@@ -13,7 +13,7 @@ from config.laudus_config import get_endpoints, BALANCE_SHEET_URL
 from services.ledger_service import fetch_ledger
 from services.balance_sheet_service import fetch_balance_sheet
 from config.gspread_config import get_spreadsheet
-from utils.gspread_utils import upsert_to_sheet, _cell_value
+from utils.gspread_utils import upsert_to_sheet, replace_sheet, safe_write, _cell_value
 from models import (
     BALANCE_HEADERS, LEDGER_HEADERS, map_balance_row, map_ledger_row,
     BALANCE_FINAL_HEADERS, LEDGER_FINAL_HEADERS,
@@ -31,27 +31,32 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def recalculate_is_latest(spreadsheet):
+def recalculate_is_latest(spreadsheet, records):
     """
-    Recalcula la columna is_latest en la pestaña balance_sheet.
-    Marca con TRUE solo las filas cuyo query_date es el máximo.
+    Recalcula la columna is_latest en balance_sheet usando datos ya cargados en memoria.
+    Evita releer la pestaña. Protege contra pérdida de datos con restore-on-failure.
+    Muta is_latest en los dicts de records (útil para enrichment posterior).
     """
-    try:
-        ws = spreadsheet.worksheet("balance_sheet")
-    except Exception:
-        return  # La pestaña no existe aún
-
-    records = ws.get_all_records()
     if not records:
         return
 
-    # Encontrar el query_date más reciente
+    try:
+        ws = spreadsheet.worksheet("balance_sheet")
+    except Exception:
+        return
+
     all_dates = [str(r.get("query_date", "")) for r in records if r.get("query_date")]
     if not all_dates:
         return
     max_date = max(all_dates)
 
-    # Reconstruir todas las filas con is_latest recalculado
+    # Backup construido desde records antes de mutar is_latest
+    backup_rows = [BALANCE_HEADERS] + [
+        [_cell_value(r.get(h, "")) for h in BALANCE_HEADERS]
+        for r in records if any(r.values())
+    ]
+
+    # Recalcular is_latest en memoria y construir filas actualizadas
     updated_rows = [BALANCE_HEADERS]
     for row in records:
         if not any(row.values()):
@@ -59,9 +64,7 @@ def recalculate_is_latest(spreadsheet):
         row["is_latest"] = "TRUE" if str(row.get("query_date", "")) == max_date else "FALSE"
         updated_rows.append([_cell_value(row.get(h, "")) for h in BALANCE_HEADERS])
 
-    # Sobreescribir toda la pestaña
-    ws.clear()
-    ws.update(values=updated_rows, range_name="A1", value_input_option="USER_ENTERED")
+    safe_write(ws, updated_rows, backup_rows, "balance_sheet")
     logger.info("is_latest recalculado: %s marcado como balance más reciente.", max_date)
 
 
@@ -91,7 +94,9 @@ def sync_api():
         target_date_str = str(last_day_prev)
         logger.info("Balance sheet objetivo: %s", target_date_str)
 
-        # Verificar si ya existe en Google Sheets
+        # Leer balance_sheet una sola vez — se reutiliza para verificación,
+        # accountNumberFrom y enriquecimiento _final
+        existing_records = []
         balance_already_loaded = False
         try:
             ws_balance = sh.worksheet("balance_sheet")
@@ -103,6 +108,10 @@ def sync_api():
         except Exception:
             pass  # La pestaña no existe, se creará al insertar
 
+        # merged_balance es el estado actual del balance en memoria
+        # Si no hay datos nuevos, equivale a existing_records
+        merged_balance = existing_records
+
         if balance_already_loaded:
             logger.info("Balance de %s ya existe en Google Sheets. Saltando.", target_date_str)
         else:
@@ -113,30 +122,24 @@ def sync_api():
                 mapped_balance = [map_balance_row(item, target_date_str) for item in balance_data]
                 logger.info("%d cuentas obtenidas.", len(mapped_balance))
 
-                upsert_to_sheet(
+                # upsert retorna el merged completo — evita releer el sheet más adelante
+                merged_balance = upsert_to_sheet(
                     spreadsheet=sh,
                     sheet_name="balance_sheet",
                     data_list=mapped_balance,
                     primary_key_func=lambda x: f"{x.get('account_id', '')}_{x.get('query_date', '')}",
-                    headers=BALANCE_HEADERS
+                    headers=BALANCE_HEADERS,
                 )
             else:
                 logger.warning("Sin datos de balance para %s.", target_date_str)
 
-        # Recalcular is_latest siempre (incluso si no se insertó nada nuevo)
-        recalculate_is_latest(sh)
+        # Recalcular is_latest usando datos en memoria (sin releer el sheet)
+        recalculate_is_latest(sh, merged_balance)
 
-        # Rebuild balance_sheet_final con enriquecimiento desde PlanCuentas
-        if plan_lookup:
-            all_balance = sh.worksheet("balance_sheet").get_all_records()
-            enriched_balance = [enrich_balance_row(r, plan_lookup) for r in all_balance]
-            upsert_to_sheet(
-                spreadsheet=sh,
-                sheet_name="balance_sheet_final",
-                data_list=enriched_balance,
-                primary_key_func=lambda x: f"{x.get('account_id', '')}_{x.get('query_date', '')}",
-                headers=BALANCE_FINAL_HEADERS,
-            )
+        # Rebuild balance_sheet_final con datos ya en memoria (sin releer balance_sheet)
+        if plan_lookup and merged_balance:
+            enriched_balance = [enrich_balance_row(r, plan_lookup) for r in merged_balance]
+            replace_sheet(sh, "balance_sheet_final", enriched_balance, BALANCE_FINAL_HEADERS)
 
         # ──────────────────────────────────────
         # 3. LEDGER — incremental desde última fecha sincronizada
@@ -156,6 +159,8 @@ def sync_api():
         logger.info("Ledger — Última fecha sincronizada: %s", latest_date_to)
         date_from, date_to = get_date_range(latest_date_to)
 
+        merged_ledger = None
+
         if date_from > date_to:
             logger.info("No hay nuevas fechas de ledger para sincronizar.")
         else:
@@ -163,20 +168,15 @@ def sync_api():
             endpoints = get_endpoints(date_from, date_to)
             ledger_cfg = endpoints["GET_LEDGER"]
 
-            # Número de cuenta mínimo como filtro
-            try:
-                ws_bal = sh.worksheet("balance_sheet")
-                bal_records = ws_bal.get_all_records()
-                account_numbers = [
-                    str(r["account_number"])
-                    for r in bal_records
-                    if r.get("account_number") not in (None, "")
-                ]
-                if account_numbers:
-                    ledger_cfg["params"]["accountNumberFrom"] = min(account_numbers)
-                    logger.info("accountNumberFrom fijado en: %s", ledger_cfg["params"]["accountNumberFrom"])
-            except Exception:
-                logger.warning("No se pudo leer el balance para determinar accountNumberFrom. Se omite el filtro.")
+            # Usar merged_balance ya cargado para obtener accountNumberFrom (sin releer el sheet)
+            account_numbers = [
+                str(r["account_number"])
+                for r in merged_balance
+                if r.get("account_number") not in (None, "")
+            ]
+            if account_numbers:
+                ledger_cfg["params"]["accountNumberFrom"] = min(account_numbers)
+                logger.info("accountNumberFrom fijado en: %s", ledger_cfg["params"]["accountNumberFrom"])
 
             ledger_data = fetch_ledger(ledger_cfg["url"], ledger_cfg["params"])
 
@@ -184,12 +184,13 @@ def sync_api():
                 mapped_ledger = [map_ledger_row(item, date_to) for item in ledger_data]
                 logger.info("%d registros de ledger obtenidos.", len(mapped_ledger))
 
-                upsert_to_sheet(
+                # upsert retorna el merged completo — evita releer el sheet para _final
+                merged_ledger = upsert_to_sheet(
                     spreadsheet=sh,
                     sheet_name="ledger",
                     data_list=mapped_ledger,
                     primary_key_func=lambda x: f"{x.get('journalentryid', '')}_{x.get('lineid', '')}",
-                    headers=LEDGER_HEADERS
+                    headers=LEDGER_HEADERS,
                 )
             else:
                 logger.warning("Sin datos nuevos de ledger.")
@@ -202,22 +203,26 @@ def sync_api():
                 sheet_name="date_range",
                 data_list=[{"dateTo": str(date_to), "dateFrom": str(date_from)}],
                 primary_key_func=lambda x: str(x.get("dateTo", "")),
-                headers=["dateTo", "dateFrom"]
+                headers=["dateTo", "dateFrom"],
             )
 
         # ──────────────────────────────────────
-        # 5. Rebuild hojas _final (siempre, con datos actuales)
+        # 5. Rebuild ledger_final
         # ──────────────────────────────────────
         if plan_lookup:
-            all_ledger = sh.worksheet("ledger").get_all_records()
-            enriched_ledger = [enrich_ledger_row(r, plan_lookup) for r in all_ledger]
-            upsert_to_sheet(
-                spreadsheet=sh,
-                sheet_name="ledger_final",
-                data_list=enriched_ledger,
-                primary_key_func=lambda x: f"{x.get('journalentryid', '')}_{x.get('lineid', '')}",
-                headers=LEDGER_FINAL_HEADERS,
-            )
+            # Si tenemos datos en memoria, usarlos directamente.
+            # Si no hubo datos nuevos, leer el sheet (puede haber cambiado PlanCuentas).
+            if merged_ledger is not None:
+                ledger_for_final = merged_ledger
+            else:
+                try:
+                    ledger_for_final = sh.worksheet("ledger").get_all_records()
+                except Exception:
+                    ledger_for_final = []
+
+            if ledger_for_final:
+                enriched_ledger = [enrich_ledger_row(r, plan_lookup) for r in ledger_for_final]
+                replace_sheet(sh, "ledger_final", enriched_ledger, LEDGER_FINAL_HEADERS)
 
         logger.info("Sincronización completada.")
 
