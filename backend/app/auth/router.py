@@ -50,7 +50,7 @@ async def callback(request: Request):
         value=jwt_token,
         httponly=True,
         secure=True,
-        samesite="lax",
+        samesite="none",
         max_age=COOKIE_MAX_AGE,
     )
     return response
