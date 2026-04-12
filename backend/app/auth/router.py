@@ -1,7 +1,10 @@
 """Auth endpoints: login, callback, logout, me."""
+import logging
 import os
 
 from fastapi import APIRouter, HTTPException, Request, Response
+
+logger = logging.getLogger(__name__)
 from fastapi.responses import RedirectResponse
 
 from backend.app.auth.schemas import UserSession
@@ -26,7 +29,8 @@ async def callback(request: Request):
     """Exchange OAuth code for token, set httpOnly cookie, redirect to dashboard."""
     try:
         token = await oauth.google.authorize_access_token(request)
-    except Exception:
+    except Exception as e:
+        logger.exception("OAuth callback failed: %s", e)
         raise HTTPException(status_code=400, detail="OAuth callback failed")
 
     user_info = token.get("userinfo") or {}
