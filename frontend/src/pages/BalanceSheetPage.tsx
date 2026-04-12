@@ -2,10 +2,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useBalanceSheet } from '@/hooks/useBalanceSheet'
 import type { BalanceSheetRecord } from '@/types'
 
-function getCategory(accountNumber: string): 'assets' | 'liabilities' | 'equity' | 'other' {
-  if (accountNumber.startsWith('1')) return 'assets'
-  if (accountNumber.startsWith('2')) return 'liabilities'
-  if (accountNumber.startsWith('3')) return 'equity'
+function getCategory(accountNumber: unknown): 'assets' | 'liabilities' | 'equity' | 'other' {
+  const s = String(accountNumber ?? '')
+  if (s.startsWith('1')) return 'assets'
+  if (s.startsWith('2')) return 'liabilities'
+  if (s.startsWith('3')) return 'equity'
   return 'other'
 }
 

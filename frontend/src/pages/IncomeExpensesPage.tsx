@@ -3,9 +3,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useLedger } from '@/hooks/useLedger'
 import type { LedgerEntryRecord } from '@/types'
 
-function getLedgerCategory(accountNumber: string): 'income' | 'expenses' | 'other' {
-  if (accountNumber.startsWith('4')) return 'income'
-  if (accountNumber.startsWith('5') || accountNumber.startsWith('6')) return 'expenses'
+function getLedgerCategory(accountNumber: unknown): 'income' | 'expenses' | 'other' {
+  const s = String(accountNumber ?? '')
+  if (s.startsWith('4')) return 'income'
+  if (s.startsWith('5') || s.startsWith('6')) return 'expenses'
   return 'other'
 }
 
