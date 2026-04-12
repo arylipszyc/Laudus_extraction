@@ -51,6 +51,10 @@ services:
     rootDir: frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
       # URL of the deployed backend (update if Render assigns a different slug)
       - key: VITE_API_URL
