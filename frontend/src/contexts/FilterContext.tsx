@@ -14,8 +14,10 @@ function getDateRange(preset: Exclude<DatePreset, 'custom'>): { dateFrom: string
     case 'month':
       return { dateFrom: `${yyyy}-${String(mm + 1).padStart(2, '0')}-01`, dateTo: todayStr }
     case 'quarter': {
-      const qStart = Math.floor(mm / 3) * 3
-      return { dateFrom: `${yyyy}-${String(qStart + 1).padStart(2, '0')}-01`, dateTo: todayStr }
+      // Rolling 90 days — avoids overlap with 'month' when at start of calendar quarter
+      const d = new Date(today)
+      d.setDate(d.getDate() - 90)
+      return { dateFrom: d.toISOString().slice(0, 10), dateTo: todayStr }
     }
     case 'year':
       return { dateFrom: `${yyyy}-01-01`, dateTo: todayStr }

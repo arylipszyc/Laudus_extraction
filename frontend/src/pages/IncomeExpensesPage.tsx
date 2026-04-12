@@ -67,7 +67,7 @@ function AccountDrilldown({ accountNumber }: { accountNumber: string }) {
   if (isLoading) {
     return (
       <tr>
-        <td colSpan={2} className="px-6 py-2 bg-muted/10">
+        <td colSpan={3} className="px-6 py-2 bg-muted/10">
           <Skeleton className="h-4 w-full" />
         </td>
       </tr>
@@ -78,7 +78,7 @@ function AccountDrilldown({ accountNumber }: { accountNumber: string }) {
   if (entries.length === 0) {
     return (
       <tr>
-        <td colSpan={2} className="px-6 py-2 text-xs text-muted-foreground italic bg-muted/10">
+        <td colSpan={3} className="px-6 py-2 text-xs text-muted-foreground italic bg-muted/10">
           Sin movimientos en el período
         </td>
       </tr>
@@ -89,9 +89,8 @@ function AccountDrilldown({ accountNumber }: { accountNumber: string }) {
     <>
       {entries.map((e, i) => (
         <tr key={`${e.journalentryid}-${e.lineid}-${i}`} className="bg-muted/10 text-xs border-t border-dashed">
-          <td className="px-6 py-1 text-muted-foreground">
-            {e.date} — {e.description || '—'}
-          </td>
+          <td className="px-6 py-1 font-mono text-muted-foreground whitespace-nowrap">{e.date}</td>
+          <td className="px-3 py-1 text-muted-foreground">{e.description || '—'}</td>
           <td className="px-4 py-1 text-right font-mono">
             {e.debit > 0 ? (
               <span className="text-destructive">−{formatAmount(e.debit, e.currencycode || 'CLP')}</span>
