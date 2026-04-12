@@ -6,6 +6,7 @@ Ledger: trae registros incrementales desde la última fecha sincronizada hasta h
 """
 
 import logging
+import os
 from datetime import datetime
 
 from utils.dates import get_date_range, get_last_day_of_previous_month
@@ -223,6 +224,26 @@ def sync_api():
             if ledger_for_final:
                 enriched_ledger = [enrich_ledger_row(r, plan_lookup) for r in ledger_for_final]
                 replace_sheet(sh, "ledger_final", enriched_ledger, LEDGER_FINAL_HEADERS)
+
+        # ──────────────────────────────────────
+        # 6. Copiar hojas _final a hojas por entidad (para soporte multi-entidad)
+        # ──────────────────────────────────────
+        entity_code = os.getenv("ENTITY_CODE", "eag").lower()
+        try:
+            balance_final_data = sh.worksheet("balance_sheet_final").get_all_records()
+            if balance_final_data:
+                replace_sheet(sh, f"balance_sheet_{entity_code}", balance_final_data, BALANCE_FINAL_HEADERS)
+                logger.info("balance_sheet_%s actualizado (%d filas).", entity_code, len(balance_final_data))
+        except Exception as e:
+            logger.warning("No se pudo copiar balance_sheet_final → balance_sheet_%s: %s", entity_code, e)
+
+        try:
+            ledger_final_data = sh.worksheet("ledger_final").get_all_records()
+            if ledger_final_data:
+                replace_sheet(sh, f"ledger_{entity_code}", ledger_final_data, LEDGER_FINAL_HEADERS)
+                logger.info("ledger_%s actualizado (%d filas).", entity_code, len(ledger_final_data))
+        except Exception as e:
+            logger.warning("No se pudo copiar ledger_final → ledger_%s: %s", entity_code, e)
 
         logger.info("Sincronización completada.")
 
