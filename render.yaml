@@ -1,0 +1,57 @@
+services:
+  # ── Backend (FastAPI) ──────────────────────────────────────────────────────
+  - type: web
+    name: laudus-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/health
+    envVars:
+      # Generated automatically by Render — never commit this value
+      - key: JWT_SECRET
+        generateValue: true
+
+      # URL of the deployed frontend (update if Render assigns a different slug)
+      - key: FRONTEND_URL
+        value: https://laudus-frontend.onrender.com
+
+      # ── Google OAuth ────────────────────────────────────────────────────────
+      # Set these manually in the Render dashboard after first deploy.
+      # Authorized redirect URI to add in Google Cloud Console:
+      #   https://laudus-backend.onrender.com/api/v1/auth/callback
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+
+      # Comma-separated list of allowed users, format: email:role
+      # Example: owner@example.com:owner,contador@example.com:contador
+      - key: ALLOWED_USERS
+        sync: false
+
+      # ── Google Sheets ────────────────────────────────────────────────────────
+      - key: GOOGLE_SHEET_ID
+        sync: false
+      # Full JSON content of the service account key file
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false
+
+      # ── Laudus ERP ───────────────────────────────────────────────────────────
+      - key: LAUDUS_USERNAME
+        sync: false
+      - key: LAUDUS_PASSWORD
+        sync: false
+      - key: LAUDUS_COMPANYVATID
+        sync: false
+
+  # ── Frontend (React/Vite → nginx static) ──────────────────────────────────
+  - type: web
+    name: laudus-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      # URL of the deployed backend (update if Render assigns a different slug)
+      - key: VITE_API_URL
+        value: https://laudus-backend.onrender.com

@@ -45,7 +45,7 @@ async def callback(request: Request):
         key="access_token",
         value=jwt_token,
         httponly=True,
-        secure=False,  # True in production (Cloud Run serves HTTPS)
+        secure=True,
         samesite="lax",
         max_age=COOKIE_MAX_AGE,
     )

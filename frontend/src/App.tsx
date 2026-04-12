@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { Login } from '@/pages/Login'
 import { DashboardPlaceholder } from '@/pages/DashboardPlaceholder'
+import { BalanceSheetPage } from '@/pages/BalanceSheetPage'
+import { IncomeExpensesPage } from '@/pages/IncomeExpensesPage'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -26,8 +28,8 @@ function App() {
           }
         >
           <Route index element={<DashboardPlaceholder />} />
-          <Route path="balance-sheet" element={<DashboardPlaceholder />} />
-          <Route path="income-expenses" element={<DashboardPlaceholder />} />
+          <Route path="balance-sheet" element={<BalanceSheetPage />} />
+          <Route path="income-expenses" element={<IncomeExpensesPage />} />
           <Route path="income-statement" element={<DashboardPlaceholder />} />
           <Route path="equity-variation" element={<DashboardPlaceholder />} />
         </Route>
