@@ -120,7 +120,7 @@ export function IncomeExpensesPage() {
           <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <XAxis dataKey="name" />
             <YAxis tickFormatter={(v: number) => v.toLocaleString('es-CL')} />
-            <Tooltip formatter={(v: number) => v.toLocaleString('es-CL')} />
+            <Tooltip formatter={(v) => typeof v === 'number' ? v.toLocaleString('es-CL') : v} />
             <Bar dataKey="value">
               <Cell key="income" fill="#22c55e" />
               <Cell key="expenses" fill="#ef4444" />
