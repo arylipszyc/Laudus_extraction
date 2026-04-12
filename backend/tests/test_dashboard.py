@@ -311,8 +311,8 @@ def test_ledger_entries_account_number_filter():
     assert response.status_code == 200
     body = response.json()
     assert len(body["data"]) == 1
-    # Patch 2: field renamed to snake_case (AC6)
-    assert body["data"][0]["account_number"] == "111005"
+    # response_model_by_alias=True → alias "accountnumber" is used in JSON
+    assert body["data"][0]["accountnumber"] == "111005"
 
 
 def test_ledger_entries_amounts_are_float():
@@ -328,8 +328,8 @@ def test_ledger_entries_amounts_are_float():
     record = response.json()["data"][0]
     assert isinstance(record["debit"], float)
     assert isinstance(record["credit"], float)
-    # Patch 2: field renamed to snake_case (AC6)
-    assert isinstance(record["parity_to_main_currency"], float)
+    # response_model_by_alias=True → alias "paritytomaincurrency" is used in JSON
+    assert isinstance(record["paritytomaincurrency"], float)
 
 
 def test_ledger_entries_invalid_entity_returns_422():

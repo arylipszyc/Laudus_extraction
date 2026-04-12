@@ -1,9 +1,19 @@
+import { useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useLedger } from '@/hooks/useLedger'
 import type { LedgerEntryRecord } from '@/types'
 
-function getLedgerCategory(accountNumber: unknown): 'income' | 'expenses' | 'other' {
+// Bug 1 fix: use Categoria1 from PlanCuentas (reliable) before falling back to prefix guessing
+function getLedgerCategory(
+  accountNumber: unknown,
+  categoria1: string = ''
+): 'income' | 'expenses' | 'other' {
+  if (categoria1) {
+    const cat = categoria1.toLowerCase()
+    if (cat.includes('ingreso') || cat.includes('revenue')) return 'income'
+    if (cat.includes('gasto') || cat.includes('costo') || cat.includes('expense')) return 'expenses'
+  }
   const s = String(accountNumber ?? '')
   if (s.startsWith('4')) return 'income'
   if (s.startsWith('5') || s.startsWith('6')) return 'expenses'
@@ -12,36 +22,154 @@ function getLedgerCategory(accountNumber: unknown): 'income' | 'expenses' | 'oth
 
 function formatAmount(amount: number, currency: string = 'CLP'): string {
   const formatted = amount.toLocaleString('es-CL')
-  return currency !== 'CLP' ? `${formatted} ${currency}` : formatted
+  return currency && currency !== 'CLP' ? `${formatted} ${currency}` : formatted
 }
 
 interface CategoryBreakdown {
   accountNumber: string
-  description: string
+  accountName: string   // Bug 2 fix: real account name instead of number
   total: number
   currency: string
 }
 
+// Bug 2 fix: capture accountName from enriched ledger_final data
 function buildBreakdown(records: LedgerEntryRecord[], type: 'income' | 'expenses'): CategoryBreakdown[] {
-  const map = new Map<string, { total: number; currency: string }>()
+  const map = new Map<string, { total: number; currency: string; accountName: string }>()
   for (const r of records) {
-    const cat = getLedgerCategory(r.accountnumber)
+    const cat = getLedgerCategory(r.accountnumber, r.Categoria1)
     if (cat !== type) continue
     const amount = type === 'income' ? r.credit - r.debit : r.debit - r.credit
     const existing = map.get(r.accountnumber)
     if (existing) {
       existing.total += amount
     } else {
-      map.set(r.accountnumber, { total: amount, currency: r.currencycode })
+      map.set(r.accountnumber, {
+        total: amount,
+        currency: r.currencycode || 'CLP',
+        accountName: r.accountName || String(r.accountnumber),
+      })
     }
   }
   return Array.from(map.entries())
-    .map(([accountNumber, { total, currency }]) => ({ accountNumber, description: accountNumber, total, currency }))
+    .map(([accountNumber, { total, currency, accountName }]) => ({
+      accountNumber,
+      accountName,
+      total,
+      currency,
+    }))
     .sort((a, b) => b.total - a.total)
+}
+
+// Bug 3 fix: drill-down component — fetches individual transactions for a given account
+function AccountDrilldown({ accountNumber }: { accountNumber: string }) {
+  const { data, isLoading } = useLedger(accountNumber)
+
+  if (isLoading) {
+    return (
+      <tr>
+        <td colSpan={2} className="px-6 py-2 bg-muted/10">
+          <Skeleton className="h-4 w-full" />
+        </td>
+      </tr>
+    )
+  }
+
+  const entries = data?.data ?? []
+  if (entries.length === 0) {
+    return (
+      <tr>
+        <td colSpan={2} className="px-6 py-2 text-xs text-muted-foreground italic bg-muted/10">
+          Sin movimientos en el período
+        </td>
+      </tr>
+    )
+  }
+
+  return (
+    <>
+      {entries.map((e, i) => (
+        <tr key={`${e.journalentryid}-${e.lineid}-${i}`} className="bg-muted/10 text-xs border-t border-dashed">
+          <td className="px-6 py-1 text-muted-foreground">
+            {e.date} — {e.description || '—'}
+          </td>
+          <td className="px-4 py-1 text-right font-mono">
+            {e.debit > 0 ? (
+              <span className="text-destructive">−{formatAmount(e.debit, e.currencycode || 'CLP')}</span>
+            ) : (
+              <span className="text-green-600">+{formatAmount(e.credit, e.currencycode || 'CLP')}</span>
+            )}
+          </td>
+        </tr>
+      ))}
+    </>
+  )
+}
+
+interface BreakdownTableProps {
+  title: string
+  items: CategoryBreakdown[]
+  emptyMessage: string
+  amountClass: string
+  expandedAccount: string | null
+  onToggle: (accountNumber: string) => void
+}
+
+function BreakdownTable({ title, items, emptyMessage, amountClass, expandedAccount, onToggle }: BreakdownTableProps) {
+  return (
+    <div>
+      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+        {title}
+      </h3>
+      {items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{emptyMessage}</p>
+      ) : (
+        <div className="rounded-md border overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50">
+              <tr>
+                <th className="text-left px-4 py-2 font-medium">Cuenta</th>
+                <th className="text-right px-4 py-2 font-medium">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item) => (
+                <>
+                  <tr
+                    key={item.accountNumber}
+                    className="border-t hover:bg-muted/30 transition-colors cursor-pointer select-none"
+                    onClick={() => onToggle(item.accountNumber)}
+                  >
+                    <td className="px-4 py-2">
+                      <span className="text-xs text-muted-foreground font-mono mr-2">{item.accountNumber}</span>
+                      <span>{item.accountName}</span>
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        {expandedAccount === item.accountNumber ? '▲' : '▼'}
+                      </span>
+                    </td>
+                    <td className={`px-4 py-2 text-right font-medium ${amountClass}`}>
+                      {formatAmount(item.total, item.currency)}
+                    </td>
+                  </tr>
+                  {expandedAccount === item.accountNumber && (
+                    <AccountDrilldown key={`drill-${item.accountNumber}`} accountNumber={item.accountNumber} />
+                  )}
+                </>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export function IncomeExpensesPage() {
   const { data, isLoading, isError } = useLedger()
+  const [expandedAccount, setExpandedAccount] = useState<string | null>(null)
+
+  function toggleAccount(accountNumber: string) {
+    setExpandedAccount((prev) => (prev === accountNumber ? null : accountNumber))
+  }
 
   if (isLoading) {
     return (
@@ -68,11 +196,11 @@ export function IncomeExpensesPage() {
   const records = data.data
 
   const totalIncome = records
-    .filter((r) => getLedgerCategory(r.accountnumber) === 'income')
+    .filter((r) => getLedgerCategory(r.accountnumber, r.Categoria1) === 'income')
     .reduce((sum, r) => sum + (r.credit - r.debit), 0)
 
   const totalExpenses = records
-    .filter((r) => getLedgerCategory(r.accountnumber) === 'expenses')
+    .filter((r) => getLedgerCategory(r.accountnumber, r.Categoria1) === 'expenses')
     .reduce((sum, r) => sum + (r.debit - r.credit), 0)
 
   const netResult = totalIncome - totalExpenses
@@ -121,7 +249,7 @@ export function IncomeExpensesPage() {
           <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <XAxis dataKey="name" />
             <YAxis tickFormatter={(v: number) => v.toLocaleString('es-CL')} />
-            <Tooltip formatter={(v) => typeof v === 'number' ? v.toLocaleString('es-CL') : v} />
+            <Tooltip formatter={(v) => (typeof v === 'number' ? v.toLocaleString('es-CL') : v)} />
             <Bar dataKey="value">
               <Cell key="income" fill="#22c55e" />
               <Cell key="expenses" fill="#ef4444" />
@@ -130,69 +258,24 @@ export function IncomeExpensesPage() {
         </ResponsiveContainer>
       </div>
 
-      {/* Breakdown tables side by side */}
+      {/* Breakdown tables side by side — click a row to drill down */}
       <div className="grid grid-cols-2 gap-6">
-        {/* Income breakdown */}
-        <div>
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-            Detalle Ingresos
-          </h3>
-          {incomeBreakdown.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Sin registros de ingresos</p>
-          ) : (
-            <div className="rounded-md border overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-muted/50">
-                  <tr>
-                    <th className="text-left px-4 py-2 font-medium">Cuenta</th>
-                    <th className="text-right px-4 py-2 font-medium">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {incomeBreakdown.map((item) => (
-                    <tr key={item.accountNumber} className="border-t hover:bg-muted/30 transition-colors">
-                      <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{item.accountNumber}</td>
-                      <td className="px-4 py-2 text-right font-medium text-green-600">
-                        {formatAmount(item.total, item.currency)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* Expense breakdown */}
-        <div>
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-            Detalle Gastos
-          </h3>
-          {expenseBreakdown.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Sin registros de gastos</p>
-          ) : (
-            <div className="rounded-md border overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-muted/50">
-                  <tr>
-                    <th className="text-left px-4 py-2 font-medium">Cuenta</th>
-                    <th className="text-right px-4 py-2 font-medium">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {expenseBreakdown.map((item) => (
-                    <tr key={item.accountNumber} className="border-t hover:bg-muted/30 transition-colors">
-                      <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{item.accountNumber}</td>
-                      <td className="px-4 py-2 text-right font-medium text-destructive">
-                        {formatAmount(item.total, item.currency)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        <BreakdownTable
+          title="Detalle Ingresos"
+          items={incomeBreakdown}
+          emptyMessage="Sin registros de ingresos"
+          amountClass="text-green-600"
+          expandedAccount={expandedAccount}
+          onToggle={toggleAccount}
+        />
+        <BreakdownTable
+          title="Detalle Gastos"
+          items={expenseBreakdown}
+          emptyMessage="Sin registros de gastos"
+          amountClass="text-destructive"
+          expandedAccount={expandedAccount}
+          onToggle={toggleAccount}
+        />
       </div>
     </div>
   )

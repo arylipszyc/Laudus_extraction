@@ -64,6 +64,8 @@ export interface LedgerEntryRecord {
   currencycode: string
   paritytomaincurrency: number
   periodo: string
+  accountName: string   // from ledger_final enrichment (PlanCuentas account name)
+  Categoria1: string    // top-level category from PlanCuentas (e.g. "Ingresos", "Gastos")
 }
 
 export interface LedgerEntriesResponse {

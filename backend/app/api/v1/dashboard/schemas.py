@@ -32,9 +32,11 @@ class LedgerEntryRecord(BaseModel):
     description: str = ""
     debit: float = 0.0
     credit: float = 0.0
-    currency_code: str = Field(default="", alias="currencycode")
+    currency_code: str = Field(default="CLP", alias="currencycode")  # absent in ledger_final, default CLP
     parity_to_main_currency: float = Field(default=1.0, alias="paritytomaincurrency")
     periodo: str = ""
+    account_name: str = Field(default="", alias="accountName")  # from ledger_final enrichment
+    categoria1: str = Field(default="", alias="Categoria1")      # top-level category from PlanCuentas
 
 
 class DashboardMeta(BaseModel):
