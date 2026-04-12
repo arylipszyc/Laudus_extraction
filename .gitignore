@@ -1,9 +1,25 @@
+# Secretos y Entornos de Python
 .env
 venv/
 env/
 .venv/
+serviceAccountKey.json
+
+# Caches y Logs
 __pycache__/
 *.pyc
+.pytest_cache/
 .DS_Store
 *.log
-*.json
+
+# Datos generados de contabilidad y reportes locales
+balance_sheet.json
+
+# Frontend
+node_modules/
+dist/
+build/
+.next/
+
+# Historiales locales de Chat
+.claude/

@@ -4,8 +4,21 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+requests = "*"
+gspread = "*"
+python-dotenv = "*"
+python-dateutil = "*"
+fastapi = {extras = ["standard"], version = "*"}
+uvicorn = {extras = ["standard"], version = "*"}
+authlib = "*"
+python-jose = {extras = ["cryptography"], version = "*"}
+itsdangerous = "*"
+httpx = "*"
+google-cloud-secret-manager = "*"
 
 [dev-packages]
+pytest = "*"
+pytest-asyncio = "*"
 
 [requires]
 python_version = "3.14"

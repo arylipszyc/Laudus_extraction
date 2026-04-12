@@ -1,0 +1,46 @@
+name: Daily Sheets Backup
+
+on:
+  schedule:
+    - cron: '0 12 * * *'  # Daily 9:00 AM Chile (UTC-3 → 12:00 UTC)
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Crear archivo .env con credenciales
+        run: |
+          echo "LAUDUS_USERNAME=${{ secrets.LAUDUS_USERNAME }}" >> .env
+          echo "LAUDUS_PASSWORD=${{ secrets.LAUDUS_PASSWORD }}" >> .env
+          echo "LAUDUS_COMPANYVATID=${{ secrets.LAUDUS_COMPANYVATID }}" >> .env
+          echo "GOOGLE_SHEET_ID=${{ secrets.GOOGLE_SHEET_ID }}" >> .env
+          echo "GOOGLE_APPLICATION_CREDENTIALS=config/serviceAccountKey.json" >> .env
+
+      - name: Escribir Service Account Key
+        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > config/serviceAccountKey.json
+
+      - name: Ejecutar backup
+        run: python sync.py
+
+      - name: Subir log como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backup-log-${{ github.run_id }}
+          path: sync.log
+          retention-days: 30
