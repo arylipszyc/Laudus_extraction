@@ -28,7 +28,7 @@ class LedgerEntryRecord(BaseModel):
     journal_entry_id: Any = Field(default=None, validation_alias="journalentryid")
     journal_entry_number: Any = Field(default=None, validation_alias="journalentrynumber")
     date: str = ""
-    account_number: str = Field(default="", validation_alias="accountnumber")
+    account_number: Any = Field(default="", validation_alias="accountnumber")
     line_id: Any = Field(default=None, validation_alias="lineid")
     description: str = ""
     debit: float = 0.0
