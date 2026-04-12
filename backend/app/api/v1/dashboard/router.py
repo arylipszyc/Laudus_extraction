@@ -64,7 +64,7 @@ def list_balance_sheets(
     )
 
 
-@router.get("/ledger-entries", response_model=LedgerEntriesResponse)
+@router.get("/ledger-entries", response_model=LedgerEntriesResponse, response_model_by_alias=True)
 def list_ledger_entries(
     entity: str = Query(..., description="Entity name: EAG | Jocelyn | Jeannette | Johanna | Jael"),
     date_from: str | None = Query(default=None, description="ISO date YYYY-MM-DD (inclusive)"),

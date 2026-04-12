@@ -21,20 +21,19 @@ class BalanceSheetRecord(BaseModel):
 
 
 class LedgerEntryRecord(BaseModel):
-    # Patch 1: rename non-snake_case Sheets column names using validation_alias (AC6)
-    # Patch 4: add defaults to all required fields
+    # alias= used (not validation_alias) so FastAPI serializes using the Sheets column names
     model_config = ConfigDict(populate_by_name=True)
 
-    journal_entry_id: Any = Field(default=None, validation_alias="journalentryid")
-    journal_entry_number: Any = Field(default=None, validation_alias="journalentrynumber")
+    journal_entry_id: Any = Field(default=None, alias="journalentryid")
+    journal_entry_number: Any = Field(default=None, alias="journalentrynumber")
     date: str = ""
-    account_number: Any = Field(default="", validation_alias="accountnumber")
-    line_id: Any = Field(default=None, validation_alias="lineid")
+    account_number: Any = Field(default="", alias="accountnumber")
+    line_id: Any = Field(default=None, alias="lineid")
     description: str = ""
     debit: float = 0.0
     credit: float = 0.0
-    currency_code: str = Field(default="", validation_alias="currencycode")
-    parity_to_main_currency: float = Field(default=1.0, validation_alias="paritytomaincurrency")
+    currency_code: str = Field(default="", alias="currencycode")
+    parity_to_main_currency: float = Field(default=1.0, alias="paritytomaincurrency")
     periodo: str = ""
 
 
