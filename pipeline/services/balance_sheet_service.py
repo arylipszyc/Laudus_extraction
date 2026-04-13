@@ -12,4 +12,4 @@ def fetch_balance_sheet(endpoint, params=None):
         dict: The JSON response containing the balance sheet data.
     """
     return get_info_API(endpoint, params)
-
+

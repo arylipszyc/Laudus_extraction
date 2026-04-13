@@ -12,4 +12,4 @@ def fetch_ledger(endpoint, params=None):
         dict: The JSON response containing the ledger data.
     """
     return get_info_API(endpoint, params)
-
+
