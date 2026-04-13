@@ -5,15 +5,16 @@ import type { LedgerEntryRecord } from '@/types'
 // All data lives in a single EAG sheet. Each daughter's records have her name
 // embedded in Categoria1 (e.g. "Gastos Jocelyn", "Patrimonio Johanna").
 // EAG records are those that don't match any daughter's name.
-const DAUGHTERS = ['Jocelyn', 'Jeannette', 'Johanna', 'Jael'] as const
+// Sheet stores Categoria1 in ALL-CAPS (e.g. "EGRESOS JOCELYN AVAYU DEUTSCH")
+const DAUGHTERS = ['JOCELYN', 'JEANNETTE', 'JOHANNA', 'JAEL'] as const
 
 export function filterByEntity(records: LedgerEntryRecord[], entity: string): LedgerEntryRecord[] {
   if (entity === 'EAG') {
     // EAG = records whose Categoria1 does NOT contain any daughter name
-    return records.filter(r => !DAUGHTERS.some(d => r.Categoria1?.includes(d)))
+    return records.filter(r => !DAUGHTERS.some(d => (r.Categoria1 ?? '').toUpperCase().includes(d)))
   }
-  // Daughter entity = records whose Categoria1 contains her name
-  return records.filter(r => r.Categoria1?.includes(entity))
+  // Daughter entity = records whose Categoria1 contains her name (case-insensitive)
+  return records.filter(r => (r.Categoria1 ?? '').toUpperCase().includes(entity.toUpperCase()))
 }
 
 // ── Classification ────────────────────────────────────────────────────────────
