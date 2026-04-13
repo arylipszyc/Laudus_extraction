@@ -66,6 +66,8 @@ export interface LedgerEntryRecord {
   periodo: string
   accountName: string   // from ledger_final enrichment (PlanCuentas account name)
   Categoria1: string    // top-level category from PlanCuentas (e.g. "Ingresos", "Gastos")
+  Categoria2: string    // 2nd-level category from PlanCuentas
+  Categoria3: string    // 3rd-level category from PlanCuentas
 }
 
 export interface LedgerEntriesResponse {

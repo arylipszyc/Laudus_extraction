@@ -8,19 +8,23 @@ export const ENTITIES: Entity[] = ['EAG', 'Jocelyn', 'Jeannette', 'Johanna', 'Ja
 function getDateRange(preset: Exclude<DatePreset, 'custom'>): { dateFrom: string; dateTo: string } {
   const today = new Date()
   const yyyy = today.getFullYear()
-  const mm = today.getMonth() // 0-indexed
-  const todayStr = today.toISOString().slice(0, 10)
+  const mm = today.getMonth() // 0-indexed: Jan=0, Apr=3
+
   switch (preset) {
-    case 'month':
-      return { dateFrom: `${yyyy}-${String(mm + 1).padStart(2, '0')}-01`, dateTo: todayStr }
+    case 'month': {
+      // Previous complete month: e.g. on Apr 13 → Mar 1 – Mar 31
+      const dateFrom = new Date(yyyy, mm - 1, 1).toISOString().slice(0, 10)
+      const dateTo   = new Date(yyyy, mm, 0).toISOString().slice(0, 10)   // day 0 = last day of prev month
+      return { dateFrom, dateTo }
+    }
     case 'quarter': {
-      // Rolling 90 days — avoids overlap with 'month' when at start of calendar quarter
-      const d = new Date(today)
-      d.setDate(d.getDate() - 90)
-      return { dateFrom: d.toISOString().slice(0, 10), dateTo: todayStr }
+      // 3 previous complete months: e.g. on Apr 13 → Jan 1 – Mar 31
+      const dateFrom = new Date(yyyy, mm - 3, 1).toISOString().slice(0, 10)
+      const dateTo   = new Date(yyyy, mm, 0).toISOString().slice(0, 10)
+      return { dateFrom, dateTo }
     }
     case 'year':
-      return { dateFrom: `${yyyy}-01-01`, dateTo: todayStr }
+      return { dateFrom: `${yyyy}-01-01`, dateTo: new Date(yyyy, mm, 0).toISOString().slice(0, 10) }
   }
 }
 

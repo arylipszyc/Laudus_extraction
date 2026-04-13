@@ -25,6 +25,8 @@ function makeRecord(overrides: Partial<LedgerEntryRecord>): LedgerEntryRecord {
     periodo: '2026-01',
     accountName: 'Cuenta Test',
     Categoria1: 'Ingresos',
+    Categoria2: '',
+    Categoria3: '',
     ...overrides,
   }
 }
@@ -91,62 +93,68 @@ describe('periodLabel', () => {
 
 // ── groupByCategoria1 ─────────────────────────────────────────────────────────
 
+// Helper: flatten all accounts from nested structure for easy assertion
+function flatAccounts(groups: ReturnType<typeof groupByCategoria1>) {
+  return groups.flatMap(g => g.cat2Groups.flatMap(g2 => g2.cat3Groups.flatMap(g3 => g3.accounts)))
+}
+
 describe('groupByCategoria1', () => {
   it('returns empty array when no records match type', () => {
     expect(groupByCategoria1([INCOME_RECORD], 'expenses')).toEqual([])
   })
 
-  it('groups income records by Categoria1', () => {
+  it('groups income records by Categoria1 (label + subtotal)', () => {
     const records = [
       makeRecord({ credit: 100000, debit: 0, Categoria1: 'Ingresos', accountnumber: '400001', accountName: 'Ventas' }),
       makeRecord({ credit: 50000, debit: 0, Categoria1: 'Ingresos', accountnumber: '400002', accountName: 'Servicios' }),
     ]
     const groups = groupByCategoria1(records, 'income')
     expect(groups).toHaveLength(1)
-    expect(groups[0].categoria1).toBe('Ingresos')
+    expect(groups[0].label).toBe('Ingresos')
     expect(groups[0].subtotal).toBe(150000)
-    expect(groups[0].accounts).toHaveLength(2)
+    expect(flatAccounts(groups)).toHaveLength(2)
   })
 
-  it('groups records into multiple Categoria1 groups', () => {
+  it('groups records into multiple Categoria1 groups sorted by subtotal desc', () => {
     const records = [
       makeRecord({ debit: 80000, credit: 0, Categoria1: 'Gastos Operacionales', accountnumber: '500001', accountName: 'Arriendo' }),
       makeRecord({ debit: 30000, credit: 0, Categoria1: 'Gastos Administración', accountnumber: '500002', accountName: 'Oficina' }),
     ]
     const groups = groupByCategoria1(records, 'expenses')
     expect(groups).toHaveLength(2)
-    // Sorted by subtotal desc
-    expect(groups[0].categoria1).toBe('Gastos Operacionales')
-    expect(groups[1].categoria1).toBe('Gastos Administración')
+    expect(groups[0].label).toBe('Gastos Operacionales')
+    expect(groups[1].label).toBe('Gastos Administración')
   })
 
-  it('accumulates amounts for same account within same Categoria1', () => {
+  it('accumulates amounts for same account', () => {
     const records = [
       makeRecord({ credit: 60000, debit: 0, Categoria1: 'Ingresos', accountnumber: '400001', accountName: 'Ventas' }),
       makeRecord({ credit: 40000, debit: 0, Categoria1: 'Ingresos', accountnumber: '400001', accountName: 'Ventas', date: '2026-02-15' }),
     ]
     const groups = groupByCategoria1(records, 'income')
-    expect(groups[0].accounts[0].total).toBe(100000)
+    expect(flatAccounts(groups)[0].total).toBe(100000)
   })
 
   it('excludes records classified as other', () => {
-    const groups = groupByCategoria1([OTHER_RECORD], 'income')
-    expect(groups).toHaveLength(0)
+    expect(groupByCategoria1([OTHER_RECORD], 'income')).toHaveLength(0)
   })
 
-  it('accounts within a group are sorted by total descending', () => {
+  it('uses Categoria2 and Categoria3 for nested grouping', () => {
     const records = [
-      makeRecord({ debit: 10000, credit: 0, Categoria1: 'Gastos Operacionales', accountnumber: '500001', accountName: 'Bajo' }),
-      makeRecord({ debit: 90000, credit: 0, Categoria1: 'Gastos Operacionales', accountnumber: '500002', accountName: 'Alto' }),
+      makeRecord({ debit: 50000, credit: 0, Categoria1: 'Gastos', Categoria2: 'Operacionales', Categoria3: 'Arriendos', accountnumber: '500001', accountName: 'Arriendo Oficina' }),
+      makeRecord({ debit: 30000, credit: 0, Categoria1: 'Gastos', Categoria2: 'Operacionales', Categoria3: 'Servicios', accountnumber: '500002', accountName: 'Luz' }),
     ]
     const groups = groupByCategoria1(records, 'expenses')
-    expect(groups[0].accounts[0].accountName).toBe('Alto')
+    expect(groups[0].label).toBe('Gastos')
+    expect(groups[0].cat2Groups[0].label).toBe('Operacionales')
+    expect(groups[0].cat2Groups[0].cat3Groups).toHaveLength(2)
   })
 
-  it('uses "Sin categoría" when Categoria1 is empty but prefix matches', () => {
-    const record = makeRecord({ debit: 50000, credit: 0, Categoria1: '', accountnumber: '500001' })
+  it('uses "Sin categoría" / "Sin subcategoría" when fields empty', () => {
+    const record = makeRecord({ debit: 50000, credit: 0, Categoria1: '', Categoria2: '', Categoria3: '', accountnumber: '500001' })
     const groups = groupByCategoria1([record], 'expenses')
-    expect(groups[0].categoria1).toBe('Sin categoría')
+    expect(groups[0].label).toBe('Sin categoría')
+    expect(groups[0].cat2Groups[0].label).toBe('Sin subcategoría')
   })
 })
 

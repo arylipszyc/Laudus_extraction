@@ -30,9 +30,21 @@ export interface AccountSummary {
   currency: string
 }
 
-export interface Categoria1Group {
-  categoria1: string
+export interface Categoria3Group {
+  label: string              // Categoria3 value (or 'Sin subcategoría')
   accounts: AccountSummary[]
+  subtotal: number
+}
+
+export interface Categoria2Group {
+  label: string              // Categoria2 value (or 'Sin subcategoría')
+  cat3Groups: Categoria3Group[]
+  subtotal: number
+}
+
+export interface Categoria1Group {
+  label: string              // Categoria1 value
+  cat2Groups: Categoria2Group[]
   subtotal: number
 }
 
@@ -64,16 +76,25 @@ export function periodLabel(yearMonth: string): string {
 
 // ── Aggregations ──────────────────────────────────────────────────────────────
 
+type AccountKey = string // accountnumber
+type Cat3Key = string
+type Cat2Key = string
+
+interface AcctData { accountName: string; total: number; currency: string }
+type Cat3Map = Map<AccountKey, AcctData>
+type Cat2Map = Map<Cat3Key, Cat3Map>
+type Cat1Map = Map<Cat2Key, Cat2Map>
+
 /**
- * Group records by Categoria1, then by account, for the given type.
- * Returns groups sorted by subtotal descending.
+ * Group records by Categoria1 → Categoria2 → Categoria3 → account.
+ * Returns groups sorted by subtotal descending at each level.
  */
 export function groupByCategoria1(
   records: LedgerEntryRecord[],
   type: 'income' | 'expenses'
 ): Categoria1Group[] {
-  // cat1 → accountNumber → { accountName, total, currency }
-  const catMap = new Map<string, Map<string, { accountName: string; total: number; currency: string }>>()
+  // cat1 → cat2 → cat3 → accountnumber → AcctData
+  const rootMap = new Map<string, Cat1Map>()
 
   for (const r of records) {
     if (getLedgerCategory(r.accountnumber, r.Categoria1) !== type) continue
@@ -83,13 +104,22 @@ export function groupByCategoria1(
       : r.debit - r.credit
 
     const cat1 = r.Categoria1 || 'Sin categoría'
-    if (!catMap.has(cat1)) catMap.set(cat1, new Map())
-    const acctMap = catMap.get(cat1)!
+    const cat2 = r.Categoria2 || 'Sin subcategoría'
+    const cat3 = r.Categoria3 || 'Sin subcategoría'
 
-    if (acctMap.has(r.accountnumber)) {
-      acctMap.get(r.accountnumber)!.total += amount
+    if (!rootMap.has(cat1)) rootMap.set(cat1, new Map())
+    const c1Map = rootMap.get(cat1)!
+
+    if (!c1Map.has(cat2)) c1Map.set(cat2, new Map())
+    const c2Map = c1Map.get(cat2)!
+
+    if (!c2Map.has(cat3)) c2Map.set(cat3, new Map())
+    const c3Map = c2Map.get(cat3)!
+
+    if (c3Map.has(r.accountnumber)) {
+      c3Map.get(r.accountnumber)!.total += amount
     } else {
-      acctMap.set(r.accountnumber, {
+      c3Map.set(r.accountnumber, {
         accountName: r.accountName || String(r.accountnumber),
         total: amount,
         currency: r.currencycode || 'CLP',
@@ -97,22 +127,39 @@ export function groupByCategoria1(
     }
   }
 
-  const groups: Categoria1Group[] = []
-  for (const [cat1, acctMap] of catMap.entries()) {
-    const accounts: AccountSummary[] = Array.from(acctMap.entries())
-      .map(([accountNumber, { accountName, total, currency }]) => ({
-        accountNumber,
-        accountName,
-        total,
-        currency,
-      }))
-      .sort((a, b) => b.total - a.total)
+  const result: Categoria1Group[] = []
 
-    const subtotal = accounts.reduce((s, a) => s + a.total, 0)
-    groups.push({ categoria1: cat1, accounts, subtotal })
+  for (const [cat1Label, c1Map] of rootMap.entries()) {
+    const cat2Groups: Categoria2Group[] = []
+
+    for (const [cat2Label, c2Map] of c1Map.entries()) {
+      const cat3Groups: Categoria3Group[] = []
+
+      for (const [cat3Label, c3Map] of c2Map.entries()) {
+        const accounts: AccountSummary[] = Array.from(c3Map.entries())
+          .map(([accountNumber, { accountName, total, currency }]) => ({
+            accountNumber,
+            accountName,
+            total,
+            currency,
+          }))
+          .sort((a, b) => b.total - a.total)
+
+        const subtotal = accounts.reduce((s, a) => s + a.total, 0)
+        cat3Groups.push({ label: cat3Label, accounts, subtotal })
+      }
+
+      cat3Groups.sort((a, b) => b.subtotal - a.subtotal)
+      const subtotal = cat3Groups.reduce((s, g) => s + g.subtotal, 0)
+      cat2Groups.push({ label: cat2Label, cat3Groups, subtotal })
+    }
+
+    cat2Groups.sort((a, b) => b.subtotal - a.subtotal)
+    const subtotal = cat2Groups.reduce((s, g) => s + g.subtotal, 0)
+    result.push({ label: cat1Label, cat2Groups, subtotal })
   }
 
-  return groups.sort((a, b) => b.subtotal - a.subtotal)
+  return result.sort((a, b) => b.subtotal - a.subtotal)
 }
 
 /**

@@ -18,6 +18,8 @@ function makeRecord(overrides: Partial<LedgerEntryRecord>): LedgerEntryRecord {
     periodo: '2026-01',
     accountName: 'Ventas',
     Categoria1: 'Ingresos',
+    Categoria2: '',
+    Categoria3: '',
     ...overrides,
   }
 }

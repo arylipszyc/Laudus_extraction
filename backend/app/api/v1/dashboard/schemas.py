@@ -37,6 +37,8 @@ class LedgerEntryRecord(BaseModel):
     periodo: str = ""
     account_name: str = Field(default="", alias="accountName")  # from ledger_final enrichment
     categoria1: str = Field(default="", alias="Categoria1")      # top-level category from PlanCuentas
+    categoria2: str = Field(default="", alias="Categoria2")      # 2nd-level category from PlanCuentas
+    categoria3: str = Field(default="", alias="Categoria3")      # 3rd-level category from PlanCuentas
 
 
 class DashboardMeta(BaseModel):
