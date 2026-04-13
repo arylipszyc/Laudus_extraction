@@ -38,9 +38,10 @@ export function useChartFilters(): ChartFilters {
     let result = records
 
     if (selectedCategories.length > 0) {
+      // Filter by Categoria2 — pie charts display Cat2 slices, so selections are Cat2 values
       result = result.filter(r => {
-        const cat1 = r.Categoria1 || 'Sin categoría'
-        return selectedCategories.includes(cat1)
+        const cat2 = r.Categoria2 || r.Categoria1 || 'Sin categoría'
+        return selectedCategories.includes(cat2)
       })
     }
 

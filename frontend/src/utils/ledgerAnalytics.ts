@@ -189,7 +189,7 @@ export function groupByCategoria1(
 }
 
 /**
- * Build pie chart data from records for the given type.
+ * Build pie chart data grouped by Categoria1 for the given type.
  * Returns slices sorted by value descending, zero-total slices excluded.
  */
 export function buildPieData(
@@ -207,6 +207,34 @@ export function buildPieData(
 
     const cat1 = r.Categoria1 || 'Sin categoría'
     totals.set(cat1, (totals.get(cat1) ?? 0) + amount)
+  }
+
+  return Array.from(totals.entries())
+    .filter(([, value]) => value > 0)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value)
+}
+
+/**
+ * Build pie chart data grouped by Categoria2 for the given type.
+ * Used in charts so the pie shows one level deeper than the summary cards.
+ * Returns slices sorted by value descending, zero-total slices excluded.
+ */
+export function buildPieDataByCat2(
+  records: LedgerEntryRecord[],
+  type: 'income' | 'expenses'
+): PieSlice[] {
+  const totals = new Map<string, number>()
+
+  for (const r of records) {
+    if (getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) !== type) continue
+
+    const amount = type === 'income'
+      ? r.credit - r.debit
+      : r.debit - r.credit
+
+    const cat2 = r.Categoria2 || r.Categoria1 || 'Sin categoría'
+    totals.set(cat2, (totals.get(cat2) ?? 0) + amount)
   }
 
   return Array.from(totals.entries())

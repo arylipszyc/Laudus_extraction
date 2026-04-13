@@ -4,6 +4,7 @@ import {
   filterByEntity,
   groupByCategoria1,
   buildPieData,
+  buildPieDataByCat2,
   buildTimeline,
   periodLabel,
 } from './ledgerAnalytics'
@@ -239,6 +240,42 @@ describe('buildPieData', () => {
     ]
     const slices = buildPieData(records, 'expenses')
     expect(slices[0].name).toBe('Gastos Grandes')
+  })
+})
+
+// ── buildPieDataByCat2 ────────────────────────────────────────────────────────
+
+describe('buildPieDataByCat2', () => {
+  it('returns empty array when no records match type', () => {
+    expect(buildPieDataByCat2([INCOME_RECORD], 'expenses')).toEqual([])
+  })
+
+  it('groups expense slices by Categoria2', () => {
+    const records = [
+      makeRecord({ debit: 80000, credit: 0, Categoria1: 'GASTOS - EGRESOS', Categoria2: 'DEPARTAMENTO SANTIAGO', accountnumber: '500001' }),
+      makeRecord({ debit: 60000, credit: 0, Categoria1: 'GASTOS - EGRESOS', Categoria2: 'GASTOS PERSONALES', accountnumber: '500002' }),
+      makeRecord({ debit: 30000, credit: 0, Categoria1: 'GASTOS - EGRESOS', Categoria2: 'GASTOS PERSONALES', accountnumber: '500003' }),
+    ]
+    const slices = buildPieDataByCat2(records, 'expenses')
+    expect(slices).toHaveLength(2)
+    expect(slices[0]).toEqual({ name: 'GASTOS PERSONALES', value: 90000 })
+    expect(slices[1]).toEqual({ name: 'DEPARTAMENTO SANTIAGO', value: 80000 })
+  })
+
+  it('falls back to Categoria1 when Categoria2 is empty', () => {
+    const record = makeRecord({ debit: 50000, credit: 0, Categoria1: 'EGRESOS JOCELYN AVAYU DEUTSCH', Categoria2: '', accountnumber: '500001' })
+    const slices = buildPieDataByCat2([record], 'expenses')
+    expect(slices).toHaveLength(1)
+    expect(slices[0].name).toBe('EGRESOS JOCELYN AVAYU DEUTSCH')
+  })
+
+  it('sorts slices by value descending', () => {
+    const records = [
+      makeRecord({ debit: 20000, credit: 0, Categoria1: 'GASTOS - EGRESOS', Categoria2: 'Casa Sur', accountnumber: '500001' }),
+      makeRecord({ debit: 80000, credit: 0, Categoria1: 'GASTOS - EGRESOS', Categoria2: 'DEPARTAMENTO MIAMI', accountnumber: '500002' }),
+    ]
+    const slices = buildPieDataByCat2(records, 'expenses')
+    expect(slices[0].name).toBe('DEPARTAMENTO MIAMI')
   })
 })
 

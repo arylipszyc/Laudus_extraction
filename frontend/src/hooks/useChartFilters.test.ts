@@ -24,10 +24,11 @@ function makeRecord(overrides: Partial<LedgerEntryRecord>): LedgerEntryRecord {
   }
 }
 
-const JAN_INCOME = makeRecord({ Categoria1: 'Ingresos', date: '2026-01-10' })
-const JAN_EXPENSE = makeRecord({ Categoria1: 'Gastos Operacionales', date: '2026-01-20', debit: 50000, credit: 0 })
-const FEB_INCOME = makeRecord({ Categoria1: 'Ingresos', date: '2026-02-05' })
-const FEB_OTHER = makeRecord({ Categoria1: 'Otros Ingresos', date: '2026-02-10' })
+// Cat2 values are what the pie chart displays and what the filter matches against
+const JAN_INCOME  = makeRecord({ Categoria1: 'INGRESOS', Categoria2: 'Ingresos', date: '2026-01-10' })
+const JAN_EXPENSE = makeRecord({ Categoria1: 'GASTOS - EGRESOS', Categoria2: 'Gastos Operacionales', date: '2026-01-20', debit: 50000, credit: 0 })
+const FEB_INCOME  = makeRecord({ Categoria1: 'INGRESOS', Categoria2: 'Ingresos', date: '2026-02-05' })
+const FEB_OTHER   = makeRecord({ Categoria1: 'INGRESOS', Categoria2: 'Otros Ingresos', date: '2026-02-10' })
 
 describe('useChartFilters', () => {
   it('initializes with empty filters and hasActiveFilters=false', () => {
@@ -94,7 +95,7 @@ describe('useChartFilters', () => {
       act(() => result.current.toggleCategory('Ingresos'))
       const filtered = result.current.applyFilters(ALL)
       expect(filtered).toHaveLength(2)
-      expect(filtered.every(r => r.Categoria1 === 'Ingresos')).toBe(true)
+      expect(filtered.every(r => r.Categoria2 === 'Ingresos')).toBe(true)
     })
 
     it('multiple categories are OR within dimension', () => {
@@ -122,7 +123,7 @@ describe('useChartFilters', () => {
 
     it('category AND period filters use AND logic across dimensions', () => {
       const { result } = renderHook(() => useChartFilters())
-      act(() => result.current.toggleCategory('Ingresos'))
+      act(() => result.current.toggleCategory('Ingresos')) // Cat2 value
       act(() => result.current.togglePeriod('2026-01'))
       const filtered = result.current.applyFilters(ALL)
       expect(filtered).toHaveLength(1)

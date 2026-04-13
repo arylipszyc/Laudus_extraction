@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useLedger } from '@/hooks/useLedger'
 import { useChartFilters } from '@/hooks/useChartFilters'
 import { useFilters } from '@/contexts/FilterContext'
-import { getLedgerCategory, buildPieData, buildTimeline, filterByEntity } from '@/utils/ledgerAnalytics'
+import { getLedgerCategory, buildPieDataByCat2, buildTimeline, filterByEntity } from '@/utils/ledgerAnalytics'
 import { CompositionPieChart } from '@/components/charts/CompositionPieChart'
 import { TimelineBarChart } from '@/components/charts/TimelineBarChart'
 import { IncomeExpensesDrilldown } from '@/components/charts/IncomeExpensesDrilldown'
@@ -57,8 +57,8 @@ export function IncomeExpensesPage() {
 
   // ── Chart data (from unfiltered records) ────────────────────────────────────
 
-  const expensePieData = buildPieData(allRecords, 'expenses')
-  const incomePieData = buildPieData(allRecords, 'income')
+  const expensePieData = buildPieDataByCat2(allRecords, 'expenses')
+  const incomePieData = buildPieDataByCat2(allRecords, 'income')
   const timelineData = buildTimeline(allRecords)
 
   // ── Filtered records for drill-down table ───────────────────────────────────
