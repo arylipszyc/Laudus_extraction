@@ -65,8 +65,9 @@ export function TimelineBarChart({ data, selectedPeriods, onBarClick }: Props) {
             fill="#22c55e"
             radius={[2, 2, 0, 0]}
             style={{ cursor: 'pointer' }}
-            onClick={(barData: unknown) => {
-              const period = (barData as TimelinePeriodData).period
+            onClick={(barData) => {
+              // Recharts v3: BarRectangleItem — original data is in .payload
+              const period = (barData.payload as TimelinePeriodData)?.period
               if (period) onBarClick(period)
             }}
           >
@@ -82,8 +83,8 @@ export function TimelineBarChart({ data, selectedPeriods, onBarClick }: Props) {
             fill="#ef4444"
             radius={[2, 2, 0, 0]}
             style={{ cursor: 'pointer' }}
-            onClick={(barData: unknown) => {
-              const period = (barData as TimelinePeriodData).period
+            onClick={(barData) => {
+              const period = (barData.payload as TimelinePeriodData)?.period
               if (period) onBarClick(period)
             }}
           >

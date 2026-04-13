@@ -65,21 +65,21 @@ export function IncomeExpensesPage() {
   // Apply entity filter client-side
   const allRecords = filterByEntity(data.data, entity)
 
-  // ── Totals (from all entity records, unfiltered) ────────────────────────────
+  // ── Period-filtered records (base for all charts and totals) ──────────────
 
-  const totalIncome = allRecords
+  const periodFiltered = filters.applyFilters(allRecords)
+
+  // ── Totals (reflect active period filter) ──────────────────────────────────
+
+  const totalIncome = periodFiltered
     .filter(r => getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) === 'income')
     .reduce((s, r) => s + (r.credit - r.debit), 0)
 
-  const totalExpenses = allRecords
+  const totalExpenses = periodFiltered
     .filter(r => getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) === 'expenses')
     .reduce((s, r) => s + (r.debit - r.credit), 0)
 
   const netResult = totalIncome - totalExpenses
-
-  // ── Period-filtered records (for charts and drilldowns) ─────────────────────
-
-  const periodFiltered = filters.applyFilters(allRecords)
   const timelineData = buildTimeline(allRecords)
 
   // Pie charts see period-filtered records and compute Cat2/Cat3 data internally
