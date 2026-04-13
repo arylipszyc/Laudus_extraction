@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   getLedgerCategory,
+  filterByEntity,
   groupByCategoria1,
   buildPieData,
   buildTimeline,
@@ -33,6 +34,47 @@ function makeRecord(overrides: Partial<LedgerEntryRecord>): LedgerEntryRecord {
 
 const INCOME_RECORD = makeRecord({ credit: 100000, debit: 0, Categoria1: 'Ingresos', accountnumber: '400001', accountName: 'Ventas' })
 const OTHER_RECORD = makeRecord({ debit: 10000, credit: 0, Categoria1: '', accountnumber: '100001', accountName: 'Caja' })
+
+// ── filterByEntity ────────────────────────────────────────────────────────────
+
+describe('filterByEntity', () => {
+  const eag1 = makeRecord({ Categoria1: 'Gastos Operacionales', accountnumber: '500001' })
+  const eag2 = makeRecord({ Categoria1: 'Ingresos', accountnumber: '400001' })
+  const jocelyn = makeRecord({ Categoria1: 'Gastos Jocelyn', accountnumber: '500002' })
+  const johanna = makeRecord({ Categoria1: 'Patrimonio Johanna', accountnumber: '300001' })
+  const jael = makeRecord({ Categoria1: 'Ingresos Jael', accountnumber: '400002' })
+  const ALL = [eag1, eag2, jocelyn, johanna, jael]
+
+  it('EAG returns records with no daughter name in Categoria1', () => {
+    const result = filterByEntity(ALL, 'EAG')
+    expect(result).toHaveLength(2)
+    expect(result).toContain(eag1)
+    expect(result).toContain(eag2)
+  })
+
+  it('Jocelyn returns only records containing "Jocelyn" in Categoria1', () => {
+    const result = filterByEntity(ALL, 'Jocelyn')
+    expect(result).toHaveLength(1)
+    expect(result[0]).toBe(jocelyn)
+  })
+
+  it('Johanna returns only records containing "Johanna" in Categoria1', () => {
+    expect(filterByEntity(ALL, 'Johanna')).toEqual([johanna])
+  })
+
+  it('Jael returns only records containing "Jael" in Categoria1', () => {
+    expect(filterByEntity(ALL, 'Jael')).toEqual([jael])
+  })
+
+  it('returns empty when no records match the entity', () => {
+    expect(filterByEntity(ALL, 'Jeannette')).toHaveLength(0)
+  })
+
+  it('EAG excludes all daughter records', () => {
+    const result = filterByEntity([jocelyn, johanna, jael], 'EAG')
+    expect(result).toHaveLength(0)
+  })
+})
 
 // ── getLedgerCategory ─────────────────────────────────────────────────────────
 

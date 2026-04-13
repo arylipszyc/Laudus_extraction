@@ -1,7 +1,8 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import { useLedger } from '@/hooks/useLedger'
 import { useChartFilters } from '@/hooks/useChartFilters'
-import { getLedgerCategory, buildPieData, buildTimeline } from '@/utils/ledgerAnalytics'
+import { useFilters } from '@/contexts/FilterContext'
+import { getLedgerCategory, buildPieData, buildTimeline, filterByEntity } from '@/utils/ledgerAnalytics'
 import { CompositionPieChart } from '@/components/charts/CompositionPieChart'
 import { TimelineBarChart } from '@/components/charts/TimelineBarChart'
 import { IncomeExpensesDrilldown } from '@/components/charts/IncomeExpensesDrilldown'
@@ -11,6 +12,7 @@ function formatAmount(amount: number): string {
 }
 
 export function IncomeExpensesPage() {
+  const { entity } = useFilters()
   const { data, isLoading, isError } = useLedger()
   const filters = useChartFilters()
 
@@ -38,7 +40,8 @@ export function IncomeExpensesPage() {
     )
   }
 
-  const allRecords = data.data
+  // Apply entity filter client-side (all data is in EAG sheet; entity name appears in Categoria1)
+  const allRecords = filterByEntity(data.data, entity)
 
   // ── Totals (always from unfiltered records) ─────────────────────────────────
 
