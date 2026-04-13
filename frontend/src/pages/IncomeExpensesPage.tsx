@@ -46,11 +46,11 @@ export function IncomeExpensesPage() {
   // ── Totals (always from unfiltered records) ─────────────────────────────────
 
   const totalIncome = allRecords
-    .filter(r => getLedgerCategory(r.accountnumber, r.Categoria1) === 'income')
+    .filter(r => getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) === 'income')
     .reduce((s, r) => s + (r.credit - r.debit), 0)
 
   const totalExpenses = allRecords
-    .filter(r => getLedgerCategory(r.accountnumber, r.Categoria1) === 'expenses')
+    .filter(r => getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) === 'expenses')
     .reduce((s, r) => s + (r.debit - r.credit), 0)
 
   const netResult = totalIncome - totalExpenses

@@ -95,24 +95,31 @@ describe('getLedgerCategory', () => {
     expect(getLedgerCategory('600001', 'Costo de Ventas')).toBe('expenses')
   })
 
-  it('falls back to account prefix "4" → income when Categoria1 empty', () => {
+  it('returns expenses when Categoria1 contains "egreso" (daughter records)', () => {
+    expect(getLedgerCategory('500001', 'Egresos Jocelyn Avayu Deutsch')).toBe('expenses')
+  })
+
+  it('returns income when Categoria2 contains "ingreso" and Categoria1 is a daughter name', () => {
+    expect(getLedgerCategory('400001', 'Disponible Johanna Avayu Deutsch', 'Ingresos')).toBe('income')
+  })
+
+  it('falls back to account prefix "4" → income when categories empty', () => {
     expect(getLedgerCategory('400001', '')).toBe('income')
   })
 
-  it('falls back to account prefix "5" → expenses when Categoria1 empty', () => {
+  it('falls back to account prefix "5" → expenses when categories empty', () => {
     expect(getLedgerCategory('500001', '')).toBe('expenses')
   })
 
-  it('falls back to account prefix "6" → expenses when Categoria1 empty', () => {
+  it('falls back to account prefix "6" → expenses when categories empty', () => {
     expect(getLedgerCategory('600001', '')).toBe('expenses')
   })
 
-  it('returns other for unrecognized Categoria1 and unrecognized prefix', () => {
+  it('returns other for unrecognized categories and unrecognized prefix', () => {
     expect(getLedgerCategory('100001', '')).toBe('other')
   })
 
   it('Categoria1 takes priority over account prefix', () => {
-    // Account prefix says "income" (4xx) but Categoria1 says expenses
     expect(getLedgerCategory('400001', 'Gastos Administración')).toBe('expenses')
   })
 })

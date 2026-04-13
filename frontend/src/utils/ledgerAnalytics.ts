@@ -24,13 +24,22 @@ export function filterByEntity(records: LedgerEntryRecord[], entity: string): Le
  */
 export function getLedgerCategory(
   accountNumber: unknown,
-  categoria1: string = ''
+  categoria1: string = '',
+  categoria2: string = ''
 ): 'income' | 'expenses' | 'other' {
-  if (categoria1) {
-    const cat = categoria1.toLowerCase()
+  // Check Cat1 and Cat2 — daughter records embed accounting type in Cat1
+  // (e.g. "Egresos Jocelyn Avayu Deutsch"), EAG records use standard terms in Cat1
+  for (const cat of [categoria1.toLowerCase(), categoria2.toLowerCase()]) {
+    if (!cat) continue
     if (cat.includes('ingreso') || cat.includes('revenue')) return 'income'
-    if (cat.includes('gasto') || cat.includes('costo') || cat.includes('expense')) return 'expenses'
+    if (
+      cat.includes('egreso') ||
+      cat.includes('gasto') ||
+      cat.includes('costo') ||
+      cat.includes('expense')
+    ) return 'expenses'
   }
+  // Fallback: account number prefix
   const s = String(accountNumber ?? '')
   if (s.startsWith('4')) return 'income'
   if (s.startsWith('5') || s.startsWith('6')) return 'expenses'
@@ -113,7 +122,7 @@ export function groupByCategoria1(
   const rootMap = new Map<string, Cat1Map>()
 
   for (const r of records) {
-    if (getLedgerCategory(r.accountnumber, r.Categoria1) !== type) continue
+    if (getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) !== type) continue
 
     const amount = type === 'income'
       ? r.credit - r.debit
@@ -189,7 +198,7 @@ export function buildPieData(
   const totals = new Map<string, number>()
 
   for (const r of records) {
-    if (getLedgerCategory(r.accountnumber, r.Categoria1) !== type) continue
+    if (getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) !== type) continue
 
     const amount = type === 'income'
       ? r.credit - r.debit
@@ -217,7 +226,7 @@ export function buildTimeline(records: LedgerEntryRecord[]): TimelinePeriod[] {
     const period = r.date?.slice(0, 7)
     if (!period) continue
 
-    const type = getLedgerCategory(r.accountnumber, r.Categoria1)
+    const type = getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2)
     if (type === 'other') continue
 
     if (!periodMap.has(period)) periodMap.set(period, { income: 0, expenses: 0 })
