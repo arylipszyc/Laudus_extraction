@@ -1,0 +1,237 @@
+import { describe, it, expect } from 'vitest'
+import {
+  getLedgerCategory,
+  groupByCategoria1,
+  buildPieData,
+  buildTimeline,
+  periodLabel,
+} from './ledgerAnalytics'
+import type { LedgerEntryRecord } from '@/types'
+
+// ── Fixtures ──────────────────────────────────────────────────────────────────
+
+function makeRecord(overrides: Partial<LedgerEntryRecord>): LedgerEntryRecord {
+  return {
+    journalentryid: 1,
+    journalentrynumber: 1,
+    date: '2026-01-15',
+    accountnumber: '400001',
+    lineid: 1,
+    description: 'Test entry',
+    debit: 0,
+    credit: 0,
+    currencycode: 'CLP',
+    paritytomaincurrency: 1,
+    periodo: '2026-01',
+    accountName: 'Cuenta Test',
+    Categoria1: 'Ingresos',
+    ...overrides,
+  }
+}
+
+const INCOME_RECORD = makeRecord({ credit: 100000, debit: 0, Categoria1: 'Ingresos', accountnumber: '400001', accountName: 'Ventas' })
+const OTHER_RECORD = makeRecord({ debit: 10000, credit: 0, Categoria1: '', accountnumber: '100001', accountName: 'Caja' })
+
+// ── getLedgerCategory ─────────────────────────────────────────────────────────
+
+describe('getLedgerCategory', () => {
+  it('returns income when Categoria1 contains "ingreso"', () => {
+    expect(getLedgerCategory('400001', 'Ingresos')).toBe('income')
+  })
+
+  it('returns income when Categoria1 contains "revenue" (case insensitive)', () => {
+    expect(getLedgerCategory('400001', 'Revenue')).toBe('income')
+  })
+
+  it('returns expenses when Categoria1 contains "gasto"', () => {
+    expect(getLedgerCategory('500001', 'Gastos Operacionales')).toBe('expenses')
+  })
+
+  it('returns expenses when Categoria1 contains "costo"', () => {
+    expect(getLedgerCategory('600001', 'Costo de Ventas')).toBe('expenses')
+  })
+
+  it('falls back to account prefix "4" → income when Categoria1 empty', () => {
+    expect(getLedgerCategory('400001', '')).toBe('income')
+  })
+
+  it('falls back to account prefix "5" → expenses when Categoria1 empty', () => {
+    expect(getLedgerCategory('500001', '')).toBe('expenses')
+  })
+
+  it('falls back to account prefix "6" → expenses when Categoria1 empty', () => {
+    expect(getLedgerCategory('600001', '')).toBe('expenses')
+  })
+
+  it('returns other for unrecognized Categoria1 and unrecognized prefix', () => {
+    expect(getLedgerCategory('100001', '')).toBe('other')
+  })
+
+  it('Categoria1 takes priority over account prefix', () => {
+    // Account prefix says "income" (4xx) but Categoria1 says expenses
+    expect(getLedgerCategory('400001', 'Gastos Administración')).toBe('expenses')
+  })
+})
+
+// ── periodLabel ───────────────────────────────────────────────────────────────
+
+describe('periodLabel', () => {
+  it('formats "2026-01" → "Ene 2026"', () => {
+    expect(periodLabel('2026-01')).toBe('Ene 2026')
+  })
+
+  it('formats "2026-12" → "Dic 2026"', () => {
+    expect(periodLabel('2026-12')).toBe('Dic 2026')
+  })
+
+  it('formats "2025-06" → "Jun 2025"', () => {
+    expect(periodLabel('2025-06')).toBe('Jun 2025')
+  })
+})
+
+// ── groupByCategoria1 ─────────────────────────────────────────────────────────
+
+describe('groupByCategoria1', () => {
+  it('returns empty array when no records match type', () => {
+    expect(groupByCategoria1([INCOME_RECORD], 'expenses')).toEqual([])
+  })
+
+  it('groups income records by Categoria1', () => {
+    const records = [
+      makeRecord({ credit: 100000, debit: 0, Categoria1: 'Ingresos', accountnumber: '400001', accountName: 'Ventas' }),
+      makeRecord({ credit: 50000, debit: 0, Categoria1: 'Ingresos', accountnumber: '400002', accountName: 'Servicios' }),
+    ]
+    const groups = groupByCategoria1(records, 'income')
+    expect(groups).toHaveLength(1)
+    expect(groups[0].categoria1).toBe('Ingresos')
+    expect(groups[0].subtotal).toBe(150000)
+    expect(groups[0].accounts).toHaveLength(2)
+  })
+
+  it('groups records into multiple Categoria1 groups', () => {
+    const records = [
+      makeRecord({ debit: 80000, credit: 0, Categoria1: 'Gastos Operacionales', accountnumber: '500001', accountName: 'Arriendo' }),
+      makeRecord({ debit: 30000, credit: 0, Categoria1: 'Gastos Administración', accountnumber: '500002', accountName: 'Oficina' }),
+    ]
+    const groups = groupByCategoria1(records, 'expenses')
+    expect(groups).toHaveLength(2)
+    // Sorted by subtotal desc
+    expect(groups[0].categoria1).toBe('Gastos Operacionales')
+    expect(groups[1].categoria1).toBe('Gastos Administración')
+  })
+
+  it('accumulates amounts for same account within same Categoria1', () => {
+    const records = [
+      makeRecord({ credit: 60000, debit: 0, Categoria1: 'Ingresos', accountnumber: '400001', accountName: 'Ventas' }),
+      makeRecord({ credit: 40000, debit: 0, Categoria1: 'Ingresos', accountnumber: '400001', accountName: 'Ventas', date: '2026-02-15' }),
+    ]
+    const groups = groupByCategoria1(records, 'income')
+    expect(groups[0].accounts[0].total).toBe(100000)
+  })
+
+  it('excludes records classified as other', () => {
+    const groups = groupByCategoria1([OTHER_RECORD], 'income')
+    expect(groups).toHaveLength(0)
+  })
+
+  it('accounts within a group are sorted by total descending', () => {
+    const records = [
+      makeRecord({ debit: 10000, credit: 0, Categoria1: 'Gastos Operacionales', accountnumber: '500001', accountName: 'Bajo' }),
+      makeRecord({ debit: 90000, credit: 0, Categoria1: 'Gastos Operacionales', accountnumber: '500002', accountName: 'Alto' }),
+    ]
+    const groups = groupByCategoria1(records, 'expenses')
+    expect(groups[0].accounts[0].accountName).toBe('Alto')
+  })
+
+  it('uses "Sin categoría" when Categoria1 is empty but prefix matches', () => {
+    const record = makeRecord({ debit: 50000, credit: 0, Categoria1: '', accountnumber: '500001' })
+    const groups = groupByCategoria1([record], 'expenses')
+    expect(groups[0].categoria1).toBe('Sin categoría')
+  })
+})
+
+// ── buildPieData ──────────────────────────────────────────────────────────────
+
+describe('buildPieData', () => {
+  it('returns empty array when no records match type', () => {
+    expect(buildPieData([INCOME_RECORD], 'expenses')).toEqual([])
+  })
+
+  it('aggregates income by Categoria1 into pie slices', () => {
+    const records = [
+      makeRecord({ credit: 100000, debit: 0, Categoria1: 'Ingresos', accountnumber: '400001' }),
+      makeRecord({ credit: 50000, debit: 0, Categoria1: 'Ingresos', accountnumber: '400002' }),
+      makeRecord({ credit: 30000, debit: 0, Categoria1: 'Otros Ingresos', accountnumber: '400003' }),
+    ]
+    const slices = buildPieData(records, 'income')
+    expect(slices).toHaveLength(2)
+    expect(slices[0]).toEqual({ name: 'Ingresos', value: 150000 })
+    expect(slices[1]).toEqual({ name: 'Otros Ingresos', value: 30000 })
+  })
+
+  it('excludes slices with zero or negative total', () => {
+    const record = makeRecord({ credit: 0, debit: 50000, Categoria1: 'Ingresos', accountnumber: '400001' })
+    const slices = buildPieData([record], 'income')
+    expect(slices).toHaveLength(0)
+  })
+
+  it('sorts slices by value descending', () => {
+    const records = [
+      makeRecord({ debit: 20000, credit: 0, Categoria1: 'Gastos Pequeños', accountnumber: '500001' }),
+      makeRecord({ debit: 80000, credit: 0, Categoria1: 'Gastos Grandes', accountnumber: '500002' }),
+    ]
+    const slices = buildPieData(records, 'expenses')
+    expect(slices[0].name).toBe('Gastos Grandes')
+  })
+})
+
+// ── buildTimeline ─────────────────────────────────────────────────────────────
+
+describe('buildTimeline', () => {
+  it('returns empty array for empty records', () => {
+    expect(buildTimeline([])).toEqual([])
+  })
+
+  it('groups records by year-month from date field', () => {
+    const records = [
+      makeRecord({ credit: 100000, debit: 0, date: '2026-01-10', Categoria1: 'Ingresos' }),
+      makeRecord({ debit: 50000, credit: 0, date: '2026-01-20', Categoria1: 'Gastos Operacionales' }),
+      makeRecord({ credit: 80000, debit: 0, date: '2026-02-05', Categoria1: 'Ingresos' }),
+    ]
+    const timeline = buildTimeline(records)
+    expect(timeline).toHaveLength(2)
+    expect(timeline[0].period).toBe('2026-01')
+    expect(timeline[0].income).toBe(100000)
+    expect(timeline[0].expenses).toBe(50000)
+    expect(timeline[1].period).toBe('2026-02')
+    expect(timeline[1].income).toBe(80000)
+    expect(timeline[1].expenses).toBe(0)
+  })
+
+  it('sorts periods chronologically', () => {
+    const records = [
+      makeRecord({ credit: 50000, debit: 0, date: '2026-03-01', Categoria1: 'Ingresos' }),
+      makeRecord({ credit: 50000, debit: 0, date: '2026-01-01', Categoria1: 'Ingresos' }),
+      makeRecord({ credit: 50000, debit: 0, date: '2026-02-01', Categoria1: 'Ingresos' }),
+    ]
+    const timeline = buildTimeline(records)
+    expect(timeline.map(t => t.period)).toEqual(['2026-01', '2026-02', '2026-03'])
+  })
+
+  it('excludes "other" classified records', () => {
+    const timeline = buildTimeline([OTHER_RECORD])
+    expect(timeline).toHaveLength(0)
+  })
+
+  it('generates correct display labels', () => {
+    const records = [makeRecord({ credit: 100000, debit: 0, date: '2026-03-15', Categoria1: 'Ingresos' })]
+    const timeline = buildTimeline(records)
+    expect(timeline[0].label).toBe('Mar 2026')
+  })
+
+  it('skips records without a date', () => {
+    const record = makeRecord({ credit: 100000, debit: 0, date: '', Categoria1: 'Ingresos' })
+    const timeline = buildTimeline([record])
+    expect(timeline).toHaveLength(0)
+  })
+})
