@@ -5,6 +5,7 @@ import {
   groupByCategoria1,
   buildPieData,
   buildPieDataByCat2,
+  buildPieDataByCat3,
   buildTimeline,
   periodLabel,
 } from './ledgerAnalytics'
@@ -276,6 +277,38 @@ describe('buildPieDataByCat2', () => {
     ]
     const slices = buildPieDataByCat2(records, 'expenses')
     expect(slices[0].name).toBe('DEPARTAMENTO MIAMI')
+  })
+})
+
+// ── buildPieDataByCat3 ────────────────────────────────────────────────────────
+
+describe('buildPieDataByCat3', () => {
+  it('returns empty when no records match cat2', () => {
+    const record = makeRecord({ debit: 50000, credit: 0, Categoria1: 'GASTOS - EGRESOS', Categoria2: 'Casa Sur', Categoria3: 'Sueldos', accountnumber: '500001' })
+    expect(buildPieDataByCat3([record], 'expenses', 'GASTOS PERSONALES')).toEqual([])
+  })
+
+  it('groups Cat3 slices for the given Cat2', () => {
+    const records = [
+      makeRecord({ debit: 80000, credit: 0, Categoria1: 'GASTOS - EGRESOS', Categoria2: 'Casa Sur', Categoria3: 'Sueldos y Adicionales', accountnumber: '500001' }),
+      makeRecord({ debit: 30000, credit: 0, Categoria1: 'GASTOS - EGRESOS', Categoria2: 'Casa Sur', Categoria3: 'Mantenciones', accountnumber: '500002' }),
+      makeRecord({ debit: 50000, credit: 0, Categoria1: 'GASTOS - EGRESOS', Categoria2: 'GASTOS PERSONALES', Categoria3: 'Salud', accountnumber: '500003' }),
+    ]
+    const slices = buildPieDataByCat3(records, 'expenses', 'Casa Sur')
+    expect(slices).toHaveLength(2)
+    expect(slices[0]).toEqual({ name: 'Sueldos y Adicionales', value: 80000 })
+    expect(slices[1]).toEqual({ name: 'Mantenciones', value: 30000 })
+  })
+
+  it('falls back to "Sin subcategoría" when Categoria3 empty', () => {
+    const record = makeRecord({ debit: 50000, credit: 0, Categoria1: 'GASTOS - EGRESOS', Categoria2: 'Casa Sur', Categoria3: '', accountnumber: '500001' })
+    const slices = buildPieDataByCat3([record], 'expenses', 'Casa Sur')
+    expect(slices[0].name).toBe('Sin subcategoría')
+  })
+
+  it('excludes slices with zero or negative total', () => {
+    const record = makeRecord({ debit: 0, credit: 50000, Categoria1: 'GASTOS - EGRESOS', Categoria2: 'Casa Sur', Categoria3: 'Sueldos', accountnumber: '500001' })
+    expect(buildPieDataByCat3([record], 'expenses', 'Casa Sur')).toHaveLength(0)
   })
 })
 

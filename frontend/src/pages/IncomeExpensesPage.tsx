@@ -1,20 +1,42 @@
+import { useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useLedger } from '@/hooks/useLedger'
 import { useChartFilters } from '@/hooks/useChartFilters'
 import { useFilters } from '@/contexts/FilterContext'
-import { getLedgerCategory, buildPieDataByCat2, buildTimeline, filterByEntity } from '@/utils/ledgerAnalytics'
+import { getLedgerCategory, buildTimeline, filterByEntity } from '@/utils/ledgerAnalytics'
 import { CompositionPieChart } from '@/components/charts/CompositionPieChart'
 import { TimelineBarChart } from '@/components/charts/TimelineBarChart'
 import { IncomeExpensesDrilldown } from '@/components/charts/IncomeExpensesDrilldown'
+import type { LedgerEntryRecord } from '@/types'
 
 function formatAmount(amount: number): string {
   return amount.toLocaleString('es-CL')
+}
+
+function applyDrillFilter(
+  records: LedgerEntryRecord[],
+  cat2: string | null,
+  cat3: string | null,
+): LedgerEntryRecord[] {
+  if (!cat2) return records
+  return records.filter(r => {
+    const recordCat2 = r.Categoria2 || r.Categoria1 || ''
+    if (recordCat2 !== cat2) return false
+    if (cat3 && (r.Categoria3 || 'Sin subcategoría') !== cat3) return false
+    return true
+  })
 }
 
 export function IncomeExpensesPage() {
   const { entity } = useFilters()
   const { data, isLoading, isError } = useLedger()
   const filters = useChartFilters()
+
+  // Pie drill state — controlled here so parent can reset them
+  const [expDrillCat2, setExpDrillCat2] = useState<string | null>(null)
+  const [expDrillCat3, setExpDrillCat3] = useState<string | null>(null)
+  const [incDrillCat2, setIncDrillCat2] = useState<string | null>(null)
+  const [incDrillCat3, setIncDrillCat3] = useState<string | null>(null)
 
   // ── Loading / error / empty ─────────────────────────────────────────────────
 
@@ -40,10 +62,10 @@ export function IncomeExpensesPage() {
     )
   }
 
-  // Apply entity filter client-side (all data is in EAG sheet; entity name appears in Categoria1)
+  // Apply entity filter client-side
   const allRecords = filterByEntity(data.data, entity)
 
-  // ── Totals (always from unfiltered records) ─────────────────────────────────
+  // ── Totals (from all entity records, unfiltered) ────────────────────────────
 
   const totalIncome = allRecords
     .filter(r => getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) === 'income')
@@ -55,25 +77,37 @@ export function IncomeExpensesPage() {
 
   const netResult = totalIncome - totalExpenses
 
-  // ── Chart data (from unfiltered records) ────────────────────────────────────
+  // ── Period-filtered records (for charts and drilldowns) ─────────────────────
 
-  const expensePieData = buildPieDataByCat2(allRecords, 'expenses')
-  const incomePieData = buildPieDataByCat2(allRecords, 'income')
+  const periodFiltered = filters.applyFilters(allRecords)
   const timelineData = buildTimeline(allRecords)
 
-  // ── Filtered records for drill-down table ───────────────────────────────────
-
-  const filteredRecords = filters.applyFilters(allRecords)
+  // Pie charts see period-filtered records and compute Cat2/Cat3 data internally
+  // Drilldown tables are further filtered by pie drill state (per type)
+  const expenseRecords = applyDrillFilter(periodFiltered, expDrillCat2, expDrillCat3)
+  const incomeRecords  = applyDrillFilter(periodFiltered, incDrillCat2, incDrillCat3)
 
   // ── Active filter chips ─────────────────────────────────────────────────────
 
-  const activeChips = [
-    ...filters.selectedCategories.map(c => ({ label: c, onRemove: () => filters.toggleCategory(c) })),
-    ...filters.selectedPeriods.map(p => ({
-      label: timelineData.find(t => t.period === p)?.label ?? p,
-      onRemove: () => filters.togglePeriod(p),
-    })),
-  ]
+  const hasAnyFilter = filters.hasActiveFilters || expDrillCat2 !== null || incDrillCat2 !== null
+
+  const periodChips = filters.selectedPeriods.map(p => ({
+    label: timelineData.find(t => t.period === p)?.label ?? p,
+    onRemove: () => filters.togglePeriod(p),
+  }))
+
+  const drillChips = [
+    expDrillCat2 && { label: `Gastos: ${expDrillCat3 ?? expDrillCat2}`, onRemove: () => { setExpDrillCat2(null); setExpDrillCat3(null) } },
+    incDrillCat2 && { label: `Ingresos: ${incDrillCat3 ?? incDrillCat2}`, onRemove: () => { setIncDrillCat2(null); setIncDrillCat3(null) } },
+  ].filter(Boolean) as { label: string; onRemove: () => void }[]
+
+  const activeChips = [...periodChips, ...drillChips]
+
+  function resetAll() {
+    filters.resetFilters()
+    setExpDrillCat2(null); setExpDrillCat3(null)
+    setIncDrillCat2(null); setIncDrillCat3(null)
+  }
 
   return (
     <div className="min-w-[1280px] space-y-8">
@@ -107,15 +141,21 @@ export function IncomeExpensesPage() {
       <div className="grid grid-cols-3 gap-6 rounded-lg border bg-card p-6">
         <CompositionPieChart
           title="Composición Gastos"
-          data={expensePieData}
-          selectedItems={filters.selectedCategories}
-          onSliceClick={filters.toggleCategory}
+          records={periodFiltered}
+          type="expenses"
+          drillCat2={expDrillCat2}
+          drillCat3={expDrillCat3}
+          onDrillCat2={setExpDrillCat2}
+          onDrillCat3={setExpDrillCat3}
         />
         <CompositionPieChart
           title="Composición Ingresos"
-          data={incomePieData}
-          selectedItems={filters.selectedCategories}
-          onSliceClick={filters.toggleCategory}
+          records={periodFiltered}
+          type="income"
+          drillCat2={incDrillCat2}
+          drillCat3={incDrillCat3}
+          onDrillCat2={setIncDrillCat2}
+          onDrillCat3={setIncDrillCat3}
         />
         <TimelineBarChart
           data={timelineData}
@@ -125,7 +165,7 @@ export function IncomeExpensesPage() {
       </div>
 
       {/* Active filters + reset */}
-      {filters.hasActiveFilters && (
+      {hasAnyFilter && (
         <div className="flex items-center gap-2 flex-wrap">
           {activeChips.map((chip, i) => (
             <span
@@ -143,7 +183,7 @@ export function IncomeExpensesPage() {
             </span>
           ))}
           <button
-            onClick={filters.resetFilters}
+            onClick={resetAll}
             className="ml-2 text-xs text-muted-foreground underline hover:text-foreground transition-colors"
           >
             Resetear filtros
@@ -154,12 +194,12 @@ export function IncomeExpensesPage() {
       {/* Drill-down tables */}
       <div className="grid grid-cols-2 gap-6">
         <IncomeExpensesDrilldown
-          records={filteredRecords}
+          records={expenseRecords}
           type="expenses"
           title="Detalle Gastos"
         />
         <IncomeExpensesDrilldown
-          records={filteredRecords}
+          records={incomeRecords}
           type="income"
           title="Detalle Ingresos"
         />

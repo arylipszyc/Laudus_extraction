@@ -244,6 +244,36 @@ export function buildPieDataByCat2(
 }
 
 /**
+ * Build pie chart data grouped by Categoria3 for the given type and Cat2 value.
+ * Used when user drills into a Cat2 slice in the pie chart.
+ */
+export function buildPieDataByCat3(
+  records: LedgerEntryRecord[],
+  type: 'income' | 'expenses',
+  cat2: string
+): PieSlice[] {
+  const totals = new Map<string, number>()
+
+  for (const r of records) {
+    const recordCat2 = r.Categoria2 || r.Categoria1 || ''
+    if (recordCat2 !== cat2) continue
+    if (getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) !== type) continue
+
+    const amount = type === 'income'
+      ? r.credit - r.debit
+      : r.debit - r.credit
+
+    const cat3 = r.Categoria3 || 'Sin subcategoría'
+    totals.set(cat3, (totals.get(cat3) ?? 0) + amount)
+  }
+
+  return Array.from(totals.entries())
+    .filter(([, value]) => value > 0)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value)
+}
+
+/**
  * Build timeline data grouped by year-month.
  * Returns periods sorted chronologically.
  */

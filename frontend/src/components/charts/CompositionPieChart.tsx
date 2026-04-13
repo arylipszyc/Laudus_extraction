@@ -1,33 +1,20 @@
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, type PieLabelRenderProps } from 'recharts'
+import { buildPieDataByCat2, buildPieDataByCat3 } from '@/utils/ledgerAnalytics'
+import type { LedgerEntryRecord } from '@/types'
 
 const COLORS = [
   '#6366f1', '#f59e0b', '#10b981', '#ef4444', '#3b82f6',
   '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#84cc16',
 ]
 
-interface PieSlice {
-  name: string
-  value: number
-}
-
-interface Props {
-  title: string
-  data: PieSlice[]
-  selectedItems: string[]
-  onSliceClick: (name: string) => void
-}
-
 interface CustomTooltipProps {
   active?: boolean
-  payload?: Array<{ name: string; value: number; payload: PieSlice }>
+  payload?: Array<{ name: string; value: number }>
 }
 
 function CustomTooltip({ active, payload }: CustomTooltipProps) {
   if (!active || !payload?.length) return null
   const { name, value } = payload[0]
-  const total = payload[0].payload
-  // Calculate percentage from siblings (approximation; recharts passes full data via context)
-  void total // used implicitly
   return (
     <div className="rounded-md border bg-background px-3 py-2 text-sm shadow-md">
       <p className="font-medium">{name}</p>
@@ -55,8 +42,36 @@ function renderPercentLabel(props: PieLabelRenderProps) {
   )
 }
 
-export function CompositionPieChart({ title, data, selectedItems, onSliceClick }: Props) {
-  const hasSelection = selectedItems.length > 0
+interface Props {
+  title: string
+  records: LedgerEntryRecord[]
+  type: 'income' | 'expenses'
+  /** Cat2 currently drilled into (null = top level). Controlled by parent. */
+  drillCat2: string | null
+  /** Cat3 currently selected (null = none). Controlled by parent. */
+  drillCat3: string | null
+  onDrillCat2: (cat2: string | null) => void
+  onDrillCat3: (cat3: string | null) => void
+}
+
+export function CompositionPieChart({
+  title, records, type, drillCat2, drillCat3, onDrillCat2, onDrillCat3,
+}: Props) {
+  const data = drillCat2
+    ? buildPieDataByCat3(records, type, drillCat2)
+    : buildPieDataByCat2(records, type)
+
+  const hasSelection = drillCat2 !== null && drillCat3 !== null
+
+  function handleClick(name: string) {
+    if (drillCat2 === null) {
+      // At Cat2 level — drill into Cat3 for this Cat2
+      onDrillCat2(name)
+    } else {
+      // At Cat3 level — toggle Cat3 filter
+      onDrillCat3(drillCat3 === name ? null : name)
+    }
+  }
 
   if (data.length === 0) {
     return (
@@ -69,7 +84,19 @@ export function CompositionPieChart({ title, data, selectedItems, onSliceClick }
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">{title}</h3>
+      <div className="flex items-center gap-2 mb-2 min-h-[1.5rem]">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide truncate">
+          {drillCat2 ? `${title} › ${drillCat2}` : title}
+        </h3>
+        {drillCat2 && (
+          <button
+            onClick={() => { onDrillCat2(null); onDrillCat3(null) }}
+            className="shrink-0 text-xs text-primary underline hover:text-primary/70 transition-colors"
+          >
+            Volver
+          </button>
+        )}
+      </div>
       <ResponsiveContainer width="100%" height={260}>
         <PieChart>
           <Pie
@@ -81,13 +108,13 @@ export function CompositionPieChart({ title, data, selectedItems, onSliceClick }
             innerRadius={50}
             outerRadius={85}
             paddingAngle={2}
-            onClick={(entry) => onSliceClick(entry.name as string)}
+            onClick={(entry) => handleClick(entry.name as string)}
             style={{ cursor: 'pointer' }}
             labelLine={false}
             label={renderPercentLabel}
           >
             {data.map((entry, index) => {
-              const isSelected = selectedItems.includes(entry.name)
+              const isSelected = drillCat3 === entry.name
               const dimmed = hasSelection && !isSelected
               return (
                 <Cell

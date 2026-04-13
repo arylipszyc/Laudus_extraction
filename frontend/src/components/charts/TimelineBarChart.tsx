@@ -54,27 +54,39 @@ export function TimelineBarChart({ data, selectedPeriods, onBarClick }: Props) {
         <BarChart
           data={data}
           margin={{ top: 4, right: 16, left: 0, bottom: 4 }}
-          onClick={(state) => {
-            if (state?.activeLabel) {
-              // Find period key from label
-              const item = data.find(d => d.label === state.activeLabel)
-              if (item) onBarClick(item.period)
-            }
-          }}
-          style={{ cursor: 'pointer' }}
         >
           <XAxis dataKey="label" tick={{ fontSize: 11 }} />
           <YAxis tickFormatter={(v: number) => v.toLocaleString('es-CL')} tick={{ fontSize: 11 }} width={80} />
           <Tooltip content={<CustomTooltip />} />
           <Legend iconType="square" iconSize={10} formatter={(v) => <span className="text-xs">{v}</span>} />
-          <Bar dataKey="income" name="Ingresos" fill="#22c55e" radius={[2, 2, 0, 0]}>
+          <Bar
+            dataKey="income"
+            name="Ingresos"
+            fill="#22c55e"
+            radius={[2, 2, 0, 0]}
+            style={{ cursor: 'pointer' }}
+            onClick={(barData: unknown) => {
+              const period = (barData as TimelinePeriodData).period
+              if (period) onBarClick(period)
+            }}
+          >
             {data.map((entry, index) => {
               const isSelected = selectedPeriods.includes(entry.period)
               const dimmed = hasSelection && !isSelected
               return <Cell key={`inc-${index}`} fill="#22c55e" opacity={dimmed ? 0.35 : 1} />
             })}
           </Bar>
-          <Bar dataKey="expenses" name="Gastos" fill="#ef4444" radius={[2, 2, 0, 0]}>
+          <Bar
+            dataKey="expenses"
+            name="Gastos"
+            fill="#ef4444"
+            radius={[2, 2, 0, 0]}
+            style={{ cursor: 'pointer' }}
+            onClick={(barData: unknown) => {
+              const period = (barData as TimelinePeriodData).period
+              if (period) onBarClick(period)
+            }}
+          >
             {data.map((entry, index) => {
               const isSelected = selectedPeriods.includes(entry.period)
               const dimmed = hasSelection && !isSelected
