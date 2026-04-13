@@ -75,7 +75,7 @@ def _run_sync(job_id: str, repo: DataRepository) -> None:
         except Exception:
             bs_before = ledger_before = None
 
-        from sync import sync_api  # top-level sync.py — do NOT modify
+        from pipeline.sync import sync_api
         sync_api()
 
         # Snapshot counts after sync and compute delta

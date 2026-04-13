@@ -1,4 +1,4 @@
-from services.laudus_service import get_info_API
+from pipeline.services.laudus_service import get_info_API
 
 def fetch_ledger(endpoint, params=None):
     """

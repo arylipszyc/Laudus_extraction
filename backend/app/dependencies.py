@@ -16,7 +16,7 @@ def get_repository() -> SheetsRepository:
 
     Override in tests via app.dependency_overrides[get_repository].
     """
-    from config.gspread_config import get_spreadsheet
+    from pipeline.config.gspread_config import get_spreadsheet
     return SheetsRepository(spreadsheet=get_spreadsheet())
 
 

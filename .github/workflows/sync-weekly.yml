@@ -21,7 +21,7 @@ jobs:
           cache: 'pip'
 
       - name: Instalar dependencias
-        run: pip install -r requirements.txt
+        run: pip install -r pipeline/requirements.txt
 
       - name: Crear archivo .env con credenciales
         run: |
@@ -29,13 +29,13 @@ jobs:
           echo "LAUDUS_PASSWORD=${{ secrets.LAUDUS_PASSWORD }}" >> .env
           echo "LAUDUS_COMPANYVATID=${{ secrets.LAUDUS_COMPANYVATID }}" >> .env
           echo "GOOGLE_SHEET_ID=${{ secrets.GOOGLE_SHEET_ID }}" >> .env
-          echo "GOOGLE_APPLICATION_CREDENTIALS=config/serviceAccountKey.json" >> .env
+          echo "GOOGLE_APPLICATION_CREDENTIALS=pipeline/config/serviceAccountKey.json" >> .env
 
       - name: Escribir Service Account Key
-        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > config/serviceAccountKey.json
+        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > pipeline/config/serviceAccountKey.json
 
       - name: Ejecutar sincronización
-        run: python sync.py
+        run: python -m pipeline.sync
 
       - name: Subir logs como artefacto
         if: always()

@@ -7,7 +7,7 @@ import logging
 from typing import Callable
 
 from backend.app.repositories.base import DataRepository
-from utils.gspread_utils import replace_sheet, upsert_to_sheet
+from pipeline.utils.gspread_utils import replace_sheet, upsert_to_sheet
 
 logger = logging.getLogger(__name__)
 

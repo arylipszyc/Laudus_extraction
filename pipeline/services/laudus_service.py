@@ -1,6 +1,6 @@
 import logging
 import requests
-from config.laudus_config import LOGIN_URL, default_headers, payload
+from pipeline.config.laudus_config import LOGIN_URL, default_headers, payload
 
 logger = logging.getLogger(__name__)
 

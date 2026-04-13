@@ -368,7 +368,7 @@ def test_run_sync_sets_failed_state_on_sync_error():
     with svc._job_lock:
         svc._current_job.update({"job_id": job_id, "status": "running", "stats": None})
 
-    with patch("sync.sync_api", side_effect=RuntimeError("Sheets write failed")):
+    with patch("pipeline.sync.sync_api", side_effect=RuntimeError("Sheets write failed")):
         svc._run_sync(job_id, mock_repo)
 
     with svc._job_lock:
@@ -395,7 +395,7 @@ def test_run_sync_captures_stats_on_success():
     with svc._job_lock:
         svc._current_job.update({"job_id": job_id, "status": "running", "stats": None})
 
-    with patch("sync.sync_api"):
+    with patch("pipeline.sync.sync_api"):
         svc._run_sync(job_id, mock_repo)
 
     with svc._job_lock:

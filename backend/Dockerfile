@@ -9,10 +9,8 @@ RUN pip install --no-cache-dir -r backend/requirements.txt
 # Copy backend application
 COPY backend/ ./backend/
 
-# Copy existing pipeline modules (SheetsRepository imports from these)
-COPY services/ ./services/
-COPY config/ ./config/
-COPY utils/ ./utils/
+# Copy pipeline package (sync, models, services, config, utils)
+COPY pipeline/ ./pipeline/
 
 EXPOSE 8000
 
