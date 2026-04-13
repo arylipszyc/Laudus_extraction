@@ -45,6 +45,21 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 export function TimelineBarChart({ data, selectedPeriods, onBarClick }: Props) {
   const hasSelection = selectedPeriods.length > 0
 
+  function handleChartClick(state: { activeIndex?: number | unknown; activeLabel?: string | number } | null) {
+    if (!state) return
+    // Recharts v3: use activeIndex to look up the data item directly
+    const idx = state.activeIndex
+    if (typeof idx === 'number' && data[idx]) {
+      onBarClick(data[idx].period)
+      return
+    }
+    // Fallback: match by label (XAxis dataKey="label")
+    if (state.activeLabel != null) {
+      const item = data.find(d => d.label === String(state.activeLabel))
+      if (item) onBarClick(item.period)
+    }
+  }
+
   return (
     <div>
       <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
@@ -54,40 +69,21 @@ export function TimelineBarChart({ data, selectedPeriods, onBarClick }: Props) {
         <BarChart
           data={data}
           margin={{ top: 4, right: 16, left: 0, bottom: 4 }}
+          onClick={handleChartClick}
+          style={{ cursor: 'pointer' }}
         >
           <XAxis dataKey="label" tick={{ fontSize: 11 }} />
           <YAxis tickFormatter={(v: number) => v.toLocaleString('es-CL')} tick={{ fontSize: 11 }} width={80} />
           <Tooltip content={<CustomTooltip />} />
           <Legend iconType="square" iconSize={10} formatter={(v) => <span className="text-xs">{v}</span>} />
-          <Bar
-            dataKey="income"
-            name="Ingresos"
-            fill="#22c55e"
-            radius={[2, 2, 0, 0]}
-            style={{ cursor: 'pointer' }}
-            onClick={(barData) => {
-              // Recharts v3: BarRectangleItem — original data is in .payload
-              const period = (barData.payload as TimelinePeriodData)?.period
-              if (period) onBarClick(period)
-            }}
-          >
+          <Bar dataKey="income" name="Ingresos" fill="#22c55e" radius={[2, 2, 0, 0]}>
             {data.map((entry, index) => {
               const isSelected = selectedPeriods.includes(entry.period)
               const dimmed = hasSelection && !isSelected
               return <Cell key={`inc-${index}`} fill="#22c55e" opacity={dimmed ? 0.35 : 1} />
             })}
           </Bar>
-          <Bar
-            dataKey="expenses"
-            name="Gastos"
-            fill="#ef4444"
-            radius={[2, 2, 0, 0]}
-            style={{ cursor: 'pointer' }}
-            onClick={(barData) => {
-              const period = (barData.payload as TimelinePeriodData)?.period
-              if (period) onBarClick(period)
-            }}
-          >
+          <Bar dataKey="expenses" name="Gastos" fill="#ef4444" radius={[2, 2, 0, 0]}>
             {data.map((entry, index) => {
               const isSelected = selectedPeriods.includes(entry.period)
               const dimmed = hasSelection && !isSelected
