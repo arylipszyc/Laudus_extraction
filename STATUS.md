@@ -4,7 +4,7 @@
 Epic 3 — Dashboards Financieros Multi-Entidad: EN PROGRESO
 
 ## Last Updated
-2026-04-13
+2026-04-14
 
 ## Completed
 - Initial PRD drafted and validated (2026-04-06)
@@ -24,6 +24,7 @@ Epic 3 — Dashboards Financieros Multi-Entidad: EN PROGRESO
   - Backend: https://laudus-backend.onrender.com
   - Auto-deploy en push a main
 - **Story 3.4** — Análisis Interactivo Ingresos/Gastos: deployed y estabilizado (2026-04-13)
+- **Fix post-deploy** (2026-04-13 21:42): filtros de gráficos consistentes — tarjetas de totales reflejan drill-down; movimientos filtrados por período seleccionado
 
 ## Bug Fixes Aplicados (2026-04-12)
 - `IncomeExpensesPage`: clasificación ingresos/gastos usa `Categoria1` del PlanCuentas + fallback por prefijo
