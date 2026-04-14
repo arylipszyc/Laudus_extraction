@@ -69,23 +69,24 @@ export function IncomeExpensesPage() {
 
   const periodFiltered = filters.applyFilters(allRecords)
 
-  // ── Totals (reflect active period filter) ──────────────────────────────────
-
-  const totalIncome = periodFiltered
-    .filter(r => getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) === 'income')
-    .reduce((s, r) => s + (r.credit - r.debit), 0)
-
-  const totalExpenses = periodFiltered
-    .filter(r => getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) === 'expenses')
-    .reduce((s, r) => s + (r.debit - r.credit), 0)
-
-  const netResult = totalIncome - totalExpenses
   const timelineData = buildTimeline(allRecords)
 
   // Pie charts see period-filtered records and compute Cat2/Cat3 data internally
   // Drilldown tables are further filtered by pie drill state (per type)
   const expenseRecords = applyDrillFilter(periodFiltered, expDrillCat2, expDrillCat3)
   const incomeRecords  = applyDrillFilter(periodFiltered, incDrillCat2, incDrillCat3)
+
+  // ── Totals (reflect both period filter and pie drill) ───────────────────────
+
+  const totalIncome = incomeRecords
+    .filter(r => getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) === 'income')
+    .reduce((s, r) => s + (r.credit - r.debit), 0)
+
+  const totalExpenses = expenseRecords
+    .filter(r => getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) === 'expenses')
+    .reduce((s, r) => s + (r.debit - r.credit), 0)
+
+  const netResult = totalIncome - totalExpenses
 
   // ── Active filter chips ─────────────────────────────────────────────────────
 
@@ -197,11 +198,13 @@ export function IncomeExpensesPage() {
           records={expenseRecords}
           type="expenses"
           title="Detalle Gastos"
+          selectedPeriods={filters.selectedPeriods}
         />
         <IncomeExpensesDrilldown
           records={incomeRecords}
           type="income"
           title="Detalle Ingresos"
+          selectedPeriods={filters.selectedPeriods}
         />
       </div>
     </div>

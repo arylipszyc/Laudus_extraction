@@ -21,7 +21,7 @@ function formatDate(isoDate: string): string {
 
 // ── Transaction detail (lazy-loaded per account) ──────────────────────────────
 
-function TransactionRows({ accountNumber, type }: { accountNumber: string; type: 'income' | 'expenses' }) {
+function TransactionRows({ accountNumber, type, selectedPeriods }: { accountNumber: string; type: 'income' | 'expenses'; selectedPeriods: string[] }) {
   const { data, isLoading } = useLedger(accountNumber)
 
   if (isLoading) {
@@ -34,7 +34,11 @@ function TransactionRows({ accountNumber, type }: { accountNumber: string; type:
     )
   }
 
-  const entries = [...(data?.data ?? [])].sort((a, b) => b.date.localeCompare(a.date))
+  const allEntries = data?.data ?? []
+  const filtered = selectedPeriods.length > 0
+    ? allEntries.filter(e => e.date && selectedPeriods.includes(e.date.slice(0, 7)))
+    : allEntries
+  const entries = [...filtered].sort((a, b) => b.date.localeCompare(a.date))
 
   if (entries.length === 0) {
     return (
@@ -66,7 +70,7 @@ function TransactionRows({ accountNumber, type }: { accountNumber: string; type:
 
 // ── Account row (level 4) ─────────────────────────────────────────────────────
 
-function AccountRow({ account, type, amountClass }: { account: AccountSummary; type: 'income' | 'expenses'; amountClass: string }) {
+function AccountRow({ account, type, amountClass, selectedPeriods }: { account: AccountSummary; type: 'income' | 'expenses'; amountClass: string; selectedPeriods: string[] }) {
   const [expanded, setExpanded] = useState(false)
   return (
     <>
@@ -84,20 +88,20 @@ function AccountRow({ account, type, amountClass }: { account: AccountSummary; t
           {formatAmount(account.total, account.currency)}
         </td>
       </tr>
-      {expanded && <TransactionRows accountNumber={account.accountNumber} type={type} />}
+      {expanded && <TransactionRows accountNumber={account.accountNumber} type={type} selectedPeriods={selectedPeriods} />}
     </>
   )
 }
 
 // ── Categoria3 row (level 3) ──────────────────────────────────────────────────
 
-function Cat3Section({ group, type, amountClass }: { group: Categoria3Group; type: 'income' | 'expenses'; amountClass: string }) {
+function Cat3Section({ group, type, amountClass, selectedPeriods }: { group: Categoria3Group; type: 'income' | 'expenses'; amountClass: string; selectedPeriods: string[] }) {
   const [expanded, setExpanded] = useState(false)
   // Collapse this level if there's only one account and it has the same name — avoids redundant nesting
   const isPassthrough = group.accounts.length === 1 && group.label === 'Sin subcategoría'
 
   if (isPassthrough) {
-    return <AccountRow account={group.accounts[0]} type={type} amountClass={amountClass} />
+    return <AccountRow account={group.accounts[0]} type={type} amountClass={amountClass} selectedPeriods={selectedPeriods} />
   }
 
   return (
@@ -115,7 +119,7 @@ function Cat3Section({ group, type, amountClass }: { group: Categoria3Group; typ
         </td>
       </tr>
       {expanded && group.accounts.map(a => (
-        <AccountRow key={a.accountNumber} account={a} type={type} amountClass={amountClass} />
+        <AccountRow key={a.accountNumber} account={a} type={type} amountClass={amountClass} selectedPeriods={selectedPeriods} />
       ))}
     </>
   )
@@ -123,12 +127,12 @@ function Cat3Section({ group, type, amountClass }: { group: Categoria3Group; typ
 
 // ── Categoria2 row (level 2) ──────────────────────────────────────────────────
 
-function Cat2Section({ group, type, amountClass }: { group: Categoria2Group; type: 'income' | 'expenses'; amountClass: string }) {
+function Cat2Section({ group, type, amountClass, selectedPeriods }: { group: Categoria2Group; type: 'income' | 'expenses'; amountClass: string; selectedPeriods: string[] }) {
   const [expanded, setExpanded] = useState(false)
   const isPassthrough = group.cat3Groups.length === 1 && group.label === 'Sin subcategoría'
 
   if (isPassthrough) {
-    return <Cat3Section group={group.cat3Groups[0]} type={type} amountClass={amountClass} />
+    return <Cat3Section group={group.cat3Groups[0]} type={type} amountClass={amountClass} selectedPeriods={selectedPeriods} />
   }
 
   return (
@@ -146,7 +150,7 @@ function Cat2Section({ group, type, amountClass }: { group: Categoria2Group; typ
         </td>
       </tr>
       {expanded && group.cat3Groups.map(g => (
-        <Cat3Section key={g.label} group={g} type={type} amountClass={amountClass} />
+        <Cat3Section key={g.label} group={g} type={type} amountClass={amountClass} selectedPeriods={selectedPeriods} />
       ))}
     </>
   )
@@ -154,7 +158,7 @@ function Cat2Section({ group, type, amountClass }: { group: Categoria2Group; typ
 
 // ── Categoria1 section (level 1) ──────────────────────────────────────────────
 
-function Cat1Section({ group, type, amountClass }: { group: Categoria1Group; type: 'income' | 'expenses'; amountClass: string }) {
+function Cat1Section({ group, type, amountClass, selectedPeriods }: { group: Categoria1Group; type: 'income' | 'expenses'; amountClass: string; selectedPeriods: string[] }) {
   const [expanded, setExpanded] = useState(true)
   return (
     <>
@@ -171,7 +175,7 @@ function Cat1Section({ group, type, amountClass }: { group: Categoria1Group; typ
         </td>
       </tr>
       {expanded && group.cat2Groups.map(g => (
-        <Cat2Section key={g.label} group={g} type={type} amountClass={amountClass} />
+        <Cat2Section key={g.label} group={g} type={type} amountClass={amountClass} selectedPeriods={selectedPeriods} />
       ))}
     </>
   )
@@ -183,9 +187,10 @@ interface Props {
   records: LedgerEntryRecord[]
   type: 'income' | 'expenses'
   title: string
+  selectedPeriods?: string[]
 }
 
-export function IncomeExpensesDrilldown({ records, type, title }: Props) {
+export function IncomeExpensesDrilldown({ records, type, title, selectedPeriods = [] }: Props) {
   const groups = groupByCategoria1(records, type)
   const amountClass = type === 'income' ? 'text-green-600' : 'text-destructive'
 
@@ -212,7 +217,7 @@ export function IncomeExpensesDrilldown({ records, type, title }: Props) {
           </thead>
           <tbody>
             {groups.map(g => (
-              <Cat1Section key={g.label} group={g} type={type} amountClass={amountClass} />
+              <Cat1Section key={g.label} group={g} type={type} amountClass={amountClass} selectedPeriods={selectedPeriods} />
             ))}
           </tbody>
         </table>
