@@ -50,11 +50,27 @@ Epic 3 — Dashboards Financieros Multi-Entidad: EN PROGRESO
 - **54 tests** en Vitest (ledgerAnalytics + useChartFilters)
 
 ## In Progress
-- Nada. Story 3.4 estabilizada en producción.
+- Nada en código. Phase 2 architecture completa.
+
+## Phase 2 Architecture — Completada (2026-04-14)
+
+Epic 4 (Ingesta de Cartolas) y Epic 5 (Categorización) diseñados con Winston. Ver `architecture.md` sección "Phase 2 Architecture: Epic 4 & 5".
+
+**Decisiones clave:**
+- Scope: solo tarjetas de crédito EAG (BCI, Santander, otros incl. USD). Cuentas corrientes diferidas.
+- Storage híbrido: ERP data sigue en Sheets (`SheetsRepository` intocable); cartola data va a Supabase (`SupabaseRepository` nuevo)
+- Gemini: PDF extraction sin config por banco; single integration point en `gemini_client.py`
+- Categorización 2 etapas: historical match primero → Gemini fallback (elige de 85 cuentas fijas)
+- Dashboard explosion: CC payment entries de Laudus se reemplazan por cartola_transactions cuando batch disponible
+- CC identification: SIEMPRE por Cat2/Cat3 — NUNCA por accountName string matching
+
+**⚠️ Prerequisito bloqueante para Epic 4:**
+Ary debe actualizar taxonomía Cat2/Cat3 en Laudus/Google Sheets para marcar claramente las cuentas de tarjetas de crédito ANTES de que Dev empiece implementación.
 
 ## Next Steps
-- [ ] Story 3.5 — DIFERIDA a Phase 2 (tarjetas de crédito requieren cartolas, no disponibles en MVP)
-- [ ] Evaluar inicio de Epic 4 (Phase 2) o priorizar otras mejoras de UX
+- [ ] Ary actualiza Cat2/Cat3 taxonomy en Laudus (prerequisito bloqueante)
+- [ ] SM genera stories para Epic 4 (Ingesta) y Epic 5 (Categorización)
+- [ ] Story 3.5 — DIFERIDA a Phase 2 (ya cubierta por Epic 4/5 architecture)
 
 ## Stack Decidido
 - Backend: FastAPI (Python) + authlib + python-jose + itsdangerous
