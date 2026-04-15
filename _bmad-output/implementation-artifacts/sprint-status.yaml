@@ -1,0 +1,73 @@
+# generated: 2026-04-09
+# last_updated: 2026-04-14
+# project: LAUDUS_Backup
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#   - deferred: Explicitly deferred to a future phase
+
+generated: 2026-04-09
+last_updated: 2026-04-14  # updated: Epic 3 done; Phase 2 arquitectura completada
+project: LAUDUS_Backup
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  # ── Epic 1: Plataforma Base y Autenticación ──────────────────────────
+  epic-1: done
+  1-1-backend-fastapi-scaffold-repository-pattern: done
+  1-2-frontend-react-vite-scaffold: done
+  1-3-google-oauth-authentication: done
+  1-4-role-based-access-control-rbac: done
+  1-5-audit-log-backup-workflow-y-cloud-run-deployment: done
+  epic-1-retrospective: optional
+
+  # ── Epic 2: Sincronización Automática de Datos ERP ───────────────────
+  epic-2: done
+  2-1-sync-api-endpoints-pipeline-integration: done
+  2-2-incremental-sync-deduplicacion-y-confiabilidad: done
+  2-3-backfill-historico-ui-de-estado-de-sync: done
+  epic-2-retrospective: optional
+
+  # ── Epic 3: Dashboards Financieros Multi-Entidad ─────────────────────
+  epic-3: done
+  3-1-dashboard-api-endpoints: done
+  3-2-filtros-de-entidad-y-fecha: done
+  3-3-dashboard-activospasivos-e-ingresosgastos: done
+  3-4-analisis-interactivo-ingresos-gastos: done  # implementado como Story 3.4 (renombrado del spec original)
+  3-5-drill-down-y-detalle-de-tarjetas-de-credito: deferred  # requiere cartolas bancarias (Phase 2)
+  epic-3-retrospective: optional
+
+  # ── Epic 4: Ingesta de Cartolas Bancarias (Phase 2) ──────────────────
+  # Arquitectura diseñada 2026-04-14. Stories pendientes de generar (SM).
+  # Prerequisito: Ary debe actualizar Cat2/Cat3 antes de que Dev empiece.
+  epic-4: backlog
+  epic-4-retrospective: optional
+
+  # ── Epic 5: Categorización Inteligente de Transacciones (Phase 2) ────
+  # Arquitectura diseñada 2026-04-14. Stories pendientes de generar (SM).
+  epic-5: backlog
+  epic-5-retrospective: optional
+
+  # ── Epics 6–8: Fase 2 posterior ──────────────────────────────────────
+  epic-6: backlog  # Reconciliación Mensual
+  epic-6-retrospective: optional
+  epic-7: backlog  # Colaboración Owner-Contador
+  epic-7-retrospective: optional
+  epic-8: backlog  # Alertas y Notificaciones
+  epic-8-retrospective: optional

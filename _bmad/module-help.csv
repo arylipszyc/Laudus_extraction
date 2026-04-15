@@ -1,0 +1,6 @@
+module,skill,display-name,menu-code,description,action,args,phase,after,before,required,output-location,outputs
+Project Command,poc-agent-moishe,Session Start,MS,Opens each session with greeting last-session summary project status and recommended actions.,session-start,,anytime,,,false,,project status
+Project Command,poc-agent-moishe,Dispatch,MD,Routes user intent in natural language to the right BMAD specialist agent with name role and invocation command.,dispatch,,anytime,,,false,,
+Project Command,poc-agent-moishe,Return from Specialist,MR,Reads artifact produced by specialist and synthesizes outcome — no user relay needed.,return-from-specialist,,anytime,poc-agent-moishe:dispatch,,,false,,
+Project Command,poc-agent-moishe,Coordinate Implementation,MC,Orchestrates Phase 4 cycle Dev to QA to Code Review as sole interlocutor with step-by-step approval.,coordinate-implementation,,4-implementation,,,false,,
+Project Command,poc-agent-moishe,Weekly Report,MW,Generates weekly progress report saves to reports folder and resets STATUS.md history.,weekly-report,,anytime,,,false,,weekly report
