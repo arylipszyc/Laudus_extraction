@@ -525,6 +525,28 @@ _Added: 2026-04-14. Covers FR20–FR31 (Bank Statement Ingestion + Intelligent C
 ### Supabase Schema
 
 ```sql
+-- Chart of accounts synced from Google Sheets (source of truth remains Sheets)
+CREATE TABLE plan_de_cuentas (
+  account_number  VARCHAR PRIMARY KEY,       -- e.g. "111005", "411001"
+  account_name    VARCHAR NOT NULL,
+  account_type    VARCHAR,                   -- e.g. 'activo', 'pasivo', 'ingreso', 'gasto'
+  cat1            VARCHAR,
+  cat2            VARCHAR,
+  cat3            VARCHAR,
+  active          BOOLEAN DEFAULT true,
+  synced_at       TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Bank account registry — maps real bank accounts to the chart of accounts
+CREATE TABLE bank_accounts (
+  id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  account_number   VARCHAR NOT NULL REFERENCES plan_de_cuentas(account_number),
+  account_type     VARCHAR NOT NULL,         -- 'tarjeta_credito' | 'cta_corriente' | 'linea_credito' | 'cta_inversiones'
+  account_currency VARCHAR NOT NULL,         -- 'CLP' | 'USD'
+  bank_name        VARCHAR,
+  active           BOOLEAN DEFAULT true
+);
+
 -- One record per uploaded credit card statement
 CREATE TABLE cartola_batches (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -575,9 +597,21 @@ CREATE TABLE cartola_transactions (
 
 ### Credit Card Entry Identification
 
-Credit card payment entries in Laudus are identified via **Cat2 / Cat3 category values** — not via `accountName` pattern matching. Ary will update the category taxonomy in Cat2/Cat3 to clearly mark CC accounts before Epic 4 implementation begins.
+Credit card accounts are identified via the **`bank_accounts` table**, which maps real bank accounts to their corresponding entry in `plan_de_cuentas`. This replaces Cat2/Cat3 string matching and requires no changes to the ERP category taxonomy.
 
-**Enforcement rule for AI agents:** Never use `accountName.startsWith("T/C")` or similar string matching to identify CC entries. Always query by the designated Cat2/Cat3 category values.
+**Lookup flow:**
+```
+cartola_batch.account_number
+  → bank_accounts WHERE account_number = ? AND account_type = 'tarjeta_credito'
+  → plan_de_cuentas WHERE account_number = bank_accounts.account_number
+  → Laudus ledger entry matched by plan_de_cuentas.account_number
+```
+
+**Prerequisite — Story 4.0 (before Epic 4 can start):**
+1. Sync `plan_de_cuentas` from Sheets to Supabase (one-time load + refresh endpoint)
+2. Ary registers each credit card in the `bank_accounts` table via a configuration UI or direct DB insert
+
+**Enforcement rule for AI agents:** Never use `accountName.startsWith("T/C")`, Cat2/Cat3 string matching, or any pattern-based heuristic to identify CC entries. Always join via `bank_accounts` → `plan_de_cuentas`.
 
 ### Gemini Integration — PDF Extraction
 
@@ -674,13 +708,19 @@ When the income/expenses dashboard fetches data for entity=EAG + period:
 ```
 Dashboard service:
   1. Query SheetsRepository for ledger entries (as today)
-  2. For each entry where Cat2/Cat3 = CC category:
-     a. Query SupabaseRepository: cartola_batch for account_name + period?
-     b. If batch found AND batch.status IN ('categorized', 'confirmed'):
-        → Replace the single Laudus entry with cartola_transactions
-        → Apply visual status based on category_status of each transaction
-     c. If no batch found:
-        → Show Laudus entry as-is (unchanged behavior)
+  2. For each ledger entry:
+     a. Query SupabaseRepository: bank_accounts JOIN plan_de_cuentas
+        WHERE plan_de_cuentas.account_number = ledger_entry.account_number
+        AND bank_accounts.active = true
+     b. If match found (entry is a registered bank account):
+        → Query cartola_batches for account_number + period
+        → If batch found AND batch.status IN ('categorized', 'confirmed'):
+           → Replace the single Laudus entry with cartola_transactions
+           → Apply visual status based on category_status of each transaction
+        → If no batch found:
+           → Show Laudus entry as-is (unchanged behavior)
+     c. If no match in bank_accounts:
+        → Show Laudus entry as-is (non-bank account, unchanged)
   3. Return combined response
 ```
 
@@ -695,6 +735,15 @@ Dashboard service:
 All endpoints require `get_current_user()`. Upload/confirm endpoints require `contador` role.
 
 ```
+# Story 4.0 — Plan de cuentas sync (prerequisite)
+POST   /api/v1/plan-de-cuentas/sync                 # Trigger sync from Google Sheets → Supabase
+GET    /api/v1/plan-de-cuentas/                     # List all accounts (for bank_accounts config UI)
+
+# Story 4.0 — Bank accounts configuration (prerequisite)
+GET    /api/v1/bank-accounts/                       # List registered bank accounts
+POST   /api/v1/bank-accounts/                       # Register a new bank account (contador only)
+PATCH  /api/v1/bank-accounts/{id}                   # Update bank account (e.g. deactivate)
+
 # Epic 4 — Ingestion
 POST   /api/v1/cartolas/upload                      # Upload PDF, trigger Gemini extraction
 GET    /api/v1/cartolas/                            # List all batches (with status)
@@ -713,6 +762,16 @@ POST   /api/v1/transactions/bulk-confirm            # Bulk confirm all 'suggeste
 backend/
   app/
     api/v1/
+      plan_de_cuentas/             # Story 4.0: chart of accounts sync from Sheets
+      │   ├── router.py            # POST /sync, GET / (list)
+      │   ├── service.py           # Sheets → Supabase sync logic
+      │   └── schemas.py           # PlanDeCuentasEntry
+      │
+      bank_accounts/               # Story 4.0: bank account registry + config UI
+      │   ├── router.py            # GET /, POST /, PATCH /{id}
+      │   ├── service.py           # CRUD + validation against plan_de_cuentas
+      │   └── schemas.py           # BankAccount, BankAccountCreate
+      │
       cartolas/                    # Epic 4: ingestion + balance validation
       │   ├── router.py            # Upload, list, detail, validate-balance endpoints
       │   ├── service.py           # Gemini orchestration + Supabase writes
@@ -772,7 +831,7 @@ Dashboard explosion (updated read flow):
 
 ### Phase 2 Consistency Rules (AI Agents MUST follow)
 
-- **CC identification:** always by Cat2/Cat3 category — never by accountName string matching
+- **CC identification:** always via `bank_accounts` JOIN `plan_de_cuentas` — never by Cat2/Cat3 string matching or `accountName` pattern matching
 - **No PDF storage:** extract and discard — never persist raw PDF bytes to any storage
 - **Balance check is blocking:** batch cannot advance to 'categorized' status if `balance_discrepancy ≠ 0` (unless override justification is provided and recorded)
 - **Categorization is non-blocking for dashboard:** partially categorized batches (`suggested`/`pending`) are visible in dashboard; full confirmation is not required to see data

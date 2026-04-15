@@ -66,3 +66,12 @@ Story 3.5 deferred to Phase 2. Rationale:
 - Global `_token` en laudus_service.py mutado sin lock — pre-existing; no race posible hoy (1 job a la vez); latente si arquitectura cambia
 - `query_date` puede llegar como int serial de Sheets en `_read_balance_sheet_last_sync` — pre-existing from Story 2.2; low risk si siempre se escribe con USER_ENTERED
 - `useSyncStatus` 60s poll sin backoff ni page visibility check — MVP scope; 2-3 usuarios internos; revisar en Epic 3
+
+## Deferred from: code review of 4-0-supabase-setup-plan-de-cuentas-bank-accounts (2026-04-15)
+
+- `replace_records` non-atomic and uses sentinel UUID delete-all — two-call delete+insert has data-loss window between calls; not called by any Phase 2 code; only implemented for DataRepository interface compliance
+- `upsert_plan_de_cuentas` count pre-fetch race condition — synced/updated counts can be stale; get_records() swallows read errors and returns [] making new_count always equal len(records); counts are informational only, upsert itself is correct
+- `cartola_batches.account_name` is a free-text VARCHAR, not FK to bank_accounts — no referential integrity enforcement; architecture decision for denormalized audit field in historical records
+- `bank_accounts.account_number` FK has no ON UPDATE/ON DELETE action (RESTRICT by default) — renaming an account_number in plan_de_cuentas would fail if bank_accounts references it; account_numbers are stable in ERP; low risk
+- DECIMAL columns without precision/scale — financial fields use bare DECIMAL; PostgreSQL unconstrained DECIMAL is precise; precision/scale can be added in later migration when ranges are known
+- SupabaseRepository client instantiated per request — intentional per story spec dev note: "do not apply @lru_cache to SupabaseRepository"

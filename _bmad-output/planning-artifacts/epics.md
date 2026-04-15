@@ -650,3 +650,269 @@ So that I can understand exactly what makes up each number — especially credit
 **When** the response is received
 **Then** only transactions belonging to the clicked account/category are returned
 **And** the response time is under 2 seconds (NFR2)
+
+---
+
+## Epic 4: Ingesta de Cartolas Bancarias *(Phase 2)*
+
+El contador puede subir estados de cuenta bancarios en PDF, el sistema los extrae con Gemini, valida los saldos, y deja los datos listos para categorización. Incluye el setup de Supabase, la tabla de plan de cuentas sincronizada desde Sheets, y el registro de cuentas bancarias.
+
+**FRs cubiertos:** FR20, FR21, FR22, FR23, FR24, FR25, FR26, FR27
+**NFRs cubiertos:** NFR3, NFR12, NFR17, NFR19
+
+---
+
+### Story 4.0: Supabase Setup + Plan de Cuentas + Bank Accounts
+
+As a developer,
+I want the Supabase schema created, the chart of accounts synced from Sheets, and a bank account registry in place,
+So that Epics 4 and 5 have the data foundation and account identification they need without touching the ERP category taxonomy.
+
+**Acceptance Criteria:**
+
+**Given** Supabase is configured with the project credentials in environment variables
+**When** the schema migration runs
+**Then** tables `plan_de_cuentas`, `bank_accounts`, `cartola_batches`, and `cartola_transactions` exist with the exact column definitions from the architecture document
+**And** `bank_accounts.account_number` has a foreign key constraint to `plan_de_cuentas.account_number`
+
+**Given** `POST /api/v1/plan-de-cuentas/sync` is called by a `contador`
+**When** the sync runs
+**Then** all accounts from the Google Sheets chart of accounts are upserted into `plan_de_cuentas` (account_number as primary key — no duplicates)
+**And** `synced_at` is updated to the current timestamp for every upserted row
+**And** the response returns `{"synced": N, "updated": M}` with the counts
+
+**Given** `GET /api/v1/plan-de-cuentas/` is called by an authenticated user
+**When** the request is received
+**Then** all active accounts are returned as a list, ordered by `account_number`
+**And** the response is used by the frontend bank account registration form
+
+**Given** `POST /api/v1/bank-accounts/` is called by a `contador` with valid payload
+**When** the request is received
+**Then** a new `bank_accounts` row is created, with `account_number` validated against existing `plan_de_cuentas` entries
+**And** if `account_number` does not exist in `plan_de_cuentas`, the endpoint returns HTTP 400
+
+**Given** `GET /api/v1/bank-accounts/` is called by an authenticated user
+**When** the request is received
+**Then** all bank accounts (active and inactive) are returned with their linked `plan_de_cuentas` account name
+
+**Given** `PATCH /api/v1/bank-accounts/{id}` is called by a `contador`
+**When** the request is received with `{"active": false}`
+**Then** the bank account is deactivated and no longer used for CC identification in the dashboard
+
+**Given** `SupabaseRepository` is implemented in `backend/app/repositories/supabase_repository.py`
+**When** it is used by any service
+**Then** it implements the same `DataRepository` interface as `SheetsRepository`
+**And** no service outside `repositories/` imports the Supabase client directly
+
+---
+
+### Story 4.1: PDF Upload + Gemini Extraction
+
+As a contador,
+I want to upload a credit card statement PDF and have it automatically extracted into structured transactions,
+So that I don't have to manually enter each transaction and can process any bank's format without configuration.
+
+**Acceptance Criteria:**
+
+**Given** the contador navigates to `CartolaUploadPage.tsx`
+**When** the page loads
+**Then** a file input accepts PDF files up to 20MB (NFR3)
+**And** a dropdown lets the contador select the bank account from registered `bank_accounts` (active only)
+
+**Given** the contador selects a file and clicks upload
+**When** `POST /api/v1/cartolas/upload` is called (multipart form)
+**Then** the endpoint returns immediately with `{"status": "processing", "batch_id": "..."}` — extraction runs asynchronously (NFR3)
+**And** the frontend `useCartolaUpload.ts` hook polls `GET /api/v1/cartolas/{batch_id}` every 3 seconds for status
+
+**Given** `GeminiClient.extract_pdf()` receives the PDF bytes
+**When** Gemini returns a response
+**Then** the response is validated against the extraction schema: `opening_balance`, `closing_balance`, `currency`, and `transactions[]` (NFR19)
+**And** if the response is malformed or missing required fields, the batch is rejected cleanly — no data is persisted (NFR12)
+
+**Given** extraction succeeds and schema validation passes
+**When** the pipeline saves to Supabase
+**Then** one `cartola_batches` row is created with `status = 'extracted'`
+**And** one `cartola_transactions` row is created per extracted transaction, each with `category_status = 'pending'`
+**And** `GeminiClient` is the only file in the codebase that imports the Gemini SDK (NFR17)
+
+**Given** the extracted transactions are saved
+**When** the pipeline checks for duplicates within the batch
+**Then** any transaction with identical `date + amount + description` as another in the same batch is flagged with a warning (FR26)
+**And** any transaction with `amount = 0` or an amount exceeding 3× the account's historical average is flagged (FR27)
+**And** flags are stored as metadata on the `cartola_transactions` row and surfaced in the UI
+
+**Given** the frontend polls and receives `status = 'extracted'`
+**When** the extraction completes
+**Then** the UI shows a summary: transaction count, opening balance, closing balance, and any flags
+**And** the user is prompted to proceed to balance validation
+
+---
+
+### Story 4.2: Balance Validation
+
+As a contador,
+I want to review and confirm the extracted opening and closing balances before the statement is processed,
+So that I catch Gemini extraction errors early and ensure the data integrity of every uploaded statement.
+
+**Acceptance Criteria:**
+
+**Given** the batch is in `status = 'extracted'`
+**When** the balance validation section renders in `CartolaUploadPage.tsx`
+**Then** three fields are shown: opening balance (editable, pre-filled from Gemini), Σ transactions (read-only, calculated), closing balance (editable, pre-filled from Gemini)
+**And** a discrepancy indicator shows `closing_balance - opening_balance - sum_transactions` in real time as the user edits (FR23)
+
+**Given** the discrepancy indicator shows `0`
+**When** the contador clicks "Confirmar validación"
+**Then** `PATCH /api/v1/cartolas/{batch_id}/validate-balance` is called with the confirmed balance values
+**And** the batch `status` transitions to `'balance_validated'`
+**And** the categorization pipeline is triggered automatically (FR22, FR24)
+
+**Given** the discrepancy indicator shows a non-zero value
+**When** the contador attempts to confirm
+**Then** the confirm button is disabled and an error message is shown: "El saldo no cuadra — revisá los valores" (FR24)
+**And** the contador can edit the opening or closing balance fields to correct the discrepancy
+
+**Given** the contador cannot resolve the discrepancy
+**When** they choose to override
+**Then** a mandatory text input is shown: "Justificación del descuadre" (FR25)
+**And** the confirm button is enabled only after the justification field is filled
+**And** `override_justification` is saved on the `cartola_batches` row
+
+---
+
+### Story 4.3: Dashboard Integration
+
+As an owner or contador,
+I want credit card transactions from uploaded statements to appear in the dashboard at individual movement level,
+So that I can see exactly what composes each credit card expense instead of a single lump-sum payment.
+
+**Acceptance Criteria:**
+
+**Given** `SupabaseRepository` has a method `get_cartola_transactions(account_number, period)`
+**When** called with a valid account and period
+**Then** it returns all `cartola_transactions` for that batch, including `category_status` and `category_confirmed` or `category_auto`
+
+**Given** `DashboardService` processes ledger entries for entity EAG
+**When** it encounters a ledger entry whose `account_number` matches a `bank_accounts` record
+**Then** it queries `SupabaseRepository` for a `cartola_batch` matching that account and period
+**And** if a batch exists with `status IN ('categorized', 'confirmed')`, the single ledger entry is replaced by the individual `cartola_transactions` in the response
+**And** if no batch exists, the ledger entry is returned unchanged (fallback behavior preserved)
+
+**Given** the dashboard frontend receives a response with cartola transactions
+**When** the transactions render
+**Then** `confirmed` transactions display normally
+**And** `suggested` transactions display with a red badge "por revisar" on the category (FR19)
+**And** `pending` transactions are grouped under a row labeled "Pendiente de categorizar"
+
+**Given** a period has no uploaded cartola for a CC account
+**When** the dashboard renders
+**Then** the original Laudus ledger entry for that CC payment is shown unchanged — no regression in existing behavior
+
+---
+
+## Epic 5: Categorización Inteligente de Transacciones *(Phase 2)*
+
+El contador puede revisar y confirmar la categorización de cada transacción de tarjeta de crédito — sugerida automáticamente por historial o Gemini — y el sistema aprende de las correcciones para mejorar sugerencias futuras.
+
+**FRs cubiertos:** FR28, FR29, FR30, FR31
+**NFRs cubiertos:** NFR19
+
+---
+
+### Story 5.1: Categorization Pipeline
+
+As a system,
+I want to automatically suggest a category for each extracted transaction using historical matches first, then Gemini as fallback,
+So that the contador has pre-filled suggestions to review rather than categorizing every transaction from scratch.
+
+**Acceptance Criteria:**
+
+**Given** a batch transitions to `status = 'balance_validated'`
+**When** the categorization pipeline runs automatically
+**Then** for each `cartola_transaction` in the batch, Stage 1 (historical match) runs first
+
+**Given** Stage 1 runs for a transaction
+**When** it searches `cartola_transactions` for prior rows with the same `description` AND `category_status = 'confirmed'`
+**Then** if a match is found, `category_auto` is set to the confirmed category, `match_source = 'historical'`, `category_status = 'suggested'`
+**And** Stage 2 (Gemini) is skipped for this transaction
+
+**Given** Stage 1 finds no match for a transaction
+**When** Stage 2 (Gemini fallback) runs
+**Then** `GeminiClient` is called with the transaction description, amount, and the full list of 85 expense accounts from `plan_de_cuentas`
+**And** Gemini must select from this fixed list only — free-form category responses are rejected
+**And** if a valid category is returned: `category_auto` is set, `match_source = 'gemini'`, `category_status = 'suggested'`
+**And** if Gemini returns an invalid or no match: `category_status` remains `'pending'`
+
+**Given** the pipeline finishes processing all transactions in a batch
+**When** all rows are updated
+**Then** `cartola_batches.status` transitions to `'categorized'`
+**And** `GET /api/v1/cartolas/{batch_id}` reflects the updated status and category counts (suggested / pending)
+
+**Given** the category weight update rule (FR31)
+**When** a `description` pattern has been corrected by the contador 30 or more times
+**Then** the corrected category takes precedence over any prior historical match for that pattern
+**And** this is implemented as a count check in `CategorizationService` — no separate table required
+
+---
+
+### Story 5.2: Category Review UI
+
+As a contador,
+I want to review, accept, modify, or reject the suggested category for each transaction,
+So that categorized data is accurate and explicitly confirmed before it affects the dashboard.
+
+**Acceptance Criteria:**
+
+**Given** the contador navigates to `CartolaReviewPage.tsx`
+**When** the page loads
+**Then** `GET /api/v1/categorization/pending` is called and returns all transactions with `category_status IN ('pending', 'suggested')`, grouped by batch → account → period
+
+**Given** the review list is displayed
+**When** the contador views a transaction
+**Then** description, amount, date, suggested category (if any), and `match_source` are shown
+**And** `suggested` transactions show the category pre-selected in the category dropdown
+**And** `pending` transactions show an empty dropdown with placeholder "Seleccionar categoría"
+
+**Given** the contador accepts a suggestion or selects a category
+**When** they confirm the row
+**Then** `PATCH /api/v1/transactions/{id}/category` is called with the selected category
+**And** the transaction `category_status` transitions to `'confirmed'`, `category_confirmed` is set, `reviewed_by` and `reviewed_at` are recorded (FR30)
+
+**Given** the contador wants to confirm all suggestions in a batch at once
+**When** they click "Confirmar todas las sugerencias"
+**Then** `POST /api/v1/transactions/bulk-confirm` is called for all `suggested` transactions in that batch
+**And** all targeted transactions transition to `'confirmed'` in a single operation (FR29)
+
+**Given** all transactions in a batch reach `category_status = 'confirmed'`
+**When** the last confirmation is processed
+**Then** `cartola_batches.status` transitions to `'confirmed'`
+**And** the dashboard immediately reflects the confirmed transactions without requiring a page reload
+
+---
+
+### Story 5.3: Completar Story 3.5 — Drill-down Tarjetas de Crédito
+
+As an owner,
+I want to click any credit card summary figure in the dashboard and see the individual confirmed transactions behind it,
+So that I can understand exactly what makes up each credit card expense at merchant level.
+
+**Acceptance Criteria:**
+
+**Given** a credit card entry in the dashboard has a confirmed cartola batch (Story 4.3 explosion logic active)
+**When** the user clicks the summary figure
+**Then** a detail panel opens showing the individual `cartola_transactions` for that account and period
+**And** each row shows: date (DD/MM/YYYY), description (merchant name), amount, currency, and confirmed category (FR19)
+**And** rows are sorted by date descending (FR18)
+
+**Given** the detail panel is open
+**When** any transaction has `category_status = 'suggested'`
+**Then** the category is shown in red with a badge "por revisar"
+**And** a link to `CartolaReviewPage` is shown for the contador role
+
+**Given** the detail panel is open
+**When** the user clicks outside the panel or the close button
+**Then** the panel closes and the dashboard view is restored without data refetch
+
+**Given** the account has no cartola uploaded for that period
+**When** the user drills down
+**Then** the existing ledger entry transactions are shown (original Story 3.5 fallback behavior — no regression)

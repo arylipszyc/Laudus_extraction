@@ -21,7 +21,7 @@
 #   - deferred: Explicitly deferred to a future phase
 
 generated: 2026-04-09
-last_updated: 2026-04-14  # updated: Epic 3 done; Phase 2 arquitectura completada
+last_updated: 2026-04-15  # updated: Story 4.0 done (code review passed)
 project: LAUDUS_Backup
 project_key: NOKEY
 tracking_system: file-system
@@ -54,14 +54,21 @@ development_status:
   epic-3-retrospective: optional
 
   # ── Epic 4: Ingesta de Cartolas Bancarias (Phase 2) ──────────────────
-  # Arquitectura diseñada 2026-04-14. Stories pendientes de generar (SM).
-  # Prerequisito: Ary debe actualizar Cat2/Cat3 antes de que Dev empiece.
-  epic-4: backlog
+  # Stories generadas 2026-04-15. Story 4.0 es prerequisito de todo Epic 4.
+  # Prerequisito: sync plan_de_cuentas + registrar bank_accounts (Story 4.0).
+  epic-4: in-progress
+  4-0-supabase-setup-plan-de-cuentas-bank-accounts: done
+  4-1-pdf-upload-gemini-extraction: backlog
+  4-2-balance-validation: backlog
+  4-3-dashboard-integration: backlog
   epic-4-retrospective: optional
 
   # ── Epic 5: Categorización Inteligente de Transacciones (Phase 2) ────
-  # Arquitectura diseñada 2026-04-14. Stories pendientes de generar (SM).
+  # Stories generadas 2026-04-15. Depende de Epic 4 completo.
   epic-5: backlog
+  5-1-categorization-pipeline: backlog
+  5-2-category-review-ui: backlog
+  5-3-completar-story-3-5-drill-down-tarjetas-de-credito: backlog
   epic-5-retrospective: optional
 
   # ── Epics 6–8: Fase 2 posterior ──────────────────────────────────────
