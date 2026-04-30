@@ -21,7 +21,7 @@
 #   - deferred: Explicitly deferred to a future phase
 
 generated: 2026-04-09
-last_updated: 2026-04-15  # updated: Story 4.0 done (code review passed)
+last_updated: 2026-04-30  # decision pivot a c4 (Beancount engine + Fava contador + LAUDUS frontend family); Epic 4 paused, esperando arquitectura Winston
 project: LAUDUS_Backup
 project_key: NOKEY
 tracking_system: file-system
@@ -54,13 +54,19 @@ development_status:
   epic-3-retrospective: optional
 
   # ── Epic 4: Ingesta de Cartolas Bancarias (Phase 2) ──────────────────
-  # Stories generadas 2026-04-15. Story 4.0 es prerequisito de todo Epic 4.
-  # Prerequisito: sync plan_de_cuentas + registrar bank_accounts (Story 4.0).
-  epic-4: in-progress
-  4-0-supabase-setup-plan-de-cuentas-bank-accounts: done
-  4-1-pdf-upload-gemini-extraction: backlog
-  4-2-balance-validation: backlog
-  4-3-dashboard-integration: backlog
+  # 2026-04-30: Pivot arquitectónico aprobado a c4 (Beancount engine + Fava
+  # contador + LAUDUS frontend family). Story 4.0 (Supabase) queda como costo
+  # hundido — se descarta o reformula según diseño Winston.
+  # Story 4.1 splitea en 4.1a (PDF→JSON canónico, paralelizable) + 4.1b
+  # (JSON→directivas .beancount vía beangulp, espera arquitectura Winston).
+  # Stories 4.2/4.3 esperan diseño concreto del thin API + reportería sobre Beancount.
+  epic-4: paused-pending-arquitectura-c4
+  4-0-supabase-setup-plan-de-cuentas-bank-accounts: done  # costo hundido bajo c4 — evaluar en arquitectura
+  4-1-pdf-upload-gemini-extraction: superseded-by-4-1a-and-4-1b
+  4-1a-pdf-upload-gemini-extraction-json: backlog  # paralelizable, espera shape JSON canónico de Winston
+  4-1b-beangulp-importer-json-to-beancount: backlog  # espera arquitectura Winston
+  4-2-balance-validation: backlog  # reformular bajo c4 (validación con bean-check + balance directives)
+  4-3-dashboard-integration: backlog  # reformular bajo c4 (frontend consume thin API en lugar de Supabase)
   epic-4-retrospective: optional
 
   # ── Epic 5: Categorización Inteligente de Transacciones (Phase 2) ────

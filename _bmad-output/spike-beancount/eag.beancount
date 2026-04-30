@@ -1,0 +1,131 @@
+option "title" "EAG — Family Office (spike Beancount)"
+option "operating_currency" "CLP"
+
+;; --- spike: 12 JEs from ledger_eag, generated 2026-04-30T14:45:42
+
+;; Account opens
+2021-01-04 open Assets:EAG:BancoBci10160175-111005 CLP
+  laudus_account_number: "111005"
+  laudus_account_name: "Banco BCI - 10160175"
+  laudus_categoria1: "ACTIVO EAG"
+2021-01-04 open Assets:EAG:BancoEdwards0162338082-111007 CLP
+  laudus_account_number: "111007"
+  laudus_account_name: "Banco Edwards - 01-62-338082"
+  laudus_categoria1: "ACTIVO EAG"
+2021-01-04 open Assets:EAG:ControlYLiquidacin-115099 CLP
+  laudus_account_number: "115099"
+  laudus_account_name: "Control y Liquidación"
+  laudus_categoria1: "ACTIVO EAG"
+2021-01-04 open Assets:Jael:BancoBci28980981Jael-910005 CLP
+  laudus_account_number: "910005"
+  laudus_account_name: "Banco BCI 28980981 - Jael"
+  laudus_categoria1: "DISPONIBLE JAEL AVAYU DEUTSCH"
+2021-01-04 open Assets:Jeannette:BancoBci28981600Jeannette-710005 CLP
+  laudus_account_number: "710005"
+  laudus_account_name: "Banco BCI 28981600 - Jeannette"
+  laudus_categoria1: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+2021-01-04 open Assets:Johanna:BancoBci28981618Johanna-810005 CLP
+  laudus_account_number: "810005"
+  laudus_account_name: "Banco BCI 28981618 - Johanna"
+  laudus_categoria1: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+2021-01-04 open Expenses:EAG:CombustibleVehculos-413044 CLP
+  laudus_account_number: "413044"
+  laudus_account_name: "Combustible Vehículos /"
+  laudus_categoria1: "GASTOS - EGRESOS"
+2021-01-04 open Expenses:EAG:MantencinGeneralInstalaciones-413065 CLP
+  laudus_account_number: "413065"
+  laudus_account_name: "Mantención General Instalaciones"
+  laudus_categoria1: "GASTOS - EGRESOS"
+2021-01-04 open Expenses:EAG:SraJacquelineDeutsch-430023 CLP
+  laudus_account_number: "430023"
+  laudus_account_name: "Sra. Jacqueline Deutsch"
+  laudus_categoria1: "GASTOS - EGRESOS"
+2021-01-04 open Expenses:EAG:Wizo-430083 CLP
+  laudus_account_number: "430083"
+  laudus_account_name: "WIZO"
+  laudus_categoria1: "GASTOS - EGRESOS"
+2021-01-04 open Expenses:Jael:OtrosGastosPersonalesJael-990099 CLP
+  laudus_account_number: "990099"
+  laudus_account_name: "Otros Gastos Personales - Jael"
+  laudus_categoria1: "EGRESOS JAEL AVAYU DEUTSCH"
+2021-01-04 open Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099 CLP
+  laudus_account_number: "690099"
+  laudus_account_name: "Otros Gastos Personales Jocelyn"
+  laudus_categoria1: "EGRESOS JOCELYN AVAYU DEUTSCH"
+2021-01-04 open Expenses:Johanna:EnfermeraGastosMdicos-890051 CLP
+  laudus_account_number: "890051"
+  laudus_account_name: "Enfermera, Gastos Médicos"
+  laudus_categoria1: "EGRESOS JOHANNA AVAYU DEUTSCH"
+2021-01-04 open Income:EAG:OtrosIngresos-310099 CLP
+  laudus_account_number: "310099"
+  laudus_account_name: "Otros Ingresos"
+  laudus_categoria1: "INGRESOS"
+2021-01-04 open Income:EAG:RetirosIndumotora-310011 CLP
+  laudus_account_number: "310011"
+  laudus_account_name: "Retiros Indumotora"
+  laudus_categoria1: "INGRESOS"
+2021-01-04 open Income:EAG:SueldoFcComplemento-310005 CLP
+  laudus_account_number: "310005"
+  laudus_account_name: "Sueldo FC - Complemento"
+  laudus_categoria1: "INGRESOS"
+
+;; Transactions
+2021-01-04 * "JAB Devol electricidad miami año 2020"
+  laudus_je_id: "4"
+  Assets:EAG:BancoBci10160175-111005  -469297.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  469297.00 CLP
+
+2021-01-11 * "WIZO - Arbolitos Fallec hijo Moca de EAG"
+  laudus_je_id: "18"
+  Expenses:EAG:Wizo-430083  12000.00 CLP
+  Assets:Johanna:BancoBci28981618Johanna-810005  -12000.00 CLP
+
+2021-01-11 * "Fernando Hidalgo - clases gimnasia Jael"
+  laudus_je_id: "20"
+  Assets:Jael:BancoBci28980981Jael-910005  -120000.00 CLP
+  Expenses:Jael:OtrosGastosPersonalesJael-990099  120000.00 CLP
+
+2021-01-13 * "Previred Odontologia EIRL Diciembre 2021"
+  laudus_je_id: "25"
+  Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  356551.00 CLP
+  Assets:Johanna:BancoBci28981618Johanna-810005  -356551.00 CLP
+
+2021-01-19 * "Arnoldo Uribe 50% señal internet sur EAG"
+  laudus_je_id: "47"
+  Expenses:EAG:MantencinGeneralInstalaciones-413065  175000.00 CLP
+  Assets:Jeannette:BancoBci28981600Jeannette-710005  -175000.00 CLP
+
+2021-01-25 * "Enero 2021"
+  laudus_je_id: "56"
+  Expenses:EAG:SraJacquelineDeutsch-430023  3895119.00 CLP
+  Assets:Jael:BancoBci28980981Jael-910005  -3895119.00 CLP
+
+2021-01-25 * "Johanna Avayu SD700 Enfermera Enero 2021"
+  laudus_je_id: "60"
+  Assets:Johanna:BancoBci28981618Johanna-810005  -517370.00 CLP
+  Expenses:Johanna:EnfermeraGastosMdicos-890051  517370.00 CLP
+
+2021-01-26 * "F#286537 Acevedo Ltda - Combustible"
+  laudus_je_id: "63"
+  Assets:EAG:BancoBci10160175-111005  -65690.00 CLP
+  Expenses:EAG:CombustibleVehculos-413044  65690.00 CLP
+
+2021-01-26 * "Retiro de Indumotora One"
+  laudus_je_id: "71"
+  Assets:EAG:BancoBci10160175-111005  258210930.00 CLP
+  Income:EAG:RetirosIndumotora-310011  -258210930.00 CLP
+
+2021-01-27 * "EAG Complemento Enero 2021"
+  laudus_je_id: "64"
+  Assets:EAG:BancoBci10160175-111005  16670361.00 CLP
+  Income:EAG:SueldoFcComplemento-310005  -16670361.00 CLP
+
+2021-01-27 * "Retiro de Indumotora One"
+  laudus_je_id: "72"
+  Assets:EAG:BancoBci10160175-111005  1173037081.00 CLP
+  Income:EAG:RetirosIndumotora-310011  -1173037081.00 CLP
+
+2021-01-27 * "Traspaso de Andres Turski"
+  laudus_je_id: "77"
+  Assets:EAG:BancoEdwards0162338082-111007  15350.00 CLP
+  Income:EAG:OtrosIngresos-310099  -15350.00 CLP
