@@ -1,5 +1,5 @@
 # generated: 2026-04-09
-# last_updated: 2026-04-14
+# last_updated: 2026-04-30
 # project: LAUDUS_Backup
 # project_key: NOKEY
 # tracking_system: file-system
@@ -11,6 +11,8 @@
 #   - backlog: Epic not yet started
 #   - in-progress: Epic actively being worked on
 #   - done: All stories in epic completed
+#   - done-with-sunk-cost: Epic closed; some deliverables superseded by a later pivot
+#   - superseded-by-epic-{N}: Epic content is functionally absorbed by another epic
 #
 # Story Status:
 #   - backlog: Story only exists in epic file
@@ -19,9 +21,12 @@
 #   - review: Ready for code review (via Dev's code-review workflow)
 #   - done: Story completed
 #   - deferred: Explicitly deferred to a future phase
+#   - blocked-by-{thing}: Story file may exist but AC pending an unresolved decision
+#   - superseded-by-{ref}: Functionality replaced by another story
+#   - sunk-cost-preserved: Story is done but part of its output is discarded under a later pivot
 
 generated: 2026-04-09
-last_updated: 2026-04-30  # decision pivot a c4 (Beancount engine + Fava contador + LAUDUS frontend family); Epic 4 paused, esperando arquitectura Winston
+last_updated: 2026-04-30  # Bob preparó Epic 9 (Migración a Beancount). Epic 4 cerrado con costo hundido honesto, Epic 5 superseded.
 project: LAUDUS_Backup
 project_key: NOKEY
 tracking_system: file-system
@@ -50,37 +55,59 @@ development_status:
   3-2-filtros-de-entidad-y-fecha: done
   3-3-dashboard-activospasivos-e-ingresosgastos: done
   3-4-analisis-interactivo-ingresos-gastos: done  # implementado como Story 3.4 (renombrado del spec original)
-  3-5-drill-down-y-detalle-de-tarjetas-de-credito: deferred  # requiere cartolas bancarias (Phase 2)
+  3-5-drill-down-y-detalle-de-tarjetas-de-credito: deferred  # cubierto bajo c4 por Story 9.8 (frontend thin API + drill-down)
   epic-3-retrospective: optional
 
-  # ── Epic 4: Ingesta de Cartolas Bancarias (Phase 2) ──────────────────
-  # 2026-04-30: Pivot arquitectónico aprobado a c4 (Beancount engine + Fava
-  # contador + LAUDUS frontend family). Story 4.0 (Supabase) queda como costo
-  # hundido — se descarta o reformula según diseño Winston.
-  # Story 4.1 splitea en 4.1a (PDF→JSON canónico, paralelizable) + 4.1b
-  # (JSON→directivas .beancount vía beangulp, espera arquitectura Winston).
-  # Stories 4.2/4.3 esperan diseño concreto del thin API + reportería sobre Beancount.
-  epic-4: paused-pending-arquitectura-c4
-  4-0-supabase-setup-plan-de-cuentas-bank-accounts: done  # costo hundido bajo c4 — evaluar en arquitectura
-  4-1-pdf-upload-gemini-extraction: superseded-by-4-1a-and-4-1b
-  4-1a-pdf-upload-gemini-extraction-json: backlog  # paralelizable, espera shape JSON canónico de Winston
-  4-1b-beangulp-importer-json-to-beancount: backlog  # espera arquitectura Winston
-  4-2-balance-validation: backlog  # reformular bajo c4 (validación con bean-check + balance directives)
-  4-3-dashboard-integration: backlog  # reformular bajo c4 (frontend consume thin API en lugar de Supabase)
+  # ── Epic 4: Ingesta de Cartolas Bancarias (CERRADO con costo hundido) ─
+  # 2026-04-30: Pivot arquitectónico c4 aprobado por Ary (Beancount engine + Fava
+  # contador + LAUDUS frontend family). Epic 4 queda cerrado:
+  #   - Story 4.0 sigue done — ~70% sobrevive (registries plan_de_cuentas + bank_accounts);
+  #     ~30% se descarta (tablas cartola_batches + cartola_transactions, ~1 día costo hundido).
+  #   - Stories 4.1a/4.1b/4.2/4.3 transferidas a Epic 9 reformuladas (9.5/9.6/9.9/9.8).
+  # NO se vuelve a tocar este epic — referencia histórica.
+  epic-4: done-with-sunk-cost
+  4-0-supabase-setup-plan-de-cuentas-bank-accounts: sunk-cost-preserved  # registries sobreviven, tablas cartola_* descartadas
+  4-1-pdf-upload-gemini-extraction: superseded-by-9-5-and-9-6
+  4-1a-pdf-upload-gemini-extraction-json: superseded-by-9-5
+  4-1b-beangulp-importer-json-to-beancount: superseded-by-9-6
+  4-2-balance-validation: superseded-by-9-9
+  4-3-dashboard-integration: superseded-by-9-8
   epic-4-retrospective: optional
 
-  # ── Epic 5: Categorización Inteligente de Transacciones (Phase 2) ────
-  # Stories generadas 2026-04-15. Depende de Epic 4 completo.
-  epic-5: backlog
-  5-1-categorization-pipeline: backlog
-  5-2-category-review-ui: backlog
-  5-3-completar-story-3-5-drill-down-tarjetas-de-credito: backlog
+  # ── Epic 5: Categorización Inteligente (SUPERSEDED por Epic 9) ───────
+  # 2026-04-30: Q6 ata categorización al importer (smart_importer corre durante
+  # import, no como pipeline separado). Story 5.1 transferida a 9.7. Stories 5.2
+  # y 5.3 superseded — su funcionalidad pasa a 9.7 + 9.8.
+  epic-5: superseded-by-epic-9
+  5-1-categorization-pipeline: superseded-by-9-7
+  5-2-category-review-ui: superseded-by-9-8  # badge "pendiente revisar" + PATCH endpoint cubre el use case
+  5-3-completar-story-3-5-drill-down-tarjetas-de-credito: superseded-by-9-8
   epic-5-retrospective: optional
 
-  # ── Epics 6–8: Fase 2 posterior ──────────────────────────────────────
-  epic-6: backlog  # Reconciliación Mensual
+  # ── Epic 6–8: Phase 2 posterior ──────────────────────────────────────
+  epic-6: backlog  # Reconciliación Mensual — reformular bajo c4 después de Epic 9 done
   epic-6-retrospective: optional
   epic-7: backlog  # Colaboración Owner-Contador
   epic-7-retrospective: optional
   epic-8: backlog  # Alertas y Notificaciones
   epic-8-retrospective: optional
+
+  # ── Epic 9: Migración a Beancount (Phase 2 — pivot c4) ───────────────
+  # 2026-04-30: Bob preparó las 12 stories. 9.10 bloqueada por Q4 (sesión
+  # dedicada FX pendiente). 9.1 puede prepararse ahora pero su ejecución
+  # también espera Q4 (cuadratura CLP requiere FX embebido en JE Laudus).
+  # Input autoritativo: _bmad-output/planning-artifacts/architecture-c4.md
+  epic-9: in-progress
+  9-0-wrapper-bean-check-fava-editor: ready-for-dev
+  9-1-bootstrap-historico-beancount: ready-for-dev  # AC declara dep Q4 para ejecución
+  9-2-backend-thin-api-bql: ready-for-dev
+  9-3-fava-deploy-render: ready-for-dev  # depende de 9-0 done
+  9-4-importer-laudus-produccion: ready-for-dev
+  9-5-pdf-upload-gemini-json-canonico: ready-for-dev  # paralelizable con 9-0/9-1/9-2
+  9-6-beangulp-importer-json-to-directivas: ready-for-dev  # depende de 9-5 done
+  9-7-categorizacion-smart-importer-patron-b: ready-for-dev  # depende de 9-6 done
+  9-8-frontend-thin-api-badge-pendiente: ready-for-dev  # depende de 9-2 done
+  9-9-validacion-balances-bean-check: ready-for-dev  # depende de 9-6 done
+  9-10-cron-prices-clp-usd: blocked-by-q4  # AC pending — sesión dedicada FX
+  9-11-deprecation-sheets: ready-for-dev  # gate operacional, ejecuta cuando paridad 1:1 confirmada
+  epic-9-retrospective: optional

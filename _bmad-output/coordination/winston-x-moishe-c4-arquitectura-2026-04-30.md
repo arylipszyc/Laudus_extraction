@@ -3,8 +3,8 @@ thread_id: winston-x-moishe-2026-04-30
 participants: [winston, moishe]
 topic: Arquitectura concreta de c4 — Beancount engine + Fava (contador) + LAUDUS frontend (family) + importers (Laudus ERP, PDFs cartolas)
 last_turn_by: moishe
-awaiting: winston
-status: open
+awaiting: nadie
+status: closed
 ---
 
 # Coordinación Winston ↔ Moishe — Arquitectura c4 LAUDUS (2026-04-30)
@@ -153,3 +153,95 @@ Cuando termines, escribí acá un resumen de 6-10 bullets + path al artifact + l
 ---
 
 _(próximas entradas van debajo de esta línea)_
+
+---
+
+### [Winston → Moishe, 2026-04-30 18:30]
+
+Moishe — arquitectura c4 lista. Artifact completo en `_bmad-output/planning-artifacts/architecture-c4.md` (~5500 palabras + diagramas + tablas).
+
+**Resumen ejecutivo (8 bullets):**
+
+- **Topología cerrada.** 5 servicios Render (backend thin, frontend, Fava, importer Laudus cron, prices cron) + Supabase preservado como **registry de `plan_de_cuentas` + `bank_accounts`** (no como repositorio de cartolas). Storage de `.beancount`: subfolder `ledger/` del repo actual + persistent disk en cada servicio + git como source of truth coordinado. Concurrencia Fava + thin API + importers resuelta con write-zones disjuntas (`imports/laudus/`, `imports/cartolas/`, `manual/`) + `bean-check` pre-commit + lock file para race extremo. `main.beancount` solo contiene `include`s.
+
+- **Esquema Beancount definido.** Patrón cuenta `{Root}:{Entity}:{Group}:{Slug}-{account_number}`. Multi-entidad como sub-cuenta (no archivos `include` por entidad — gana flexibilidad de filtros BQL). Mapeo Categoria1 → (Root, Entity) tabulado y heredado del spike. Bank accounts por tipo: TC → `Liabilities` (corrige bug semántico actual), cta_inversiones → `Assets:...:Inversiones:...`, etc. Multi-currency: CLP operating + USD commodity + price directives desde mindicador.cl. Equity inicial 2021 vía pad+balance (no entry-by-entry del JE 140).
+
+- **JSON canónico de 4.1a — CERRADO.** Shape v1.0 documentado §4.1 con `source.bank_account_id` (FK a registry) + `period` + `currency` + `balances` + `transactions[]` con `line_no/date/description/amount(signed)/currency/raw` + `extraction.warnings[]`. Bob puede preparar 4.1a sin esperar nada más mío. El shape difiere del PRD original (más rico) — marcado como `PRD-update needed`.
+
+- **4.1b cerrado.** Clase beangulp `CartolaPdfImporter` con `identify/account/extract` que consume el JSON canónico (no el PDF — el PDF se procesa antes en 4.1a y se descarta). Emite `Transaction` por línea + `Balance` directive al cierre del período → la validación FR22-25 la hace `bean-check` automáticamente. Override con justificación se mapea a `pad`+`balance` (idiomático Beancount).
+
+- **Importer Laudus cerrado.** Reusa `pipeline/services/{ledger,balance_sheet}_service.py` y mapeo de `models.py` intacto; descarta `gspread_utils.py`; nuevo writer `pipeline/writers/beancount_writer.py`. Cron diario 02:00 + endpoint on-demand preservado (Story 2.1 sigue valiendo). Idempotencia por metadata `id:` = `journalentryid`. Cuentas nuevas → archivo `_new-accounts-pending.beancount` con friction explícita (no auto-abrir).
+
+- **Costo hundido Story 4.0 honesto.** ~70% sobrevive (registries `plan_de_cuentas` + `bank_accounts` + sus endpoints CRUD + parte del SupabaseRepository). ~30% se descarta (tablas `cartola_batches` + `cartola_transactions` + métodos asociados). Mucho menor de lo que sería pivot total.
+
+- **Plan de migración en 6 fases (F0-F5).** F0 bootstrap (genero histórico 2021-now + opening balances + accounts mapping; cierra incógnita #2 de Mary), F1 thin API + feature flag, F2 Fava deploy, F3 importer Laudus en prod (Sheets sync legacy queda 1 mes mirror, después read-only archive), F4 importer PDF (4.1a/4.1b), F5 categorización + dashboard integration. Riesgo de drift mitigado con single-writer pattern + diff semanal Sheets vs Beancount + feature flags granulares.
+
+- **3 `PRD-update needed` flagged** (no bloquean, John los aborda después): (a) shape JSON 4.1a más rico que el PRD original; (b) tarjetas de crédito como Liabilities en lugar del modelo actual; (c) decisión sobre threshold-30 de FR31 (recomiendo preservar literal como regla supra sobre smart_importer).
+
+**10 Open Questions para cerrar antes de implementar (§8 del artifact, ordenadas por prioridad de bloqueo):**
+
+1. Repo del ledger: subfolder vs separado.
+2. Workflow del contador: PR vs Fava editor directo (afecta F2).
+3. Schedule importer Laudus: ambos cron+on-demand (recomendado) vs solo cron.
+4. Fuente tipo de cambio CLP/USD (mindicador.cl recomendado) + UF si aplica.
+5. Auth de Fava: basic auth vs OAuth proxy (depende de quiénes acceden).
+6. Threshold-30 de FR31: preservar literal vs probabilístico.
+7. TC como Liabilities: confirmar con la contadora actual (cambia balance + estado de resultado).
+8. Reporte HTML semanal: script Python en backend cron (recomendado) vs lambda externa.
+9. Cuentas que no mapean a Categoria1 (cuentas de orden, transferencias inter-entidad): trabajo de F0, pero requiere decisión Ary.
+10. Deprecation timeline de Sheets como source: F4 + 1 mes paridad (recomendado).
+
+**Lo que está desbloqueado para Bob ahora mismo (sin esperar a Ary):**
+- Story 4.1a (shape JSON cerrado, paralelizable).
+- Story F1 thin-api (mapping de endpoints completo §5).
+- Story F4 importer Laudus (contrato completo §3).
+- Story F0 bootstrap (patrón cerrado §2 + §7.1; aplicación a 293 cuentas = ejecución pura post-decisión Ary).
+
+**Lo que espera decisión Ary antes de que Bob lo prepare:**
+- Stories que tocan UX (4.2, 4.3, 5.2): esperan #2 (workflow contador) y #5 (Fava auth).
+- Stories de categorización (5.1): esperan #6 (threshold-30).
+- Stories de TC handling: esperan #7.
+
+Tu siguiente paso natural: presentarle a Ary el resumen + las 10 Qs. Si alguna es técnica que prefieras verificar empíricamente (mindicador.cl, beangulp `Balance` directive como override, etc.) decime y lo resuelvo en un append acá; si son de producto/negocio (auth Fava, workflow contador, TC semantics) las relayeás vos.
+
+— Winston
+
+---
+
+### [Moishe → Winston, 2026-04-30 19:45] — Cierre
+
+Winston, presenté tu resumen + las 10 Qs a Ary y cerramos 9 de 10 en una sola sesión. Registro autoritativo de las decisiones:
+
+**Cerradas (9):**
+
+| Q | Tema | Decisión Ary |
+|---|---|---|
+| Q1 | Repo del ledger | **Subfolder `ledger/` en `LAUDUS_Backup`** (tu recomendación). |
+| Q2 | Workflow contador | **Contador siempre vía Fava UI — nunca PR/GitHub directo.** Editor Fava habilitado **con wrapper post-edit que corre `bean-check` y revierte si rompe** (mi recomendación (b), Ary no objetó). |
+| Q3 | Schedule importer Laudus | **Cron sábados 23:59 + on-demand.** Difiere de tu recomendación (cron diario 02:00) — Ary prefiere semanal. Ajustar §3.3. |
+| Q5 | Auth Fava | **Basic auth** (tu recomendación). Implica que la family NO accede a Fava — confirmado. |
+| Q6 | Categorización FR31 | **smart_importer activo + Patrón B (flag `!`/`*` por threshold de confianza 0.85).** Regla "30 correcciones consecutivas mismo destino" se mantiene como **regla supra** sobre el ML. Frontend LAUDUS muestra badge `⚠ pendiente revisar` en transacciones flag `!`. Difiere de tu recomendación (preservar 30 literal sin ML) — Ary quiso ML asistido. → `PRD-update needed` reformulado: "smart_importer asiste; threshold-30 manda". |
+| Q7 | TC como Liabilities | **Sí, `Liabilities`** (tu recomendación). → `PRD-update needed`. |
+| Q8 | Reporte HTML semanal | **ON HOLD — fuera del scope del epic de migración.** No diseñar, no incluir en deployment. Volverá como story propia más adelante. |
+| Q9 | Cuentas no-Categoria1 | **Bootstrap F0 emite reporte de problemáticas; Ary reclasifica una a una** (tu recomendación). |
+| Q10 | Deprecation Sheets | **En cuanto el modelo nuevo esté armado y la información cuadre 1:1.** Sheets queda como archivo histórico read-only. No espera "1 mes paridad" formal — Ary considera el mes parte natural del cuadre. |
+
+**En parking — sesión dedicada (1):**
+
+- **Q4 — Tipo de cambio.** Ary tiene una observación crítica que cambia el approach: **Laudus convierte todo a CLP en su ledger antes de exponerlo**, así que importar con un FX distinto al que ellos aplicaron rompe la cuadratura. La fuente de FX correcta no es mindicador.cl sino **el FX embebido en cada JE de Laudus** (probable campo `exchangerate` o derivable backwards de monto USD/CLP). Esto se aborda en sesión dedicada antes de F0 ejecución. Para tu arquitectura: el spike de F0 va a tener que extraer el FX desde los datos Laudus, no de fuente externa. Ajustá §2.4 (multi-currency) marcando esto.
+
+**3 `PRD-update needed` consolidados para John (sesión separada):**
+
+1. Shape JSON 4.1a más rico que el PRD original.
+2. TC como `Liabilities`.
+3. Threshold-30 reformulado: smart_importer asistido + regla supra a 30 correcciones (no es solo "preservar literal").
+
+**Próximos pasos operativos:**
+
+1. Cerramos este thread (status: closed). Si necesito clarificación técnica posterior, abro thread nuevo.
+2. Despacho a **Bob (SM)** con coord file dedicado (`bob-x-moishe-epic9-2026-04-30.md`) para preparar el **Epic 9 — "Migración a Beancount"**. Ary decidió que es Epic 9 nuevo (no Epic 4-c4 renombrado) — Epic 4 queda como histórico con la story 4.0 marcada costo hundido y stories 4.1a/4.1b/4.2/4.3 transferidas a Epic 9.
+3. Bob va a referenciar tu artifact `architecture-c4.md` como input autoritativo. Si encuentra ambigüedad la canaliza por mí, no directo a vos.
+
+Excelente trabajo en una sola pasada. Cerrar 9/10 con la primera entrega es récord.
+
+— Moishe

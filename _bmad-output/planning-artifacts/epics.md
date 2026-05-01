@@ -916,3 +916,89 @@ So that I can understand exactly what makes up each credit card expense at merch
 **Given** the account has no cartola uploaded for that period
 **When** the user drills down
 **Then** the existing ledger entry transactions are shown (original Story 3.5 fallback behavior — no regression)
+
+---
+
+## Epic 9: Migración a Beancount *(Phase 2 — pivot c4)*
+
+> **Status:** epic activo desde 2026-04-30 (decisión de pivot c4 aprobada por Ary). Reemplaza el approach Sheets+Supabase de Phase 2 por un ledger Beancount versionado como source of truth.
+
+### Goal
+
+Reemplazar Sheets+Supabase como source of truth por un ledger Beancount versionado en `ledger/` (subfolder del repo `LAUDUS_Backup`), con **Fava** como UI del contador y el **frontend LAUDUS actual** consumiendo un thin API que expone queries BQL. Importers Laudus ERP (cron sábados 23:59 + on-demand) y cartolas PDF (beangulp + Gemini) escriben directivas a zonas disjuntas; `bean-check` valida pre-commit. La family ve dashboards idénticos visualmente — cambia el motor, no la UX.
+
+### Justificación
+
+Producto de la decisión de pivot c4 documentada en:
+- `_bmad-output/planning-artifacts/research-beancount-pivot-2026-04-30.md` (análisis técnico de Mary)
+- `_bmad-output/planning-artifacts/architecture-c4.md` (arquitectura concreta de Winston, ~5500 palabras, **input autoritativo de este epic**)
+- `_bmad-output/coordination/winston-x-moishe-c4-arquitectura-2026-04-30.md` (cierre con 9 de 10 open questions resueltas por Ary)
+
+El motor Beancount nos da: (a) double-entry validation nativa (`bean-check`), (b) directivas `Balance`/`pad` que reemplazan toda la lógica custom de FR22-25, (c) BQL para queries ad-hoc del contador vía Fava, (d) git history como audit log, (e) categorización con `smart_importer` integrada al import en lugar de pipeline separado. Costo: descartar ~30% de Story 4.0 (tablas `cartola_*`); preservar 70% (registries `plan_de_cuentas` + `bank_accounts`).
+
+### Scope incluido — 12 stories
+
+- **Story 9.0** — Wrapper `bean-check` para Fava editor (pre-requisito de F2)
+- **Story 9.1** — Bootstrap histórico Beancount (F0; depende de Q4 cerrada antes de ejecutar)
+- **Story 9.2** — Backend thin API con BQL endpoints (F1)
+- **Story 9.3** — Fava deploy en Render con basic auth (F2)
+- **Story 9.4** — Importer Laudus en producción (F3 — cron sábados 23:59 + on-demand)
+- **Story 9.5** — PDF upload + extracción a JSON canónico (F4 — era 4.1a)
+- **Story 9.6** — Beangulp importer JSON → directivas (F4 — era 4.1b)
+- **Story 9.7** — Categorización con `smart_importer` + Patrón B (F5 — era 5.1 reformulada)
+- **Story 9.8** — Frontend LAUDUS consume thin API + badge "pendiente revisar" (era 4.3 reformulada)
+- **Story 9.9** — Validación de balances post-import via `bean-check` (era 4.2 reformulada)
+- **Story 9.10** — Cron prices CLP/USD *(blocked-by-Q4)*
+- **Story 9.11** — Deprecation Sheets como source of truth
+
+### Scope excluido (explícito)
+
+- **Reporte HTML semanal a Eduardo** — Q8 on hold, vuelve como story propia más adelante.
+- **Reformulación del PRD** — los 3 `PRD-update needed` (shape JSON 4.1a, TC como Liabilities, threshold-30 reformulado) van a John (PM) en sesión separada.
+- **Aplicación cuenta-por-cuenta del mapeo a las 293 cuentas** — es trabajo de la *ejecución* de la Story 9.1 (bootstrap), no del prep.
+- **UI nueva para family** — el frontend actual se preserva sin cambios visuales; Story 9.8 solo cambia el data source y agrega el badge.
+- **Decisión sobre fuente de FX (Q4)** — sesión dedicada antes de ejecutar Story 9.1 / desbloquear Story 9.10.
+- **Stories 5.2 y 5.3 originales** — funcionalidad subsumida por 9.7 + 9.8; quedan marcadas `superseded-by-epic-9` en Epic 5.
+
+### Dependencias bloqueantes
+
+| Bloqueador | Afecta a | Cuándo se resuelve |
+|---|---|---|
+| Q4 — fuente de tipo de cambio (FX embebido en Laudus, no externa) | Story 9.1 (ejecución), Story 9.10 (prep + ejecución) | Sesión dedicada Ary + Moishe antes de F0 ejecución |
+| Asignación de "el contador" como persona real | Story 9.3 onboarding (no la implementación) | Decisión Ary, no bloquea prep ni deploy |
+| 9.0 done | 9.3 (Fava deploy con editor habilitado) | Secuencial |
+| 9.2 done (al menos endpoints leyendo del ledger) | 9.8 (frontend consume thin API) | Secuencial |
+| 9.5 done | 9.6 (beangulp consume JSON canónico) | Secuencial — pero 9.5 es paralelizable desde el día 1 con 9.0/9.1/9.2 |
+| 9.6 done | 9.7 (smart_importer integrado al pipeline de import) | Secuencial |
+| Paridad Sheets ↔ Beancount confirmada | 9.11 (deprecation Sheets) | Validación en F1+F3 |
+
+### Reorganización de epics anteriores
+
+- **Epic 4** cambia status a `done-with-sunk-cost`. Story 4.0 se preserva como `done` con nota de costo hundido (~30% se descarta, ~70% sobrevive como registry). Stories 4.1a/4.1b/4.2/4.3 se transfieren a Epic 9 como 9.5/9.6/9.9/9.8 reformuladas.
+- **Epic 5** cambia status a `superseded-by-epic-9`. Story 5.1 se transfiere como Story 9.7. Stories 5.2 y 5.3 quedan como `superseded-by-epic-9` con nota de que su funcionalidad está cubierta por 9.7 + 9.8.
+
+### FRs / NFRs cubiertos
+
+Inherits del Epic 4 + Epic 5 originales con reformulación bajo c4:
+
+- **FR20-FR27** (Bank statement ingestion): cubiertos por 9.5 + 9.6 + 9.9. FR22-FR25 (balance validation) ahora son responsabilidad nativa de `bean-check` + `Balance` directives.
+- **FR28-FR31** (Categorization): cubiertos por 9.7. FR31 reformulado: smart_importer + Patrón B (threshold confianza 0.85) + regla supra a 30 correcciones (`PRD-update needed`).
+- **NFR3, NFR12, NFR17, NFR19** (Phase 2 NFRs): cubiertos por 9.5 + 9.6.
+- **NFR13** (audit log append-only): cubierto por git history sobre `ledger/` + audit log operacional sobre acciones HTTP (mutaciones de upload/validate/categorize).
+
+### Stories detalladas
+
+Cada story tiene su propio archivo con AC + tasks + dev notes en `_bmad-output/implementation-artifacts/9-{n}-*.md`. La lista de stories arriba incluye links lógicos:
+
+- [9.0 — Wrapper bean-check para Fava editor](../implementation-artifacts/9-0-wrapper-bean-check-fava-editor.md)
+- [9.1 — Bootstrap histórico Beancount](../implementation-artifacts/9-1-bootstrap-historico-beancount.md)
+- [9.2 — Backend thin API con BQL](../implementation-artifacts/9-2-backend-thin-api-bql.md)
+- [9.3 — Fava deploy en Render](../implementation-artifacts/9-3-fava-deploy-render.md)
+- [9.4 — Importer Laudus producción](../implementation-artifacts/9-4-importer-laudus-produccion.md)
+- [9.5 — PDF upload + extracción JSON canónico](../implementation-artifacts/9-5-pdf-upload-gemini-json-canonico.md)
+- [9.6 — Beangulp importer JSON → directivas](../implementation-artifacts/9-6-beangulp-importer-json-to-directivas.md)
+- [9.7 — Categorización smart_importer + Patrón B](../implementation-artifacts/9-7-categorizacion-smart-importer-patron-b.md)
+- [9.8 — Frontend LAUDUS consume thin API + badge](../implementation-artifacts/9-8-frontend-thin-api-badge-pendiente.md)
+- [9.9 — Validación de balances post-import](../implementation-artifacts/9-9-validacion-balances-bean-check.md)
+- [9.10 — Cron prices CLP/USD *(blocked-by-Q4)*](../implementation-artifacts/9-10-cron-prices-clp-usd.md)
+- [9.11 — Deprecation Sheets como source of truth](../implementation-artifacts/9-11-deprecation-sheets.md)
