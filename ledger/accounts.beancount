@@ -1,0 +1,11 @@
+;; ledger/accounts.beancount — open directives (mock subset)
+
+2021-01-01 open Assets:EAG:Bancos:BancoBci-111005 CLP
+  code: "111005"
+  laudus_account_name: "Banco BCI - 10160175"
+
+2021-01-01 open Expenses:EAG:CombustibleVehiculos-413044 CLP
+  code: "413044"
+  laudus_account_name: "Combustible Vehículos"
+
+2021-01-01 open Equity:EAG:OpeningBalances CLP

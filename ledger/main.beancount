@@ -1,0 +1,12 @@
+;; ledger/main.beancount — entry point
+;;
+;; Mock ledger for Story 9.0 smoke test. Replace with real bootstrap output
+;; when Story 9.1 (F0 bootstrap) lands.
+
+option "title" "LAUDUS — EAG Family Office (mock)"
+option "operating_currency" "CLP"
+
+2021-01-01 custom "fava-extension" "fava_edit_validator"
+
+include "accounts.beancount"
+include "manual/*.beancount"

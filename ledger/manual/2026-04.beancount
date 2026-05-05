@@ -1,0 +1,9 @@
+;; ledger/manual/2026-04.beancount — manual edits zone (mock)
+
+2021-01-01 * "Opening Balance"
+  Assets:EAG:Bancos:BancoBci-111005       1000000.00 CLP
+  Equity:EAG:OpeningBalances             -1000000.00 CLP
+
+2026-04-15 * "Acevedo Ltda - Combustible"
+  Assets:EAG:Bancos:BancoBci-111005       -65690.00 CLP
+  Expenses:EAG:CombustibleVehiculos-413044  65690.00 CLP
