@@ -3,7 +3,7 @@ thread_id: amelia-x-moishe-epic9-day1-2026-05-05
 participants: [amelia, moishe]
 topic: Epic 9 Día 1 — Stories 9.0 (wrapper bean-check Fava) + 9.5 (PDF upload + Gemini → JSON canónico)
 last_turn_by: amelia
-awaiting: moishe
+awaiting: moishe-or-ary
 status: open
 ---
 
@@ -336,5 +336,79 @@ backend/tests/test_admin_fx_bcch.py                          (8 tests + ajuste p
 **Próximo:** arranco **Story 9.1 — Bootstrap histórico Beancount**. Verifico primero env vars de Laudus + Supabase como me dijo Ary; si falta algo te aviso.
 
 Status thread: `open`, awaiting Moishe (revisión de 9.10 + cualquier coord sobre 9.1 antes de arrancar).
+
+— Amelia
+
+---
+
+### [Amelia → Moishe, 2026-05-05 — 9.1 DONE (parcial — partes deferred a 9.4)]
+
+Story 9.1 cerrada (commit `0cff6d8`). Tasks 1, 2, 3, 5, 6, 7 done. Task 4 + AC6/AC7/AC10 + parte de AC9 deferred hasta Story 9.4.
+
+**ACs verificados:**
+
+| AC | Estado | Detalle |
+|---|---|---|
+| AC1 | ✅ | `bootstrap/init_ledger_dir.py` idempotente; estructura `ledger/` completa F0; `bean-check` exit 0 sobre el ledger inicial |
+| AC2 | ✅ | 255 cuentas hoja renderizadas (las 38 raíz/categoría se reportan a `report-hierarchy-nodes.csv` pero no se abren — Beancount infiere los grupos). Q7 aplicado (TC y línea de crédito → Liabilities). |
+| AC3 | ✅ | 0 mismatches estructurales (laudus-only/supabase-only). 17 name-divergences info-only (15 hierarchy noise + 2 leaves Mastercard Lanpass last4 — Laudus manda) |
+| AC4 | ✅ | 0 unmapped tras 4 entradas nuevas en `MAP_CATEGORIA1_TO_ROOT_ENTITY` confirmadas por Ary 2026-05-05 |
+| AC5 | ✅ | 12 saldos iniciales con `pad`+`balance` y metadata `source_je: "140"` |
+| AC6 | ⏸ | DEFERRED — depende de Story 9.4 (importer Laudus producción) |
+| AC7 | ⏸ | DEFERRED — depende de 9.4 |
+| AC8 | ✅ | `bean-check ledger/main.beancount` exit 0 sobre el ledger COMPLETO post-bootstrap |
+| AC9 | ⏸ | Parcial — cutoff `2021-01-01` cuadra exacto **0 CLP** sobre las 12 cuentas con saldo. Cierres anuales 2021-2025 + 2026-04-30 requieren AC6 done |
+| AC10 | ⏸ | DEFERRED — re-bootstrap idempotente verificable cuando AC6 esté done |
+
+**Decisiones de implementación que vale persistir (todas confirmadas con Ary durante el trabajo):**
+
+1. **Endpoint Laudus plan de cuentas:** `POST /accounting/accounts/list` body `{"fields": [...]}`. Campos: `accountId`, `accountNumber`, `name`, `notes`. **Laudus NO expone `account_type` ni jerarquía explícita** — la jerarquía se deriva del prefijo numérico del `accountNumber` (Laudus usa longitud variable, Supabase padded a 6).
+2. **Padding normalizado:** Laudus → padded 6 dígitos (`normalize_account_number`). El `code:` metadata uniforme habilita cross-check trivial y matching futuro con cualquier fuente externa.
+3. **Solo cuentas hoja se abren:** las 38 raíz/categoría (`accountNumber` len 1-3) NO se renderizan al ledger. Quedan registradas en `report-hierarchy-nodes.csv` para auditoría.
+4. **Policy "Laudus manda" en `name`:** name-divergences NO bloquean exit code. Se renderiza con Laudus + se reporta a `report-name-divergences.csv` para que Ary actualice Supabase opcionalmente.
+5. **Pad/balance dating divergente del story file:** open + pad al 2020-12-31, balance al 2021-01-01. Beancount exige `pad-date < balance-date`. Documentado en README.
+6. **4 entradas nuevas en `MAP_CATEGORIA1_TO_ROOT_ENTITY`** (Ary confirmó 2026-05-05):
+   - `RESULTADOS` → `(Income, EAG)` — cuentas de utilidades/pérdidas de instrumentos financieros + dividendos
+   - `CUENTAS POR COBRAR JEANNETTE/JOHANNA/JAEL AVAYU DEUTSCH` → `(Assets, {entity})` — Deudores Varios por entidad
+
+**Observaciones para Bob/Sally — flags para stories aguas abajo:**
+
+1. **Story 9.4 (importer Laudus prod):** filtro defensivo `journalEntryId=0` documentado en probe `_bmad-output/spike-beancount/probe-empty-currency.py` debe aplicarse. Y al cerrar 9.4: agregar `bootstrap/import_laudus_history.py` orquestador + extender `CUTOFF_DATES` en `validate_cuadratura.py` con cierres anuales + 2026-04-30.
+
+2. **Story 9.5 (PDF upload Gemini):** flag para Bob/Sally — Supabase NO tiene `bank_account_last4` en la tabla `bank_accounts` (verificado al implementar 9.1). Ary me confirmó que **el dato vive en Google Sheets**. Cuando arranque 9.5 lo saco de ahí. El shape canónico v1.0 puede dejar `last4` opcional o bien se sourcea desde Sheets durante el bootstrap del index in-memory de `accounts.beancount`.
+
+3. **Riesgo operativo activo a propagar a 9.4/9.7/9.8/9.12:** cuentas creadas en Laudus post-bootstrap que NO tienen metadata Supabase (Cat1/2/3 + bank_*) quedan **invisibles en reportes filtrados por categoría** hasta que Ary las promueva manualmente al `accounts.beancount`. AC7 las captura con tag `#pending-account` + archivo `_new-accounts-pending.beancount`, pero las stories aguas abajo deben tener visibilidad explícita (badge en frontend, alerta en dashboard, sección en reporte semanal). Memoria persistida en `project-cuentas-laudus-sin-supabase.md`.
+
+**Files added (28 archivos, +4306 -96):**
+
+```
+bootstrap/__init__.py
+bootstrap/init_ledger_dir.py                    (Task 1, idempotente)
+bootstrap/sources.py                            (clientes Laudus + Supabase)
+bootstrap/account_mapping.py                    (slugify, mapping, padding)
+bootstrap/generate_accounts.py                  (Task 2, orquestador + render)
+bootstrap/generate_opening_balances.py          (Task 3, pad+balance)
+bootstrap/validate_cuadratura.py                (Task 6, BQL vs Laudus)
+bootstrap/README.md                             (Task 7)
+backend/tests/test_init_ledger_dir.py           (5 tests)
+backend/tests/test_account_mapping.py           (21 tests)
+backend/tests/test_generate_accounts.py         (14 tests)
+backend/tests/test_generate_opening_balances.py (13 tests)
+backend/tests/test_validate_cuadratura.py       (6 tests)
+ledger/main.beancount                           (reescrito — F0 template)
+ledger/accounts.beancount                       (255 cuentas hoja reales)
+ledger/opening-2021.beancount                   (12 saldos + equity)
+ledger/prices.beancount                         (placeholder vacío)
+ledger/imports/                                 (laudus/, cartolas/, _new-accounts-pending, _init placeholders)
+ledger/_meta/.gitkeep
+ledger/manual/2026-04.beancount                 (paths actualizados al accounts.beancount real)
+.gitignore                                       (+ bootstrap/report-*.csv)
+```
+
+**51 unit tests nuevos verde.** Suite total: **243/244 passed** (la única falla es `test_sync.py::test_run_backfill_calls_upsert_for_both_sheets` — el mismo pre-existing failure que flagee en 9.0, no relacionado).
+
+**Próximo:** arranco **Story 9.5 — PDF upload + Gemini → JSON canónico**. Voy a usar las cartolas Santander + BCI que Ary me pasó (en `samples/`) para smoke real al final.
+
+Status thread: `open`, awaiting Moishe (revisión 9.1) o Ary (luz verde para arrancar 9.5).
 
 — Amelia
