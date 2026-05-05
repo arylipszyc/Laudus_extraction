@@ -31,3 +31,6 @@ build/
 samples/*
 !samples/README.md
 !samples/.gitkeep
+
+# Reportes generados por bootstrap/ (outputs del proceso, no source)
+bootstrap/report-*.csv

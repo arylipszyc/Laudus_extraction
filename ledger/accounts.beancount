@@ -1,11 +1,1979 @@
-;; ledger/accounts.beancount — open directives (mock subset)
+;; ledger/accounts.beancount — generado por bootstrap/generate_accounts.py
+;; Story 9.1 (Bootstrap histórico Beancount).
+;; NO editar a mano sin re-correr el script o sincronizar con Supabase.
+;; Modelo unificado: las 47 cuentas bancarias son subset del plan,
+;; identificadas por la metadata bank_account_id.
 
-2021-01-01 open Assets:EAG:Bancos:BancoBci-111005 CLP
+
+2020-12-31 open Assets:EAG:Caja-111001 CLP
+  code: "111001"
+  laudus_account_name: "Caja $"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - EAG"
+
+2020-12-31 open Assets:EAG:CajaUs-111003 CLP
+  code: "111003"
+  laudus_account_name: "Caja US$"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - EAG"
+
+2020-12-31 open Assets:EAG:Bancos:BancoBci10160175-111005 CLP
   code: "111005"
   laudus_account_name: "Banco BCI - 10160175"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - EAG"
+  bank_account_id: "d844c24e-e5da-41c6-8734-039424f13613"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
 
-2021-01-01 open Expenses:EAG:CombustibleVehiculos-413044 CLP
+2020-12-31 open Assets:EAG:Bancos:BancoEdwards0162338082-111007 CLP
+  code: "111007"
+  laudus_account_name: "Banco Edwards - 01-62-338082"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - EAG"
+  bank_account_id: "c2a51bf2-9681-43f1-b406-64c6a17b5eb7"
+  bank_name: "Banco Chile"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:EAG:Bancos:BancoSantander63188824-111009 CLP
+  code: "111009"
+  laudus_account_name: "Banco Santander 63188824"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - EAG"
+  bank_account_id: "eab1effb-a9f8-4a9c-a9ec-e19132cb224d"
+  bank_name: "Santander"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:EAG:Bancos:BancoBci18565743Us-111011 CLP, USD
+  code: "111011"
+  laudus_account_name: "Banco BCI 18565743 - US$"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - EAG"
+  bank_account_id: "62ba0ec4-b0a2-4bd4-8ce7-bb89dbd94661"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "USD"
+
+2020-12-31 open Assets:EAG:Bancos:BancoBci110014172UsMiami-111015 CLP, USD
+  code: "111015"
+  laudus_account_name: "Banco BCI 110014172 - US$ Miami"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - EAG - BANCO INTERNACIONAL"
+  bank_account_id: "3e909efb-2953-46e7-91e0-48449294eb6e"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "USD"
+
+2020-12-31 open Assets:EAG:Bancos:BancoCityNBank30000771265-111016 CLP, USD
+  code: "111016"
+  laudus_account_name: "Banco City N. Bank - 30000771265"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - EAG - BANCO INTERNACIONAL"
+  bank_account_id: "d97cbcc8-b155-47c7-a608-091944ae9a87"
+  bank_name: "Citi"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "USD"
+
+2020-12-31 open Assets:EAG:Inversiones:BancoJuliusBaer03133171-111017 CLP, USD
+  code: "111017"
+  laudus_account_name: "Banco Julius Baer 0313.3171"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - EAG - BANCO INTERNACIONAL"
+  bank_account_id: "f332dc41-005e-44e3-b6c7-0e18e5a7d192"
+  bank_name: "Julius Baer"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "USD"
+
+2020-12-31 open Assets:EAG:Inversiones:FmBciAltoPatrimonio-113001 CLP
+  code: "113001"
+  laudus_account_name: "FM BCI - Alto Patrimonio"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "VALORES NEGOCIABLES"
+  bank_account_id: "dbe16286-7b0f-4e43-8900-b1a687d31b6a"
+  bank_name: "BCI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:EAG:Inversiones:FmBciCompetitivoSerieAp0-113002 CLP
+  code: "113002"
+  laudus_account_name: "FM BCI - Competitivo serie AP 0"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "VALORES NEGOCIABLES"
+  bank_account_id: "a7c35d09-c273-4d54-a642-d563e7c3073b"
+  bank_name: "BCI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:EAG:Inversiones:FmBciExpressSerieClsica-113003 CLP
+  code: "113003"
+  laudus_account_name: "FM BCI - Express Serie Clásica"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "VALORES NEGOCIABLES"
+  bank_account_id: "e8639bc9-4832-4fdf-9c6f-2ad992a4ad04"
+  bank_name: "BCI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:EAG:Inversiones:FmBciCompetitivoSerieClass0-113004 CLP
+  code: "113004"
+  laudus_account_name: "FM BCI - Competitivo serie class 0"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "VALORES NEGOCIABLES"
+  bank_account_id: "1e45636e-d34c-4969-8d28-3d3660697391"
+  bank_name: "BCI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:EAG:Inversiones:FmBciRealStateLmvIii-113005 CLP
+  code: "113005"
+  laudus_account_name: "FM BCI - Real State LMV III"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "VALORES NEGOCIABLES"
+  bank_account_id: "b4370778-8cb7-43c2-9fef-deafdec398b1"
+  bank_name: "BCI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:EAG:Inversiones:MbiSecuencia0-113011 CLP
+  code: "113011"
+  laudus_account_name: "MBI - Secuencia 0"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "VALORES NEGOCIABLES"
+  bank_account_id: "fd45a729-b46b-4512-bbfa-8404d5bb4c2e"
+  bank_name: "MBI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:EAG:Inversiones:MbiSecuencia2-113013 CLP
+  code: "113013"
+  laudus_account_name: "MBI - Secuencia 2"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "VALORES NEGOCIABLES"
+  bank_account_id: "7da2f876-acc0-44e2-822b-f3b2b1e4ea82"
+  bank_name: "MBI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:EAG:TektonicaDiseoLimitada-113014 CLP
+  code: "113014"
+  laudus_account_name: "Tektonica Diseño Limitada"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "INVERSIONES"
+
+2020-12-31 open Assets:EAG:InversinWm-113015 CLP
+  code: "113015"
+  laudus_account_name: "Inversión W&M"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "VALORES NEGOCIABLES"
+
+2020-12-31 open Assets:EAG:TecnionInternacional-113016 CLP
+  code: "113016"
+  laudus_account_name: "Tecnion Internacional"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "VALORES NEGOCIABLES"
+
+2020-12-31 open Assets:EAG:TecninLlc-113017 CLP
+  code: "113017"
+  laudus_account_name: "Tecnión LLC"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "EMPRESAS INTERNACIONALES"
+
+2020-12-31 open Assets:EAG:InvTecnionLimitada-113018 CLP
+  code: "113018"
+  laudus_account_name: "Inv. Tecnion Limitada"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "EMPRESAS INTERNACIONALES"
+
+2020-12-31 open Assets:EAG:InversinEnHemanext-113019 CLP
+  code: "113019"
+  laudus_account_name: "Inversión en Hemanext"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "INVERSIONES"
+
+2020-12-31 open Assets:EAG:Inversiones:FipDesarrolloInmobiliarioI-113020 CLP
+  code: "113020"
+  laudus_account_name: "FIP Desarrollo Inmobiliario I"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "EMPRESAS INTERNACIONALES"
+  bank_account_id: "203a6925-c11a-47b2-873b-504038edc5c1"
+  bank_name: "Fondo"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:EAG:TauroLimitedPartnership-113021 CLP
+  code: "113021"
+  laudus_account_name: "Tauro Limited Partnership"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "EMPRESAS INTERNACIONALES"
+
+2020-12-31 open Assets:EAG:InmobiliariasRefySpa-113022 CLP
+  code: "113022"
+  laudus_account_name: "Inmobiliarias Refy SpA"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "EMPRESAS INTERNACIONALES"
+
+2020-12-31 open Assets:EAG:TraspasoAFondoComn-113031 CLP
+  code: "113031"
+  laudus_account_name: "Traspaso a Fondo Común"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "VALORES NEGOCIABLES"
+
+2020-12-31 open Assets:EAG:CuentasCorrientesDelPersonal-115001 CLP
+  code: "115001"
+  laudus_account_name: "Cuentas Corrientes del Personal"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:EAG:FondosPorRendir-115005 CLP
+  code: "115005"
+  laudus_account_name: "Fondos por Rendir"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:EAG:InmobiliariaInvPirihueicoSpa-115015 CLP
+  code: "115015"
+  laudus_account_name: "Inmobiliaria Inv. Pirihueico SPA"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:EAG:InversionesNuevoCiclo-115016 CLP
+  code: "115016"
+  laudus_account_name: "Inversiones Nuevo Ciclo"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:EAG:GrupoGastronmicoSa-115017 CLP
+  code: "115017"
+  laudus_account_name: "Grupo Gastronómico S.A."
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:EAG:TierraYHuertosSpa-115018 CLP
+  code: "115018"
+  laudus_account_name: "Tierra y Huertos SpA"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:EAG:DeudoresVarios-115019 CLP
+  code: "115019"
+  laudus_account_name: "Deudores Varios"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:EAG:ControlYLiquidacin-115099 CLP
+  code: "115099"
+  laudus_account_name: "Control y Liquidación"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Liabilities:EAG:Apertura-211005 CLP
+  code: "211005"
+  laudus_account_name: "Apertura"
+  laudus_categoria1: "PASIVO"
+  laudus_categoria2: "PASIVOS CORRIENTES"
+  laudus_categoria3: "PASIVOS CORRIENTES"
+
+2020-12-31 open Income:EAG:SueldoCepech-310001 CLP
+  code: "310001"
+  laudus_account_name: "Sueldo Cepech"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:SueldoTecnin-310003 CLP
+  code: "310003"
+  laudus_account_name: "Sueldo Tecnión"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:SueldoFcComplemento-310005 CLP
+  code: "310005"
+  laudus_account_name: "Sueldo FC - Complemento"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:RetirosFondoComn-310006 CLP
+  code: "310006"
+  laudus_account_name: "Retiros Fondo Común"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:DividendosRetiros-310009 CLP
+  code: "310009"
+  laudus_account_name: "Dividendos / Retiros"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:LatinoamericanaSa-310010 CLP
+  code: "310010"
+  laudus_account_name: "Latinoamericana S.A."
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:RetirosIndumotora-310011 CLP
+  code: "310011"
+  laudus_account_name: "Retiros Indumotora"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:RetirosTecnin-310013 CLP
+  code: "310013"
+  laudus_account_name: "Retiros Tecnión"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:RetirosPlyades-310015 CLP
+  code: "310015"
+  laudus_account_name: "Retiros Pléyades"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:RetirosInvNuevoCiclo-310016 CLP
+  code: "310016"
+  laudus_account_name: "Retiros Inv. Nuevo Ciclo"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INVERSIONES"
+
+2020-12-31 open Income:EAG:RetirosCepech-310017 CLP
+  code: "310017"
+  laudus_account_name: "Retiros Cepech"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:RetirosInmobiliariaEspaa-310018 CLP
+  code: "310018"
+  laudus_account_name: "Retiros Inmobiliaria España"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:RetirosInmobiliariaMetropolitana-310019 CLP
+  code: "310019"
+  laudus_account_name: "Retiros Inmobiliaria Metropolitana"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:DirectorioIpChile-310021 CLP
+  code: "310021"
+  laudus_account_name: "Directorio IP-Chile"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:DirectorioIndumotoraOne-310022 CLP
+  code: "310022"
+  laudus_account_name: "Directorio Indumotora One"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:KiaChileSpa-310023 CLP
+  code: "310023"
+  laudus_account_name: "Kia Chile SpA"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:HyundaiChileSpa-310024 CLP
+  code: "310024"
+  laudus_account_name: "Hyundai Chile SpA"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:FondosMutuosBci-310025 CLP
+  code: "310025"
+  laudus_account_name: "Fondos Mutuos - BCI"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INVERSIONES"
+
+2020-12-31 open Income:EAG:Mbi-310027 CLP
+  code: "310027"
+  laudus_account_name: "MBI"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INVERSIONES"
+
+2020-12-31 open Income:EAG:Jb-310029 CLP
+  code: "310029"
+  laudus_account_name: "JB"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:DevolucinOficinaTecnin-310035 CLP
+  code: "310035"
+  laudus_account_name: "Devolución Oficina - Tecnión"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:DevolucinGerencia50-310037 CLP
+  code: "310037"
+  laudus_account_name: "Devolución Gerencia - 50%"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:DevolucinGastosReaca-310039 CLP
+  code: "310039"
+  laudus_account_name: "Devolución Gastos Reñaca"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:DevolucinInternet-310041 CLP
+  code: "310041"
+  laudus_account_name: "Devolución Internet"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:DevolucinIsapre-310043 CLP
+  code: "310043"
+  laudus_account_name: "Devolución Isapre"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:JhonnyGuerra-310045 CLP
+  code: "310045"
+  laudus_account_name: "Jhonny Guerra"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:JhonnyGuerraHijo-310047 CLP
+  code: "310047"
+  laudus_account_name: "Jhonny Guerra (hijo)"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:DevolucinSeguros-310049 CLP
+  code: "310049"
+  laudus_account_name: "Devolución Seguros"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:VentaAccionesPerla-310059 CLP
+  code: "310059"
+  laudus_account_name: "Venta Acciones Perla"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:VentaDeActivos-310091 CLP
+  code: "310091"
+  laudus_account_name: "Venta de Activos"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:IngresosPorInversiones-310095 CLP
+  code: "310095"
+  laudus_account_name: "Ingresos por Inversiones"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Income:EAG:OtrosIngresos-310099 CLP
+  code: "310099"
+  laudus_account_name: "Otros Ingresos"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: "INGRESOS"
+
+2020-12-31 open Expenses:EAG:SueldosRopaRegalas-411001 CLP
+  code: "411001"
+  laudus_account_name: "Sueldos, Ropa, Regalías"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Sueldos y Adicionales"
+
+2020-12-31 open Expenses:EAG:Luz-411005 CLP
+  code: "411005"
+  laudus_account_name: "Luz"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Cuentas Basicas"
+
+2020-12-31 open Expenses:EAG:TelfonoComunicaciones-411007 CLP
+  code: "411007"
+  laudus_account_name: "Teléfono, Comunicaciones"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Cuentas Basicas"
+
+2020-12-31 open Expenses:EAG:TvCableInternet-411009 CLP
+  code: "411009"
+  laudus_account_name: "TV Cable / Internet"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Cuentas Basicas"
+
+2020-12-31 open Expenses:EAG:Alarma-411011 CLP
+  code: "411011"
+  laudus_account_name: "Alarma"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Cuentas Basicas"
+
+2020-12-31 open Expenses:EAG:Agua-411013 CLP
+  code: "411013"
+  laudus_account_name: "Agua"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Cuentas Basicas"
+
+2020-12-31 open Expenses:EAG:Gas-411015 CLP
+  code: "411015"
+  laudus_account_name: "Gas"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Cuentas Basicas"
+
+2020-12-31 open Expenses:EAG:MovilizacinViajesChoferes-411037 CLP
+  code: "411037"
+  laudus_account_name: "Movilización / Viajes / Choferes"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Vehiculos"
+
+2020-12-31 open Expenses:EAG:MantencinVehculosSeguros-411043 CLP
+  code: "411043"
+  laudus_account_name: "Mantención Vehículos / Seguros"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Mantenciones"
+
+2020-12-31 open Expenses:EAG:ComprasCasaEfectivo-411049 CLP
+  code: "411049"
+  laudus_account_name: "Compras Casa (efectivo)"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Varios"
+
+2020-12-31 open Expenses:EAG:MantencinPiscina-411051 CLP
+  code: "411051"
+  laudus_account_name: "Mantención Piscina"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Mantenciones"
+
+2020-12-31 open Expenses:EAG:MantencinJardinBonsai-411053 CLP
+  code: "411053"
+  laudus_account_name: "Mantención Jardin, Bonsai"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Mantenciones"
+
+2020-12-31 open Expenses:EAG:ManencinAireCalefaccin-411055 CLP
+  code: "411055"
+  laudus_account_name: "Manención Aire / Calefacción"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Mantenciones"
+
+2020-12-31 open Expenses:EAG:MantencinDomtica-411063 CLP
+  code: "411063"
+  laudus_account_name: "Mantención Domótica"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Mantenciones"
+
+2020-12-31 open Expenses:EAG:MantencinGeneralInstalaciones-411065 CLP
+  code: "411065"
+  laudus_account_name: "Mantención General Instalaciones"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Mantenciones"
+
+2020-12-31 open Expenses:EAG:GastosComunes-411067 CLP
+  code: "411067"
+  laudus_account_name: "Gastos Comunes"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Cuentas Basicas"
+
+2020-12-31 open Expenses:EAG:Contribuciones-411069 CLP
+  code: "411069"
+  laudus_account_name: "Contribuciones"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Contribuciones"
+
+2020-12-31 open Expenses:EAG:SegurosPropiedad-411071 CLP
+  code: "411071"
+  laudus_account_name: "Seguros Propiedad"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Seguros"
+
+2020-12-31 open Expenses:EAG:CompraDeActivosEquipamiento-411090 CLP
+  code: "411090"
+  laudus_account_name: "Compra de Activos / Equipamiento"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Compra Activos"
+
+2020-12-31 open Expenses:EAG:CompraDeVehculos-411091 CLP
+  code: "411091"
+  laudus_account_name: "Compra de Vehículos"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO SANTIAGO"
+  laudus_categoria3: "Compra Activos"
+
+2020-12-31 open Expenses:EAG:SueldosRopaRegalias-413001 CLP
+  code: "413001"
+  laudus_account_name: "Sueldos, Ropa, Regalias"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Sueldos y Adicionales"
+
+2020-12-31 open Expenses:EAG:Luz-413005 CLP
+  code: "413005"
+  laudus_account_name: "Luz"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Cuentas Basicas"
+
+2020-12-31 open Expenses:EAG:TelfonoComunicaciones-413007 CLP
+  code: "413007"
+  laudus_account_name: "Teléfono, Comunicaciones"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Cuentas Basicas"
+
+2020-12-31 open Expenses:EAG:TvCableInternet-413009 CLP
+  code: "413009"
+  laudus_account_name: "TV Cable / Internet"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Cuentas Basicas"
+
+2020-12-31 open Expenses:EAG:Agua-413013 CLP
+  code: "413013"
+  laudus_account_name: "Agua"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Cuentas Basicas"
+
+2020-12-31 open Expenses:EAG:Gas-413015 CLP
+  code: "413015"
+  laudus_account_name: "Gas"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Cuentas Basicas"
+
+2020-12-31 open Expenses:EAG:Petrleo-413017 CLP
+  code: "413017"
+  laudus_account_name: "Petróleo"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Cuentas Basicas"
+
+2020-12-31 open Expenses:EAG:MovilizacinViajesChoferes-413037 CLP
+  code: "413037"
+  laudus_account_name: "Movilización / Viajes / Choferes"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Movilización"
+
+2020-12-31 open Expenses:EAG:MantencinVehculosMotosTierraSeguros-413043 CLP
+  code: "413043"
+  laudus_account_name: "Mantención Vehículos, Motos Tierra, Seguros"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Vehiculos"
+
+2020-12-31 open Expenses:EAG:CombustibleVehculos-413044 CLP
   code: "413044"
-  laudus_account_name: "Combustible Vehículos"
+  laudus_account_name: "Combustible Vehículos /"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Vehiculos"
 
-2021-01-01 open Equity:EAG:OpeningBalances CLP
+2020-12-31 open Expenses:EAG:MantencinLanchasMotosDeAguaSeguros-413045 CLP
+  code: "413045"
+  laudus_account_name: "Mantención Lanchas, Motos de Agua, Seguros"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Mantenciones"
+
+2020-12-31 open Expenses:EAG:ComprasCasaEfectivo-413049 CLP
+  code: "413049"
+  laudus_account_name: "Compras Casa (efectivo)"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Otros Gastos"
+
+2020-12-31 open Expenses:EAG:MantencinPiscina-413051 CLP
+  code: "413051"
+  laudus_account_name: "Mantención Piscina"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Mantenciones"
+
+2020-12-31 open Expenses:EAG:MantencinJardinTractor-413053 CLP
+  code: "413053"
+  laudus_account_name: "Mantención Jardin, Tractor"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Mantenciones"
+
+2020-12-31 open Expenses:EAG:MantencinMotobombaRiego-413054 CLP
+  code: "413054"
+  laudus_account_name: "Mantención Motobomba / Riego"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Mantenciones"
+
+2020-12-31 open Expenses:EAG:MantencinAireCalefaccin-413055 CLP
+  code: "413055"
+  laudus_account_name: "Mantención Aire, Calefacción"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Mantenciones"
+
+2020-12-31 open Expenses:EAG:MantencinElctrica-413057 CLP
+  code: "413057"
+  laudus_account_name: "Mantención Eléctrica"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Mantenciones"
+
+2020-12-31 open Expenses:EAG:FumigacionesDesratizacin-413059 CLP
+  code: "413059"
+  laudus_account_name: "Fumigaciones / Desratización"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Mantenciones"
+
+2020-12-31 open Expenses:EAG:MantencinMuelle-413063 CLP
+  code: "413063"
+  laudus_account_name: "Mantención Muelle"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Mantenciones"
+
+2020-12-31 open Expenses:EAG:MantencinGeneralInstalaciones-413065 CLP
+  code: "413065"
+  laudus_account_name: "Mantención General Instalaciones"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Mantenciones"
+
+2020-12-31 open Expenses:EAG:SegurosPropiedad-413071 CLP
+  code: "413071"
+  laudus_account_name: "Seguros Propiedad"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Seguros"
+
+2020-12-31 open Expenses:EAG:CompraDeActivosEquipamiento-413090 CLP
+  code: "413090"
+  laudus_account_name: "Compra de Activos / Equipamiento"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Compra Activos"
+
+2020-12-31 open Expenses:EAG:CompraVehculos-413091 CLP
+  code: "413091"
+  laudus_account_name: "Compra Vehículos"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Compra Activos"
+
+2020-12-31 open Expenses:EAG:OtrosGastos-413099 CLP
+  code: "413099"
+  laudus_account_name: "Otros Gastos"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Otros Gastos"
+
+2020-12-31 open Expenses:EAG:ObrasDeInfraestructuraMb-413900 CLP
+  code: "413900"
+  laudus_account_name: "Obras de Infraestructura: MB"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "Casa Sur"
+  laudus_categoria3: "Compra Activos"
+
+2020-12-31 open Expenses:EAG:MantencinGeneralInstalaciones-415065 CLP
+  code: "415065"
+  laudus_account_name: "Mantención General Instalaciones"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO MIAMI"
+  laudus_categoria3: "Mantenciones"
+
+2020-12-31 open Expenses:EAG:GastosComunesUsa-415067 CLP
+  code: "415067"
+  laudus_account_name: "Gastos comunes USA"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO MIAMI"
+  laudus_categoria3: "Gastos Comunes"
+
+2020-12-31 open Expenses:EAG:SegurosPropiedad-415071 CLP
+  code: "415071"
+  laudus_account_name: "Seguros propiedad"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "DEPARTAMENTO MIAMI"
+  laudus_categoria3: "Seguros"
+
+2020-12-31 open Expenses:EAG:Efectivo-430001 CLP
+  code: "430001"
+  laudus_account_name: "Efectivo"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Efectivo"
+
+2020-12-31 open Expenses:EAG:GastosBancarios-430003 CLP
+  code: "430003"
+  laudus_account_name: "Gastos Bancarios"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Otros Gastos"
+
+2020-12-31 open Liabilities:EAG:TC:Tc1027VisaInfinity-430005 CLP
+  code: "430005"
+  laudus_account_name: "T/C: 1027 - Visa Infinity - $"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Tarjetas Credito"
+  bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
+  bank_name: ""
+  bank_account_type: "tarjeta_credito"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006 CLP
+  code: "430006"
+  laudus_account_name: "T/C: 1027 - Visa Infinity - US$"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Tarjetas Credito"
+  bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
+  bank_name: ""
+  bank_account_type: "tarjeta_credito"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Liabilities:EAG:TC:Tc8996MastercardLanpass-430007 CLP
+  code: "430007"
+  laudus_account_name: "T/C: 8996 - Mastercard Lanpass - $"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Tarjetas Credito"
+  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
+  bank_name: ""
+  bank_account_type: "tarjeta_credito"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008 CLP
+  code: "430008"
+  laudus_account_name: "T/C: 8996 - Mastercard Lanpass - US$"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Tarjetas Credito"
+  bank_account_id: "7f0d7695-b39a-49db-94a6-58c8cf468469"
+  bank_name: ""
+  bank_account_type: "tarjeta_credito"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Liabilities:EAG:TC:Tc0858VisaLatanpass-430009 CLP
+  code: "430009"
+  laudus_account_name: "T/C: 0858 - Visa Latanpass - $"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Tarjetas Credito"
+  bank_account_id: "df21b488-a93d-4092-b79b-c84bd9a5b6e7"
+  bank_name: ""
+  bank_account_type: "tarjeta_credito"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010 CLP
+  code: "430010"
+  laudus_account_name: "T/C: 0858 - Visa Latanpass - US$"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Tarjetas Credito"
+  bank_account_id: "b00a909b-7d39-4900-885b-2282d53ab5b7"
+  bank_name: ""
+  bank_account_type: "tarjeta_credito"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Liabilities:EAG:TC:Tc8083AmericanExpress-430011 CLP, USD
+  code: "430011"
+  laudus_account_name: "T/C: 8083 - American Express"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Tarjetas Credito"
+  bank_account_id: "d2e4b439-617f-4a42-9797-9c9e9c9bda65"
+  bank_name: ""
+  bank_account_type: "tarjeta_credito"
+  bank_account_currency: "USD"
+
+2020-12-31 open Liabilities:EAG:TC:TcVariasEag-430017 CLP
+  code: "430017"
+  laudus_account_name: "T/C: Varias EAG"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Tarjetas Credito"
+  bank_account_id: "08eba13d-8506-4f55-ae8a-bb1449358c58"
+  bank_name: ""
+  bank_account_type: "tarjeta_credito"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Liabilities:EAG:TC:TcRaquelVentura-430019 CLP
+  code: "430019"
+  laudus_account_name: "T/C: Raquel Ventura"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Raquel Ventura"
+  bank_account_id: "6d255017-ef7e-447f-8e70-dbdc13699439"
+  bank_name: ""
+  bank_account_type: "tarjeta_credito"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Expenses:EAG:SraRaquelVentura-430021 CLP
+  code: "430021"
+  laudus_account_name: "Sra. Raquel Ventura"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Raquel Ventura"
+
+2020-12-31 open Expenses:EAG:SraJacquelineDeutsch-430023 CLP
+  code: "430023"
+  laudus_account_name: "Sra. Jacqueline Deutsch"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Flia Deutsch"
+
+2020-12-31 open Expenses:EAG:SraPatriciaDeutsch-430024 CLP
+  code: "430024"
+  laudus_account_name: "Sra. Patricia Deutsch"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Flia Deutsch"
+
+2020-12-31 open Expenses:EAG:JocelynAvayDeutsch-430025 CLP
+  code: "430025"
+  laudus_account_name: "Jocelyn Avayú Deutsch"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Hijas"
+
+2020-12-31 open Expenses:EAG:JeannetteAvayDeutsch-430027 CLP
+  code: "430027"
+  laudus_account_name: "Jeannette Avayú Deutsch"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Hijas"
+
+2020-12-31 open Expenses:EAG:JohannaAvayDeutsch-430029 CLP
+  code: "430029"
+  laudus_account_name: "Johanna Avayú Deutsch"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Hijas"
+
+2020-12-31 open Expenses:EAG:JaelAvayDeutsch-430031 CLP
+  code: "430031"
+  laudus_account_name: "Jael Avayú Deutsch"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Hijas"
+
+2020-12-31 open Expenses:EAG:GloriaJimenez-430033 CLP
+  code: "430033"
+  laudus_account_name: "Gloria Jimenez"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Gloria Jimenez"
+
+2020-12-31 open Expenses:EAG:Remedios-430051 CLP
+  code: "430051"
+  laudus_account_name: "Remedios"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Salud"
+
+2020-12-31 open Expenses:EAG:ClnicasBonosMdicosExmenes-430053 CLP
+  code: "430053"
+  laudus_account_name: "Clínicas / Bonos / Médicos / Exámenes"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Salud"
+
+2020-12-31 open Expenses:EAG:CotizacinIsapre-430055 CLP
+  code: "430055"
+  laudus_account_name: "Cotización Isapre"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Salud"
+
+2020-12-31 open Expenses:EAG:GastosLegalesNotara-430071 CLP
+  code: "430071"
+  laudus_account_name: "Gastos Legales, Notaría"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Legales"
+
+2020-12-31 open Expenses:EAG:ImpuestoRenta-430073 CLP
+  code: "430073"
+  laudus_account_name: "Impuesto Renta"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Impuestos"
+
+2020-12-31 open Expenses:EAG:KerenHayesod-430081 CLP
+  code: "430081"
+  laudus_account_name: "Keren Hayesod"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Donaciones"
+
+2020-12-31 open Expenses:EAG:Wizo-430083 CLP
+  code: "430083"
+  laudus_account_name: "WIZO"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Donaciones"
+
+2020-12-31 open Expenses:EAG:CoronasDeCaridad-430089 CLP
+  code: "430089"
+  laudus_account_name: "Coronas de Caridad"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Donaciones"
+
+2020-12-31 open Expenses:EAG:RematesCompras-430090 CLP
+  code: "430090"
+  laudus_account_name: "Remates, Compras"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "GASTOS PERSONALES"
+
+2020-12-31 open Expenses:EAG:RegalosDeMatrimonioOtros-430091 CLP
+  code: "430091"
+  laudus_account_name: "Regalos de Matrimonio, Otros"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "GASTOS PERSONALES"
+
+2020-12-31 open Expenses:EAG:Donaciones-430092 CLP
+  code: "430092"
+  laudus_account_name: "Donaciones"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Donaciones"
+
+2020-12-31 open Expenses:EAG:OtrosGastosPersonales-430099 CLP
+  code: "430099"
+  laudus_account_name: "Otros Gastos Personales"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Otros Gastos"
+
+2020-12-31 open Income:EAG:ResultadoFondosMutuos-510001 CLP
+  code: "510001"
+  laudus_account_name: "Resultado Fondos Mutuos"
+  laudus_categoria1: "RESULTADOS"
+  laudus_categoria2: "Utilidad/Perdida Instrumentos Financieros"
+  laudus_categoria3: "Utilidad/Perdida Instrumentos Financieros Renta Variable"
+
+2020-12-31 open Income:EAG:ResultadoCvAcciones-510007 CLP
+  code: "510007"
+  laudus_account_name: "Resultado C/V Acciones"
+  laudus_categoria1: "RESULTADOS"
+  laudus_categoria2: "Utilidad/Perdida Instrumentos Financieros"
+  laudus_categoria3: "Utilidad/Perdida Instrumentos Financieros Renta Variable"
+
+2020-12-31 open Income:EAG:ResultadoRentaFija-510009 CLP
+  code: "510009"
+  laudus_account_name: "Resultado Renta Fija"
+  laudus_categoria1: "RESULTADOS"
+  laudus_categoria2: "Utilidad/Perdida Instrumentos Financieros"
+  laudus_categoria3: "Utilidad/Perdida Instrumentos Financieros Rentra Fija"
+
+2020-12-31 open Income:EAG:ResultadoMbi-510011 CLP
+  code: "510011"
+  laudus_account_name: "Resultado MBI"
+  laudus_categoria1: "RESULTADOS"
+  laudus_categoria2: "Utilidad/Perdida Instrumentos Financieros"
+  laudus_categoria3: "Utilidad/Perdida Instrumentos Financieros MBI"
+
+2020-12-31 open Income:EAG:DividendosAccionesArt107-510021 CLP
+  code: "510021"
+  laudus_account_name: "Dividendos Acciones Art. 107"
+  laudus_categoria1: "RESULTADOS"
+  laudus_categoria2: "Utilidad/Perdida Instrumentos Financieros"
+  laudus_categoria3: "Utilidad/Perdida Dividendos"
+
+2020-12-31 open Income:EAG:DividendosFip-510023 CLP
+  code: "510023"
+  laudus_account_name: "Dividendos FIP"
+  laudus_categoria1: "RESULTADOS"
+  laudus_categoria2: "Utilidad/Perdida Instrumentos Financieros"
+  laudus_categoria3: "Utilidad/Perdida Dividendos"
+
+2020-12-31 open Assets:Jocelyn:Caja-610001 CLP
+  code: "610001"
+  laudus_account_name: "Caja - $"
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jocelyn:CajaUs-610003 CLP
+  code: "610003"
+  laudus_account_name: "Caja - US$"
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005 CLP
+  code: "610005"
+  laudus_account_name: "Banco BCI 28977581 Jocelyn"
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  bank_account_id: "77c7b21f-c9bb-4fb5-b056-adbbe3d6faeb"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jocelyn:Bancos:BancoBciUsd19650540Jocelyn-610006 CLP
+  code: "610006"
+  laudus_account_name: "Banco BCI USD 19650540 Jocelyn"
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  bank_account_id: "627f2642-9e94-439f-96fd-4c1e70dd214e"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jocelyn:Inversiones:FmBciDlarCash-610021 CLP, USD
+  code: "610021"
+  laudus_account_name: "FM BCI - Dólar Cash"
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  bank_account_id: "efd3139f-33e0-445f-bdc6-d5d310f15341"
+  bank_name: "BCI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "USD"
+
+2020-12-31 open Assets:Jocelyn:Inversiones:FmBciExpressSerieClsica-610022 CLP
+  code: "610022"
+  laudus_account_name: "FM BCI - Express Serie Clásica"
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  bank_account_id: "265ab6c1-a64e-49ae-a1c8-c6d1920ab0b2"
+  bank_name: "BCI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jocelyn:Inversiones:MbiSecuencia0-610023 CLP
+  code: "610023"
+  laudus_account_name: "MBI - Secuencia 0"
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  bank_account_id: "27f60b7e-eb54-4f4d-b720-f38acb421349"
+  bank_name: "MBI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jocelyn:Inversiones:MbiSecuencia0-610025 CLP
+  code: "610025"
+  laudus_account_name: "MBI - Secuencia 0"
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  bank_account_id: "790d849d-57da-487e-adfb-169283fdb688"
+  bank_name: "MBI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jocelyn:OtrosIngresos-610099 CLP
+  code: "610099"
+  laudus_account_name: "Otros Ingresos"
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jocelyn:ControlYLiquidacin-610999 CLP
+  code: "610999"
+  laudus_account_name: "Control y Liquidación"
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jocelyn:CuentasCorrientesDelPersonal-613001 CLP
+  code: "613001"
+  laudus_account_name: "Cuentas Corrientes del Personal"
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jocelyn:FondoFijo-613003 CLP
+  code: "613003"
+  laudus_account_name: "Fondo Fijo"
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jocelyn:FondosPorRendir-613005 CLP
+  code: "613005"
+  laudus_account_name: "Fondos por Rendir"
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jocelyn:FondosPorRendirUs-613007 CLP
+  code: "613007"
+  laudus_account_name: "Fondos por Rendir - US$"
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jocelyn:DeudoresVarios-613019 CLP
+  code: "613019"
+  laudus_account_name: "Deudores Varios"
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jocelyn:ControlYLiquidacin-613099 CLP
+  code: "613099"
+  laudus_account_name: "Control y Liquidación"
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jocelyn:Sueldo-670001 CLP
+  code: "670001"
+  laudus_account_name: "Sueldo"
+  laudus_categoria1: "INGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jocelyn:Dividendos-670005 CLP
+  code: "670005"
+  laudus_account_name: "Dividendos"
+  laudus_categoria1: "INGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jocelyn:RetirosTecnin-670011 CLP
+  code: "670011"
+  laudus_account_name: "Retiros Tecnión"
+  laudus_categoria1: "INGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jocelyn:RetirosPlyades-670013 CLP
+  code: "670013"
+  laudus_account_name: "Retiros Pléyades"
+  laudus_categoria1: "INGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jocelyn:FondosMutuosBci-670021 CLP
+  code: "670021"
+  laudus_account_name: "Fondos Mutuos BCI"
+  laudus_categoria1: "INGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jocelyn:Mbi-670023 CLP
+  code: "670023"
+  laudus_account_name: "MBI"
+  laudus_categoria1: "INGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jocelyn:VentaDeActivos-670091 CLP
+  code: "670091"
+  laudus_account_name: "Venta de Activos"
+  laudus_categoria1: "INGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jocelyn:OtrosIngresos-670099 CLP
+  code: "670099"
+  laudus_account_name: "Otros Ingresos"
+  laudus_categoria1: "INGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jocelyn:RetirosDelMes-690001 CLP
+  code: "690001"
+  laudus_account_name: "Retiros del mes"
+  laudus_categoria1: "EGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jocelyn:GastosBancarios-690003 CLP
+  code: "690003"
+  laudus_account_name: "Gastos Bancarios"
+  laudus_categoria1: "EGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jocelyn:EnferneraGastosMdicos-690051 CLP
+  code: "690051"
+  laudus_account_name: "Enfernera, Gastos Médicos"
+  laudus_categoria1: "EGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jocelyn:ImpuestoRenta-690073 CLP
+  code: "690073"
+  laudus_account_name: "Impuesto Renta"
+  laudus_categoria1: "EGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jocelyn:CompraActivos-690091 CLP
+  code: "690091"
+  laudus_account_name: "Compra Activos"
+  laudus_categoria1: "EGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099 CLP
+  code: "690099"
+  laudus_account_name: "Otros Gastos Personales Jocelyn"
+  laudus_categoria1: "EGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JOCELYN AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JOCELYN AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jeannette:Caja-710001 CLP
+  code: "710001"
+  laudus_account_name: "Caja - $"
+  laudus_categoria1: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jeannette:CajaUs-710003 CLP
+  code: "710003"
+  laudus_account_name: "Caja - US$"
+  laudus_categoria1: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005 CLP
+  code: "710005"
+  laudus_account_name: "Banco BCI 28981600 - Jeannette"
+  laudus_categoria1: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  bank_account_id: "8e1d5201-d7d9-4df2-92fc-dd5667ba96cd"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jeannette:Bancos:BancoBciUsd19679122Jeannette-710006 CLP
+  code: "710006"
+  laudus_account_name: "Banco BCI USD 19679122 Jeannette"
+  laudus_categoria1: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  bank_account_id: "6fde454e-74e6-4a41-832a-a066f08994c0"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jeannette:Inversiones:FmBciAltoPatrimonio-710021 CLP
+  code: "710021"
+  laudus_account_name: "FM BCI - Alto Patrimonio"
+  laudus_categoria1: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  bank_account_id: "1fd6041b-ba80-4aa3-8907-63283d141cd7"
+  bank_name: "BCI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jeannette:Inversiones:FmBciExpressSerieClsica-710022 CLP
+  code: "710022"
+  laudus_account_name: "FM BCI - Express Serie Clásica"
+  laudus_categoria1: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  bank_account_id: "552ce580-4ae5-4197-95c1-0ccca09cf73b"
+  bank_name: "BCI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jeannette:Inversiones:MbiSecuencia0-710023 CLP
+  code: "710023"
+  laudus_account_name: "MBI - Secuencia 0"
+  laudus_categoria1: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  bank_account_id: "72c1c9f6-e410-4468-98fb-5b8c210b473d"
+  bank_name: "MBI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jeannette:Inversiones:MbiSecuencia2-710025 CLP
+  code: "710025"
+  laudus_account_name: "MBI - Secuencia 2"
+  laudus_categoria1: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  bank_account_id: "fa696162-c36e-4793-8d78-a87aa40a880a"
+  bank_name: "MBI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jeannette:ControlYLiquidacin-710999 CLP
+  code: "710999"
+  laudus_account_name: "Control y Liquidación"
+  laudus_categoria1: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jeannette:DeudoresVarios-750017 CLP
+  code: "750017"
+  laudus_account_name: "Deudores Varios"
+  laudus_categoria1: "CUENTAS POR COBRAR JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "CUENTAS POR COBRAR JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "CUENTAS POR COBRAR JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jeannette:Sueldo-770001 CLP
+  code: "770001"
+  laudus_account_name: "Sueldo"
+  laudus_categoria1: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jeannette:Dividendos-770005 CLP
+  code: "770005"
+  laudus_account_name: "Dividendos"
+  laudus_categoria1: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jeannette:RetirosTecnin-770011 CLP
+  code: "770011"
+  laudus_account_name: "Retiros Tecnión"
+  laudus_categoria1: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jeannette:RetirosPlyades-770013 CLP
+  code: "770013"
+  laudus_account_name: "Retiros Pléyades"
+  laudus_categoria1: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jeannette:FondosMutuosBci-770021 CLP
+  code: "770021"
+  laudus_account_name: "Fondos Mutuos BCI"
+  laudus_categoria1: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jeannette:Mbi-770023 CLP
+  code: "770023"
+  laudus_account_name: "MBI"
+  laudus_categoria1: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jeannette:VentaDeActivos-770091 CLP
+  code: "770091"
+  laudus_account_name: "Venta de Activos"
+  laudus_categoria1: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jeannette:OtrosIngresosJeannette-770099 CLP
+  code: "770099"
+  laudus_account_name: "Otros Ingresos - Jeannette"
+  laudus_categoria1: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jeannette:RetirosDelMes-790001 CLP
+  code: "790001"
+  laudus_account_name: "Retiros del Mes"
+  laudus_categoria1: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jeannette:GastosBancarios-790003 CLP
+  code: "790003"
+  laudus_account_name: "Gastos Bancarios"
+  laudus_categoria1: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jeannette:EnfermeraGastosMdicos-790051 CLP
+  code: "790051"
+  laudus_account_name: "Enfermera, Gastos Médicos"
+  laudus_categoria1: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jeannette:ImpuestoRenta-790073 CLP
+  code: "790073"
+  laudus_account_name: "Impuesto Renta"
+  laudus_categoria1: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jeannette:CompraActivos-790091 CLP
+  code: "790091"
+  laudus_account_name: "Compra Activos"
+  laudus_categoria1: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jeannette:OtrosGastosPersonalesJeannette-790099 CLP
+  code: "790099"
+  laudus_account_name: "Otros Gastos Personales - Jeannette"
+  laudus_categoria1: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JEANNETTE AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Johanna:Caja-810001 CLP
+  code: "810001"
+  laudus_account_name: "Caja - $"
+  laudus_categoria1: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Johanna:CajaUs-810003 CLP
+  code: "810003"
+  laudus_account_name: "Caja - US$"
+  laudus_categoria1: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Johanna:Bancos:BancoBci28981618Johanna-810005 CLP
+  code: "810005"
+  laudus_account_name: "Banco BCI 28981618 - Johanna"
+  laudus_categoria1: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  bank_account_id: "7551810b-31c4-4ad7-9269-82efca29deda"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Johanna:Inversiones:FmBciAltoPatrimonio-810021 CLP
+  code: "810021"
+  laudus_account_name: "FM BCI - Alto Patrimonio"
+  laudus_categoria1: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  bank_account_id: "82dddc23-43c3-4d1c-95ee-e835b4ea0f77"
+  bank_name: "BCI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Johanna:Inversiones:FmBciExpressSerieClsica-810022 CLP
+  code: "810022"
+  laudus_account_name: "FM BCI - Express Serie Clásica"
+  laudus_categoria1: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  bank_account_id: "5c1ec825-0bd8-43e8-96bc-930f3c14a7f8"
+  bank_name: "BCI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Johanna:Inversiones:MbiSecuencia0-810023 CLP
+  code: "810023"
+  laudus_account_name: "MBI - Secuencia 0"
+  laudus_categoria1: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  bank_account_id: "85213952-1b75-4f92-ab5c-77a6271cb4ca"
+  bank_name: "MBI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Johanna:Inversiones:MbiSecuencia2-810025 CLP
+  code: "810025"
+  laudus_account_name: "MBI - Secuencia 2"
+  laudus_categoria1: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  bank_account_id: "443a17fe-5764-4278-9ee1-497d86178b98"
+  bank_name: "MBI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Johanna:ControlYLiquidacinJohanna-810999 CLP
+  code: "810999"
+  laudus_account_name: "Control y Liquidación - Johanna"
+  laudus_categoria1: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Johanna:DeudoresVarios-850001 CLP
+  code: "850001"
+  laudus_account_name: "Deudores Varios"
+  laudus_categoria1: "CUENTAS POR COBRAR JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "CUENTAS POR COBRAR JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "CUENTAS POR COBRAR JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Income:Johanna:Sueldo-870001 CLP
+  code: "870001"
+  laudus_account_name: "Sueldo"
+  laudus_categoria1: "INGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Income:Johanna:Dividendos-870005 CLP
+  code: "870005"
+  laudus_account_name: "Dividendos"
+  laudus_categoria1: "INGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Income:Johanna:RetirosTecnin-870011 CLP
+  code: "870011"
+  laudus_account_name: "Retiros  Tecnión"
+  laudus_categoria1: "INGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Income:Johanna:RetirosPlyades-870013 CLP
+  code: "870013"
+  laudus_account_name: "Retiros Pléyades"
+  laudus_categoria1: "INGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Income:Johanna:FondosMutuosBci-870021 CLP
+  code: "870021"
+  laudus_account_name: "Fondos Mutuos BCI"
+  laudus_categoria1: "INGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Income:Johanna:Mbi-870023 CLP
+  code: "870023"
+  laudus_account_name: "MBI"
+  laudus_categoria1: "INGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Income:Johanna:VentaDeActivos-870091 CLP
+  code: "870091"
+  laudus_account_name: "Venta de Activos"
+  laudus_categoria1: "INGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Income:Johanna:OtrosIngresos-870099 CLP
+  code: "870099"
+  laudus_account_name: "Otros Ingresos"
+  laudus_categoria1: "INGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Johanna:RetirosDelMes-890001 CLP
+  code: "890001"
+  laudus_account_name: "Retiros del mes"
+  laudus_categoria1: "EGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Johanna:GastosBancarios-890003 CLP
+  code: "890003"
+  laudus_account_name: "Gastos Bancarios"
+  laudus_categoria1: "EGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Johanna:EnfermeraGastosMdicos-890051 CLP
+  code: "890051"
+  laudus_account_name: "Enfermera, Gastos Médicos"
+  laudus_categoria1: "EGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Johanna:ImpuestoRenta-890073 CLP
+  code: "890073"
+  laudus_account_name: "Impuesto Renta"
+  laudus_categoria1: "EGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Johanna:CompraDeActivos-890091 CLP
+  code: "890091"
+  laudus_account_name: "Compra de Activos"
+  laudus_categoria1: "EGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Johanna:OtrosGastosPersonalesJohanna-890099 CLP
+  code: "890099"
+  laudus_account_name: "Otros Gastos Personales - Johanna"
+  laudus_categoria1: "EGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JOHANNA AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JOHANNA AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jael:Caja-910001 CLP
+  code: "910001"
+  laudus_account_name: "Caja - $"
+  laudus_categoria1: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jael:CajaUs-910003 CLP
+  code: "910003"
+  laudus_account_name: "Caja - US$"
+  laudus_categoria1: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jael:Bancos:BancoBci28980981Jael-910005 CLP
+  code: "910005"
+  laudus_account_name: "Banco BCI 28980981 - Jael"
+  laudus_categoria1: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  bank_account_id: "3551f7eb-bc11-4c08-8714-f702c3182e37"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jael:Bancos:BancoBciUsd19679114Jael-910006 CLP
+  code: "910006"
+  laudus_account_name: "Banco BCI USD 19679114 Jael"
+  laudus_categoria1: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  bank_account_id: "b83d2031-c210-428e-97e2-a448f660de31"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jael:Inversiones:FmBciAltoPatrimonio-910021 CLP
+  code: "910021"
+  laudus_account_name: "FM BCI - Alto Patrimonio"
+  laudus_categoria1: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  bank_account_id: "8008b53c-697e-40ea-bc8a-c530096aef58"
+  bank_name: "BCI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jael:Inversiones:FmBciExpressSerieClsica-910022 CLP
+  code: "910022"
+  laudus_account_name: "FM BCI - Express Serie Clásica"
+  laudus_categoria1: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  bank_account_id: "b0685544-5a36-4a1b-be50-edccc1a3939b"
+  bank_name: "BCI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jael:Inversiones:MbiSecuencia0-910023 CLP
+  code: "910023"
+  laudus_account_name: "MBI - Secuencia 0"
+  laudus_categoria1: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  bank_account_id: "22d458c3-33af-42d6-81a2-30caecb532cf"
+  bank_name: "MBI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jael:Inversiones:MbiSecuencia2-910025 CLP
+  code: "910025"
+  laudus_account_name: "MBI - Secuencia 2"
+  laudus_categoria1: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  bank_account_id: "dbfaedf2-f1c2-42fa-aecf-a620742dae40"
+  bank_name: "MBI"
+  bank_account_type: "cta_inversiones"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:Jael:ControlYLiquidacin-910099 CLP
+  code: "910099"
+  laudus_account_name: "Control y Liquidación"
+  laudus_categoria1: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "DISPONIBLE JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "DISPONIBLE JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Assets:Jael:DeudoresVarios-950017 CLP
+  code: "950017"
+  laudus_account_name: "Deudores Varios"
+  laudus_categoria1: "CUENTAS POR COBRAR JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "CUENTAS POR COBRAR JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "CUENTAS POR COBRAR JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jael:Sueldo-970001 CLP
+  code: "970001"
+  laudus_account_name: "Sueldo"
+  laudus_categoria1: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jael:Dividendos-970005 CLP
+  code: "970005"
+  laudus_account_name: "Dividendos"
+  laudus_categoria1: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jael:RetirosBankJuliusBaerCoLtdJael-970010 CLP
+  code: "970010"
+  laudus_account_name: "Retiros Bank Julius Baer & Co. Ltd Jael"
+  laudus_categoria1: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jael:RetirosTecnin-970011 CLP
+  code: "970011"
+  laudus_account_name: "Retiros Tecnión"
+  laudus_categoria1: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jael:RetirosPlyades-970013 CLP
+  code: "970013"
+  laudus_account_name: "Retiros Pléyades"
+  laudus_categoria1: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jael:FondosMutuosBci-970021 CLP
+  code: "970021"
+  laudus_account_name: "Fondos Mutuos BCI"
+  laudus_categoria1: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jael:Mbi-970023 CLP
+  code: "970023"
+  laudus_account_name: "MBI"
+  laudus_categoria1: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jael:DevolucinIsapreJael-970051 CLP
+  code: "970051"
+  laudus_account_name: "Devolución Isapre - Jael"
+  laudus_categoria1: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jael:VentaDeActivos-970091 CLP
+  code: "970091"
+  laudus_account_name: "Venta de Activos"
+  laudus_categoria1: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Income:Jael:OtrosIngresosJael-970099 CLP
+  code: "970099"
+  laudus_account_name: "Otros Ingresos - Jael"
+  laudus_categoria1: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "INGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "INGRESOS JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jael:RetirosDelMes-990001 CLP
+  code: "990001"
+  laudus_account_name: "Retiros del mes"
+  laudus_categoria1: "EGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jael:GastosBancarios-990003 CLP
+  code: "990003"
+  laudus_account_name: "Gastos Bancarios"
+  laudus_categoria1: "EGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jael:IsapreGastosMdicos-990051 CLP
+  code: "990051"
+  laudus_account_name: "Isapre, Gastos Médicos"
+  laudus_categoria1: "EGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jael:ImpuestoRenta-990073 CLP
+  code: "990073"
+  laudus_account_name: "Impuesto Renta"
+  laudus_categoria1: "EGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jael:CompraDeActivos-990091 CLP
+  code: "990091"
+  laudus_account_name: "Compra de Activos"
+  laudus_categoria1: "EGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JAEL AVAYU DEUTSCH"
+
+2020-12-31 open Expenses:Jael:OtrosGastosPersonalesJael-990099 CLP
+  code: "990099"
+  laudus_account_name: "Otros Gastos Personales - Jael"
+  laudus_categoria1: "EGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria2: "EGRESOS JAEL AVAYU DEUTSCH"
+  laudus_categoria3: "EGRESOS JAEL AVAYU DEUTSCH"

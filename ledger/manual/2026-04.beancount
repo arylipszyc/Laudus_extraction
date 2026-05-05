@@ -1,9 +1,11 @@
-;; ledger/manual/2026-04.beancount — manual edits zone (mock)
+;; ledger/manual/2026-04.beancount — zona de edits manuales del contador
+;;
+;; Esta transacción sirve doble propósito:
+;;   - Smoke fixture: permite que los tests de Story 9.0
+;;     (test_fava_edit_validator) tengan algo concreto que mutar.
+;;   - Demo: muestra el patrón de edit manual del contador. Las cuentas
+;;     referenciadas existen en accounts.beancount (post-bootstrap 9.1).
 
-2021-01-01 * "Opening Balance"
-  Assets:EAG:Bancos:BancoBci-111005       1000000.00 CLP
-  Equity:EAG:OpeningBalances             -1000000.00 CLP
-
-2026-04-15 * "Acevedo Ltda - Combustible"
-  Assets:EAG:Bancos:BancoBci-111005       -65690.00 CLP
-  Expenses:EAG:CombustibleVehiculos-413044  65690.00 CLP
+2026-04-15 * "Acevedo Ltda - Combustible (sample)"
+  Assets:EAG:Bancos:BancoBci10160175-111005    -65690.00 CLP
+  Expenses:EAG:CombustibleVehculos-413044       65690.00 CLP

@@ -1,12 +1,28 @@
-;; ledger/main.beancount — entry point
+;; ledger/main.beancount — entry point del ledger LAUDUS
 ;;
-;; Mock ledger for Story 9.0 smoke test. Replace with real bootstrap output
-;; when Story 9.1 (F0 bootstrap) lands.
+;; Solo declaraciones globales + includes a las subzonas. No transactions.
+;; Ver architecture-c4.md §1.5 para el template canónico.
 
-option "title" "LAUDUS — EAG Family Office (mock)"
+option "title" "LAUDUS — EAG Family Office"
 option "operating_currency" "CLP"
 
+plugin "beancount.plugins.implicit_prices"
+plugin "beancount.plugins.check_commodity"
+;; NO usar auto_accounts — explicit opens only.
+
+;; Commodities declaradas — exigidas por plugin check_commodity.
+1900-01-01 commodity CLP
+  name: "Peso chileno"
+1900-01-01 commodity USD
+  name: "Dólar estadounidense"
+
+;; Fava extension para validación bean-check pre/post edit (Story 9.0)
 2021-01-01 custom "fava-extension" "fava_edit_validator"
 
 include "accounts.beancount"
+include "opening-2021.beancount"
+include "prices.beancount"
+include "imports/laudus/*.beancount"
+include "imports/cartolas/*.beancount"
+include "imports/_new-accounts-pending.beancount"
 include "manual/*.beancount"

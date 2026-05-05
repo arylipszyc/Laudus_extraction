@@ -1,0 +1,7 @@
+;; ledger/imports/_new-accounts-pending.beancount
+;;
+;; Cuentas detectadas por el importer Laudus (Story 9.4) que NO existen
+;; todavía en accounts.beancount. Cada entrada es un `open` tentativo +
+;; sus JEs llevan tag #pending-account hasta que Ary las promueva
+;; manualmente al accounts.beancount con su Cat1/2/3 + bank metadata.
+;; Vacío en estado inicial.

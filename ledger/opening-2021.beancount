@@ -1,0 +1,67 @@
+;; ledger/opening-2021.beancount — generado por bootstrap/generate_opening_balances.py
+;; Story 9.1 (Bootstrap histórico Beancount).
+;; Saldos iniciales al 2021-01-01 derivados del balance sheet de Laudus
+;; (JE 140 — Saldo anterior). Pre-2026 todo CLP por decisión Q4.
+
+
+2020-12-31 open Equity:EAG:OpeningBalances CLP, USD
+
+2020-12-31 pad Assets:EAG:Bancos:BancoBci10160175-111005 Equity:EAG:OpeningBalances
+  source_je: "140"
+
+2021-01-01 balance Assets:EAG:Bancos:BancoBci10160175-111005 20309785.00 CLP
+
+2020-12-31 pad Assets:EAG:Bancos:BancoEdwards0162338082-111007 Equity:EAG:OpeningBalances
+  source_je: "140"
+
+2021-01-01 balance Assets:EAG:Bancos:BancoEdwards0162338082-111007 33085236.00 CLP
+
+2020-12-31 pad Assets:EAG:Bancos:BancoSantander63188824-111009 Equity:EAG:OpeningBalances
+  source_je: "140"
+
+2021-01-01 balance Assets:EAG:Bancos:BancoSantander63188824-111009 8742162.00 CLP
+
+2020-12-31 pad Assets:EAG:FondosPorRendir-115005 Equity:EAG:OpeningBalances
+  source_je: "140"
+
+2021-01-01 balance Assets:EAG:FondosPorRendir-115005 500000.00 CLP
+
+2020-12-31 pad Assets:EAG:DeudoresVarios-115019 Equity:EAG:OpeningBalances
+  source_je: "140"
+
+2021-01-01 balance Assets:EAG:DeudoresVarios-115019 20000000.00 CLP
+
+2020-12-31 pad Assets:EAG:ControlYLiquidacin-115099 Equity:EAG:OpeningBalances
+  source_je: "140"
+
+2021-01-01 balance Assets:EAG:ControlYLiquidacin-115099 -13895755.00 CLP
+
+2020-12-31 pad Liabilities:EAG:Apertura-211005 Equity:EAG:OpeningBalances
+  source_je: "140"
+
+2021-01-01 balance Liabilities:EAG:Apertura-211005 -349482802.00 CLP
+
+2020-12-31 pad Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005 Equity:EAG:OpeningBalances
+  source_je: "140"
+
+2021-01-01 balance Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005 24465710.00 CLP
+
+2020-12-31 pad Assets:Jocelyn:DeudoresVarios-613019 Equity:EAG:OpeningBalances
+  source_je: "140"
+
+2021-01-01 balance Assets:Jocelyn:DeudoresVarios-613019 143664366.00 CLP
+
+2020-12-31 pad Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005 Equity:EAG:OpeningBalances
+  source_je: "140"
+
+2021-01-01 balance Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005 52085954.00 CLP
+
+2020-12-31 pad Assets:Johanna:Bancos:BancoBci28981618Johanna-810005 Equity:EAG:OpeningBalances
+  source_je: "140"
+
+2021-01-01 balance Assets:Johanna:Bancos:BancoBci28981618Johanna-810005 42130726.00 CLP
+
+2020-12-31 pad Assets:Jael:Bancos:BancoBci28980981Jael-910005 Equity:EAG:OpeningBalances
+  source_je: "140"
+
+2021-01-01 balance Assets:Jael:Bancos:BancoBci28980981Jael-910005 18394618.00 CLP

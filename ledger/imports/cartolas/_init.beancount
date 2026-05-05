@@ -1,0 +1,5 @@
+;; ledger/imports/cartolas/_init.beancount — placeholder para que el
+;; glob `include "imports/cartolas/*.beancount"` matchee algún archivo
+;; aún cuando todavía no se procesó ninguna cartola (Story 9.6).
+;; El importer escribe `imports/cartolas/{slug}.beancount` por cartola
+;; promovida desde staging; este archivo queda inocuo en producción.

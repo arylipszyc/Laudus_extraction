@@ -1,0 +1,5 @@
+;; ledger/imports/laudus/_init.beancount — placeholder para que el glob
+;; `include "imports/laudus/*.beancount"` matchee algún archivo aún
+;; cuando todavía no se ejecutó el importer Laudus (Story 9.4).
+;; El importer escribe `imports/laudus/YYYY-MM.beancount` por mes;
+;; este archivo queda inocuo en producción.

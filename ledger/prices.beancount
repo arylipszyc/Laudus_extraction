@@ -1,0 +1,6 @@
+;; ledger/prices.beancount — placeholder vacío
+;;
+;; Bajo Q4 (decisión 2026-05-05, FX Opción D cartola-derivada), las price
+;; directives reales se derivan automáticamente de las Transactions con `@@`
+;; notation vía plugin `implicit_prices` (Story 9.6b). Este archivo queda
+;; vacío por consistencia formal con el template de main.beancount.
