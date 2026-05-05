@@ -4,7 +4,7 @@ title: PDF upload + extracción Gemini → JSON canónico (era 4.1a)
 status: ready-for-dev
 epic: 9
 depends_on: []
-blocks: [9.6]
+blocks: [9.6a]
 parallelizable_with: [9.0, 9.1, 9.2]
 ---
 
@@ -35,20 +35,27 @@ Esta story:
 **AC1 — Endpoint multipart con validación de inputs**
 
 **Given** `POST /api/v1/cartolas/upload` con multipart form: `pdf_file` (binary, ≤ 20MB) + `bank_account_id` (UUID)
-**When** el endpoint se llama por un usuario `contador`
-**Then** valida: tamaño ≤ 20MB (NFR3), MIME = `application/pdf`, `bank_account_id` existe en `bank_accounts` (Supabase)
+**When** el endpoint se llama por un usuario `contador` o `admin` (Story 9.13)
+**Then** valida:
+  - tamaño ≤ 20MB (NFR3)
+  - MIME = `application/pdf`
+  - `bank_account_id` existe en metadata de `accounts.beancount` (consultado vía backend al boot, cached in-memory — **NO Supabase**)
+  - el `accounts.beancount` entry para ese `bank_account_id` tiene metadata `bank_account_last4` no-null (necesario para validar que la cartola subida corresponde al banco/cuenta esperado en post-process)
 **And** si alguna validación falla → HTTP 400 con `{"error": {"code": "VALIDATION_FAILED", ...}}`
-**And** un usuario `family` recibe HTTP 403 (sin cambios vs RBAC)
+**And** específicamente si `bank_account_last4` es null → HTTP 400 con código `MISSING_LAST4` y mensaje *"Esta cuenta bancaria no tiene `bank_account_last4` registrado en `accounts.beancount`. Editar vía Fava antes de subir cartolas (ver runbook contador-onboarding-fava.md)."*
+**And** un usuario `family` recibe HTTP 403 (gate de Story 9.13)
 
 ---
 
 **AC2 — Frontend de upload selecciona bank_account_id ANTES del upload**
 
-**Given** la pantalla `CartolaUploadPage.tsx` (preservada de Story 4.1 original)
+**Given** la pantalla `CartolaUploadPage.tsx` (Story 4.1 original NO se implementó — crear from scratch)
 **When** el contador navega
 **Then** ve un dropdown de bank accounts activos (de `GET /api/v1/bank-accounts/?active_only=true`) — uno seleccionable
 **And** ve un file input para PDF
 **And** el botón "Subir" se deshabilita si falta cualquiera
+
+> **Nota sobre el endpoint backend `GET /api/v1/bank-accounts/`:** la **interfaz HTTP no cambia** vs Story 4.0 — sigue siendo el mismo contrato (mismo response shape). Lo que cambia es la **implementación interna**: el backend lee de `accounts.beancount` filtrando entries con metadata `bank_account_*` (cached in-memory al boot), NO query Supabase. Frontend no se entera del cambio.
 
 ---
 
@@ -75,8 +82,8 @@ Esta story:
 
 **Given** el frontend envía solo `pdf_file` + `bank_account_id`
 **When** el backend procesa
-**Then** los campos `source.bank_name`, `source.account_label`, `source.account_type`, `source.entity` se resuelven server-side leyendo `bank_accounts` (Supabase)
-**And** se incluyen en el JSON canónico devuelto (frontend + 9.6 no necesitan re-resolver)
+**Then** los campos `source.bank_name`, `source.account_label`, `source.account_type`, `source.entity` se resuelven server-side leyendo metadata de `accounts.beancount` (cached in-memory) — **NO Supabase**
+**And** se incluyen en el JSON canónico devuelto (frontend + 9.6a no necesitan re-resolver)
 
 ---
 
@@ -154,8 +161,11 @@ Esta story:
   - [ ] Async pattern con job_id tracking en memoria (singleton dict) — TTL 1 hora
 
 - [ ] Task 4: Resolución bank account → entity (AC5)
-  - [ ] Lookup en Supabase `bank_accounts` por `id`; join lateral con `plan_de_cuentas` para `account_name`
-  - [ ] Mapear a `entity` aplicando tabla §2.3 (Categoria1 de plan_de_cuentas → Entity)
+  - [ ] El backend parsea `accounts.beancount` al boot (load-once, ~340 directivas, milisegundos) y mantiene index in-memory por `bank_account_id` metadata.
+  - [ ] Index value: `{account_name (Beancount full path), bank_name, account_type, currency, laudus_categoria1, laudus_account_name}`.
+  - [ ] La función `resolve_source(bank_account_id) → CartolaSource` usa el index para devolver todos los fields requeridos.
+  - [ ] Mapear `entity` aplicando tabla §2.3 (Categoria1 → Entity) sobre el `laudus_categoria1` del index.
+  - [ ] Cache invalidation: el index se reconstruye cuando cambia `accounts.beancount` (signal del file watcher Story 9.2 — endpoint admin `POST /api/v1/admin/cache/reload-accounts` para invalidar manual también es válido).
 
 - [ ] Task 5: Post-process warnings (AC6 + AC7)
   - [ ] Detección de `DUPLICATE_LINE`, `ZERO_AMOUNT`, `PERIOD_MISMATCH` (lógica pura sobre el JSON)
@@ -235,9 +245,28 @@ Esta story:
 
 Ver flag #1 en cierre de Moishe-Winston: este shape es más rico que el del PRD original. NO bloquea esta story. El PRD se actualizará en sesión separada por John.
 
+### Sin Supabase — fuente de bank accounts
+
+Bajo decisión 2026-05-05 (eliminar Supabase del diseño c4):
+- El backend mantiene un **index in-memory** parseado de `accounts.beancount` al boot.
+- Las metadata `bank_account_id`, `bank_name`, `account_type`, `bank_account_last4`, `bank_account_currency` viven directamente en las directivas `open` del archivo `accounts.beancount` (modelo unificado — ver Story 9.1).
+- **NO** hay tabla SQL `bank_accounts` separada.
+
+Performance: parseo del archivo entero al boot ~milisegundos (~340 directivas). Cache invalidation vía file watcher (Story 9.2) o endpoint admin.
+
+### Caveat: `bank_account_last4` nace null en bootstrap (Flag 6, 2026-05-05)
+
+Hallazgo de Amelia durante implementación de Story 9.1: **la tabla `bank_accounts` de Supabase NO tiene el campo `bank_account_last4`**. Ese dato vive en Google Sheets (tab `Bancos`), que el bootstrap de 9.1 no consulta (Option C híbrida lee Laudus + Supabase one-time, no Sheets).
+
+**Decisión Ary 2026-05-05 (Opción 1):** la **fuente canónica** de `last4` post-bootstrap es `accounts.beancount`. Si está null, el endpoint de esta story falla la validación con código `MISSING_LAST4` (AC1) y Ary pobla manualmente vía Fava antes de subir cartolas de esa cuenta.
+
+**Por qué Opción 1 (no consultar Sheets como segundo source):** bajo c4 puro, `accounts.beancount` es la SoT. Reintroducir lectura de Sheets contradice la dirección de Story 9.11 (deprecation Sheets) y agrega un drift potencial. El costo de poblar manualmente las 47 cuentas en Fava es único (~30 min) y queda contemplado como pre-condición operacional en Story 9.3 AC8.
+
+**Implicación aguas abajo:** Stories 9.6a, 9.6b y 9.7 consumen `last4` indirectamente (matching cartola↔Laudus); heredan esta decisión sin cambios estructurales propios. Si una cartola intenta subirse antes de poblar el `last4`, la validación de esta story (AC1) corta el flujo con mensaje accionable.
+
 ### Out of scope
 
-- Transformación a directivas Beancount (Story 9.6).
+- Transformación a directivas Beancount (Story 9.6a / 9.6b).
 - Validación de balance via bean-check (Story 9.9 — la `Balance` directive en 9.6 + el revert si falla).
 - Categorización (Story 9.7).
 - Drill-down en frontend (Story 9.8).
@@ -266,3 +295,6 @@ ledger/.gitignore                          # NEW or MODIFY (ignore _staging/)
 - [Source: architecture-c4.md §4 — Contrato del importer PDF (4.1 reformulada)]
 - [Source: bob-x-moishe-epic9-2026-04-30.md — `PRD-update needed` #1]
 - [Source: epics.md Story 4.1 original — partes preservadas (frontend, GeminiClient, NFRs)]
+- [Source: bob-x-moishe-epic9-2026-04-30.md — ítem #9 (sin Supabase) + confirmación 2026-05-05 frontend 4.1 NO existe + Flag 6 (last4 ausente en Supabase, Opción 1 confirmada por Ary)]
+- [Source: 9-13-rbac-3-roles.md — gate `contador` o `admin` aplicado al endpoint upload]
+- [Source: 9-3-fava-deploy-render.md — pre-condición operacional de poblar last4 manual antes de operar cartolas (AC8)]

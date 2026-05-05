@@ -93,16 +93,23 @@ F2 del plan de migración (`architecture-c4.md` §7.3 + §6). Crear un servicio 
 
 ---
 
-**AC8 — Onboarding doc para el contador**
+**AC8 — Onboarding doc para el contador interino (Ary) + pre-condición de `bank_account_last4`**
 
-**Given** el servicio está deployado y la persona contador asignada
-**When** se entrega documentación inicial al contador
+> Ajuste 2026-04-30: contador real sin asignar. Ary actúa como **contador interino** hasta que se asigne uno externo. No bloquea el deploy.
+> Ajuste 2026-05-05 (Flag 6): el bootstrap de Story 9.1 deja `bank_account_last4` en null para las 47 cuentas (el dato vive en Google Sheets, no en Supabase, y el bootstrap no lee Sheets). Ary debe poblarlas manualmente vía Fava antes de operar cartolas.
+
+**Given** el servicio está deployado
+**When** se entrega documentación inicial
 **Then** existe `docs/contador-onboarding-fava.md` con:
   - URL del servicio + credenciales (entrega manual, NO en el repo)
   - Walkthrough Fava: Income Statement, Balance Sheet, Trial Balance, Net Worth, BQL workbench, drill-down
   - Cómo editar (con explicación del wrapper bean-check + qué hacer si revert)
   - Workflow: "siempre edits vía Fava UI — nunca PR/GitHub directo" (Q2 reforzada)
-**And** la sesión 1-1 del onboarding queda agendada (no es parte de esta story; es trigger post-deploy)
+  - **Sección "Pre-condición antes de operar cartolas":** instrucciones para poblar manualmente `bank_account_last4: "XXXX"` en cada `open` directive bancaria de `accounts.beancount` (las 47 cuentas) — fuente del dato: Google Sheets tab `Bancos` (que será deprecated en Story 9.11). Estimado ~30 min trabajo único.
+**And** AC8 se considera **cumplido cuando Ary haya:**
+  1. Operado Fava al menos 1 ciclo de import + revisión (auto-onboarding como contador interino)
+  2. Poblado `bank_account_last4` en las 47 cuentas bancarias (pre-condición para que Story 9.5 valide uploads)
+**And** la sesión 1-1 con un contador externo queda diferida hasta que Ary asigne la persona — no bloquea esta story ni el deploy
 
 ---
 
@@ -141,6 +148,7 @@ F2 del plan de migración (`architecture-c4.md` §7.3 + §6). Crear un servicio 
   - [ ] Escribir `docs/contador-onboarding-fava.md` (ver AC8 para contenido)
   - [ ] Walkthrough con screenshots básicos opcionales (no bloquea deploy)
   - [ ] Disclaimer sobre Q2: el contador NO usa GitHub, todo vía Fava
+  - [ ] Sección dedicada "Pre-condición: poblar `bank_account_last4` en las 47 cuentas" con paso-a-paso vía Fava editor (referenciar Story 9.5 que valida ese campo en uploads)
 
 - [ ] Task 7: Smoke test post-deploy
   - [ ] Acceder a la URL → 401
@@ -185,5 +193,6 @@ docs/
 
 - [Source: architecture-c4.md §5.4, §6.1, §6.2]
 - [Source: architecture-c4.md §7.3 — Plan F2]
-- [Source: bob-x-moishe-epic9-2026-04-30.md — Q2, Q5 cierre]
+- [Source: bob-x-moishe-epic9-2026-04-30.md — Q2, Q5 cierre + Flag 6 (last4 vive en Sheets, pre-condición en este AC8)]
+- [Source: 9-5-pdf-upload-gemini-json-canonico.md — consume `bank_account_last4` en validación AC1]
 - [External: https://beancount.github.io/fava/ — Fava docs]

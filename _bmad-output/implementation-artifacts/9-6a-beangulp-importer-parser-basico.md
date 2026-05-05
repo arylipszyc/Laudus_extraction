@@ -1,29 +1,44 @@
 ---
-story: 9.6
-title: Beangulp importer — JSON canónico → directivas Beancount (era 4.1b)
+story: 9.6a
+title: Beangulp importer — JSON canónico → directivas Beancount (parser básico, match perfecto)
 status: ready-for-dev
 epic: 9
 depends_on: [9.5]
-blocks: [9.7, 9.9]
+blocks: [9.6b, 9.7, 9.9]
 ---
 
-# Story 9.6 — Beangulp importer JSON → directivas
+# Story 9.6a — Beangulp importer JSON → directivas (parser básico)
 
 ## User Story
 
 As the system,
 I want a beangulp `Importer` class that consumes the canonical JSON from Story 9.5, transforms each transaction into Beancount directives, emits a `Balance` directive at period.end to enforce closing-balance validation, and writes a single `.beancount` file per cartola,
-So that PDF cartolas become first-class citizens of the ledger with native double-entry validation.
+So that PDF cartolas become first-class citizens of the ledger with native double-entry validation — without yet doing cross-source reconciliation against Laudus (that's 9.6b).
 
 ## Context
 
+**Esta story es el split del 9.6 original (split decidido 2026-05-05):**
+- **9.6a (esta story):** parser básico cartola JSON → directivas. Todo lo que es **mecánica idempotente** del path "match perfecto" del estado de matching (Q4 cierre). Sin lógica de reconciliación cross-source.
+- **9.6b (story siguiente):** motor de matching cartola ↔ Laudus + emisión de discrepancias a JSONL + manejo de los 6 estados de discrepancia. Depende de 9.6a done.
+
 Story 4.1b reformulada bajo c4. Esquema completo en `architecture-c4.md` §4.2. Esta story crea la clase `CartolaPdfImporter(beangulp.Importer)` que consume `ledger/imports/cartolas/_staging/{batch_id}.cartola.json` (output de 9.5) y produce un archivo `ledger/imports/cartolas/{slug}.beancount`.
 
-Decisiones cerradas:
+Decisiones cerradas que aplican a 9.6a:
 - TC como `Liabilities:{Entity}:TC:...` (Q7 — corrige bug semántico actual). `PRD-update needed` #2.
 - `Balance` directive al cierre del período → `bean-check` valida automáticamente FR22-25.
 - Override con justificación → convierte la `Balance` en `pad`+`balance` con metadata `override_justification` (idiomático Beancount).
+- Cuenta destino del pad: `Equity:Reconciliation:Discrepancias` (Ary confirmó naming 2026-04-30).
 - Categorización integrada en este pipeline via Story 9.7 (NO separada). En esta story: dejar el hook abierto (CategorizationService inyectado), pero la implementación full está en 9.7.
+
+**Lo que NO está en 9.6a (queda para 9.6b):**
+- Motor de matching cartola ↔ Laudus (estados: match perfecto / distinto valor / faltante en Laudus / faltante en cartola / distinta fecha / distinta descripción / distinta categoría)
+- Cálculo de `fx_implied = CLP_laudus / USD_cartola` por línea
+- Cross-check con BCCh end-of-month, threshold 5%
+- Emisión de discrepancias a `ledger/_meta/cartola-discrepancies.jsonl`
+- Comportamiento por estado (importa con flag, no importa, etc.)
+- Storage de FX en metadata Beancount (`fx_source`, `fx_implied`, `fx_bcch`, `fx_deviation_pct`) + `@@` notation USD-CLP
+
+**9.6a asume todas las líneas son "match perfecto"** — emite directamente Transactions CLP-only (o USD-only si así viene en la cartola, pero sin reconciliación).
 
 ## Acceptance Criteria
 
@@ -36,18 +51,19 @@ Decisiones cerradas:
 
 ---
 
-**AC2 — `account(file)` resuelve cuenta destino**
+**AC2 — `account(file)` resuelve cuenta destino vía `accounts.beancount`**
 
 **Given** un archivo de staging `{batch_id}.cartola.json`
 **When** `account()` se invoca
 **Then** lee `source.bank_account_id` y resuelve la cuenta Beancount correspondiente vía `bank_account_resolver.resolve(bank_account_id)`
-**And** la cuenta sigue patrón §2.1 (`Assets:{Entity}:Bancos:Slug-N` o `Liabilities:{Entity}:TC:Slug-N` según `account_type`)
+**And** el resolver lee la metadata `bank_account_id` de `accounts.beancount` (parseado al boot, cached in-memory) — **NO consulta Supabase ni ningún registry separado**
+**And** la cuenta sigue patrón §2.1 (`Assets:{Entity}:Bancos:Slug-N` o `Liabilities:{Entity}:TC:Slug-N` según `account_type` que también vive en metadata de `accounts.beancount`)
 
 ---
 
 **AC3 — `extract(file)` emite Transactions**
 
-**Given** un JSON canónico válido con N transactions
+**Given** un JSON canónico válido con N transactions (asumido "match perfecto" — sin lógica de reconciliación en 9.6a)
 **When** `extract()` se invoca
 **Then** retorna una lista de N `data.Transaction` + 1 `data.Balance` (closing assertion)
 **And** cada Transaction tiene:
@@ -139,11 +155,12 @@ Decisiones cerradas:
   - [ ] Métodos vacíos: `identify`, `account`, `extract` con docstrings
   - [ ] Verificar que `pip install beangulp` instala correctamente
 
-- [ ] Task 2: `BankAccountResolver`
+- [ ] Task 2: `BankAccountResolver` (sin Supabase)
   - [ ] Crear `pipeline/importers/bank_account_resolver.py`
-  - [ ] Constructor lee `bank_accounts` (Supabase) + `accounts.beancount` (parseado por `beancount.loader`)
+  - [ ] Constructor lee `accounts.beancount` (via `beancount.loader`) — NO Supabase
+  - [ ] Index in-memory por metadata `bank_account_id` (string) → account name Beancount completo + `account_type` + `currency`
   - [ ] Método `resolve(bank_account_id) → str` retorna el account name Beancount completo
-  - [ ] Cache LRU para evitar releer Supabase en cada call
+  - [ ] Cache invalidation: el index se reconstruye cuando cambia `accounts.beancount` (signal del file watcher de Story 9.2 — endpoint admin para invalidar manual también es válido)
 
 - [ ] Task 3: `_build_postings(account_target, category_account, amount, currency, account_type)`
   - [ ] Lógica de signo por tipo (AC4)
@@ -214,6 +231,10 @@ Beancount valida la suma del account a la fecha (start of day → 2026-04-01 inc
 
 Esta story expone el hook (`category_predictor` injectable) pero NO implementa la lógica de smart_importer. Eso es Story 9.7. En v1 puede correr con un noop predictor que devuelve siempre `Suspense` + flag `!` (=pendiente).
 
+### Sin Supabase — el resolver lee de `accounts.beancount`
+
+Bajo decisión 2026-05-05 (eliminar Supabase del diseño c4), el `BankAccountResolver` parsea `accounts.beancount` al boot via `beancount.loader.load_file` y construye un index in-memory sobre metadata `bank_account_id`. Cache LRU innecesario — el archivo entero se carga una vez (~340 directivas, milisegundos) y se mantiene en memoria.
+
 ### `PRD-update needed`
 
 Ver flags #2 (TC como Liabilities) y, indirectamente, #3 (categorización). NO bloquean. John actualiza PRD en sesión separada.
@@ -223,7 +244,7 @@ Ver flags #2 (TC como Liabilities) y, indirectamente, #3 (categorización). NO b
 ```
 pipeline/importers/
   cartola_pdf_importer.py                  # NEW
-  bank_account_resolver.py                 # NEW
+  bank_account_resolver.py                 # NEW (lee accounts.beancount, no Supabase)
   category_predictor.py                    # NEW (interface; noop impl en v1, real en 9.7)
   README.md                                # NEW (runbook + diagrama de flujo)
 ledger/imports/cartolas/
@@ -242,5 +263,6 @@ beangulp>=0.2
 
 - [Source: architecture-c4.md §4.2 — Story 4.1b — JSON canónico → directivas]
 - [Source: architecture-c4.md §2.1 + §2.5 — Naming convention + bank_accounts mapping]
-- [Source: bob-x-moishe-epic9-2026-04-30.md — Q7 (TC como Liabilities)]
+- [Source: bob-x-moishe-epic9-2026-04-30.md — Q7 (TC como Liabilities) + ítem #9 sin-Supabase]
 - [Source: 9-5-pdf-upload-gemini-json-canonico.md — staging contract]
+- [Source: 9-6b-matching-cartola-laudus-discrepancias.md — story siguiente, motor matching]

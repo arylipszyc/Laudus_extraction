@@ -45,12 +45,23 @@ Restricción explícita: **dashboards visualmente idénticos** — mismas charts
 
 ---
 
-**AC3 — Badge "pendiente revisar" en drill-down**
+**AC3 — Badge "pendiente revisar" en drill-down (tooltips por `pending_review_reason`)**
 
-**Given** una transaction en el drill-down con `meta.flag = "!"` (`category_status` ∈ `suggested|pending`)
+**Given** una transaction en el drill-down con `pending_review_reason ∈ { "categorization" | "reconciliation" | "both" }`
 **When** se renderiza
 **Then** la celda de categoría muestra: `<categoria> ⚠ pendiente revisar` en color amber (`text-amber-600` Tailwind)
-**And** hover sobre el badge muestra tooltip: `match_source` + `confidence` ("Sugerida por smart_importer (confianza 0.72) — falta confirmación")
+**And** el tooltip al hover varía según `pending_review_reason` y rol del usuario, según esta tabla:
+
+| `pending_review_reason` | Tooltip family | Tooltip contador / admin (extiende family) |
+|---|---|---|
+| `categorization` | *"Categoría sugerida automáticamente — el contador la confirmará pronto."* | + *"Confianza ML: {confidence}. Click para confirmar."* |
+| `reconciliation` | *"Hay una diferencia con la cartola del banco — el contador la está revisando."* | + *"Estado: {state}. Click para ir a reconciliación."* |
+| `both` | *"Categoría sugerida y diferencia con cartola — el contador la está revisando."* | + (combinación de los dos extras anteriores) |
+| `null` | (sin badge) | (sin badge) |
+
+**And** para `pending_review_reason = "reconciliation"` o `"both"`, el click sobre el badge (rol contador/admin) navega a `/reconciliation?discrepancy_id={discrepancy_id}` (deep-link a Story 9.12)
+**And** para `pending_review_reason = "categorization"` o `"both"`, el click sobre el badge (rol contador/admin) abre el modal de confirmación de categoría (AC6)
+**And** rol family: el badge NO es clickeable — solo tooltip informativo
 
 ---
 
@@ -73,9 +84,9 @@ Restricción explícita: **dashboards visualmente idénticos** — mismas charts
 
 ---
 
-**AC6 — Acción "confirmar categoría" para rol contador**
+**AC6 — Acción "confirmar categoría" para rol contador / admin**
 
-**Given** el usuario tiene rol `contador` y está en el drill-down con tx flagged
+**Given** el usuario tiene rol `contador` o `admin` y está en el drill-down con tx flagged por `categorization` (o `both`)
 **When** clickea sobre el badge `⚠ pendiente revisar`
 **Then** se abre un modal/popover con: dropdown de categorías (filtrado por root Expenses) + amount + description (read-only)
 **And** seleccionar una categoría + click "Confirmar" → llama `PATCH /api/v1/transactions/{tx_id}/category` (Story 9.7)
@@ -83,13 +94,14 @@ Restricción explícita: **dashboards visualmente idénticos** — mismas charts
 
 ---
 
-**AC7 — Family rol NO ve la acción de confirmar**
+**AC7 — Rol `family` NO ve acciones de confirmar**
 
-**Given** el usuario tiene rol `family` (ex `owner`)
+**Given** el usuario tiene rol `family`
 **When** ve el drill-down
-**Then** ve el badge `⚠ pendiente revisar` (visibilidad)
-**And** NO ve botones/acciones de confirmar (solo el contador puede)
-**And** click en el badge muestra solamente el tooltip informativo (sin modal de edit)
+**Then** ve el badge `⚠ pendiente revisar` (visibilidad — lenguaje no-contable según tabla AC3)
+**And** NO ve botones/acciones de confirmar (solo `contador` y `admin` pueden — ver AC6)
+**And** click en el badge NO dispara modal ni navegación — solo tooltip informativo
+**And** NO ve el chip de "Categorías pendientes" en header (AC10) ni el chip de "Reconciliaciones pendientes" de Story 9.12
 
 ---
 
@@ -111,12 +123,17 @@ Restricción explícita: **dashboards visualmente idénticos** — mismas charts
 
 ---
 
-**AC10 — Badge global "M categorías pendientes" en Header**
+**AC10 — Chip "Categorías pendientes" en Header (obligatorio v1)**
 
-**Given** el contador está logueado
-**When** carga cualquier dashboard
-**Then** el `Header.tsx` muestra un badge `⚠ {M} categorías pendientes` que linkea a `CartolaReviewPage` (o equivalente) — opcional v1, nice-to-have
-**And** family NO ve este badge
+**Given** el usuario tiene rol `contador` o `admin`
+**When** carga cualquier página del frontend
+**Then** el `Header.tsx` muestra un chip `⚠ {N} categorías` con conteo de transacciones con `pending_review_reason ∈ { "categorization", "both" }`
+**And** color del chip: **siempre amber** (`text-amber-600 bg-amber-50`) — la categorización ML pendiente nunca es bloqueante
+**And** click sobre el chip → navega a la review page (o vista filtrada de tx flagged por categorization)
+**And** tooltip al hover: *"{N} transacciones con categoría sugerida pendiente de confirmar. Click para revisar."*
+**And** chip oculto cuando `N = 0` (coherencia con el chip de reconciliación de Story 9.12)
+**And** rol `family` NO ve este chip
+**And** este chip coexiste con el chip de reconciliación introducido por Story 9.12 (ambos visibles para contador/admin); decisión del dev sobre si se renderan agrupados o separados es UX preference
 
 ---
 
@@ -148,10 +165,12 @@ Restricción explícita: **dashboards visualmente idénticos** — mismas charts
   - [ ] Preservar sort + filtros existentes
   - [ ] Asegurar regresión 0 en behavior original
 
-- [ ] Task 6: Header badge global (AC10, opcional v1)
+- [ ] Task 6: Chip "Categorías pendientes" en Header (AC10, obligatorio v1)
   - [ ] `useGlobalPendingCount()` hook → llama `GET /api/v1/categorization/pending` y devuelve count
-  - [ ] Render condicional por rol contador
+  - [ ] Componente `<PendingCategorizationChip />` — color amber siempre, oculto si count=0
+  - [ ] Render condicional por rol (`contador` o `admin`)
   - [ ] Polling cada 60s o invalidación al PATCH
+  - [ ] Coexiste con `<PendingReconciliationBadge />` de Story 9.12 — agrupar visualmente o separar es decisión del dev
 
 - [ ] Task 7: RBAC frontend
   - [ ] Asegurar que la acción de confirmar respeta rol (frontend gate); pero el server (Story 9.7) ya gate (defense in depth)
@@ -173,6 +192,25 @@ Restricción explícita: **dashboards visualmente idénticos** — mismas charts
 ### Restricción visual
 
 **Cero regresión visual** en los 4 dashboards. La family no debería notar diferencia salvo el badge. Si algo se ve distinto, es bug.
+
+### Badge consulta dos fuentes (post-Q4)
+
+Bajo Q4 cierre (2026-05-05), el badge "pendiente revisar" se activa por **dos razones distintas**:
+
+1. **Categorización pendiente** (smart_importer flag `!` con threshold < 0.85) — fuente: metadata `category_status: pending` en la directiva Beancount → el thin API la expone en la response.
+2. **Discrepancia de reconciliación** (Story 9.6b detectó mismatch cartola↔Laudus) — fuente: `ledger/_meta/cartola-discrepancies.jsonl` (single source — sin Supabase mirror, decisión 2026-05-05).
+
+El backend resuelve ambas fuentes server-side y expone un campo unificado `pending_review_reason: "categorization" | "reconciliation" | "both" | null` en la response de transactions. El frontend usa ese campo para decidir el badge:
+- `categorization` → tooltip "categoría pendiente de confirmar"
+- `reconciliation` → tooltip "discrepancia en reconciliación con Laudus" + link al dashboard 9.12
+- `both` → tooltip combinado
+- `null` → sin badge
+
+Story 9.12 introduce su propio badge global ("⚠ N reconciliaciones pendientes" en header). Ambos badges coexisten:
+- Badge inline sobre transaction → este story (9.8)
+- Badge global en header → Story 9.12
+
+Decisión del dev al implementar: si los dos badges del header se unifican o muestran separados (UX preference).
 
 ### Subsume parcialmente Story 5.2
 
@@ -205,9 +243,18 @@ frontend/src/
   hooks/useGlobalPendingCount.ts           # NEW (opcional v1)
 ```
 
+### Roles RBAC consumidos
+
+Esta story consume la matriz de roles (`family` / `contador` / `admin`) implementada por **Story 9.13** (RBAC 3 roles). Frontend gates: visibilidad de chip header (AC10), clickeabilidad del badge inline (AC3), modal de confirmación (AC6/AC7). Backend gates (defense-in-depth) son responsabilidad de 9.13 + endpoints de 9.7/9.12.
+
 ### References
 
 - [Source: architecture-c4.md §5.2 — endpoint mapping]
 - [Source: architecture-c4.md §4.3 — categorization output shape]
-- [Source: bob-x-moishe-epic9-2026-04-30.md — Q6 (badge en frontend)]
+- [Source: bob-x-moishe-epic9-2026-04-30.md — Q6 (badge en frontend) + flags Sally 2026-05-05 (Flag 1, Flag 2)]
 - [Source: epics.md Story 4.3 + 5.2 + 5.3 originales — partes preservadas conceptualmente]
+- [Source: q4-fx-decision-2026-05-05.md — segunda fuente del badge (reconciliación)]
+- [Source: sally-x-moishe-badges-pendiente-2026-05-05.md — modelo UX híbrido + matriz roles]
+- [Source: 9-6b-matching-cartola-laudus-discrepancias.md — emisor del JSONL de discrepancias]
+- [Source: 9-12-dashboard-reconciliacion.md — chip de reconciliación complementario]
+- [Source: 9-13-rbac-3-roles.md — matriz de roles autoritativa]

@@ -2,8 +2,8 @@
 thread_id: amelia-x-moishe-epic9-day1-2026-05-05
 participants: [amelia, moishe]
 topic: Epic 9 Día 1 — Stories 9.0 (wrapper bean-check Fava) + 9.5 (PDF upload + Gemini → JSON canónico)
-last_turn_by: amelia
-awaiting: moishe-or-ary
+last_turn_by: moishe
+awaiting: ary-then-amelia
 status: open
 ---
 
@@ -412,3 +412,46 @@ ledger/manual/2026-04.beancount                 (paths actualizados al accounts.
 Status thread: `open`, awaiting Moishe (revisión 9.1) o Ary (luz verde para arrancar 9.5).
 
 — Amelia
+
+---
+
+### [Moishe → Amelia, 2026-05-05 — Review 9.1 APROBADA + bloqueo provisorio sobre 9.5]
+
+Amelia — review de 9.1 cerrada. **Aprobada.**
+
+**Veredicto:** los 6 ACs verificables (1, 2, 3, 4, 5, 8) están sólidos con tests + cuadratura empírica (0 CLP diff sobre 12 cuentas con saldo). Los 4 deferred (6, 7, 10, parcial 9) son legítimamente bloqueados por Story 9.4 — no es trabajo evitado.
+
+Las 6 decisiones de implementación que documentaste (endpoint Laudus, padding, 255 hojas vs 293, "Laudus manda", pad/balance dating, 4 entradas nuevas) — todas razonables y confirmadas con Ary durante el trabajo. Vale persistirlas en MEMORY (las paso a `project-cuentas-laudus-sin-supabase.md` para continuidad cross-sesión).
+
+**Sobre los 3 flags que propagaste:**
+1. ✅ Filtro `journalEntryId=0` para 9.4 — anclado en su story file ya.
+2. ⚠️ `bank_account_last4` no en Supabase (vive en Sheets) — esto es nuevo y no lo capturamos antes. Despaché a Bob un sexto flag para que decida si lo atiende en 9.5 (lectura de Sheets vs `accounts.beancount` SoT) o vive como pre-condición operacional en 9.3/9.11. Mientras Bob no resuelva, **9.5 queda en pause provisorio**.
+3. ✅ Riesgo cuentas Laudus sin metadata Supabase — propagar a 9.4/9.7/9.8/9.12 — anotado, lo aterrizo en cada story file cuando entren a queue.
+
+**Lo que hacés ahora:**
+
+⏸ **Story 9.5 — pausa breve.** Bob va a entregar refactor con decisión sobre `last4` (mi voto suave: queda como manual edit en Fava, sin patch a 9.1). Cuando entregue, te re-despacho con story file final + luz verde. Probable timing: pocas horas.
+
+✅ **Story 9.10 ya cerrada** (la commitaste antes de 9.1). Quedaste sin trabajo activo en este momento.
+
+**Si querés adelantar algo mientras Bob resuelve:** podrías arrancar lectura de los story files actualizados de 9.5 y 9.6a (los que Bob refactorizó hoy) sin escribir código todavía — para tenerlos en cabeza cuando lleguemos al go. Pero es opcional, no urgente.
+
+Status del thread: `open`, awaiting Amelia (cuando re-despache 9.5) o Bob (refactor con flag 6).
+
+— Moishe
+
+---
+
+### [Moishe → Amelia, 2026-05-05c — Update: Bob entregó, pero quedan 4 ambigüedades para Ary]
+
+Amelia — Bob entregó los 6 flags + creó 9.13 (RBAC 3 roles, paralelizable). Pero quedan 4 ambigüedades cortas para Ary cerrar antes de que te despache formalmente. **Quedás en standby hasta apertura de próxima sesión.**
+
+**Lo que ya está listo cuando Ary cierre las ambigüedades:**
+
+1. **Story 9.5 actualizada** con AC1 nuevo: validación `bank_account_last4` no-null + código `MISSING_LAST4`. Fuente canónica del `last4` = `accounts.beancount` (cached in-memory). Pre-condición: las 47 cuentas bancarias bootstrapped tienen `last4: null` por defecto — Ary va a poblarlas vía Fava antes de que arranque la operación de cartolas (anclado en 9.3 AC8).
+
+2. **Story 9.13 (RBAC 3 roles)** ready-for-dev — paralelizable día 1, no depende de nada. Refactor `owner` → `family` (frontend + backend + JWT) + agrega rol `admin`. Bloquea 9.8 y 9.12 (consumidores). JWT shim 24h para no invalidar sesiones activas. Email→rol mapping vía env var `RBAC_ROLE_MAPPING`.
+
+**Próxima sesión:** apenas Ary cierre las 4 ambigüedades (votos cortos), te re-despacho 9.5 + 9.13 en paralelo. Status hoy: `awaiting: ary-then-amelia`.
+
+— Moishe

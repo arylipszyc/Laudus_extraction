@@ -30,7 +30,7 @@ inputs:
 - Backend FastAPI thin lee el ledger en memoria y expone JSON al frontend vía queries BQL.
 - `pipeline/sync.py` se reformula como importer Laudus → directivas `.beancount` (preserva auth, retry, paginación).
 - Story 4.1 se splitea en 4.1a (PDF → JSON canónico) + 4.1b (JSON → directivas vía beangulp).
-- Story 4.0 (Supabase Phase 2): se evalúa en este documento — parte sobrevive como registry, parte se descarta.
+- Story 4.0 (Supabase Phase 2): superseded por 9.1 — los registries pasan a vivir como metadata en `accounts.beancount` (modelo unificado: las 47 bank_accounts NO son registry separado, viven como metadata extra opcional sobre las cuentas del plan que aplican). El bootstrap (9.1) se hidrata vía **Option C híbrida**: Laudus API (datos contables base) + Supabase one-time read (taxonomía Categoria1/2/3 + metadata bancaria), con cross-check obligatorio. Después del bootstrap, `accounts.beancount` es source of truth; Supabase queda en standby hasta cierre de 9.11.
 
 ---
 
@@ -47,7 +47,7 @@ inputs:
 | **Fava** | UI contador — Income Statement, Balance Sheet, Trial Balance, Net Worth, BQL ad-hoc, drill-down | Fava (oficial Beancount) detrás de basic auth | Render web service `laudus-fava` (NUEVO) |
 | **Importer Laudus ERP** | Pull diario API Laudus → directivas Beancount → `ledger/imports/laudus/` | Reusa `pipeline/services/{ledger,balance_sheet}_service.py` + writer Beancount nuevo | Render Cron Job `laudus-importer` (NUEVO) — alternativa: GitHub Action existente, ver Open Q3 |
 | **Importer cartolas PDF** | On-demand: PDF → Gemini extract (4.1a) → JSON canónico → beangulp transform (4.1b) → directivas | beangulp + GeminiClient (existente) | Endpoints en `laudus-backend` (no servicio separado) |
-| **Registries Supabase** | Tablas chicas: `bank_accounts`, `plan_de_cuentas` — leídas por importers y por la UI de upload | Supabase actual de Story 4.0 | Servicio Supabase actual (preservado, ver §7.4) |
+| **`accounts.beancount` (registry unificado)** | Source of truth post-bootstrap de las 293 cuentas del plan + metadata bancaria (`bank_account_*`) embebida en las cuentas que son bancarias. Editable vía Fava UI o PR al repo. | Beancount directives en archivo plain-text | Versionado en `LAUDUS_Backup` repo |
 
 ### 1.2 Diagrama de flujo (texto-ASCII)
 
@@ -83,13 +83,21 @@ inputs:
                         │  basic auth (proxy)         │
                         └────────────────────────────┘
 
-         ┌─────────────────────────────────────────┐
-         │  Supabase (registries únicamente)       │
-         │  - plan_de_cuentas (293 → Beancount map)│
-         │  - bank_accounts (47 → routing target)  │
-         └─────────────────────────────────────────┘
-                  ▲                  ▲
-        leído por importers     leído por backend (UI upload)
+    ┌──────────────────────┐         ┌──────────────────────────┐
+    │  Laudus API          │         │  Supabase (one-time)     │
+    │  - 293 cuentas base  │         │  - taxonomía Categoria   │
+    │  - hierarchy + code  │         │  - metadata bank_account │
+    └────────────┬─────────┘         └─────────────┬────────────┘
+                 │      ambos leídos UNA vez       │
+                 │      por bootstrap (9.1) +      │
+                 │      cross-check obligatorio    │
+                 └────────────────┬────────────────┘
+                                  ▼
+                    accounts.beancount (modelo unificado:
+                    cuentas plan + bank metadata embebida)
+                                  ▲
+                      leído por backend + importers
+                      (parsea archivo, cached in-memory)
 ```
 
 ### 1.3 Concurrencia entre Fava + thin API + importers
@@ -194,7 +202,7 @@ Equity:EAG:OpeningBalances                              # equity inicial
   laudus_categoria1: "ACTIVO EAG"
   laudus_categoria2: "Banco / Caja"       ; si existe en el plan
   laudus_categoria3: ""
-  bank_account_id: "uuid-…"               ; FK lógica a Supabase bank_accounts si aplica
+  bank_account_id: "uuid-…"               ; identificador estable (UUID generado durante bootstrap 9.1) — usado por importer cartolas para routing
 ```
 
 ### 2.2 Multi-entidad: sub-cuenta por entidad (NO archivos separados)
@@ -224,23 +232,26 @@ Tabla de mapeo (replicada del spike y verificada cuenta-por-cuenta en bootstrap)
 
 **Cuentas que NO caen en este mapeo (riesgo identificado por Mary, Top 3 incógnita #2):** cuentas de orden, contingencias, transferencias inter-entidad. **Acción de bootstrap:** generar reporte de cuentas con `account_type = NULL` o `Categoria1` no mapeado, presentarlo a Ary para reclasificar manualmente antes de F0. Ver §7 plan de migración.
 
-### 2.4 Multi-currency (CLP + USD)
+### 2.4 Multi-currency (CLP + USD) — Q4 cerrada 2026-05-05
+
+> **Cierre Q4 supersede la versión original de esta sección.** Coord file: `_bmad-output/coordination/q4-fx-decision-2026-05-05.md`. La verificación empírica de Laudus mostró que el ERP no preserva `currencyCode` ni `parityToMainCurrency` originales para JEs USD — el contador entra el cargo ya convertido a CLP. La Opción "FX embebido en JE de Laudus" no es viable. La Opción "mindicador.cl externo" rompe cuadratura. Decisión: Opción D — FX derivada de cartola.
 
 **Decisiones:**
 
 - `option "operating_currency" "CLP"` (CLP es el reporting currency primario).
-- USD se declara como commodity y se usa first-class en transactions (`-450.00 USD`).
-- Tarjetas de crédito en USD (Citi, Julius Baer, Amex internacional) llevan postings en USD; el frontend muestra valor original + valor convertido a CLP.
-- **Price source:** [mindicador.cl](https://mindicador.cl/) — endpoint público sin auth, devuelve dólar observado del Banco Central. Cron diario que pulla y appendea a `prices.beancount`:
-
-  ```beancount
-  2026-04-30 price USD 950.45 CLP
-  ```
-
-- Plugin `beancount.plugins.implicit_prices` activado para que transactions con `cost` deriven prices automáticamente.
-- El frontend (LAUDUS Recharts) y Fava ambos respetan operating_currency para la consolidación familiar.
-
-**Open Q4 abajo:** confirmar mindicador.cl como source autorizado y determinar si necesitamos también UF (no aparece en data actual pero es estándar chileno).
+- USD se declara como commodity y se usa first-class en transactions (`-450.00 USD @@ 427702.50 CLP`).
+- Tarjetas de crédito en USD (Citi, Amex internacional) y cuentas USD (Julius Baer Inversiones, transferencias USD) llevan postings en USD; el frontend muestra valor original + CLP convertido.
+- **Engine FX — Opción D (cartola-derived):**
+  - **TC USD:** cartola PDF como source de USD original, Laudus como source de CLP del contador. Matching línea-por-línea cartola ↔ JE Laudus. `fx_implied = CLP_laudus / USD_cartola` por línea.
+  - **non-TC USD:** matching 1:1 trivial — una transacción Laudus por movimiento USD real, cross-check directo cuando hay cartola/comprobante.
+  - **Pre-2026:** CLP-only (Opción A para histórico). Bootstrap importa todo histórico sin USD original. Reconstrucción retroactiva solo si aparece necesidad de uso real.
+- **Variable de control:** BCCh end-of-month como referencia. Threshold 5% desviación entre `fx_implied` y BCCh. Out-of-tolerance → flag (`fx_deviation_pct`), no abort.
+- **Sistema de reconciliación con estados explícitos:** match perfecto, distinto valor (NO importa — bloqueante), faltante en Laudus, faltante en cartola, distinta fecha, distinta descripción, distinta categoría. Cartola manda excepto en "faltante en cartolas". Detalle de comportamiento en coord file Q4.
+- **Storage discrepancias:** append-only JSONL en `ledger/_meta/cartola-discrepancies.jsonl` (single source — Story 9.12 dashboard lee directo desde acá vía backend, sin mirror SQL).
+- **Storage FX por Transaction:** metadata Beancount (`fx_source`, `fx_implied`, `fx_bcch`, `fx_deviation_pct`) + `@@` notation USD-CLP. Plugin `implicit_prices` deriva price directives automáticamente.
+- **`prices.beancount`** queda como placeholder vacío referenciado en `main.beancount` (consistencia formal). El precio de cada transacción USD vive en su propia annotation `@@`, no en directivas standalone.
+- **Cron BCCh end-of-month** (Story 9.10 reformulada): fetcha el dólar observado del cierre del mes para alimentar `fx_bcch` en la validación. Propósito = sanity check, no fuente de FX general.
+- **UF**: no aparece en data Laudus (verificado 2026-05-05). Fuera de scope hasta que aparezca uso real.
 
 ### 2.5 Bank accounts (47 cuentas — los 4 tipos)
 
@@ -311,7 +322,7 @@ Convención de campos en cada Transaction generada por importer Laudus:
 | `pipeline/config/laudus_config.py` (auth, endpoints) | **Preservado intacto** |
 | `pipeline/services/{ledger,balance_sheet}_service.py` (fetch + paginación + retry token) | **Preservado intacto** — provee data raw |
 | `pipeline/utils/dates.py` | **Preservado intacto** |
-| `pipeline/models.py` (BALANCE_HEADERS, LEDGER_HEADERS, map functions, enrich functions) | **Preservado parcialmente** — `map_ledger_row` se reusa para normalizar JE; los `enrich_*` que dependen de Sheets se reescriben para leer desde Supabase `plan_de_cuentas` (registry) |
+| `pipeline/models.py` (BALANCE_HEADERS, LEDGER_HEADERS, map functions, enrich functions) | **Preservado parcialmente** — `map_ledger_row` se reusa para normalizar JE; los `enrich_*` que dependen de Sheets se reescriben para leer la metadata de `plan_de_cuentas` directo desde `accounts.beancount` (parseado al boot, cached in-memory) |
 | `pipeline/utils/gspread_utils.py` (upsert, replace, safe_write) | **Descartado** — el writer es Beancount ahora |
 | `pipeline/sync.py` orquestación | **Reescrito** (simple — pipeline equivalente con writer Beancount) |
 
@@ -427,8 +438,8 @@ Alternativa simpler que descartamos: auto-abrir bajo `Expenses:EAG:_Pending-{slu
 
 **Reglas de campos (importantes para 4.1b y para el frontend de upload):**
 
-- `bank_account_id`: UUID de la tabla `bank_accounts` (Supabase, sobrevive de Story 4.0). Es lo que ata la cartola a una bank account específica → determina cuenta destino Beancount + entity. **El frontend lo selecciona ANTES del upload** (dropdown de bank_accounts activos).
-- `entity`, `bank_name`, `account_label`, `account_type`: derivados del `bank_account_id` (resueltos server-side al recibir el upload — el frontend no los manda, pero quedan en el JSON canónico para que 4.1b no tenga que volver a Supabase).
+- `bank_account_id`: UUID estable generado durante el bootstrap 9.1 (Option C híbrida) y embebido como metadata en la cuenta correspondiente de `accounts.beancount`. Es lo que ata la cartola a una bank account específica → determina cuenta destino Beancount + entity. **El frontend lo selecciona ANTES del upload** (dropdown de bank accounts activos, servido por backend que filtra cuentas con metadata `bank_account_id`).
+- `entity`, `bank_name`, `account_label`, `account_type`: derivados del `bank_account_id` (resueltos server-side al recibir el upload leyendo metadata de `accounts.beancount` — el frontend no los manda, pero quedan en el JSON canónico para que 4.1b no tenga que volver a parsear el ledger).
 - `period.start` / `period.end`: ISO 8601, derivados por Gemini del PDF + sanity-check con la fecha de la primera/última transacción.
 - `currency` (top-level): currency del statement. Cada transaction puede tener `currency` propia (caso TC USD con cargos en CLP — raro pero posible).
 - `transactions[].amount`: **SIGNED**. Negativo = outflow para el holder (compra/cargo); positivo = inflow (pago, devolución). La interpretación exacta depende de `account_type` y se resuelve en 4.1b (ver §4.2).
@@ -617,10 +628,10 @@ class LedgerService:
 | `GET /api/v1/categorization/pending` | **igual contrato** | reads del ledger: tx con metadata `category_status: pending` |
 | `PATCH /api/v1/transactions/{id}/category` | **NEW semantics** | edita la directiva en el `.beancount` correspondiente: cambia el posting account + appendea a `categorization-history.jsonl` + commit |
 | `POST /api/v1/transactions/bulk-confirm` | **igual** | versión bulk de lo anterior |
-| `GET /api/v1/plan-de-cuentas/` | **preservado** | lee Supabase (registry) |
-| `POST /api/v1/plan-de-cuentas/sync` | **NEW semantics** | sync Laudus → Supabase (registry), también actualiza `accounts.beancount` para cuentas nuevas |
-| `GET /api/v1/bank-accounts/` | **preservado** | lee Supabase (registry) |
-| `POST /api/v1/bank-accounts/` | **preservado** | escribe Supabase + opcionalmente abre `open` directive si la cuenta no existe |
+| `GET /api/v1/plan-de-cuentas/` | **igual contrato** | parsea metadata de `accounts.beancount` (cached in-memory al boot, invalidado por watcher cuando cambia archivo) |
+| `POST /api/v1/plan-de-cuentas/sync` | **NEW semantics** | sync Laudus → detecta cuentas nuevas → emite `open` directive en `accounts.beancount` (con bean-check pre-commit). Modelo unificado, sin seed CSV intermedio. |
+| `GET /api/v1/bank-accounts/` | **igual contrato** | parsea entries de `accounts.beancount` filtrando las que tienen metadata `bank_account_id` (modelo unificado — son las mismas cuentas del plan, no registry separado) |
+| `POST /api/v1/bank-accounts/` | **NEW semantics** | toma una cuenta del plan existente y la enriquece con metadata bancaria (`bank_account_id` UUID generado, `bank_name`, `account_type`, `account_last4`). Si la cuenta no existe en el plan, abrir primero via `plan-de-cuentas/sync`. |
 
 ### 5.3 Auth + RBAC
 
@@ -631,7 +642,7 @@ class LedgerService:
 - `admin` (= Ary) — todo lo anterior + puede editar registries (bank_accounts, plan_de_cuentas).
 
 **Audit log:**
-- Mutaciones de upload, validate, categorize → log estructurado en backend (file o tabla audit Supabase, decidir según costo, pero mantener separada de ledger).
+- Mutaciones de upload, validate, categorize → log estructurado append-only en `ledger/_meta/audit-log.jsonl`. Mantener separado del ledger contable mismo.
 - `git log` sobre `ledger/` da auditoría completa de qué cambió en data financiera (quién mergeó qué directiva, cuándo).
 - Combinado: el audit log "operacional" (acciones HTTP) + git history (cambios de data) cubren NFR13/FR5 con MÁS rigor que el approach actual.
 
@@ -676,9 +687,13 @@ Alternativa rechazada: shared volume entre servicios. Render no lo soporta clean
 - `BEANCOUNT_REPO_URL` — URL del repo (si extraemos a repo separado; si no, mismo `LAUDUS_Backup` con deploy key restringido a `ledger/`)
 - `BEANCOUNT_DEPLOY_KEY` — SSH key con write access para los importers
 - `FAVA_BASIC_AUTH_USER` / `FAVA_BASIC_AUTH_PASSWORD` (o reemplazar por OAuth proxy si Open Q5 lo decide así)
-- `MINDICADOR_API_URL` (default `https://mindicador.cl/api`)
+- `BCCH_API_URL` — endpoint Banco Central para dólar observado end-of-month (Story 9.10 reformulada bajo Q4)
 
-**Preservados:** todos los actuales (`LAUDUS_USERNAME/PASSWORD`, `GOOGLE_CLIENT_ID/SECRET`, `GEMINI_API_KEY` (cuando se sume), `ALLOWED_USERS`, `JWT_SECRET`, `SUPABASE_URL/KEY` (mientras los registries sigan en Supabase)).
+**Preservados:** todos los actuales (`LAUDUS_USERNAME/PASSWORD`, `GOOGLE_CLIENT_ID/SECRET`, `GEMINI_API_KEY` (cuando se sume), `ALLOWED_USERS`, `JWT_SECRET`).
+
+**Preservados durante 9.1 only (one-time read):** `SUPABASE_URL/KEY` — bajo Option C híbrida, el bootstrap los lee una vez para hidratar la taxonomía Categoria1/2/3 + metadata bancaria, con cross-check contra Laudus API. Después de 9.1 done, el path c4 no los usa más.
+
+**Removidos en c4 post-9.1:** los registries pasan a `accounts.beancount` (modelo unificado, sin entidad separada para bank_accounts); reconciliation y FX BCCh viven en `ledger/_meta/*.jsonl`. El servicio Supabase queda en standby hasta cierre de 9.11; durante la transición el código legacy puede seguir leyéndolo, pero el path c4 no lo toca.
 
 **Removidos eventualmente (al deprecate Sheets, F4):** `GOOGLE_SHEET_ID`, `GOOGLE_SERVICE_ACCOUNT_JSON`. Hasta entonces se mantienen para que el `pipeline/sync.py` legacy (Sheets) corra en paralelo durante la transición.
 
@@ -691,7 +706,7 @@ Alternativa rechazada: shared volume entre servicios. Render no lo soporta clean
 **Objetivo:** generar `ledger/main.beancount` válido (`bean-check` limpio) con histórico desde 2021 + saldos iniciales + 293 cuentas mapeadas.
 
 **Pasos:**
-1. Script `bootstrap/generate_accounts.py` — toma plan_de_cuentas + bank_accounts de Supabase + tabla §2.3, genera `accounts.beancount`. Reporta cuentas no mapeables (Categoria1 desconocido o NULL) — Ary las reclasifica manualmente. **Esta es la incógnita #2 de Mary, se cierra acá.**
+1. Script `bootstrap/generate_accounts.py` — bajo **Option C híbrida**: lee 293 cuentas base de Laudus API (código, nombre, jerarquía contable) + lee Supabase one-time para taxonomía (Categoria1/2/3) + metadata bancaria sobre las 47 cuentas que aplican. Hace cross-check obligatorio entre ambas fuentes. Genera `accounts.beancount` con metadata embebida (`laudus_categoria1/2/3`, `bank_account_id` en las que aplica, etc.) bajo modelo unificado (sin registry separado para bank_accounts). Reporta cuentas no mapeables (Categoria1 desconocido o NULL) — Ary las reclasifica manualmente. **Esta es la incógnita #2 de Mary, se cierra acá.**
 2. Script `bootstrap/generate_opening_balances.py` — pad+balance al 2021-01-01 desde balance sheet 2021-01.
 3. Script `bootstrap/import_laudus_history.py` — pull + write de toda la historia 2021-now via importer Laudus modo full-backfill.
 4. `bean-check` debe pasar limpio. Diff con dashboards actuales (Sheets-based) — totales por entidad/mes deben coincidir ± tolerancia 0.5%.
@@ -702,7 +717,7 @@ Alternativa rechazada: shared volume entre servicios. Render no lo soporta clean
 
 **Pasos:**
 1. Implementar endpoints BQL (§5.2) con la misma forma JSON que los actuales (snake_case, ISO 8601, etc.).
-2. Feature flag `USE_BEANCOUNT_ENGINE` en backend — si true, endpoints leen del ledger; si false, leen de Sheets/Supabase (fallback).
+2. Feature flag `USE_BEANCOUNT_ENGINE` en backend — si true, endpoints leen del ledger; si false, leen de Sheets (fallback path legacy).
 3. Validación de paridad: dashboard contra dashboard, mes por mes, entity por entity. Discrepancias ≠ 0 — investigar y corregir mapeo de cuentas.
 4. Cuando paridad es 100% para período de validación → switch flag a true en producción.
 
@@ -734,19 +749,27 @@ Alternativa rechazada: shared volume entre servicios. Render no lo soporta clean
 
 **Objetivo:** completar Phase 2 sobre c4.
 
-**Pasos:** stories 5.1 (CategorizationService), 5.2 (review UI), 5.3 (drill-down) — todas adaptadas para leer/escribir desde el ledger en lugar de Supabase cartola_*.
+**Pasos:** stories 5.1 (CategorizationService), 5.2 (review UI), 5.3 (drill-down) — todas adaptadas para leer/escribir desde el ledger directamente.
 
-### 7.7 Costo hundido Story 4.0 — qué sobrevive, qué se descarta
+### 7.7 Costo hundido Story 4.0 — superseded por 9.1 (decisión 2026-05-05)
 
-| Story 4.0 deliverable | Estado en c4 |
+Versión inicial (2026-04-30) preservaba los registries de Story 4.0 en Supabase. Cierre Q4 (2026-05-05) cazó la inconsistencia: bajo c4 puro Beancount + archivos es la única source of truth. Decisión Ary: eliminar Supabase del diseño completamente. Story 4.0 pasa a **100% costo hundido**.
+
+Posteriormente (misma fecha, sesión directa Bob ↔ Ary) se cerraron 2 decisiones complementarias que afinan el modelo:
+
+- **Option C híbrida para bootstrap (Story 9.1):** el seed inicial NO viene de un export único de la Sheet. Viene de combinar **Laudus API** (datos contables base — código, nombre, jerarquía) con **Supabase one-time read** (taxonomía Categoria1/2/3 + metadata bancaria), con cross-check obligatorio entre ambas fuentes. Razón: ejercitamos el conector Laudus de paso (smoke test del que va a usar 9.4 semanal) y aprovechamos la taxonomía existente en Supabase sin re-trabajo manual.
+- **Modelo unificado de cuentas:** las 47 bank_accounts no son un registry separado de las 293 cuentas del plan — viven como **metadata extra opcional** (`bank_account_id`, `bank_name`, `account_type`, `account_last4`) en las cuentas del plan que son bancarias. Razón: la relación es 1:1 (cada cuenta del plan que es bancaria tiene una y solo una cuenta física), no N:1. Tener dos registries era artefacto del modelo Supabase relacional, no necesidad de modelado bajo Beancount.
+
+| Story 4.0 deliverable | Estado en c4 (post 2026-05-05) |
 |---|---|
-| Migration `001_phase2_initial_schema.sql` (4 tablas) | **Parcial** — se preservan `plan_de_cuentas` y `bank_accounts`; se descartan `cartola_batches` y `cartola_transactions` |
-| `SupabaseRepository` | **Parcial** — métodos sobre cartola_* se borran; los métodos sobre registries sobreviven |
-| Sync `plan_de_cuentas` desde Sheets | **Sobrevive** — Supabase es ahora la registry oficial (en lugar de Sheets) |
-| `bank_accounts` CRUD endpoints | **Sobrevive** — siguen siendo el backbone de la UI de upload + del routing del importer |
-| Módulos `backend/app/api/v1/{plan_de_cuentas, bank_accounts}/` | **Sobreviven sin cambios estructurales** |
+| Migration `001_phase2_initial_schema.sql` (4 tablas) | **Descartada** — las 4 tablas se desprecian. Servicio Supabase queda en standby hasta cierre 9.11. Durante 9.1, Supabase se lee one-time como input al cross-check. |
+| `SupabaseRepository` | **Descartada** — el código se borra cuando 9.1+9.5 reemplazan los call sites. |
+| `plan_de_cuentas` (registry de 293) | **Migra a `accounts.beancount`** — vía Option C híbrida durante 9.1. |
+| `bank_accounts` (registry separado de 47) | **Disuelto en modelo unificado** — la metadata bancaria pasa a vivir embebida en las cuentas del plan que son bancarias. Sin entidad separada. |
+| `bank_accounts` CRUD endpoints | **Cambia semántica** — pasa de "CRUD sobre tabla bank_accounts" a "enriquecer/leer metadata bancaria sobre cuentas del plan en `accounts.beancount`". Interfaz HTTP estable. |
+| Módulos `backend/app/api/v1/{plan_de_cuentas, bank_accounts}/` | **Sobreviven con implementación nueva** — parsing Beancount + cache in-memory + emit `open` directives + enriquecimiento de metadata. |
 
-**Veredicto honesto:** Story 4.0 fue **70% productiva** bajo c4 (los registries) y **30% costo hundido** (las tablas cartola_*, ~1 día de trabajo descartable). Mucho menor que el costo hundido total que Mary estimó si íbamos a "pivot total".
+**Veredicto honesto post-2026-05-05:** Story 4.0 fue **0% productiva** bajo c4 final. ~1-2 días de trabajo descartado, producto del arrastre silencioso del costo hundido al cuestionar el diseño. Lección documentada en MEMORY: cuando se preserva infraestructura por costo hundido sin cuestionar si el nuevo diseño la necesita, se acumula deuda silenciosa.
 
 ### 7.8 Riesgo de drift durante transición
 

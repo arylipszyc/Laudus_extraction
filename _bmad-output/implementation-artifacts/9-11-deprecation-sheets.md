@@ -112,10 +112,11 @@ Esta story es un **gate operacional** — no es código nuevo significativo, es:
   - [ ] Restart del servicio
   - [ ] Smoke test (AC6)
 
-- [ ] Task 4: Desactivar sync legacy
-  - [ ] Editar `.github/workflows/backup.yml` (o equivalente) para quitar el step de sync activo
-  - [ ] Mantener el step de snapshot diario (NFR14 — backup) si tiene sentido seguir backupeando Sheets como archivo histórico
+- [ ] Task 4: Desactivar sync legacy + discontinuar backup snapshot Sheets
+  - [ ] Editar `.github/workflows/backup.yml` para quitar el step de sync activo
+  - [ ] **Discontinuar `.github/workflows/backup.yml` (snapshot diario Sheets) completamente** — Ary confirmó OK porque `pipeline/sync.py` queda como fallback para reimportar histórico Laudus si fuera necesario. El git history del propio ledger Beancount cubre NFR14 (backup) por construcción.
   - [ ] Commit del cambio
+  - [ ] Apagar el proyecto Supabase en standby (Story 4.0 sunk-cost se cierra junto con esta story)
 
 - [ ] Task 5: Sheets read-only (manual, fuera de CI)
   - [ ] Ary cambia permisos en Drive
@@ -147,7 +148,7 @@ La mayoría del trabajo es validación + config. La única "code" nueva es Task 
 ### Riesgos
 
 - **Diferencias inesperadas en paridad:** Q4 (FX) puede causar que ciertos balances USD↔CLP no cuadren si la decisión de Q4 difiere del approach actual. Esta story se ejecuta DESPUÉS de Q4 cerrada y bootstrap (9.1) re-ejecutado.
-- **GitHub Actions backup.yml:** verificar que si se desactiva el sync, el backup snapshot diario (NFR14) sigue corriendo o se reemplaza por backup del ledger (git push ya backups el ledger; Sheets backup pierde valor cuando es read-only).
+- **GitHub Actions backup.yml:** discontinuado en su totalidad (decisión Ary 2026-04-30). NFR14 (backup) lo cubre el git history del ledger Beancount. Sheets queda read-only — el snapshot pierde valor.
 
 ### Out of scope
 

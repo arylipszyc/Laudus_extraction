@@ -20,7 +20,9 @@ So that the Beancount ledger stays in sync with Laudus weekly without manual int
 F3 + F4 (parte) del plan de migración (`architecture-c4.md` §3 + §7.4). Reusa lo bueno del `pipeline/sync.py` actual:
 - `pipeline/services/{ledger,balance_sheet}_service.py` (auth, retry, paginación) — preservados intactos.
 - `pipeline/utils/dates.py` — preservado.
-- `pipeline/models.py` map functions — preservadas; `enrich_*` se reescriben para leer de Supabase `plan_de_cuentas` (registry) en lugar de Sheets.
+- `pipeline/models.py` map functions — preservadas; `enrich_*` se reescriben para leer de `accounts.beancount` (parseado al boot, cached in-memory) en lugar de Sheets o Supabase.
+
+**Q4 cerrada (2026-05-05):** Laudus no preserva `currencyCode` ni `parityToMainCurrency` originales para JEs USD — el contador entra el cargo ya convertido a CLP. **Importer Laudus emite todo CLP-only**, sin lógica multi-currency. El USD original aparece recién en 9.6 (cartola → directivas con matching).
 
 Lo nuevo:
 - `pipeline/writers/beancount_writer.py` — toma JEs Laudus normalizadas y emite directivas.
@@ -36,8 +38,9 @@ Lo nuevo:
 **When** `BeancountWriter.write_jes(jes, target_dir="ledger/imports/laudus/")` es invocado
 **Then** se generan archivos `imports/laudus/YYYY-MM.beancount` (un archivo por mes — write-and-replace)
 **And** cada `Transaction` tiene metadata: `id:` (= `journalentryid`), `je_num:`, `source: "laudus-erp"`
-**And** las cuentas referenciadas usan el mapping del registry `plan_de_cuentas` (Supabase) + tabla §2.3
-**And** las JEs en USD preservan amount original + (eventualmente, post-Q4) FX embebido en metadata
+**And** las cuentas referenciadas usan el mapping leído de `accounts.beancount` (parseado al boot, cached in-memory) + tabla §2.3
+**And** todas las JEs se emiten en CLP (Q4 cerrada — Laudus no preserva USD original; las cuentas USD en Laudus aparecen como CLP igual que el resto)
+**And** **filtro defensivo:** se descartan líneas con `journalEntryId = 0` (saldos sintéticos `"Saldo anterior"` que la API Laudus inyecta cuando se consulta un rango que arranca después del JE 140 — caveat documentado en `_bmad-output/spike-beancount/probe-empty-currency.py` del 2026-05-05)
 
 ---
 
@@ -135,8 +138,10 @@ Lo nuevo:
   - [ ] Crear `pipeline/writers/beancount_writer.py`
   - [ ] Input: lista de JEs normalizadas (mismo shape que el actual `map_ledger_row`)
   - [ ] Output: archivos `.beancount` agrupados por mes
-  - [ ] Resolver cuenta destino: leer Supabase `plan_de_cuentas` + aplicar tabla §2.3 + slug §2.1
-  - [ ] Tests unitarios: 5-10 casos de JE → directivas; verificar metadata + format
+  - [ ] **Sin lógica multi-currency** — todas las JEs CLP (Q4 cerrada)
+  - [ ] Resolver cuenta destino: parsear `accounts.beancount` al boot (cached in-memory, ~340 directivas, milisegundos), index por `code:` metadata. Aplicar tabla §2.3 + slug §2.1.
+  - [ ] **Filtro defensivo `journalEntryId = 0`:** descartar antes de procesar.
+  - [ ] Tests unitarios: 5-10 casos de JE → directivas; verificar metadata + format. Incluir caso `journalEntryId=0` que confirme descarte.
 
 - [ ] Task 2: Reescribir orquestación `pipeline/sync.py` → `pipeline/importers/laudus_run.py`
   - [ ] Mantener `pipeline/sync.py` actual (path Sheets) como fallback durante F1+F3 (drift mitigation §7.8)
@@ -204,7 +209,7 @@ Winston recomendó cron diario 02:00. **Q3 cerrada por Ary: cron sábados 23:59 
 | `pipeline/services/{ledger,balance_sheet}_service.py` | preservado intacto |
 | `pipeline/utils/dates.py` | preservado |
 | `pipeline/models.py` `map_*` functions | preservadas |
-| `pipeline/models.py` `enrich_*` functions | reescribir para leer de Supabase |
+| `pipeline/models.py` `enrich_*` functions | reescribir para leer de `accounts.beancount` (parseo + cache in-memory) — NO usa Supabase ni Sheets |
 | `pipeline/utils/gspread_utils.py` | NO usar más en path nuevo (path Sheets sigue por F3 mitigation; queda como dead code candidate post-9.11) |
 
 ### Mitigación de drift (§7.8)
@@ -233,6 +238,8 @@ ledger/_meta/import-log.jsonl              # NEW — append cada corrida
 - [Source: architecture-c4.md §3 — Importer Laudus]
 - [Source: architecture-c4.md §7.4 — Plan F3]
 - [Source: architecture-c4.md §7.8 — Drift mitigation]
-- [Source: bob-x-moishe-epic9-2026-04-30.md — Q3 (cron sábados)]
+- [Source: bob-x-moishe-epic9-2026-04-30.md — Q3 (cron sábados) + Q4 cierre 2026-05-05]
+- [Source: q4-fx-decision-2026-05-05.md — Laudus no preserva USD original]
+- [Source: _bmad-output/spike-beancount/probe-empty-currency.py — caveat journalEntryId=0]
 - [Source: pipeline/services/ledger_service.py — preservado]
 - [Source: backend/app/api/v1/sync/router.py — endpoint on-demand existente]

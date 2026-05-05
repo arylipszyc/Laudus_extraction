@@ -300,6 +300,16 @@ Después de que 9.1 está done y mergeado:
 - Cuentas nuevas detectadas por Story 9.4 → friction en `_new-accounts-pending.beancount` → Ary las promueve manualmente al `accounts.beancount` con su Categoria1/2/3 + metadata bancaria (vía Fava editor de Story 9.0/9.3).
 - Supabase queda en standby (sin queries) hasta cierre de 9.11.
 
+### Caveat retroactivo: `bank_account_last4` quedó null en bootstrap (Flag 6, 2026-05-05)
+
+**Hallazgo post-cierre:** durante implementación, Amelia verificó que la tabla `bank_accounts` de Supabase **NO tiene el campo `bank_account_last4`**. Ese dato vive en Google Sheets (tab `Bancos`), que el bootstrap no consulta (Option C híbrida lee Laudus + Supabase one-time, no Sheets).
+
+**Resultado en producción:** las 47 directivas `open` bancarias en `accounts.beancount` quedaron emitidas con `bank_account_last4: null` (o sin la metadata).
+
+**Decisión Ary 2026-05-05:** **NO patchear el bootstrap** (esta story está done; sumar trabajo es churn). El poblado del `last4` queda como **pre-condición operacional manual** asignada a Story 9.3 AC8: Ary edita las 47 cuentas vía Fava antes de operar cartolas. Story 9.5 valida server-side (AC1 código `MISSING_LAST4`) y corta el flujo si falta — failure mode accionable.
+
+**Alternativa descartada:** patch a `generate_accounts.py` para leer Sheets como tercer source. Razón: contradice la dirección de Story 9.11 (deprecation Sheets), agrega complejidad a un bootstrap done, y el costo de poblar manualmente es único (~30 min).
+
 ### References
 
 - [Source: architecture-c4.md §1.5 — Estructura `ledger/`]
