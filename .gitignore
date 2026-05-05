@@ -26,3 +26,8 @@ build/
 
 # BMAD runtime cache (skills, templates — regenerable)
 .agent/
+
+# Sample cartolas locales (PII real — ver samples/README.md)
+samples/*
+!samples/README.md
+!samples/.gitkeep
