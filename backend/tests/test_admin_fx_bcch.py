@@ -21,12 +21,16 @@ def _make_app():
     return app
 
 
-def _owner_cookie():
-    return {"access_token": create_jwt(email="owner@test.com", role="owner")}
+def _admin_cookie():
+    return {"access_token": create_jwt(email="ary@test.com", role="admin")}
 
 
 def _contador_cookie():
     return {"access_token": create_jwt(email="contador@test.com", role="contador")}
+
+
+def _family_cookie():
+    return {"access_token": create_jwt(email="eduardo@eag.cl", role="family")}
 
 
 class TestRBAC:
@@ -36,6 +40,7 @@ class TestRBAC:
         assert resp.status_code == 401
 
     def test_contador_returns_403(self):
+        # Story 9.13: fx-bcch/refetch is admin-only — contador is denied.
         client = TestClient(_make_app(), raise_server_exceptions=False)
         resp = client.post(
             "/api/v1/admin/fx-bcch/refetch?year_month=2026-04",
@@ -43,9 +48,17 @@ class TestRBAC:
         )
         assert resp.status_code == 403
 
+    def test_family_returns_403(self):
+        client = TestClient(_make_app(), raise_server_exceptions=False)
+        resp = client.post(
+            "/api/v1/admin/fx-bcch/refetch?year_month=2026-04",
+            cookies=_family_cookie(),
+        )
+        assert resp.status_code == 403
+
 
 class TestEndpointBehavior:
-    def test_owner_fetched_returns_200_with_rate(self):
+    def test_admin_fetched_returns_200_with_rate(self):
         fake = RefetchResult(
             status="fetched", year_month="2026-04", bcch_date="2026-04-30",
             rate_clp_per_usd=950.45, source="mindicador-dolar-observado",
@@ -54,7 +67,7 @@ class TestEndpointBehavior:
             client = TestClient(_make_app())
             resp = client.post(
                 "/api/v1/admin/fx-bcch/refetch?year_month=2026-04",
-                cookies=_owner_cookie(),
+                cookies=_admin_cookie(),
             )
         assert resp.status_code == 200
         body = resp.json()
@@ -73,7 +86,7 @@ class TestEndpointBehavior:
             client = TestClient(_make_app())
             resp = client.post(
                 "/api/v1/admin/fx-bcch/refetch?year_month=2026-04",
-                cookies=_owner_cookie(),
+                cookies=_admin_cookie(),
             )
         assert resp.status_code == 200
         assert resp.json()["status"] == "skipped"
@@ -86,7 +99,7 @@ class TestEndpointBehavior:
             client = TestClient(_make_app())
             resp = client.post(
                 "/api/v1/admin/fx-bcch/refetch?year_month=2026-06",
-                cookies=_owner_cookie(),
+                cookies=_admin_cookie(),
             )
         assert resp.status_code == 400
         assert "futuro" in resp.json()["error"]["message"]
@@ -99,11 +112,11 @@ class TestEndpointBehavior:
             client = TestClient(_make_app())
             resp = client.post(
                 "/api/v1/admin/fx-bcch/refetch?year_month=2026-04",
-                cookies=_owner_cookie(),
+                cookies=_admin_cookie(),
             )
         assert resp.status_code == 502
 
     def test_missing_year_month_returns_422(self):
         client = TestClient(_make_app(), raise_server_exceptions=False)
-        resp = client.post("/api/v1/admin/fx-bcch/refetch", cookies=_owner_cookie())
+        resp = client.post("/api/v1/admin/fx-bcch/refetch", cookies=_admin_cookie())
         assert resp.status_code == 422

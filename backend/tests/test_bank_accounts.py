@@ -24,8 +24,8 @@ def _contador_cookie():
     return {"access_token": create_jwt(email="c@test.com", role="contador")}
 
 
-def _owner_cookie():
-    return {"access_token": create_jwt(email="o@test.com", role="owner")}
+def _family_cookie():
+    return {"access_token": create_jwt(email="family@test.com", role="family")}
 
 
 SAMPLE_UUID = "12345678-1234-5678-1234-567812345678"
@@ -60,12 +60,12 @@ class TestListBankAccounts:
         resp = client.get("/api/v1/bank-accounts/")
         assert resp.status_code == 401
 
-    def test_owner_can_list(self):
+    def test_family_can_list(self):
         with patch("backend.app.api.v1.bank_accounts.service.SupabaseRepository") as MockRepo:
             MockRepo.return_value.list_bank_accounts.return_value = [SAMPLE_BANK_ACCOUNT_ROW]
             app = _make_app()
             client = TestClient(app)
-            resp = client.get("/api/v1/bank-accounts/", cookies=_owner_cookie())
+            resp = client.get("/api/v1/bank-accounts/", cookies=_family_cookie())
             assert resp.status_code == 200
 
     def test_returns_accounts_with_account_name(self):
@@ -93,13 +93,13 @@ class TestListBankAccounts:
 # ── Tests: POST / ─────────────────────────────────────────────────────────────
 
 class TestCreateBankAccount:
-    def test_owner_cannot_create(self):
+    def test_family_cannot_create(self):
         app = _make_app()
         client = TestClient(app, raise_server_exceptions=False)
         resp = client.post(
             "/api/v1/bank-accounts/",
             json={"account_number": "411001", "account_type": "tarjeta_credito", "account_currency": "CLP"},
-            cookies=_owner_cookie(),
+            cookies=_family_cookie(),
         )
         assert resp.status_code == 403
 
@@ -169,13 +169,13 @@ class TestCreateBankAccount:
 # ── Tests: PATCH /{id} ────────────────────────────────────────────────────────
 
 class TestUpdateBankAccount:
-    def test_owner_cannot_update(self):
+    def test_family_cannot_update(self):
         app = _make_app()
         client = TestClient(app, raise_server_exceptions=False)
         resp = client.patch(
             f"/api/v1/bank-accounts/{SAMPLE_UUID}",
             json={"active": False},
-            cookies=_owner_cookie(),
+            cookies=_family_cookie(),
         )
         assert resp.status_code == 403
 

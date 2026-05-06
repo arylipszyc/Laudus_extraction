@@ -10,7 +10,7 @@ router = APIRouter(tags=["plan-de-cuentas"])
 
 @router.post("/sync", response_model=SyncResponse, status_code=status.HTTP_200_OK)
 def sync_chart_of_accounts(
-    _user=Depends(require_role(["contador"])),
+    _user=Depends(require_role(["contador", "admin"])),
 ):
     """Sync plan de cuentas from Google Sheets to Supabase.
 

@@ -26,8 +26,8 @@ def _contador_cookie():
     return {"access_token": token}
 
 
-def _owner_cookie():
-    token = create_jwt(email="o@test.com", role="owner")
+def _family_cookie():
+    token = create_jwt(email="family@test.com", role="family")
     return {"access_token": token}
 
 
@@ -64,7 +64,7 @@ class TestSyncPlanDeCuentas:
             mock_sync.return_value = {"synced": 10, "updated": 5}
             app = _make_app(None)
             client = TestClient(app, raise_server_exceptions=False)
-            resp = client.post("/api/v1/plan-de-cuentas/sync", cookies=_owner_cookie())
+            resp = client.post("/api/v1/plan-de-cuentas/sync", cookies=_family_cookie())
             assert resp.status_code == 403
 
     def test_sync_unauthenticated_returns_401(self):
@@ -108,13 +108,13 @@ class TestListPlanDeCuentas:
             resp = client.get("/api/v1/plan-de-cuentas/")
             assert resp.status_code == 401
 
-    def test_list_owner_can_access(self):
+    def test_list_family_can_access(self):
         """Owner role can list accounts."""
         with patch("backend.app.api.v1.plan_de_cuentas.router.list_plan_de_cuentas") as mock_list:
             mock_list.return_value = SAMPLE_ACCOUNTS
             app = _make_app(None)
             client = TestClient(app)
-            resp = client.get("/api/v1/plan-de-cuentas/", cookies=_owner_cookie())
+            resp = client.get("/api/v1/plan-de-cuentas/", cookies=_family_cookie())
             assert resp.status_code == 200
 
     def test_list_returns_accounts_ordered(self):

@@ -26,7 +26,7 @@
 #   - sunk-cost-preserved: Story is done but part of its output is discarded under a later pivot
 
 generated: 2026-04-09
-last_updated: 2026-05-05  # Bob aplicó los 6 flags pendientes (5 de Sally + 1 de last4): 9.8/9.12 ajustadas, 9.13 NUEVA (RBAC 3 roles), 9.5/9.3 patcheadas + nota retroactiva en 9.1. Amelia destrabada para re-arrancar 9.5.
+last_updated: 2026-05-06  # 9.13 + 9.5 done. Validación expandida pendiente: 12 cartolas adicionales en samples/ esperan validación CSV vs PDF (mañana 2026-05-07). Después de eso: decisión BALANCE_MISMATCH (a/b/c — ver memory project-laudus-shape-ambiguity-tc) + dispatch 9.6a. Story 9.5b candidato (auto-detect cuenta de PDF) parqueado hasta last4 poblados (9.3 AC8). Story 9.5c candidato (validation tooling automatizado) — destraba revisión de N PDFs en bulk. Plan serial 9.6a sigue pausado.
 project: LAUDUS_Backup
 project_key: NOKEY
 tracking_system: file-system
@@ -129,8 +129,8 @@ development_status:
   9-2-backend-thin-api-bql: ready-for-dev
   9-3-fava-deploy-render: ready-for-dev  # depende de 9-0 done; AC8 ajustado (contador interino = Ary)
   9-4-importer-laudus-produccion: ready-for-dev  # CLP-only + filtro journalEntryId=0
-  9-5-pdf-upload-gemini-json-canonico: ready-for-dev  # validación contra accounts.beancount (no Supabase). Amelia puede re-arrancar.
-  9-6a-beangulp-importer-parser-basico: ready-for-dev  # split 2026-05-05 — parser JSON→directivas, path "match perfecto"
+  9-5-pdf-upload-gemini-json-canonico: done  # 2026-05-06 cierre. Re-review post-patch APROBADA: re-corrida BCI verificó las 4 correcciones empíricamente vs PDF (signo PAC, 3 compras 27/03, 5 cuotas X/N con sufijo, exclusión RUMBO 00/12). BALANCE_MISMATCH BCI = 0 (closing-opening = sum(transactions) = 1.165.634 exacto). Convención signo coherente Liabilities + bonus Assets. Santander emite BALANCE_MISMATCH legítimo (decisión bloqueo/advertencia delegada a 9.6b). 322/322 backend verde + 12 tests nuevos. Reproducibilidad PASS.
+  9-6a-beangulp-importer-parser-basico: ready-for-dev  # split 2026-05-05 — parser JSON→directivas, path "match perfecto". Wiring pendiente: agregar `historical_amounts_provider` en cartolas/router.py (~10 líneas) que consuma cartolas históricas de imports/cartolas/{...}.beancount y lo pase a cartola_post_process.detect_large_amount() — destrabea LARGE_AMOUNT warnings deferred desde 9.5.
   9-6b-matching-cartola-laudus-discrepancias: ready-for-dev  # split 2026-05-05 — motor matching + JSONL discrepancias. Depende de 9.6a + 9.4 + 9.10
   9-7-categorizacion-smart-importer-patron-b: ready-for-dev  # depende de 9-6a done (categorización corre durante el parser básico)
   9-8-frontend-thin-api-badge-pendiente: ready-for-dev  # depende de 9-2 done + 9-13 (RBAC). Flags Sally aplicados: AC3 tooltips por pending_review_reason + AC6 contador+admin + AC10 chip obligatorio amber.
@@ -138,5 +138,7 @@ development_status:
   9-10-cron-prices-clp-usd: done  # 2026-05-05 Amelia entregó + commit 4845df1. Opción D scope (endpoint on-demand only); cron Render deferred. Fuente: mindicador.cl (proxy BCCh, 0% drift). 34 tests verde.
   9-11-deprecation-sheets: ready-for-dev  # gate operacional; Task 4 ajustada (backup.yml discontinuado en su totalidad)
   9-12-dashboard-reconciliacion: ready-for-dev  # NUEVA 2026-05-05 — vista accionable sobre cartola-discrepancies.jsonl. Depende de 9.6b + 9.2 + 9.13. Flags Sally aplicados: AC1 deep-link discrepancy_id + AC9 severidad amber/rojo.
-  9-13-rbac-3-roles: ready-for-dev  # NUEVA 2026-05-05 — Flag 5 Sally. Matriz family/contador/admin transversal (backend gates + frontend gates + JWT). Bloquea 9.8 y 9.12 (consumidores). Refactor del rol 'owner' actual a 'family' + agrega 'admin'. No depende de nada — paralelizable día 1.
+  9-13-rbac-3-roles: done  # 2026-05-06 Amelia entregó + Moishe review aprobada. Backend gates + frontend gates + JWT shim 24h + RBAC_ROLE_MAPPING env var + tests E2E. 102/102 RBAC-affected tests verde + 57/57 frontend. Matriz autoritativa patcheada: sync trigger = [contador, admin] (decisión Ary durante implementación, contrato canónico actualizado). RBAC_ROLE_MAPPING ya pegado por Ary en Render dashboard 2026-05-06.
+  9-5b-auto-detect-bank-account: backlog  # candidato 2026-05-06 — capability propuesta por Ary: Gemini detecta last4 + bank_name del PDF y matchea contra accounts.beancount auto, eliminando step de selección manual del contador. Pre-condición: 47/47 last4 poblados en accounts.beancount (Story 9.3 AC8). Ver memory project-laudus-auto-detect-cuenta-candidato. NO dispatch hasta cierre 9.3.
+  9-5c-validation-tooling-extraccion-ml: backlog  # candidato 2026-05-06 — script wrapper que tome N PDFs, corra smoke 3x cada uno (reproducibilidad check), genere reporte agregado: count vs subtotales declarados del PDF + drift entre corridas + sign distribution + balance check + warnings. Output CSV/markdown con verde/amarillo/rojo. Reduce mi tiempo de validación de ~1.5h a ~15 min por batch. Reusable cada cambio de prompt Gemini. Buen momento de dispatch: entre 9.6a done y 9.6b dispatch (tener tooling antes de matching agresivo). ~2-3h Amelia.
   epic-9-retrospective: optional

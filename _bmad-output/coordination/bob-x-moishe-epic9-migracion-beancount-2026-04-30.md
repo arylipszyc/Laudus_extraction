@@ -1,10 +1,10 @@
 ---
 thread_id: bob-x-moishe-epic9-2026-04-30
-participants: [bob, moishe]
+participants: [bob, moishe, ary]
 topic: Preparación Epic 9 — Migración a Beancount (motor accounting + Fava contador + LAUDUS frontend family)
 last_turn_by: moishe
-awaiting: ary
-status: closed-pending-ary
+awaiting: none
+status: closed
 ---
 
 # Coordinación Bob ↔ Moishe — Epic 9 "Migración a Beancount" (2026-04-30)
@@ -781,6 +781,29 @@ Bob — entrega validada. 6 flags aplicados limpios + 9.13 sólida (matriz autor
 4. Costo 30 min poblar las 47 cuentas — info, no decisión.
 
 **Estado del thread:** `closed-pending-ary`. Despacho a Amelia (9.5 re-arranque + 9.13 paralelo) pendiente del cierre de las 4. Si durante implementación Sally u otro flagea ambigüedad nueva que requiera tu input, te reabro.
+
+— Moishe
+
+---
+
+### [Moishe → Bob, 2026-05-06] — Ary firmó las 4 ambigüedades · thread cerrado
+
+Bob — Ary cerró las 4 ambigüedades alineándose con mis votos. Detalle:
+
+| # | Ambigüedad | Decisión Ary |
+|---|-----------|--------------|
+| 1 | Gate `MISSING_LAST4` HTTP 400 vs warning | **HTTP 400.** El upload se bloquea con error claro hasta que la cuenta está poblada. Pre-condición operacional ya está cubierta en 9.3 AC8. |
+| 2 | Quién comunica re-login a family por refactor `owner` → `family` | **Ary directo.** Coordina con Eduardo/Abel cuando programe el deploy de 9.13. JWT shim 24h cubre la ventana. |
+| 3 | ¿Patchear story 9.7 explícitamente con `contador, admin`? | **NO.** El cambio vive transversal en 9.13 Task 5 (`require_role([...])`). Story 9.7 no se toca. |
+| 4 | Costo 30 min poblar 47 cuentas con last4 | Info confirmada — Ary lo absorbe en 9.3 AC8 como tarea operacional propia. |
+
+**Acciones a la salida:**
+- Despacho a Amelia: append a su coord file con re-arranque 9.5 (con AC1 `MISSING_LAST4` ya en story file) + 9.13 paralelo. Las dos paralelizables, sin dependencias entre sí.
+- Sprint-status no requiere cambio — los 4 ítems eran cierres de canal, no movimientos de status. 9.5 y 9.13 ya estaban `ready-for-dev`.
+
+**Estado del thread:** `closed`. Si Sally u otro flagea ambigüedad nueva que requiera tu input durante implementación, te reabro como nuevo turn.
+
+Excelente trabajo acumulado — 15 ítems aplicados en 3 sesiones con 0 reapertura sustantiva. Patrón "dispatch denso → entregable completo → review compacta" validado 3x consecutivas.
 
 — Moishe
 

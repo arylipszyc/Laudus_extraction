@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
-import type { UserSession } from '@/types/user'
+import { useHasRole } from '@/hooks/useHasRole'
 
 const dashboardNavItems = [
   { label: 'Activos / Pasivos', to: '/dashboard/balance-sheet' },
@@ -10,6 +10,7 @@ const dashboardNavItems = [
   { label: 'Variación Patrimonial', to: '/dashboard/equity-variation' },
 ]
 
+// Visible para contador + admin (Story 9.13 matriz autoritativa)
 const contadorNavItems = [
   { label: 'Cargar Cartola', to: '/upload' },
   { label: 'Reconciliación', to: '/reconcile' },
@@ -34,9 +35,8 @@ function NavItem({ to, label }: { to: string; label: string }) {
 }
 
 export function Sidebar() {
-  const { data: user, isLoading } = useAuth()
-  const typedUser = user as UserSession | undefined
-  const isContador = typedUser?.role === 'contador'
+  const { isLoading } = useAuth()
+  const canSeeContadorItems = useHasRole(['contador', 'admin'])
 
   if (isLoading) {
     return <aside className="w-56 flex-shrink-0 border-r bg-card" />
@@ -52,8 +52,7 @@ export function Sidebar() {
           <NavItem key={item.to} to={item.to} label={item.label} />
         ))}
 
-        {/* Contador-only features — hidden for owner role (server always authoritative) */}
-        {isContador && contadorNavItems.map((item) => (
+        {canSeeContadorItems && contadorNavItems.map((item) => (
           <NavItem key={item.to} to={item.to} label={item.label} />
         ))}
       </nav>

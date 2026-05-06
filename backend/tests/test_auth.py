@@ -1,7 +1,4 @@
 """Tests for auth service, router, and get_current_user dependency."""
-import os
-from unittest.mock import MagicMock, patch
-
 import pytest
 from fastapi.testclient import TestClient
 
@@ -12,10 +9,10 @@ from fastapi.testclient import TestClient
 def test_create_and_decode_jwt():
     from backend.app.auth.service import create_jwt, decode_jwt
 
-    token = create_jwt(email="test@example.com", role="owner")
+    token = create_jwt(email="test@example.com", role="family")
     payload = decode_jwt(token)
     assert payload["sub"] == "test@example.com"
-    assert payload["role"] == "owner"
+    assert payload["role"] == "family"
 
 
 def test_decode_invalid_jwt_raises():
@@ -27,17 +24,19 @@ def test_decode_invalid_jwt_raises():
 
 
 def test_get_role_for_email_found(monkeypatch):
-    monkeypatch.setenv("ALLOWED_USERS", "ary@example.com:owner,contador@example.com:contador")
+    monkeypatch.delenv("RBAC_ROLE_MAPPING", raising=False)
+    monkeypatch.setenv("ALLOWED_USERS", "ary@example.com:family,contador@example.com:contador")
     from importlib import reload
     import backend.app.auth.service as svc
     reload(svc)
 
-    assert svc.get_role_for_email("ary@example.com") == "owner"
+    assert svc.get_role_for_email("ary@example.com") == "family"
     assert svc.get_role_for_email("contador@example.com") == "contador"
 
 
 def test_get_role_for_email_not_found(monkeypatch):
-    monkeypatch.setenv("ALLOWED_USERS", "ary@example.com:owner")
+    monkeypatch.delenv("RBAC_ROLE_MAPPING", raising=False)
+    monkeypatch.setenv("ALLOWED_USERS", "ary@example.com:family")
     from importlib import reload
     import backend.app.auth.service as svc
     reload(svc)
@@ -46,12 +45,78 @@ def test_get_role_for_email_not_found(monkeypatch):
 
 
 def test_get_role_case_insensitive(monkeypatch):
-    monkeypatch.setenv("ALLOWED_USERS", "ARY@EXAMPLE.COM:owner")
+    monkeypatch.delenv("RBAC_ROLE_MAPPING", raising=False)
+    monkeypatch.setenv("ALLOWED_USERS", "ARY@EXAMPLE.COM:family")
     from importlib import reload
     import backend.app.auth.service as svc
     reload(svc)
 
-    assert svc.get_role_for_email("ary@example.com") == "owner"
+    assert svc.get_role_for_email("ary@example.com") == "family"
+
+
+# ── Story 9.13 — RBAC_ROLE_MAPPING (JSON) ──────────────────────────────────
+
+
+def test_rbac_role_mapping_json_takes_priority(monkeypatch):
+    """AC2: RBAC_ROLE_MAPPING wins over legacy ALLOWED_USERS when both set."""
+    monkeypatch.setenv(
+        "RBAC_ROLE_MAPPING",
+        '{"ary.lipszyc@ammy.cl": "admin", "eduardo@eag.cl": "family"}',
+    )
+    monkeypatch.setenv("ALLOWED_USERS", "ary.lipszyc@ammy.cl:contador")
+    from importlib import reload
+    import backend.app.auth.service as svc
+    reload(svc)
+
+    assert svc.get_role_for_email("ary.lipszyc@ammy.cl") == "admin"
+    assert svc.get_role_for_email("eduardo@eag.cl") == "family"
+
+
+def test_rbac_role_mapping_falls_back_to_allowed_users(monkeypatch):
+    """AC2: when email is not in RBAC_ROLE_MAPPING, fall back to ALLOWED_USERS."""
+    monkeypatch.setenv("RBAC_ROLE_MAPPING", '{"ary@x.cl": "admin"}')
+    monkeypatch.setenv("ALLOWED_USERS", "legacy@x.cl:contador")
+    from importlib import reload
+    import backend.app.auth.service as svc
+    reload(svc)
+
+    assert svc.get_role_for_email("legacy@x.cl") == "contador"
+
+
+def test_rbac_role_mapping_normalizes_legacy_owner(monkeypatch):
+    """AC2: legacy 'owner' value in mapping is normalized to 'family'."""
+    monkeypatch.setenv(
+        "RBAC_ROLE_MAPPING",
+        '{"eduardo@eag.cl": "owner"}',
+    )
+    monkeypatch.delenv("ALLOWED_USERS", raising=False)
+    from importlib import reload
+    import backend.app.auth.service as svc
+    reload(svc)
+
+    assert svc.get_role_for_email("eduardo@eag.cl") == "family"
+
+
+def test_rbac_role_mapping_invalid_json_ignored(monkeypatch):
+    """AC2: malformed RBAC_ROLE_MAPPING falls through to ALLOWED_USERS without crashing."""
+    monkeypatch.setenv("RBAC_ROLE_MAPPING", "{not-json")
+    monkeypatch.setenv("ALLOWED_USERS", "fallback@x.cl:family")
+    from importlib import reload
+    import backend.app.auth.service as svc
+    reload(svc)
+
+    assert svc.get_role_for_email("fallback@x.cl") == "family"
+
+
+def test_rbac_role_mapping_unmapped_email_returns_none(monkeypatch):
+    """AC2: email not in either mapping returns None (caller emits 403)."""
+    monkeypatch.setenv("RBAC_ROLE_MAPPING", '{"a@x.cl": "admin"}')
+    monkeypatch.delenv("ALLOWED_USERS", raising=False)
+    from importlib import reload
+    import backend.app.auth.service as svc
+    reload(svc)
+
+    assert svc.get_role_for_email("intruder@x.cl") is None
 
 
 # ── Auth router tests ──────────────────────────────────────────────────────
@@ -78,14 +143,14 @@ def test_me_returns_401_with_invalid_cookie():
 def test_me_returns_user_with_valid_cookie():
     from backend.app.auth.service import create_jwt
 
-    token = create_jwt(email="ary@example.com", role="owner")
+    token = create_jwt(email="ary@example.com", role="family")
     client = get_test_client()
     client.cookies.set("access_token", token)
     response = client.get("/api/v1/auth/me")
     assert response.status_code == 200
     data = response.json()
     assert data["email"] == "ary@example.com"
-    assert data["role"] == "owner"
+    assert data["role"] == "family"
 
 
 def test_logout_clears_cookie():

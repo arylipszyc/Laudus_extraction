@@ -99,8 +99,8 @@ def make_mock_repo(entity: str = "EAG", balance_records=None, ledger_records=Non
     return repo
 
 
-def owner_token():
-    return create_jwt(email="owner@test.com", role="owner")
+def family_token():
+    return create_jwt(email="family@test.com", role="family")
 
 
 def contador_token():
@@ -117,13 +117,13 @@ def test_balance_sheets_unauthenticated():
     assert response.status_code == 401
 
 
-def test_balance_sheets_owner_can_read():
-    """AC4: owner role → 200 (read access for both roles)."""
+def test_balance_sheets_family_can_read():
+    """AC4 + Story 9.13 AC6: family role → 200 on dashboard reads."""
     client = make_dashboard_test_app(mock_repo=make_mock_repo(balance_records=[SAMPLE_BALANCE_RECORD]))
     response = client.get(
         "/api/v1/balance-sheets",
         params={"entity": "EAG"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 200
 
@@ -145,7 +145,7 @@ def test_balance_sheets_returns_data_and_meta():
     response = client.get(
         "/api/v1/balance-sheets",
         params={"entity": "EAG"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 200
     body = response.json()
@@ -163,7 +163,7 @@ def test_balance_sheets_filters_by_date_range():
     response = client.get(
         "/api/v1/balance-sheets",
         params={"entity": "EAG", "date_from": "2026-01-01", "date_to": "2026-12-31"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 200
     body = response.json()
@@ -178,7 +178,7 @@ def test_balance_sheets_no_date_filter_returns_all():
     response = client.get(
         "/api/v1/balance-sheets",
         params={"entity": "EAG"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 200
     assert len(response.json()["data"]) == 2
@@ -190,7 +190,7 @@ def test_balance_sheets_invalid_entity_returns_422():
     response = client.get(
         "/api/v1/balance-sheets",
         params={"entity": "INVALID"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 422
 
@@ -202,7 +202,7 @@ def test_balance_sheets_valid_entities_accepted(entity):
     response = client.get(
         "/api/v1/balance-sheets",
         params={"entity": entity},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 200
 
@@ -216,7 +216,7 @@ def test_balance_sheets_empty_entity_returns_empty_list():
     response = client.get(
         "/api/v1/balance-sheets",
         params={"entity": "EAG"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 200
     body = response.json()
@@ -232,7 +232,7 @@ def test_balance_sheets_amounts_are_float():
     response = client.get(
         "/api/v1/balance-sheets",
         params={"entity": "EAG"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 200
     record = response.json()["data"][0]
@@ -249,7 +249,7 @@ def test_balance_sheets_only_date_from_applied():
     response = client.get(
         "/api/v1/balance-sheets",
         params={"entity": "EAG", "date_from": "2026-01-01"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 200
     body = response.json()
@@ -273,7 +273,7 @@ def test_ledger_entries_returns_data_and_meta():
     response = client.get(
         "/api/v1/ledger-entries",
         params={"entity": "EAG"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 200
     body = response.json()
@@ -291,7 +291,7 @@ def test_ledger_entries_filters_by_date_range():
     response = client.get(
         "/api/v1/ledger-entries",
         params={"entity": "EAG", "date_from": "2026-01-01", "date_to": "2026-12-31"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 200
     body = response.json()
@@ -306,7 +306,7 @@ def test_ledger_entries_account_number_filter():
     response = client.get(
         "/api/v1/ledger-entries",
         params={"entity": "EAG", "account_number": "111005"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 200
     body = response.json()
@@ -322,7 +322,7 @@ def test_ledger_entries_amounts_are_float():
     response = client.get(
         "/api/v1/ledger-entries",
         params={"entity": "EAG"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 200
     record = response.json()["data"][0]
@@ -338,7 +338,7 @@ def test_ledger_entries_invalid_entity_returns_422():
     response = client.get(
         "/api/v1/ledger-entries",
         params={"entity": "UNKNOWN"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 422
 
@@ -350,7 +350,7 @@ def test_ledger_entries_no_date_filter_returns_all():
     response = client.get(
         "/api/v1/ledger-entries",
         params={"entity": "EAG"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 200
     assert len(response.json()["data"]) == 2
@@ -364,7 +364,7 @@ def test_ledger_entries_empty_returns_null_last_sync():
     response = client.get(
         "/api/v1/ledger-entries",
         params={"entity": "EAG"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 200
     body = response.json()
@@ -428,7 +428,7 @@ def test_ledger_entries_valid_entities_accepted(entity):
     response = client.get(
         "/api/v1/ledger-entries",
         params={"entity": entity},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 200
 
@@ -442,7 +442,7 @@ def test_balance_sheets_malformed_date_returns_422():
     response = client.get(
         "/api/v1/balance-sheets",
         params={"entity": "EAG", "date_from": "not-a-date"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 422
 
@@ -453,7 +453,7 @@ def test_balance_sheets_inverted_range_returns_422():
     response = client.get(
         "/api/v1/balance-sheets",
         params={"entity": "EAG", "date_from": "2026-12-31", "date_to": "2026-01-01"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 422
 
@@ -464,6 +464,6 @@ def test_ledger_entries_malformed_date_returns_422():
     response = client.get(
         "/api/v1/ledger-entries",
         params={"entity": "EAG", "date_to": "31-03-2026"},
-        cookies={"access_token": owner_token()},
+        cookies={"access_token": family_token()},
     )
     assert response.status_code == 422

@@ -38,7 +38,7 @@ def sync_status(
 @router.post("/trigger", response_model=TriggerResponse, status_code=202)
 def sync_trigger(
     request: TriggerRequest = Body(default=TriggerRequest()),
-    user: UserSession = Depends(require_role(["contador"])),
+    user: UserSession = Depends(require_role(["contador", "admin"])),
     repo: DataRepository = Depends(get_repository),
 ) -> TriggerResponse:
     """Trigger async sync (normal) or backfill. Returns job_id immediately."""

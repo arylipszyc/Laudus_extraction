@@ -1,13 +1,13 @@
-"""Tests for require_role() RBAC dependency — Story 1.4."""
+"""Tests for require_role() RBAC dependency — Story 1.4 + Story 9.13 (3 roles)."""
+import logging
 from datetime import datetime, timedelta, timezone
 
-import pytest
 from fastapi import FastAPI, Depends
 from fastapi.testclient import TestClient
 from jose import jwt
 
 from backend.app.auth.service import create_jwt
-from backend.app.dependencies import get_current_user, require_role
+from backend.app.dependencies import require_role
 from backend.app.middleware import add_middleware
 
 
@@ -15,16 +15,20 @@ from backend.app.middleware import add_middleware
 
 
 def make_test_app() -> TestClient:
-    """Mini FastAPI app with a single write-protected endpoint."""
+    """Mini FastAPI app exercising the 3-role matrix from Story 9.13."""
     app = FastAPI()
     add_middleware(app)
 
-    @app.post("/write-resource")
-    def write_endpoint(user=Depends(require_role(["contador"]))):
+    @app.post("/contador-write")
+    def contador_write(user=Depends(require_role(["contador", "admin"]))):
         return {"ok": True, "role": user.role}
 
-    @app.get("/read-resource")
-    def read_endpoint(user=Depends(require_role(["owner", "contador"]))):
+    @app.post("/admin-only")
+    def admin_only(user=Depends(require_role(["admin"]))):
+        return {"ok": True, "role": user.role}
+
+    @app.get("/all-authenticated")
+    def all_authenticated(user=Depends(require_role(["family", "contador", "admin"]))):
         return {"ok": True, "role": user.role}
 
     return TestClient(app, raise_server_exceptions=False)
@@ -34,80 +38,127 @@ def make_expired_token() -> str:
     """Create a JWT that expired 1 second ago."""
     payload = {
         "sub": "test@test.com",
-        "role": "owner",
+        "role": "family",
         "exp": datetime.now(timezone.utc) - timedelta(seconds=1),
     }
     return jwt.encode(payload, "dev-secret-change-in-production", algorithm="HS256")
 
 
-# ── require_role unit tests ────────────────────────────────────────────────
+# ── 3-role matrix tests (AC9) ──────────────────────────────────────────────
 
 
-def test_owner_calling_write_endpoint_gets_403():
-    """AC2: owner cannot call write endpoints."""
+def test_family_blocked_from_contador_write():
+    """AC6 + AC9: family cannot call contador-write endpoints."""
     client = make_test_app()
-    token = create_jwt(email="owner@test.com", role="owner")
-    client.cookies.set("access_token", token)
-    response = client.post("/write-resource")
+    client.cookies.set("access_token", create_jwt(email="family@test.com", role="family"))
+    response = client.post("/contador-write")
     assert response.status_code == 403
     error = response.json()["error"]
     assert error["code"] == "HTTP_403"
     assert "Insufficient permissions" in error["message"]
 
 
-def test_contador_calling_write_endpoint_gets_200():
-    """AC3: contador can call write endpoints."""
+def test_contador_can_call_contador_write():
+    """AC7 + AC9: contador can call contador-write endpoints."""
     client = make_test_app()
-    token = create_jwt(email="contador@test.com", role="contador")
-    client.cookies.set("access_token", token)
-    response = client.post("/write-resource")
+    client.cookies.set("access_token", create_jwt(email="contador@test.com", role="contador"))
+    response = client.post("/contador-write")
     assert response.status_code == 200
-    assert response.json()["ok"] is True
     assert response.json()["role"] == "contador"
 
 
-def test_owner_calling_read_endpoint_gets_200():
-    """AC3: owner can call read endpoints (both roles allowed)."""
+def test_admin_can_call_contador_write():
+    """AC8 + AC9: admin inherits everything contador can do."""
     client = make_test_app()
-    token = create_jwt(email="owner@test.com", role="owner")
-    client.cookies.set("access_token", token)
-    response = client.get("/read-resource")
+    client.cookies.set("access_token", create_jwt(email="ary@test.com", role="admin"))
+    response = client.post("/contador-write")
     assert response.status_code == 200
-    assert response.json()["role"] == "owner"
+    assert response.json()["role"] == "admin"
+
+
+def test_family_blocked_from_admin_only():
+    """AC9: family cannot reach admin-only endpoints."""
+    client = make_test_app()
+    client.cookies.set("access_token", create_jwt(email="family@test.com", role="family"))
+    assert client.post("/admin-only").status_code == 403
+
+
+def test_contador_blocked_from_admin_only():
+    """AC7 + AC9: contador cannot reach admin-only endpoints."""
+    client = make_test_app()
+    client.cookies.set("access_token", create_jwt(email="contador@test.com", role="contador"))
+    assert client.post("/admin-only").status_code == 403
+
+
+def test_admin_can_call_admin_only():
+    """AC8 + AC9: admin can reach admin-only endpoints."""
+    client = make_test_app()
+    client.cookies.set("access_token", create_jwt(email="ary@test.com", role="admin"))
+    response = client.post("/admin-only")
+    assert response.status_code == 200
+    assert response.json()["role"] == "admin"
+
+
+def test_all_three_roles_can_call_authenticated_read():
+    """AC3 + AC6: dashboards Epic 3 visible para los 3 roles."""
+    for role in ("family", "contador", "admin"):
+        client = make_test_app()
+        client.cookies.set("access_token", create_jwt(email=f"{role}@test.com", role=role))
+        assert client.get("/all-authenticated").status_code == 200
+
+
+# ── Legacy shim (AC2 / Task 4) ─────────────────────────────────────────────
+
+
+def test_legacy_owner_jwt_treated_as_family(caplog):
+    """AC2 Task 4: JWTs minted with role='owner' (pre-9.13) are mapped to family."""
+    client = make_test_app()
+    legacy_token = create_jwt(email="eduardo@eag.cl", role="owner")
+    client.cookies.set("access_token", legacy_token)
+
+    with caplog.at_level(logging.WARNING, logger="backend.app.dependencies"):
+        # family role allowed on /all-authenticated; legacy owner should map to family.
+        response = client.get("/all-authenticated")
+
+    assert response.status_code == 200
+    assert response.json()["role"] == "family"
+    assert any("LEGACY_ROLE_OWNER_DETECTED" in rec.message for rec in caplog.records)
+
+
+def test_legacy_owner_blocked_from_contador_write():
+    """Shim maps owner→family, so legacy JWTs lose contador-only access (correct)."""
+    client = make_test_app()
+    client.cookies.set("access_token", create_jwt(email="eduardo@eag.cl", role="owner"))
+    assert client.post("/contador-write").status_code == 403
+
+
+# ── Auth gating (preserved from Story 1.4) ─────────────────────────────────
 
 
 def test_missing_cookie_gets_401():
-    """AC1: missing cookie returns 401."""
     client = make_test_app()
-    response = client.post("/write-resource")
-    assert response.status_code == 401
+    assert client.post("/contador-write").status_code == 401
 
 
 def test_expired_jwt_gets_401():
-    """AC4: expired JWT returns 401."""
     client = make_test_app()
     client.cookies.set("access_token", make_expired_token())
-    response = client.post("/write-resource")
-    assert response.status_code == 401
+    assert client.post("/contador-write").status_code == 401
 
 
 def test_invalid_token_gets_401():
-    """AC1: valid JWT structure but wrong signature returns 401."""
-    # Use a properly-formed 3-segment JWT with an invalid signature to exercise
-    # the actual signature-verification failure path (not just format rejection)
     bad_token = (
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
-        ".eyJzdWIiOiJ0ZXN0QHRlc3QuY29tIiwicm9sZSI6Im93bmVyIn0"
+        ".eyJzdWIiOiJ0ZXN0QHRlc3QuY29tIiwicm9sZSI6ImZhbWlseSJ9"
         ".AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     )
     client = make_test_app()
     client.cookies.set("access_token", bad_token)
-    response = client.post("/write-resource")
-    assert response.status_code == 401
+    assert client.post("/contador-write").status_code == 401
 
 
 def test_unknown_role_gets_401():
-    """P2: JWT with unrecognized role value is rejected at authentication, not authorization."""
+    """JWT with unrecognized role value is rejected at authentication, not authorization."""
     payload = {
         "sub": "attacker@test.com",
         "role": "superadmin",
@@ -116,34 +167,24 @@ def test_unknown_role_gets_401():
     token = jwt.encode(payload, "dev-secret-change-in-production", algorithm="HS256")
     client = make_test_app()
     client.cookies.set("access_token", token)
-    # Unknown role → get_current_user raises 401 (invalid claims), not 403
-    response = client.post("/write-resource")
-    assert response.status_code == 401
+    assert client.post("/contador-write").status_code == 401
 
 
-def test_require_role_returns_user_session():
-    """require_role returns the UserSession on success."""
+# ── Defense-in-depth logging (AC5) ────────────────────────────────────────
+
+
+def test_rbac_denied_logs_structured_event(caplog):
+    """AC5: 403 emits RBAC_DENIED with user_email, user_role, endpoint, required_roles."""
     client = make_test_app()
-    token = create_jwt(email="contador@test.com", role="contador")
-    client.cookies.set("access_token", token)
-    response = client.post("/write-resource")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["role"] == "contador"
+    client.cookies.set("access_token", create_jwt(email="family@test.com", role="family"))
 
+    with caplog.at_level(logging.WARNING, logger="backend.app.dependencies"):
+        client.post("/admin-only")
 
-def test_require_role_multiple_allowed_roles():
-    """Both roles can access when both are listed."""
-    client = make_test_app()
-
-    # owner allowed
-    token_owner = create_jwt(email="owner@test.com", role="owner")
-    client_owner = make_test_app()
-    client_owner.cookies.set("access_token", token_owner)
-    assert client_owner.get("/read-resource").status_code == 200
-
-    # contador allowed
-    token_contador = create_jwt(email="contador@test.com", role="contador")
-    client_contador = make_test_app()
-    client_contador.cookies.set("access_token", token_contador)
-    assert client_contador.get("/read-resource").status_code == 200
+    rbac_logs = [rec for rec in caplog.records if "RBAC_DENIED" in rec.message]
+    assert len(rbac_logs) == 1
+    msg = rbac_logs[0].message
+    assert "user_email=family@test.com" in msg
+    assert "user_role=family" in msg
+    assert "/admin-only" in msg
+    assert "['admin']" in msg

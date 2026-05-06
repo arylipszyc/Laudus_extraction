@@ -53,8 +53,12 @@ def contador_token():
     return create_jwt(email="contador@test.com", role="contador")
 
 
-def owner_token():
-    return create_jwt(email="owner@test.com", role="owner")
+def family_token():
+    return create_jwt(email="family@test.com", role="family")
+
+
+def admin_token():
+    return create_jwt(email="ary@test.com", role="admin")
 
 
 def reset_job_state():
@@ -110,10 +114,10 @@ def test_sync_status_with_prior_sync():
     assert "2026-04-10" in data["ledger"]["last_sync"]
 
 
-def test_sync_status_owner_can_read():
-    """GET /sync/status is accessible to owner (read-only endpoint)."""
+def test_sync_status_family_can_read():
+    """GET /sync/status is accessible to family (authenticated read-only endpoint)."""
     client = make_sync_test_app(mock_repo=make_mock_repo())
-    client.cookies.set("access_token", owner_token())
+    client.cookies.set("access_token", family_token())
     response = client.get("/api/v1/sync/status")
     assert response.status_code == 200
 
@@ -144,16 +148,16 @@ def test_sync_trigger_unauthenticated():
     assert response.status_code == 401
 
 
-def test_sync_trigger_owner_forbidden():
-    """AC3: owner → 403."""
+def test_sync_trigger_family_forbidden():
+    """Story 9.13 AC6: family → 403 on sync trigger (write endpoint)."""
     client = make_sync_test_app(mock_repo=make_mock_repo())
-    client.cookies.set("access_token", owner_token())
+    client.cookies.set("access_token", family_token())
     response = client.post("/api/v1/sync/trigger")
     assert response.status_code == 403
 
 
 def test_sync_trigger_contador_returns_triggered():
-    """AC2: contador → 202 + {status: triggered, job_id: ...}."""
+    """AC2 + Story 9.13 AC7: contador → 202 + {status: triggered, job_id: ...}."""
     reset_job_state()
     with patch("backend.app.api.v1.sync.service._run_sync"):
         client = make_sync_test_app(mock_repo=make_mock_repo())
@@ -164,6 +168,17 @@ def test_sync_trigger_contador_returns_triggered():
     assert data["status"] == "triggered"
     assert "job_id" in data
     assert len(data["job_id"]) > 10  # UUID
+
+
+def test_sync_trigger_admin_returns_triggered():
+    """Story 9.13 AC8: admin can trigger sync (inherits contador capabilities)."""
+    reset_job_state()
+    with patch("backend.app.api.v1.sync.service._run_sync"):
+        client = make_sync_test_app(mock_repo=make_mock_repo())
+        client.cookies.set("access_token", admin_token())
+        response = client.post("/api/v1/sync/trigger")
+    assert response.status_code == 202
+    assert response.json()["status"] == "triggered"
 
 
 def test_sync_trigger_returns_unique_job_ids():

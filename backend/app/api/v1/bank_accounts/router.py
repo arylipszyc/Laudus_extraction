@@ -31,7 +31,7 @@ def get_bank_accounts(
 @router.post("/", response_model=BankAccount, status_code=status.HTTP_201_CREATED)
 def register_bank_account(
     data: BankAccountCreate,
-    _user=Depends(require_role(["contador"])),
+    _user=Depends(require_role(["contador", "admin"])),
 ):
     """Register a new bank account. Requires: contador role.
 
@@ -44,7 +44,7 @@ def register_bank_account(
 def patch_bank_account(
     account_id: UUID,
     data: BankAccountUpdate,
-    _user=Depends(require_role(["contador"])),
+    _user=Depends(require_role(["contador", "admin"])),
 ):
     """Update a bank account (e.g. deactivate). Requires: contador role."""
     return update_bank_account(str(account_id), data)

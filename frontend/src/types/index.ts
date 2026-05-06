@@ -1,6 +1,6 @@
 // TypeScript types — exported from here as they are created
 
-export type UserRole = 'owner' | 'contador'
+export type UserRole = 'family' | 'contador' | 'admin'
 
 export interface UserSession {
   email: string

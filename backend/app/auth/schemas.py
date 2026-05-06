@@ -1,5 +1,9 @@
 """Auth Pydantic models."""
+from typing import Literal
+
 from pydantic import BaseModel
+
+UserRole = Literal["family", "contador", "admin"]
 
 
 class TokenResponse(BaseModel):
@@ -9,4 +13,4 @@ class TokenResponse(BaseModel):
 
 class UserSession(BaseModel):
     email: str
-    role: str
+    role: UserRole

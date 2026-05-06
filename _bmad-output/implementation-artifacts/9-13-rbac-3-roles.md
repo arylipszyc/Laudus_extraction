@@ -1,7 +1,7 @@
 ---
 story: 9.13
 title: RBAC 3 roles (family / contador / admin)
-status: ready-for-dev
+status: done
 epic: 9
 depends_on: []
 blocks: [9.8, 9.12]
@@ -43,7 +43,7 @@ El RBAC actual (Story 1.4) tiene 2 roles: `owner` y `contador`. Bajo la matriz n
 | Subir cartolas PDF (`POST /api/v1/cartolas/upload`, Story 9.5) | ❌ | ✅ | ✅ |
 | PATCH categoría (`PATCH /api/v1/transactions/{id}/category`, Story 9.7) | ❌ | ✅ | ✅ |
 | Acceso a Fava UI (basic auth separado, Story 9.3) | ❌ | ✅ (credencial compartida) | ✅ |
-| Sync trigger manual (`POST /api/v1/sync/trigger`) | ❌ | ❌ | ✅ |
+| Sync trigger manual (`POST /api/v1/sync/trigger`) | ❌ | ✅ | ✅ |
 | Endpoints admin (`/api/v1/admin/*` — cache reload, etc.) | ❌ | ❌ | ✅ |
 | Gestión de usuarios y roles (asignar rol a un email) | ❌ | ❌ | ✅ (manual vía DB / config) |
 
@@ -90,7 +90,7 @@ El RBAC actual (Story 1.4) tiene 2 roles: `owner` y `contador`. Bajo la matriz n
 | `GET /api/v1/reconciliation/discrepancies/{id}/history` (9.12) | `contador`, `admin` |
 | `POST /api/v1/reconciliation/discrepancies/{id}/resolve` (9.12) | `contador`, `admin` |
 | `GET /api/v1/reconciliation/count` (9.12 chip) | `contador`, `admin` |
-| `POST /api/v1/sync/trigger` (9.4 on-demand) | `admin` |
+| `POST /api/v1/sync/trigger` (9.4 on-demand) | `contador`, `admin` |
 | `POST /api/v1/admin/cache/reload-accounts` (9.5 cache invalidation) | `admin` |
 | Endpoints de dashboards Epic 3 (`/balance-sheets`, `/ledger-entries`, etc.) | `family`, `contador`, `admin` (los 3 leen; sin gate restrictivo) |
 
@@ -157,7 +157,7 @@ El RBAC actual (Story 1.4) tiene 2 roles: `owner` y `contador`. Bajo la matriz n
 **Given** Ary logueado como `admin`
 **When** usa el sistema
 **Then** todo lo de `contador` está disponible
-**And** además: sync trigger manual, endpoints `/api/v1/admin/*`, gestión de roles (vía edit del config `RBAC_ROLE_MAPPING`)
+**And** además: endpoints `/api/v1/admin/*` (cache reload, fx-bcch refetch, etc.), gestión de roles (vía edit del config `RBAC_ROLE_MAPPING`)
 **And** la sidebar muestra ítems extra de admin (si aplica)
 
 ---
@@ -168,7 +168,7 @@ El RBAC actual (Story 1.4) tiene 2 roles: `owner` y `contador`. Bajo la matriz n
 **When** corren los tests
 **Then** existen tests que verifican (al menos un caso por rol):
   - `family` → 200 en `/balance-sheets`, 403 en `/cartolas/upload`, 403 en `/reconciliation/discrepancies`, 403 en `/sync/trigger`
-  - `contador` → 200 en `/balance-sheets`, 200 en `/cartolas/upload`, 200 en `/reconciliation/discrepancies`, 403 en `/sync/trigger`
+  - `contador` → 200 en `/balance-sheets`, 200 en `/cartolas/upload`, 200 en `/reconciliation/discrepancies`, 200 en `/sync/trigger`
   - `admin` → 200 en todos los anteriores
 **And** los tests existentes de Story 1.4 (que usaban `owner`) se actualizan a `family`
 **And** se agregan al menos 3 tests nuevos para `admin` (uno por endpoint admin-only)
@@ -187,48 +187,51 @@ El RBAC actual (Story 1.4) tiene 2 roles: `owner` y `contador`. Bajo la matriz n
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Renombrar `owner` → `family` y agregar `admin` en types
-  - [ ] Frontend: `frontend/src/types/auth.ts` → `export type UserRole = "family" | "contador" | "admin"`
-  - [ ] Backend: Pydantic model equivalente (probable `backend/app/models/auth.py` o `dependencies.py`)
-  - [ ] Search-and-replace `"owner"` → `"family"` en todos los `.ts` / `.tsx` / `.py` del repo (verificar tests también)
-  - [ ] Agregar `"admin"` al enum/Literal
+- [x] Task 1: Renombrar `owner` → `family` y agregar `admin` en types
+  - [x] Frontend: `frontend/src/types/user.ts` y `index.ts` → `export type UserRole = "family" | "contador" | "admin"`
+  - [x] Backend: `backend/app/auth/schemas.py` → `UserRole = Literal["family", "contador", "admin"]` aplicado a `UserSession.role`
+  - [x] Search-and-replace `"owner"` → `"family"` en `.ts`/`.tsx`/`.py` del repo (excepto shim legítimo en `dependencies.py` y `service.py`)
+  - [x] Agregar `"admin"` al Literal
 
-- [ ] Task 2: Update `_VALID_ROLES` y `require_role()` en `dependencies.py`
-  - [ ] `_VALID_ROLES = frozenset({"family", "contador", "admin"})`
-  - [ ] `require_role()` factory ya existe (Story 1.4) — solo asegurar que acepta listas con los 3 roles
-  - [ ] Agregar middleware/log de `RBAC_DENIED` para AC5
+- [x] Task 2: Update `_VALID_ROLES` y `require_role()` en `dependencies.py`
+  - [x] `_VALID_ROLES = frozenset({"family", "contador", "admin"})`
+  - [x] `require_role()` factory acepta listas con los 3 roles (sin cambios estructurales)
+  - [x] Log estructurado `RBAC_DENIED user_email=... user_role=... endpoint=... required_roles=...` para AC5
 
-- [ ] Task 3: Mapping email → rol vía config (AC2)
-  - [ ] Env var `RBAC_ROLE_MAPPING` (JSON string: `{"ary.lipszyc@ammy.cl": "admin", "eduardo@...": "family", ...}`)
-  - [ ] Loader en `oauth.py` que lookup el rol al login
-  - [ ] Email no-mapeado → 403 al login (no se emite JWT)
-  - [ ] Default fallback: NINGUNO (mejor 403 que asignar rol bajo permisivo)
+- [x] Task 3: Mapping email → rol vía config (AC2)
+  - [x] Env var `RBAC_ROLE_MAPPING` (JSON) con priority sobre legacy `ALLOWED_USERS`
+  - [x] Loader en `auth/service.py:get_role_for_email()` lookup el rol al login (preserva flow OAuth existente)
+  - [x] Email no-mapeado → `get_role_for_email` retorna `None` → callback OAuth emite HTTP 403 (preservado de Story 1.3)
+  - [x] Fallback `ALLOWED_USERS` mantenido para no breakear deploy actual durante el cutover
 
-- [ ] Task 4: Compatibility shim para JWTs viejos (AC2)
-  - [ ] En `get_current_user` dependency: si `claim["role"] == "owner"`, tratar como `"family"` y loguear `LEGACY_ROLE_OWNER_DETECTED`
-  - [ ] Documentar ventana de migración (~24h o el TTL del JWT — confirmar con Story 1.3)
+- [x] Task 4: Compatibility shim para JWTs viejos (AC2)
+  - [x] `_LEGACY_ROLE_ALIAS = {"owner": "family"}` en `dependencies.py:get_current_user`
+  - [x] Log warning `LEGACY_ROLE_OWNER_DETECTED email=... legacy_role=owner mapped_to=family`
+  - [x] Ventana de migración = TTL del JWT (`JWT_EXPIRE_HOURS`, default 8h) — documentado en `docs/rbac-3-roles.md`
+  - [x] Normalización en input también: `_LEGACY_ROLE_NORMALIZE` en `service.py` para tolerar `"owner"` en env vars
 
-- [ ] Task 5: Aplicar `require_role()` a endpoints según AC3
-  - [ ] Cartolas upload + status (Story 9.5)
-  - [ ] PATCH category + GET pending (Story 9.7 + 9.8)
-  - [ ] Reconciliation endpoints (Story 9.12)
-  - [ ] Sync trigger + admin endpoints
+- [x] Task 5: Aplicar `require_role()` a endpoints según AC3
+  - [x] **Sync trigger** (`POST /api/v1/sync/trigger`) → `[contador, admin]` (decisión Ary 2026-05-06; diverge de la matriz original que pedía admin-only — Ary aclaró que contador también necesita poder iniciar sync)
+  - [x] **Admin endpoints** (`POST /api/v1/admin/fx-bcch/refetch`) → `[admin]` (era `owner`, ahora estricto admin)
+  - [x] **Bank accounts CRUD** (`POST/PATCH /api/v1/bank-accounts`) → `[contador, admin]` (admin hereda capacidades contador)
+  - [x] **Plan de cuentas sync** (`POST /api/v1/plan-de-cuentas/sync`) → `[contador, admin]`
+  - [ ] **Cartolas/upload, transactions/category, categorization/pending, reconciliation/*, admin/cache/reload-accounts**: endpoints aún no existen — los implementan stories 9.5/9.7/9.8/9.12 con la matriz como contrato. NO bloquea esta story (consumidores aguas abajo).
 
-- [ ] Task 6: Frontend gates en componentes (AC4)
-  - [ ] Helper `useHasRole(roles: UserRole[])` en `useAuth` o hook nuevo
-  - [ ] Gate componentes nuevos de 9.8 + 9.12 (chips, modales, ruta `/reconciliation`)
-  - [ ] Sidebar: filter ítems según rol
-  - [ ] Tooltip family vs tooltip contador/admin (referenciado en 9.8 AC3 — esta story expone el helper para que 9.8 lo consuma)
+- [x] Task 6: Frontend gates en componentes (AC4)
+  - [x] Helper `useHasRole(roles: readonly UserRole[]): boolean` en `frontend/src/hooks/useHasRole.ts`
+  - [x] Sidebar: items "Cargar Cartola" + "Reconciliación" gated a `[contador, admin]`
+  - [ ] Componentes nuevos de 9.8 + 9.12 (chips, modales, ruta `/reconciliation`): consumirán `useHasRole` cuando se implementen — el helper queda expuesto. NO bloquea esta story.
 
-- [ ] Task 7: Tests (AC9)
-  - [ ] Backend: parametric test por rol × endpoint clave
-  - [ ] Frontend: snapshot/render test por rol verificando visibilidad de chips/sidebar
-  - [ ] Update tests existentes de Story 1.4 (`test_owner_gets_403` → `test_family_gets_403`)
+- [x] Task 7: Tests (AC9)
+  - [x] Backend: 14 tests RBAC nuevos en `test_rbac.py` cubriendo matriz 3 roles + shim legacy + log RBAC_DENIED
+  - [x] Backend: 5 tests nuevos en `test_auth.py` para `RBAC_ROLE_MAPPING` (priority, fallback, legacy normalize, invalid JSON, unmapped email)
+  - [x] Backend: tests existentes refactorizados (`test_admin_fx_bcch.py`, `test_sync.py`, `test_dashboard.py`, `test_bank_accounts.py`, `test_plan_de_cuentas.py`) — `owner` → `family` + tests nuevos para admin donde corresponde
+  - [x] Frontend: `Sidebar.test.tsx` con 3 tests (family / contador / admin) — visibilidad de items por rol
 
-- [ ] Task 8: Documentación (AC10)
-  - [ ] `docs/rbac-3-roles.md` con matriz + email mapping + instrucciones admin
-  - [ ] Update MEMORY index si referencia el rol viejo
-  - [ ] Heads-up a Ary: notificar a family members del badge nuevo (lenguaje no-contable)
+- [x] Task 8: Documentación (AC10)
+  - [x] `docs/rbac-3-roles.md` con matriz, email mapping, instrucciones admin, shim, defense-in-depth, out of scope
+  - [x] Heads-up a Ary documentado en Completion Notes: necesita coordinar re-login con Eduardo/Abel cuando deploye (decisión 2026-05-06)
+  - [ ] MEMORY index: no contenía referencias al rol `owner`, no requiere update
 
 ---
 
@@ -305,3 +308,102 @@ docs/
 - [Source: 1-4-role-based-access-control-rbac.md — patrón `require_role()` que se preserva + extiende]
 - [Source: 9-8-frontend-thin-api-badge-pendiente.md — consumidor del gate (chips + acciones)]
 - [Source: 9-12-dashboard-reconciliacion.md — consumidor del gate (página + endpoints)]
+
+---
+
+## Dev Agent Record
+
+### Implementation Plan (ejecutado)
+
+8 tasks en orden secuencial. Backend foundation primero (types + dependencies + service), luego endpoints, luego frontend, luego tests, luego docs.
+
+### Decisiones de implementación
+
+1. **Sync trigger queda en `[contador, admin]`** (no admin-only como pedía la matriz original). Decisión Ary 2026-05-06 durante implementación: el contador necesita poder iniciar syncs. Documentado en `docs/rbac-3-roles.md` y flageado a Moishe en coord file. No re-abierto: Ary aclaró explícitamente.
+
+2. **`bank_accounts` y `plan_de_cuentas` CRUD** pasan a `[contador, admin]` (antes solo `contador`). Razón: bajo nueva matriz `admin` por definición hereda todas las capacidades de `contador`. Sin esto, Ary perdería acceso a estos endpoints después del refactor.
+
+3. **`RBAC_ROLE_MAPPING` con fallback a `ALLOWED_USERS`**. AC2 pide la nueva env var como SoT, pero el deploy en Render todavía usa `ALLOWED_USERS`. El fallback evita un breaking en producción mientras Ary actualiza el env var en Render dashboard. Cuando Ary haga el cutover, puede borrar `_parse_allowed_users()` (es deuda técnica acotada, documentada).
+
+4. **Normalización `"owner" → "family"` en dos capas**:
+   - **Input** (env vars): `_LEGACY_ROLE_NORMALIZE` en `service.py` tolera `"owner"` en `ALLOWED_USERS` o `RBAC_ROLE_MAPPING` (operador olvidado de actualizar config).
+   - **JWT decode**: `_LEGACY_ROLE_ALIAS` en `dependencies.py` mapea JWTs viejos minted antes del refactor.
+   - Ambas emiten log de auditoría. Ambas se borran post-cutover.
+
+5. **Endpoints aguas abajo NO los bloquean stories 9.5/9.7/9.8/9.12**. La matriz es contrato — cuando esas stories implementen los endpoints respectivos, simplemente aplicarán `Depends(require_role([...]))` con los roles indicados en AC3. No requiere coordinación adicional con esta story.
+
+6. **`useHasRole` simple, no más componentes gated** que Sidebar. La matriz dice que componentes nuevos de 9.8/9.12 (chips, modales, página `/reconciliation`) usan el helper, pero esos componentes aún no existen — los crean las stories aguas abajo. Esta story expone el helper + lo prueba con Sidebar como caso de uso real.
+
+### Validación
+
+- **Backend tests**: 246 passed / 1 failed. La única falla es `test_run_backfill_calls_upsert_for_both_sheets` en `test_sync.py` — pre-existing failure ya flageado en stories 9.0 y 9.1 (no relacionado con RBAC). Subset de archivos afectados por el refactor: 102/102 verde (test_rbac, test_auth, test_admin_fx_bcch, test_bank_accounts, test_plan_de_cuentas, test_dashboard).
+- **Frontend tests**: 57/57 verde (incluyendo 3 nuevos en `Sidebar.test.tsx`).
+- **TypeScript**: `tsc -b` compila sin errores.
+
+### Completion Notes
+
+- ✅ AC1 — `UserRole` ahora es `Literal["family", "contador", "admin"]` en backend (Pydantic) y TypeScript.
+- ✅ AC2 — `RBAC_ROLE_MAPPING` implementado + JWT shim 24h + log `LEGACY_ROLE_OWNER_DETECTED`.
+- ✅ AC3 — endpoints existentes gated. Endpoints aguas abajo (no implementados aún) tienen contrato documentado en matriz.
+- ✅ AC4 — `useHasRole` hook + Sidebar refactorizada.
+- ✅ AC5 — Defense-in-depth: log estructurado `RBAC_DENIED` con todos los campos requeridos. Cubierto por test `test_rbac_denied_logs_structured_event`.
+- ✅ AC6 — Family no ve items contador en Sidebar. Tests verifican esto.
+- ✅ AC7 — Contador puede `[contador, admin]` endpoints (sync + bank + plan + nuevos). NO puede admin endpoints (verificado por test).
+- ✅ AC8 — Admin hereda todas las capacidades + acceso exclusivo a `/api/v1/admin/*`.
+- ✅ AC9 — Tests E2E por rol en `test_rbac.py` (3 endpoints × 3 roles + shim + log) + tests refactorizados en suites existentes.
+- ✅ AC10 — `docs/rbac-3-roles.md` creado.
+
+### ⚠️ Heads-up para Ary (operacional, post-deploy)
+
+1. **Actualizar env var `RBAC_ROLE_MAPPING` en Render** antes de re-loguear users:
+   ```json
+   {"ary.lipszyc@ammy.cl": "admin", "eduardo@eag.cl": "family", "abel@eag.cl": "family", "<contador-email>": "contador"}
+   ```
+   Mientras no se actualice, el sistema sigue leyendo `ALLOWED_USERS` (compat shim) — pero `"owner"` se normaliza a `"family"`, así que vos perdés acceso `admin` hasta que actualices el mapping.
+
+2. **Coordinar re-login con Eduardo/Abel**: el JWT shim mantiene sesiones activas funcionando como `family` por la ventana TTL (~8h). Después necesitan re-loguearse para obtener un JWT con la taxonomía nueva. Vos coordinás directo con ellos (decisión cerrada: yo no escribo docs ni mails).
+
+3. **Borrar shim post-cutover** (opcional, deuda técnica acotada): cuando todos los JWTs legacy expiren, podés borrar `_LEGACY_ROLE_ALIAS` de `dependencies.py` y `_LEGACY_ROLE_NORMALIZE` de `service.py`. Sin urgencia.
+
+### Divergencia respecto a la story original (para review de Moishe)
+
+- **Sync trigger** = `[contador, admin]` en vez de admin-only. Decisión Ary durante implementación 2026-05-06. Si Moishe considera que la matriz autoritativa debe actualizarse en la story file, queda a su discreción patchear AC3 / AC8 / matriz autoritativa en este file.
+
+### File List
+
+**Backend (modified):**
+- `backend/app/auth/schemas.py` — agregado `UserRole` Literal, aplicado a `UserSession.role`
+- `backend/app/auth/service.py` — agregado `_parse_rbac_role_mapping()`, `_normalize_role()`, `_LEGACY_ROLE_NORMALIZE`; `get_role_for_email()` ahora prefiere `RBAC_ROLE_MAPPING` con fallback a `ALLOWED_USERS`
+- `backend/app/dependencies.py` — `_VALID_ROLES` actualizado a 3 roles, agregado `_LEGACY_ROLE_ALIAS` shim, `require_role()` emite log `RBAC_DENIED`
+- `backend/app/api/v1/admin/router.py` — `fx-bcch/refetch` ahora `require_role(["admin"])` (era `["owner"]`)
+- `backend/app/api/v1/sync/router.py` — `sync/trigger` ahora `require_role(["contador", "admin"])` (era `["contador"]`)
+- `backend/app/api/v1/bank_accounts/router.py` — endpoints CRUD ahora `["contador", "admin"]`
+- `backend/app/api/v1/plan_de_cuentas/router.py` — `sync` endpoint ahora `["contador", "admin"]`
+
+**Backend (tests modified):**
+- `backend/tests/test_rbac.py` — refactorizado completo: 14 tests cubren matriz 3 roles, shim legacy, log RBAC_DENIED
+- `backend/tests/test_auth.py` — 5 tests nuevos para `RBAC_ROLE_MAPPING`; refactor `owner` → `family` en tests existentes
+- `backend/tests/test_admin_fx_bcch.py` — `_owner_cookie()` → `_admin_cookie()`; tests verifican que family/contador reciben 403
+- `backend/tests/test_sync.py` — `owner_token()` → `family_token()`; agregado `admin_token()` + `test_sync_trigger_admin_returns_triggered`
+- `backend/tests/test_dashboard.py` — `owner_token()` → `family_token()`
+- `backend/tests/test_bank_accounts.py` — `_owner_cookie()` → `_family_cookie()`
+- `backend/tests/test_plan_de_cuentas.py` — `_owner_cookie()` → `_family_cookie()`
+
+**Frontend (modified):**
+- `frontend/src/types/user.ts` — `UserRole = 'family' | 'contador' | 'admin'`
+- `frontend/src/types/index.ts` — `UserRole` actualizado
+- `frontend/src/components/layout/Sidebar.tsx` — usa `useHasRole(['contador', 'admin'])` en vez de check directo
+
+**Frontend (new):**
+- `frontend/src/hooks/useHasRole.ts` — helper `useHasRole(roles: readonly UserRole[]): boolean`
+- `frontend/src/components/layout/Sidebar.test.tsx` — 3 tests RBAC matrix
+
+**Docs (new):**
+- `docs/rbac-3-roles.md` — matriz, mapping, instrucciones admin, shim, defense-in-depth
+
+### Change Log
+
+| Date | Change | Author |
+|---|---|---|
+| 2026-05-06 | Story 9.13 implemented end-to-end (8 tasks, 10 ACs). Backend gates + frontend gates + JWT shim + email mapping + tests + docs. Status → review. | Amelia |
+| 2026-05-06 | Review aprobada. Patch matriz autoritativa: sync trigger pasa a `[contador, admin]` (refleja decisión Ary durante implementación). Cambios en matriz línea 46 + AC3 tabla + AC8 + AC9 contador test. Status → done. | Moishe |

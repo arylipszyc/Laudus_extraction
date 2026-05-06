@@ -1,8 +1,6 @@
 """Admin endpoints — Story 9.10 (fx-bcch refetch).
 
-RBAC: rol `owner` requerido. En el sistema actual `owner` es el dueño (Ary);
-no existe un rol `admin` separado, así que `owner` cumple la semántica
-"admin only" del story file.
+RBAC: rol `admin` requerido (Story 9.13 — matriz 3 roles).
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -21,7 +19,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 @router.post("/fx-bcch/refetch", response_model=FxBcchRefetchResponse)
 def fx_bcch_refetch(
     year_month: str = Query(..., description="Mes ya cerrado, formato YYYY-MM"),
-    user: UserSession = Depends(require_role(["owner"])),
+    user: UserSession = Depends(require_role(["admin"])),
 ) -> FxBcchRefetchResponse:
     try:
         result = refetch_eom(year_month)
