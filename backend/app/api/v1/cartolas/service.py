@@ -33,6 +33,9 @@ logger = logging.getLogger(__name__)
 
 MAX_PDF_SIZE_BYTES = 20 * 1024 * 1024  # NFR3: 20MB
 JOB_TTL_SECONDS = 60 * 60  # 1 hour
+# Story 9.5h: draws independientes ante fallo transitorio de Gemini (línea
+# omitida → BALANCE_MISMATCH, o JSON truncado → GeminiExtractionError).
+MAX_EXTRACTION_ATTEMPTS = 3
 
 JobStatus = Literal["processing", "ready", "failed"]
 
@@ -211,19 +214,21 @@ def write_staging_file(canonical: CartolaCanonicalV1, batch_id: str,
 # ── Pipeline (the synchronous body of the job) ────────────────────────────
 
 
-def process_upload_sync(
+def _has_balance_mismatch(canonical: CartolaCanonicalV1) -> bool:
+    return any(w.code == "BALANCE_MISMATCH" for w in canonical.extraction.warnings)
+
+
+def _extract_and_enrich(
     *,
-    batch_id: str,
     pdf_bytes: bytes,
     bank_account_entry: BankAccountEntry,
     gemini: GeminiClient,
-    historical_amounts_provider=None,
-    staging_dir: Path | None = None,
+    history: list | None,
 ) -> CartolaCanonicalV1:
-    """Run the full pipeline and update the job store. Returns canonical on success.
+    """One extraction draw: Gemini → server-side stamps → validate → post-process.
 
-    Raises Pydantic ValidationError if the canonical JSON is invalid (caller
-    sets the job to failed).
+    Raises GeminiExtractionError (bad/truncated JSON) or Pydantic ValidationError
+    (invalid canonical shape).
     """
     raw_dict = gemini.extract_pdf(
         pdf_bytes=pdf_bytes,
@@ -243,14 +248,76 @@ def process_upload_sync(
     raw_dict.setdefault("schema_version", "1.0")
 
     canonical = CartolaCanonicalV1.model_validate(raw_dict)
+    return apply_post_process(canonical, historical_amounts=history)
 
+
+def process_upload_sync(
+    *,
+    batch_id: str,
+    pdf_bytes: bytes,
+    bank_account_entry: BankAccountEntry,
+    gemini: GeminiClient,
+    historical_amounts_provider=None,
+    staging_dir: Path | None = None,
+) -> CartolaCanonicalV1:
+    """Run the full pipeline and write the staging file. Returns the canonical.
+
+    Story 9.5h: hasta MAX_EXTRACTION_ATTEMPTS draws independientes ante un fallo
+    transitorio (GeminiExtractionError o BALANCE_MISMATCH). Corta apenas obtiene
+    un resultado limpio. Si se agotan los intentos devuelve el mejor canonical
+    válido obtenido (un BALANCE_MISMATCH persistente es legítimo y se surfacea
+    como warning, no se oculta). Si nunca hubo canonical válido, propaga el
+    último GeminiExtractionError. Raises Pydantic ValidationError sin reintentar
+    (shape inválido = problema determinista; el caller lo marca como failed).
+    """
     history = None
     if historical_amounts_provider is not None:
         history = historical_amounts_provider(bank_account_entry.bank_account_id)
-    enriched = apply_post_process(canonical, historical_amounts=history)
 
-    write_staging_file(enriched, batch_id, staging_dir)
-    return enriched
+    last_valid: CartolaCanonicalV1 | None = None
+    last_extraction_error: GeminiExtractionError | None = None
+
+    for attempt in range(1, MAX_EXTRACTION_ATTEMPTS + 1):
+        try:
+            enriched = _extract_and_enrich(
+                pdf_bytes=pdf_bytes,
+                bank_account_entry=bank_account_entry,
+                gemini=gemini,
+                history=history,
+            )
+        except GeminiExtractionError as exc:
+            last_extraction_error = exc
+            logger.warning(
+                "cartola_upload: batch_id=%s extraction_error attempt %d/%d: %s",
+                batch_id, attempt, MAX_EXTRACTION_ATTEMPTS, exc,
+            )
+            continue
+        except ValidationError:
+            # Shape inválido = problema determinista; NO se reintenta (AC4).
+            # Pero si un intento previo ya produjo un canonical válido, no se
+            # descarta: se devuelve ese (mejor resultado obtenido).
+            if last_valid is not None:
+                break
+            raise
+
+        last_valid = enriched
+        if not _has_balance_mismatch(enriched):
+            write_staging_file(enriched, batch_id, staging_dir)
+            return enriched
+
+        logger.warning(
+            "cartola_upload: batch_id=%s balance_mismatch attempt %d/%d, retrying",
+            batch_id, attempt, MAX_EXTRACTION_ATTEMPTS,
+        )
+
+    if last_valid is not None:
+        # Best result obtained — BALANCE_MISMATCH persisted across all attempts.
+        write_staging_file(last_valid, batch_id, staging_dir)
+        return last_valid
+
+    # All attempts raised GeminiExtractionError — never got a valid canonical.
+    assert last_extraction_error is not None
+    raise last_extraction_error
 
 
 def run_job(

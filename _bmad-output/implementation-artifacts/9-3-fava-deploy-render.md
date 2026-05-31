@@ -149,6 +149,7 @@ F2 del plan de migración (`architecture-c4.md` §7.3 + §6). Crear un servicio 
   - [ ] Walkthrough con screenshots básicos opcionales (no bloquea deploy)
   - [ ] Disclaimer sobre Q2: el contador NO usa GitHub, todo vía Fava
   - [ ] Sección dedicada "Pre-condición: poblar `bank_account_last4` en las 47 cuentas" con paso-a-paso vía Fava editor (referenciar Story 9.5 que valida ese campo en uploads)
+  - [ ] **Al poblar los last4 reales:** re-evaluar re-habilitar la detección server-side de cuenta-equivocada (last4-índice vs last4-PDF). Story 9.5h la neutralizó porque el tooling de smoke usaba `last4="9999"` dummy → 100% de PARSE_AMBIGUOUS espurios; con last4 reales el check vuelve a tener señal. Ver `9-5h-validators-deterministas-flash-3-5.md` → Review Findings (Decision) + TODO en `gemini_client.py` `_build_prompt`.
 
 - [ ] Task 7: Smoke test post-deploy
   - [ ] Acceder a la URL → 401

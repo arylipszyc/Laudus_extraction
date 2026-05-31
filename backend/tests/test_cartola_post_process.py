@@ -124,7 +124,7 @@ def test_period_mismatch_first_tx_before_period_start():
     warnings = detect_period_mismatch(cart)
     assert len(warnings) == 1
     assert warnings[0].code == "PERIOD_MISMATCH"
-    assert "before period.start" in warnings[0].detail
+    assert "outside period" in warnings[0].detail and "2026-02-25" in warnings[0].detail
 
 
 def test_period_mismatch_last_tx_after_period_end():
@@ -134,7 +134,7 @@ def test_period_mismatch_last_tx_after_period_end():
     )
     warnings = detect_period_mismatch(cart)
     assert len(warnings) == 1
-    assert "after period.end" in warnings[0].detail
+    assert "outside period" in warnings[0].detail and "2026-04-05" in warnings[0].detail
 
 
 def test_period_mismatch_no_warning_when_in_range():
@@ -151,6 +151,131 @@ def test_period_mismatch_no_warning_when_in_range():
 def test_period_mismatch_no_warning_when_no_transactions():
     cart = _build([])
     assert detect_period_mismatch(cart) == []
+
+
+# ── PERIOD_MISMATCH cuota-aware (Story 9.5h AC3) ──────────────────────────
+
+
+def test_period_mismatch_excludes_instalment_by_operation_type():
+    """Cuota pre-existente (fecha anterior al período) identificada por raw.operation_type."""
+    cart = _build(
+        [{"line_no": 1, "date": "2026-01-10", "amount": "5000",
+          "raw": {"operation_type": "cuota", "cuotas": "3/6"}}],
+        period={"start": "2026-03-01", "end": "2026-03-31"},
+    )
+    assert detect_period_mismatch(cart) == []
+
+
+def test_period_mismatch_excludes_instalment_by_raw_cuotas():
+    cart = _build(
+        [{"line_no": 1, "date": "2026-01-10", "amount": "5000",
+          "raw": {"cuotas": "3/6"}}],
+        period={"start": "2026-03-01", "end": "2026-03-31"},
+    )
+    assert detect_period_mismatch(cart) == []
+
+
+def test_period_mismatch_excludes_instalment_by_description_suffix():
+    """Sin raw, la cuota se reconoce por el sufijo ' (cuota X/N)' de la description."""
+    cart = _build(
+        [{"line_no": 1, "date": "2026-01-10", "amount": "5000",
+          "description": "NETFLIX (cuota 3/6)", "raw": {}}],
+        period={"start": "2026-03-01", "end": "2026-03-31"},
+    )
+    assert detect_period_mismatch(cart) == []
+
+
+def test_period_mismatch_still_flags_non_instalment_before_start():
+    """Una compra normal (no-cuota) anterior al período SIGUE siendo anomalía."""
+    cart = _build(
+        [{"line_no": 1, "date": "2026-02-25", "amount": "-100",
+          "description": "JUMBO", "raw": {"operation_type": "compra"}}],
+        period={"start": "2026-03-01", "end": "2026-03-31"},
+    )
+    warnings = detect_period_mismatch(cart)
+    assert len(warnings) == 1
+    assert warnings[0].code == "PERIOD_MISMATCH"
+
+
+def test_period_mismatch_still_flags_non_instalment_after_end():
+    cart = _build(
+        [{"line_no": 1, "date": "2026-04-05", "amount": "-100",
+          "description": "JUMBO", "raw": {}}],
+        period={"start": "2026-03-01", "end": "2026-03-31"},
+    )
+    assert len(detect_period_mismatch(cart)) == 1
+
+
+def test_period_mismatch_mix_instalment_out_and_normal_in_range():
+    """Cuota fuera de período + compra normal dentro → no warning (la única fuera es cuota)."""
+    cart = _build(
+        [
+            {"line_no": 1, "date": "2026-01-10", "amount": "5000",
+             "raw": {"operation_type": "cuota", "cuotas": "2/12"}},
+            {"line_no": 2, "date": "2026-03-15", "amount": "-100",
+             "description": "JUMBO", "raw": {"operation_type": "compra"}},
+        ],
+        period={"start": "2026-03-01", "end": "2026-03-31"},
+    )
+    assert detect_period_mismatch(cart) == []
+
+
+def test_period_mismatch_all_instalments_out_of_range():
+    cart = _build(
+        [
+            {"line_no": 1, "date": "2026-01-10", "amount": "5000",
+             "raw": {"operation_type": "cuota", "cuotas": "2/12"}},
+            {"line_no": 2, "date": "2025-12-10", "amount": "5000",
+             "raw": {"operation_type": "cuota", "cuotas": "1/12"}},
+        ],
+        period={"start": "2026-03-01", "end": "2026-03-31"},
+    )
+    assert detect_period_mismatch(cart) == []
+
+
+# ── PERIOD_MISMATCH ratio rule (Story 9.5h iteración smoke pass 1) ────────
+
+
+def test_period_mismatch_silenced_when_minority_out_of_period():
+    """Boundary slop: 1 tx fuera de 5 (20%) < 80% threshold → NO warn.
+
+    Caso real medido en el smoke 2026-05-29: TC chilenas tienen tx normales
+    1-5 días antes de period.start por corte de facturación. Es ruido.
+    """
+    cart = _build(
+        [
+            {"line_no": 1, "date": "2026-02-28", "amount": "-100",  # 1 día antes
+             "raw": {"operation_type": "compra"}},
+            {"line_no": 2, "date": "2026-03-05", "amount": "-100"},
+            {"line_no": 3, "date": "2026-03-10", "amount": "-100"},
+            {"line_no": 4, "date": "2026-03-20", "amount": "-100"},
+            {"line_no": 5, "date": "2026-03-25", "amount": "-100"},
+        ],
+        period={"start": "2026-03-01", "end": "2026-03-31"},
+    )
+    assert detect_period_mismatch(cart) == []
+
+
+def test_period_mismatch_fires_when_majority_out_of_period():
+    """Catástrofe: 4 tx fuera de 5 (80%) ≥ threshold → SÍ warn.
+
+    Señal de que el LLM leyó mal el mes/año del período.
+    """
+    cart = _build(
+        [
+            {"line_no": 1, "date": "2026-02-10", "amount": "-100",
+             "raw": {"operation_type": "compra"}},
+            {"line_no": 2, "date": "2026-02-15", "amount": "-100"},
+            {"line_no": 3, "date": "2026-02-20", "amount": "-100"},
+            {"line_no": 4, "date": "2026-02-25", "amount": "-100"},
+            {"line_no": 5, "date": "2026-03-05", "amount": "-100"},  # única dentro
+        ],
+        period={"start": "2026-03-01", "end": "2026-03-31"},
+    )
+    warnings = detect_period_mismatch(cart)
+    assert len(warnings) == 1
+    assert warnings[0].code == "PERIOD_MISMATCH"
+    assert "4 of 5" in warnings[0].detail
 
 
 # ── LARGE_AMOUNT ──────────────────────────────────────────────────────────
@@ -205,11 +330,13 @@ def test_apply_post_process_preserves_gemini_warnings():
 
 
 def test_apply_post_process_combines_all_categories():
+    # 9.5h iter: las 3 tx caen fuera del período (100% > 80% threshold) para
+    # que PERIOD_MISMATCH dispare bajo la nueva regla de ratio.
     cart = _build(
         [
-            {"line_no": 1, "date": "2026-03-05", "description": "X", "amount": "0"},
-            {"line_no": 2, "date": "2026-03-05", "description": "X", "amount": "0"},
-            {"line_no": 3, "date": "2026-04-05", "description": "Y", "amount": "-100"},
+            {"line_no": 1, "date": "2026-04-05", "description": "X", "amount": "0"},
+            {"line_no": 2, "date": "2026-04-05", "description": "X", "amount": "0"},
+            {"line_no": 3, "date": "2026-04-10", "description": "Y", "amount": "-100"},
         ],
         period={"start": "2026-03-01", "end": "2026-03-31"},
     )

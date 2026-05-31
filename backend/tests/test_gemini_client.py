@@ -3,11 +3,16 @@
 Real Gemini calls are NOT exercised here (smoke test runs locally with API key).
 These tests cover SDK contract, prompt construction, and error handling.
 """
+import os
+import pathlib
+import subprocess
+import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from backend.app.integrations.gemini_client import (
+    DEFAULT_MODEL,
     GeminiClient,
     GeminiExtractionError,
     _BankAccountHint,
@@ -146,6 +151,71 @@ def test_prompt_excludes_post_process_warnings():
     assert "NO los emitas tú" in prompt or "NO los emitas tu" in prompt
 
 
+# ── Story 9.5h: default model + PARSE_AMBIGUOUS removal ───────────────────
+
+
+def test_default_model_is_gemini_3_5_flash():
+    """9.5h AC1: el default pasa a gemini-3.5-flash (ganador del spike 9.5g).
+
+    DEFAULT_MODEL se resuelve en import time. No recargamos el módulo (eso
+    contamina la identidad de las clases en el resto de la sesión); leemos el
+    valor ya resuelto y saltamos si hay un override de entorno activo.
+    """
+    if os.getenv("GEMINI_MODEL"):
+        pytest.skip("GEMINI_MODEL override activo en el entorno")
+    assert DEFAULT_MODEL == "gemini-3.5-flash"
+    with patch("google.genai.Client"):
+        assert GeminiClient(api_key="x").model == "gemini-3.5-flash"
+
+
+def test_default_model_respects_env_override():
+    """9.5h AC1: GEMINI_MODEL sigue forzando otro modelo (ej. pro como reserve).
+
+    Aislado en subprocess: el override se evalúa en import time, así que no se
+    puede testear in-process sin recargar (lo que contamina la sesión).
+    """
+    repo_root = pathlib.Path(__file__).resolve().parents[2]
+    code = (
+        "import os; os.environ['GEMINI_MODEL']='gemini-2.5-pro'; "
+        "import backend.app.integrations.gemini_client as gc; "
+        "print(gc.DEFAULT_MODEL)"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        capture_output=True, text=True, cwd=repo_root,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "gemini-2.5-pro" in result.stdout
+
+
+def test_prompt_does_not_instruct_gemini_to_emit_parse_ambiguous():
+    """9.5h AC2: PARSE_AMBIGUOUS era ruido (last4 dummy + 'estructura inusual').
+
+    Gemini ya no debe recibir instrucción de emitirlo; sólo LOW_CONFIDENCE queda
+    como warning emitible. Puede seguir en la lista de enums cerrados.
+    """
+    hint = _BankAccountHint(
+        bank_account_id="x", bank_name="y", account_label="z",
+        account_type="tarjeta_credito", currency="CLP", last4="1234",
+    )
+    prompt = _build_prompt(hint)
+    # El last4_clause ya no pide emitir un warning de discrepancia.
+    assert "emite un warning" not in prompt
+    assert "code=PARSE_AMBIGUOUS" not in prompt
+    # La instrucción de emisión activa menciona LOW_CONFIDENCE.
+    assert "LOW_CONFIDENCE" in prompt
+
+
+def test_prompt_keeps_last4_context_without_warning():
+    """9.5h AC2: el last4 sigue como contexto, sin pedir emisión de warning."""
+    hint = _BankAccountHint(
+        bank_account_id="x", bank_name="y", account_label="z",
+        account_type="tarjeta_credito", currency="CLP", last4="1234",
+    )
+    prompt = _build_prompt(hint)
+    assert '"1234"' in prompt
+
+
 # ── Client construction ──────────────────────────────────────────────────
 
 
@@ -244,5 +314,6 @@ def test_extract_pdf_passes_pdf_bytes_to_sdk():
     assert call.kwargs["model"] == "gemini-2.5-flash"
     contents = call.kwargs["contents"]
     assert len(contents) == 2
-    assert "abc" in contents[0]  # prompt has bank_account_id
-    assert contents[1] == "PDF_PART"
+    # 9.5f Tier 1: el PDF va primero, luego el prompt (contents=[pdf_part, prompt]).
+    assert contents[0] == "PDF_PART"
+    assert "abc" in contents[1]  # prompt has bank_account_id
