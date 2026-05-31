@@ -75,3 +75,12 @@ Story 3.5 deferred to Phase 2. Rationale:
 - `bank_accounts.account_number` FK has no ON UPDATE/ON DELETE action (RESTRICT by default) — renaming an account_number in plan_de_cuentas would fail if bank_accounts references it; account_numbers are stable in ERP; low risk
 - DECIMAL columns without precision/scale — financial fields use bare DECIMAL; PostgreSQL unconstrained DECIMAL is precise; precision/scale can be added in later migration when ranges are known
 - SupabaseRepository client instantiated per request — intentional per story spec dev note: "do not apply @lru_cache to SupabaseRepository"
+
+## Deferred from: code review of story-9.5h (2026-05-28)
+
+- Año alucinado en línea de cuota escapa PERIOD_MISMATCH — la exención de cuotas (AC3, by-design + testeada) deja sin check de año a las líneas clasificadas como cuota; una cuota con año alucinado (ej. 2021 en cartola 2026) no dispara PERIOD_MISMATCH. `cartola_post_process.py:73-104`. Mitigación fuera de scope: bound absoluto de fecha que aplique aun a cuotas.
+- Retry sobre BALANCE_MISMATCH determinista gasta hasta 3× costo/latencia Gemini — un PDF genuinamente descuadrado corre los 3 draws síncronos y devuelve el mismo warning del intento 1. `service.py:280`. Optimización: early-break si el `detail` del mismatch se repite idéntico entre draws.
+
+## Deferred from: smoke iteration of story-9.5h (2026-05-29)
+
+- **UI post-upload para revisar y corregir el período extraído** — decisión Ary 2026-05-29 al iterar 9.5h: el check PERIOD_MISMATCH se relajó a una regla de ratio ≥80% (sólo dispara ante una catástrofe — LLM leyó mal el mes/año). El coverage residual (años alucinados en pocas líneas, 1-2 tx fuera del período por hallucination, period.start/end mal-extraído por unos días) se mitiga afuera del post-process: el operador debe poder **ver el período extraído + ajustarlo** después del upload. Pertenece a la capa UI (frontend cartolas) + endpoint API (PATCH período en el canonical staged). Probablemente nueva story en epic 9 (UI/UX cartolas) o ítem de 9.6a/9.6b si el importer expone el JSON canónico para revisión.

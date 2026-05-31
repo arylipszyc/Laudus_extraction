@@ -13,7 +13,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+DEFAULT_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
 
 
 class GeminiExtractionError(Exception):
@@ -96,10 +96,15 @@ def _build_prompt(hint: _BankAccountHint) -> str:
     convention by account_type, mandatory inclusion of pre-existing instalments,
     mandatory exclusion of future instalments and subtotals.
     """
+    # 9.5h: el last4 queda como contexto informativo. NO se le pide a Gemini
+    # emitir un warning de discrepancia — el operador eligió la cuenta y ese
+    # match es decisión server-side, no de Gemini (era la fuente del 100% de
+    # los PARSE_AMBIGUOUS espurios medidos en el spike 9.5g).
+    # TODO(9.3 AC8): cuando los bank_account_last4 reales estén poblados,
+    # re-evaluar un check server-side last4-vs-PDF. La detección de
+    # cuenta-equivocada se DIFIRIÓ aquí (no se descartó) — ver 9.5h Review Findings.
     last4_clause = (
-        f'La cuenta esperada termina en "{hint.last4}" (verificar match contra '
-        "el PDF). Si no coincide, emite un warning con code=PARSE_AMBIGUOUS y "
-        "detail explicando la discrepancia."
+        f'La cuenta esperada termina en "{hint.last4}".'
         if hint.last4
         else ""
     )
@@ -200,11 +205,11 @@ REGLAS:
 
 11. **extraction.model:** "{DEFAULT_MODEL}".
 
-12. **extraction.warnings[]:** sólo emite warnings de los siguientes códigos:
-    - LOW_CONFIDENCE: alguna línea con datos ambiguos o ilegibles.
-    - PARSE_AMBIGUOUS: estructura del PDF inusual; revisar detalle.
-    Los códigos DUPLICATE_LINE, ZERO_AMOUNT, LARGE_AMOUNT, PERIOD_MISMATCH y
-    BALANCE_MISMATCH los detecta el backend en post-process — NO los emitas tú.
+12. **extraction.warnings[]:** sólo emite el código LOW_CONFIDENCE, y únicamente
+    cuando una línea tiene datos genuinamente ilegibles o ambiguos. NO emitas
+    ningún otro código. DUPLICATE_LINE, ZERO_AMOUNT, LARGE_AMOUNT, PERIOD_MISMATCH,
+    BALANCE_MISMATCH y PARSE_AMBIGUOUS los maneja el backend en post-process —
+    NO los emitas tú.
 
 ENUMS CERRADOS:
 
@@ -325,11 +330,12 @@ class GeminiClient:
 
         config = types.GenerateContentConfig(
             response_mime_type="application/json",
-            temperature=0.0,
+            temperature=0.1,
+            max_output_tokens=32768,
         )
         response = self._client.models.generate_content(
             model=self._model,
-            contents=[prompt, pdf_part],
+            contents=[pdf_part, prompt],
             config=config,
         )
         raw = response.text or ""

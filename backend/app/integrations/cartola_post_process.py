@@ -7,16 +7,48 @@ LARGE_AMOUNT requires history; if unavailable, the function emits nothing
 """
 from __future__ import annotations
 
+import re
 from decimal import Decimal
 from statistics import mean
 
 from backend.app.integrations.cartola_schema import (
     CartolaCanonicalV1,
+    CartolaTransaction,
     CartolaWarning,
 )
 
 LARGE_AMOUNT_THRESHOLD_FACTOR = 3  # FR27: > 3× promedio histórico
 BALANCE_MISMATCH_TOLERANCE_CLP = Decimal("100")  # Story 9.5 patch: round-off tolerance
+# 9.5h iteración (smoke pass 1): el check estricto disparaba por boundary slop
+# normal (tx 1-5 días antes de period.start es común en TC CL por corte de
+# facturación). El check ahora dispara sólo ante una catástrofe — el LLM leyó
+# mal el mes/año. Mitigación del coverage residual: UI post-upload para revisar
+# y corregir el período (ver deferred-work.md → "review/edit period post-upload").
+PERIOD_MISMATCH_RATIO_THRESHOLD = 0.80
+
+# Story 9.5h: sufijo " (cuota X/N)" que el prompt agrega a cuotas pre-existentes.
+# Captura X para distinguir pre-existentes (X≥1) de cuotas futuras (X=0).
+_INSTALMENT_DESC_RE = re.compile(r"\(cuota (\d+)/\d+\)", re.IGNORECASE)
+
+
+def _is_preexisting_installment(tx: CartolaTransaction) -> bool:
+    """True si la transacción es una cuota X/N pre-existente.
+
+    Su `date` es la fecha de la operación original (legítimamente anterior al
+    período de la cartola actual), así que NO debe disparar PERIOD_MISMATCH.
+    Señales (ver gemini_client._build_prompt): raw.cuotas o el sufijo
+    " (cuota X/N)" en la description aportan el nº de cuota X; raw.operation_type
+    == "cuota" es la señal de fallback cuando no hay X derivable.
+
+    Una cuota futura (X=0, "0/N") NO se cobra este mes — el prompt la excluye de
+    transactions; si aun así aparece, no es pre-existente y NO se exime del check.
+    """
+    raw = tx.raw or {}
+    token = str(raw.get("cuotas") or "")
+    m = re.match(r"\s*(\d+)\s*/\s*\d+", token) or _INSTALMENT_DESC_RE.search(tx.description or "")
+    if m:
+        return int(m.group(1)) >= 1
+    return raw.get("operation_type") == "cuota"
 
 
 def detect_duplicate_lines(canonical: CartolaCanonicalV1) -> list[CartolaWarning]:
@@ -48,28 +80,38 @@ def detect_zero_amounts(canonical: CartolaCanonicalV1) -> list[CartolaWarning]:
 
 
 def detect_period_mismatch(canonical: CartolaCanonicalV1) -> list[CartolaWarning]:
-    """AC6: verify period.start ≤ first_tx.date ≤ last_tx.date ≤ period.end."""
-    if not canonical.transactions:
+    """AC6: detect catastrophic mismatch between extracted period and tx dates.
+
+    Story 9.5h iteración (smoke pass 1, decisión Ary 2026-05-29): el check
+    dispara SÓLO si ≥80% (PERIOD_MISMATCH_RATIO_THRESHOLD) de las transacciones
+    no-cuota caen fuera del período — señal de que el LLM leyó mal el mes/año.
+    Una o dos tx ligeramente fuera (boundary slop del corte de facturación, hasta
+    5 días en la muestra real) NO dispara — es ruido. Cuotas pre-existentes X/N
+    se siguen excluyendo (su fecha es legítimamente anterior). El coverage
+    residual (años alucinados en pocas líneas) se mitiga vía UI post-upload
+    (revisar/corregir período).
+    """
+    relevant = [
+        tx for tx in canonical.transactions
+        if not _is_preexisting_installment(tx)
+    ]
+    if not relevant:
         return []
-    dates = [tx.date for tx in canonical.transactions]
+    period_start, period_end = canonical.period.start, canonical.period.end
+    out_of_period = [tx for tx in relevant if tx.date < period_start or tx.date > period_end]
+    if len(out_of_period) / len(relevant) < PERIOD_MISMATCH_RATIO_THRESHOLD:
+        return []
+    dates = [tx.date for tx in out_of_period]
     first, last = min(dates), max(dates)
-    if first < canonical.period.start:
-        return [CartolaWarning(
-            code="PERIOD_MISMATCH",
-            detail=(
-                f"first transaction date ({first.isoformat()}) is before "
-                f"period.start ({canonical.period.start.isoformat()})"
-            ),
-        )]
-    if last > canonical.period.end:
-        return [CartolaWarning(
-            code="PERIOD_MISMATCH",
-            detail=(
-                f"last transaction date ({last.isoformat()}) is after "
-                f"period.end ({canonical.period.end.isoformat()})"
-            ),
-        )]
-    return []
+    return [CartolaWarning(
+        code="PERIOD_MISMATCH",
+        detail=(
+            f"{len(out_of_period)} of {len(relevant)} transactions "
+            f"({100 * len(out_of_period) / len(relevant):.0f}%) outside "
+            f"period {period_start.isoformat()}..{period_end.isoformat()} "
+            f"(out-of-period range {first.isoformat()}..{last.isoformat()})"
+        ),
+    )]
 
 
 def detect_balance_mismatch(
