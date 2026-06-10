@@ -23,10 +23,16 @@ supabase>=2.7.0,<2.8.0
 
 # Beancount engine (Story 9.0+)
 beancount>=3.2.0
+# BQL queries + ledger file watcher (Story 9.2 — thin API)
+beanquery>=0.2
+watchfiles>=0.21
 
 # Gemini SDK (Story 9.5 — PDF cartola extraction)
 # Note: pulls httpx>=0.28; supabase 2.7.x advertises httpx<0.28 but runtime is compatible.
 google-genai>=1.75.0
+
+# Reporte de gastos para contadores (xlsx)
+openpyxl>=3.1.0
 
 # Testing
 pytest>=8.0.0

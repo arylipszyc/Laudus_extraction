@@ -5,6 +5,7 @@ import { DashboardPlaceholder } from '@/pages/DashboardPlaceholder'
 import { BalanceSheetPage } from '@/pages/BalanceSheetPage'
 import { IncomeExpensesPage } from '@/pages/IncomeExpensesPage'
 import { CartolaUploadPage } from '@/pages/CartolaUploadPage'
+import { ReportesPage } from '@/pages/ReportesPage'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/hooks/useAuth'
 import { useHasRole } from '@/hooks/useHasRole'
@@ -52,6 +53,18 @@ function App() {
           }
         >
           <Route index element={<CartolaUploadPage />} />
+        </Route>
+        <Route
+          path="/reportes"
+          element={
+            <RequireAuth>
+              <RequireContador>
+                <DashboardLayout />
+              </RequireContador>
+            </RequireAuth>
+          }
+        >
+          <Route index element={<ReportesPage />} />
         </Route>
         {/* Catch-all: redirect to login (Story 1.3 wires real auth) */}
         <Route path="*" element={<Navigate to="/login" replace />} />
