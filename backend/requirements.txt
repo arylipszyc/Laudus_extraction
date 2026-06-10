@@ -6,7 +6,8 @@ uvicorn[standard]>=0.30.0
 authlib>=1.3.0
 python-jose[cryptography]>=3.3.0
 itsdangerous>=2.1.0
-httpx>=0.27.0
+# Pin exacto: evita que pip explore versiones (backtracking) en el build de Render.
+httpx==0.28.1
 
 # Secrets (Story 1.5)
 google-cloud-secret-manager>=2.20.0
@@ -18,9 +19,10 @@ python-dotenv>=1.0.0
 python-dateutil>=2.9.0
 
 # Supabase (Story 4.0) — standby (no configurado en Render).
-# El tope <2.8.0 fijaba httpx<0.28, incompatible con google-genai (httpx>=0.28.1) -> pip ResolutionImpossible.
-# Sin tope resuelve a supabase 2.31+ (storage3 2.31, SIN pyiceberg en py3.12). Superficie usada: create_client/Client (estable).
-supabase>=2.7.0
+# Pin EXACTO. El viejo tope <2.8.0 fijaba httpx<0.28 (incompatible con google-genai httpx>=0.28.1 -> ResolutionImpossible),
+# y dejarlo abierto (>=2.7.0) hacía a pip backtrackear todo el rango (build colgado en Render).
+# 2.31.0 va con httpx 0.28.1, storage3 2.31 (SIN pyiceberg en py3.12); superficie create_client/Client estable.
+supabase==2.31.0
 
 # Beancount engine (Story 9.0+)
 beancount>=3.2.0
@@ -30,9 +32,8 @@ watchfiles>=0.21
 # Cartola PDF → directivas Beancount (Story 9.6a)
 beangulp>=0.2
 
-# Gemini SDK (Story 9.5 — PDF cartola extraction)
-# Note: pulls httpx>=0.28; supabase 2.7.x advertises httpx<0.28 but runtime is compatible.
-google-genai>=1.75.0
+# Gemini SDK (Story 9.5 — PDF cartola extraction). Pin exacto (requiere httpx>=0.28.1).
+google-genai==2.8.0
 
 # Reporte de gastos para contadores (xlsx)
 openpyxl>=3.1.0
