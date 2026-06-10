@@ -27,6 +27,13 @@ BOTTOM = Border(bottom=Side(style="thin", color="808080"))
 
 TEMPLATE = os.path.join(os.path.dirname(__file__), "template_order.json")
 
+# El template es estático: se carga y particiona una sola vez al importar el módulo,
+# no en cada request a GET /reportes/gastos.
+with open(TEMPLATE, encoding="utf-8") as _f:
+    _TEMPLATE = json.load(_f)
+ING_TPL = [e for e in _TEMPLATE if e["section"] == "INGRESOS"]
+EGR_TPL = [e for e in _TEMPLATE if e["section"] == "EGRESOS"]
+
 ALIAS = {
     "310025": ["113002", "113003"],
     "6900001": ["690001"], "69000003": ["690003"], "6501073": ["690073"], "6900099": ["690099"],
@@ -52,6 +59,27 @@ DAUGHTERS = [
     ("Egresos Johanna", "EGRESOS JOHANNA AVAYU DEUTSCH"),
     ("Egresos Jael", "EGRESOS JAEL AVAYU DEUTSCH"),
 ]
+
+# Story 10.2 — guard "cuentas sin categorizar".
+# Una cuenta creada nueva en Laudus (ausente del plan de cuentas) llega con Categoria vacía
+# y hoy desaparece del reporte: el resumen agrupa por Categoria2 (cae en el bucket "" que nunca
+# se lee) y el detalle exige el código en template_order.json. Detectamos esas cuentas por su
+# PREFIJO de número de cuenta. Semilla con los 4 CC de gasto EAG (prefijo→CC verificado 1:1 contra
+# Laudus); los prefijos de hijas se aprenden de la data ya categorizada (ver build_report).
+EAG_EXPENSE_PREFIX = {
+    "411": "Departamento Santiago", "413": "Casa Sur",
+    "415": "Departamento Miami", "430": "Gastos Personales",
+}
+KNOWN_EAG_CAT2 = {"DEPARTAMENTO SANTIAGO", "Casa Sur", "DEPARTAMENTO MIAMI", "GASTOS PERSONALES"}
+EXPENSE_FIRST_DIGITS = set("46789")  # familias de gasto del plan (4xx EAG, 6/7/8/9xx hijas)
+
+
+def _cc_prefix(code):
+    """Prefijo de 3 dígitos del número de cuenta (4101→411), o "" si no aplica."""
+    s = str(code).strip().replace(" ", "").replace("-", "")
+    if s.startswith("4101"):
+        s = "411" + s[4:]
+    return s[:3] if s[:3].isdigit() else ""
 
 
 def _num(v):
@@ -109,9 +137,6 @@ def _laudus_by_code(rows, months):
 
 def build_report(start: date, end: date, get_records) -> bytes:
     rows = get_records("ledger_final")
-    template = json.load(open(TEMPLATE, encoding="utf-8"))
-    ing_tpl = [e for e in template if e["section"] == "INGRESOS"]
-    egr_tpl = [e for e in template if e["section"] == "EGRESOS"]
     months = _months_in_range(start, end)
     nmon = len(months)
     laudus = _laudus_by_code(rows, months)
@@ -135,17 +160,41 @@ def build_report(start: date, end: date, get_records) -> bytes:
         cat2[str(r.get("Categoria2", ""))][mi] += amt
         cat1[str(r.get("Categoria1", ""))][mi] += amt
 
+    # ----- Story 10.2: detección de cuentas sin categorizar -----
+    name_of, acc_cat = {}, {}
+    for row in rows:
+        acc = str(row.get("accountnumber", ""))
+        if acc and acc not in acc_cat:
+            acc_cat[acc] = (str(row.get("Categoria1", "")), str(row.get("Categoria2", "")))
+            name_of[acc] = str(row.get("accountName", "")) or acc
+    daughter_cat1 = {k for _, k in DAUGHTERS}
+    prefix_label = dict(EAG_EXPENSE_PREFIX)        # semilla EAG + prefijos de hijas aprendidos de la data
+    for acc, (c1, c2) in acc_cat.items():
+        if c2 in KNOWN_EAG_CAT2:
+            prefix_label.setdefault(_cc_prefix(acc), c2)
+        elif c1 in daughter_cat1:
+            prefix_label.setdefault(_cc_prefix(acc), c1)
+    # El defecto es una cuenta SIN categoría (nueva en Laudus, ausente del plan). Una cuenta con
+    # categoría —aunque no sea de gasto, p.ej. un activo "DISPONIBLE…"— está bien y NO se marca.
+    uncat, uncat_unknown = [], []   # (code, name, cc_label, values) / (code, name, values)
+    for acc in sorted(have):
+        c1, c2 = acc_cat.get(acc, ("", ""))
+        if c1.strip() or c2.strip():
+            continue
+        p = _cc_prefix(acc)
+        if p in prefix_label:                       # prefijo ubica un CC de gasto → cuenta al total
+            uncat.append((acc, name_of.get(acc, acc), prefix_label[p], laudus[acc]))
+        elif p[:1] in EXPENSE_FIRST_DIGITS or not p:  # parece gasto, o código no parseable → visible, no sumado
+            uncat_unknown.append((acc, name_of.get(acc, acc), laudus[acc]))
+    uncat_total = [sum(v[3][m] for v in uncat) for m in range(nmon)]
+
     wb = Workbook()
     ws = wb.active
     ws.title = "Reporte"
     ws.sheet_view.showGridLines = False
     total_col = 2 + nmon
     LC = [get_column_letter(2 + j) for j in range(nmon)]   # letras de columnas de mes
-    TLC = get_column_letter(total_col)
     r = 1
-
-    def add(a, b):
-        return [x + y for x, y in zip(a, b)]
 
     def row_total_formula(row):
         return f"=SUM({LC[0]}{row}:{LC[-1]}{row})" if nmon else None
@@ -262,7 +311,7 @@ def build_report(start: date, end: date, get_records) -> bytes:
     # ----- INGRESOS -----
     section_title("INGRESOS")
     month_header()
-    render_template(ing_tpl)
+    render_template(ING_TPL)
 
     # ----- EGRESOS (resumen) -----
     section_title("EGRESOS (resumen)")
@@ -277,12 +326,16 @@ def build_report(start: date, end: date, get_records) -> bytes:
     ws.cell(r, 1, "EGRESOS HIJAS").font = BOLD; r += 1
     h_rows = [write(label, values=cat1[key], indent=True) for label, key in DAUGHTERS]
     hijas_sub = write("Subtotal Egresos Hijas", month_formulas=cells_formula(h_rows), bold=True, fill=LIGHT)
-    write("TOTAL EGRESOS", month_formulas=cells_formula([eag_sub, hijas_sub]), bold=True, fill=DARK)
+    total_terms = [eag_sub, hijas_sub]
+    if uncat:  # Story 10.2: las cuentas sin categorizar (CC conocido) entran al total (consistente con el detalle)
+        total_terms.append(
+            write("⚠️ Egresos sin categorizar (ver detalle al final)", values=uncat_total, indent=True))
+    write("TOTAL EGRESOS", month_formulas=cells_formula(total_terms), bold=True, fill=DARK)
 
     # ----- DETALLE DE LOS GASTOS -----
     section_title("DETALLE DE LOS GASTOS")
     month_header()
-    render_template(egr_tpl)
+    render_template(EGR_TPL)
 
     # ----- TARJETAS DE CRÉDITO (a completar por el contador) -----
     section_title("TARJETAS DE CRÉDITO — detalle a completar por el contador (desde cartola)")
@@ -294,7 +347,7 @@ def build_report(start: date, end: date, get_records) -> bytes:
         return any(c in have for c in norm_codes(code))
 
     cats, ingp = [], False
-    for e in egr_tpl:
+    for e in EGR_TPL:
         if e["kind"] == "header" and e["label"].strip().upper() == "GASTOS PERSONALES":
             ingp = True; continue
         if e["kind"] == "subtotal" and "GASTOS PERSONALES" in e["label"].upper():
@@ -307,6 +360,23 @@ def build_report(start: date, end: date, get_records) -> bytes:
     if r - 1 >= cat_first:
         write("Subtotal desglose (debe igualar el total Laudus de arriba)",
               month_formulas=range_formula(cat_first, r - 1), bold=True, fill=LIGHT)
+
+    # ----- Story 10.2: CUENTAS SIN CATEGORIZAR -----
+    if uncat or uncat_unknown:
+        section_title("⚠️ CUENTAS SIN CATEGORIZAR — en Laudus pero faltan en el plan de cuentas")
+        month_header()
+        for code, name, cc_label, vals in uncat:
+            write(f"{name} · {cc_label} · {code}", values=vals, indent=True)
+        if uncat:
+            write("Total sin categorizar (incluido en TOTAL EGRESOS)",
+                  values=uncat_total, bold=True, fill=LIGHT)
+        for code, name, vals in uncat_unknown:
+            write(f"{name} · (centro de costo desconocido — revisar) · {code}",
+                  values=vals, indent=True)
+        if uncat_unknown:
+            unk_total = [sum(v[2][m] for v in uncat_unknown) for m in range(nmon)]
+            write("Total prefijo desconocido (NO incluido en ningún total — categorizar)",
+                  values=unk_total, bold=True, fill=LIGHT)
 
     ws.column_dimensions["A"].width = 46
     for j in range(nmon + 1):

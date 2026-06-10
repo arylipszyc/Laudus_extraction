@@ -16,7 +16,7 @@ export function ReportesPage() {
 
   const running = sync?.job_status === 'running'
   const invalidRange = start > end
-  const lastSync = sync?.ledger.last_sync
+  const lastSync = sync?.ledger?.last_sync
     ? new Date(sync.ledger.last_sync).toLocaleDateString('es-CL')
     : '—'
 
