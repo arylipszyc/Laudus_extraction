@@ -13,6 +13,7 @@ const dashboardNavItems = [
 // Visible para contador + admin (Story 9.13 matriz autoritativa)
 const contadorNavItems = [
   { label: 'Cargar Cartola', to: '/upload' },
+  { label: 'Reporte de Gastos', to: '/reportes' },
   { label: 'Reconciliación', to: '/reconcile' },
 ]
 
