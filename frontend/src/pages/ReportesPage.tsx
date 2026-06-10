@@ -16,6 +16,9 @@ export function ReportesPage() {
 
   const running = sync?.job_status === 'running'
   const invalidRange = start > end
+  const lastSync = sync?.ledger.last_sync
+    ? new Date(sync.ledger.last_sync).toLocaleDateString('es-CL')
+    : '—'
 
   async function onGenerar() {
     setError(null)
@@ -79,9 +82,12 @@ export function ReportesPage() {
         )}
         {error && <p className="text-sm text-destructive">{error}</p>}
 
-        <p className="text-xs text-muted-foreground">
-          Datos sincronizados hasta: <strong>{sync?.ledger.last_sync ?? '—'}</strong>
-          {running && ' · sincronizando con Laudus…'}
+        <p className="text-sm text-muted-foreground">
+          Datos de Laudus al: <strong>{lastSync}</strong>
+          {running && <span className="text-blue-500"> · sincronizando con Laudus…</span>}
+          {sync?.job_status === 'failed' && (
+            <span className="text-destructive"> · error en la sincronización</span>
+          )}
         </p>
       </Card>
 
