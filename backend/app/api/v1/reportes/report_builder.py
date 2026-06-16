@@ -169,6 +169,10 @@ def build_report(start: date, end: date, get_records) -> bytes:
     mindex = {ym: i for i, ym in enumerate(months)}
     cat2 = defaultdict(lambda: [0.0] * nmon)
     cat1 = defaultdict(lambda: [0.0] * nmon)
+    # Detalle por cuenta dentro de cada hija (para itemizar el reporte como el workbook
+    # del contador). daughter_accts[cat1_hija][code] = montos mensuales.
+    daughter_accts = defaultdict(lambda: defaultdict(lambda: [0.0] * nmon))
+    daughter_name = {}
     for r in rows:
         ym = _row_ym(r)
         if ym is None:
@@ -186,6 +190,8 @@ def build_report(start: date, end: date, get_records) -> bytes:
         c1 = str(r.get("Categoria1", ""))
         if c1 in DAUGHTER_CAT1:
             cat1[c1][mi] += amt
+            daughter_accts[c1][acc][mi] += amt
+            daughter_name.setdefault(acc, str(r.get("accountName", "")) or acc)
         else:
             cat2[str(r.get("Categoria2", ""))][mi] += amt
 
@@ -364,6 +370,25 @@ def build_report(start: date, end: date, get_records) -> bytes:
     section_title("DETALLE DE LOS GASTOS")
     month_header()
     render_template(egr_tpl)
+
+    # ----- DETALLE DE GASTOS — HIJAS (itemizado por cuenta) -----
+    # El resumen de arriba solo muestra el subtotal por hija; acá se desglosa cuenta por
+    # cuenta (como el workbook del contador). Cada cuenta lleva su nombre + código.
+    if any(daughter_accts.get(key) for _, key in DAUGHTERS):
+        section_title("DETALLE DE GASTOS — HIJAS")
+        month_header()
+        for label, key in DAUGHTERS:
+            accts = sorted(daughter_accts.get(key, {}).items())
+            if not accts:
+                continue
+            ws.cell(r, 1, label).font = BOLD
+            r += 1
+            first = last = None
+            for code, vals in accts:
+                row = write(f"{daughter_name.get(code, code)} · {code}", values=vals, indent=True)
+                first = first or row
+                last = row
+            write(f"Subtotal {label}", month_formulas=range_formula(first, last), bold=True, fill=LIGHT)
 
     # ----- TARJETAS DE CRÉDITO (a completar por el contador) -----
     section_title("TARJETAS DE CRÉDITO — detalle a completar por el contador (desde cartola)")

@@ -113,3 +113,22 @@ def test_rows_feed_build_report(tmp_path):
     assert isinstance(data, bytes) and data[:2] == b"PK"   # firma ZIP/xlsx
     wb = load_workbook(io.BytesIO(data))
     assert wb.active.title == "Reporte"
+
+
+def test_report_itemizes_daughter_accounts():
+    """El reporte desglosa cuenta por cuenta dentro de cada hija (sección DETALLE HIJAS),
+    como el workbook del contador — no solo el subtotal."""
+    daughter = "EGRESOS JOCELYN AVAYU DEUTSCH"
+    rows = [
+        {"date": "2026-03-10", "accountnumber": "690003", "accountName": "Jocelyn - PAC Seguros",
+         "Categoria1": daughter, "Categoria2": "", "Categoria3": "", "debit": 1177, "credit": 0},
+        {"date": "2026-03-15", "accountnumber": "690001", "accountName": "Jocelyn - Remesa",
+         "Categoria1": daughter, "Categoria2": "", "Categoria3": "", "debit": 2500000, "credit": 0},
+    ]
+    data = build_report(date(2026, 1, 1), date(2026, 6, 30), lambda _name: rows)
+    ws = load_workbook(io.BytesIO(data)).active
+    labels = [str(ws.cell(r, 1).value) for r in range(1, ws.max_row + 1) if ws.cell(r, 1).value]
+    text = " ".join(labels)
+    assert any("DETALLE DE GASTOS" in l and "HIJAS" in l for l in labels)
+    assert "690003" in text and "690001" in text          # ambas cuentas itemizadas
+    assert "Jocelyn - PAC Seguros" in text                 # con su nombre
