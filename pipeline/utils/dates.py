@@ -1,15 +1,51 @@
+import os
 from datetime import datetime, date
 import calendar
 from dateutil.relativedelta import relativedelta
 
-def get_date_range(date_str):
+DEFAULT_OVERLAP_WINDOW_MONTHS = 13
+
+
+def _overlap_window_months():
+    """Tamaño (en meses) de la ventana solapada hacia atrás. Configurable por env."""
+    raw = os.getenv("SYNC_OVERLAP_WINDOW_MONTHS", str(DEFAULT_OVERLAP_WINDOW_MONTHS))
+    try:
+        months = int(raw)
+    except (TypeError, ValueError):
+        return DEFAULT_OVERLAP_WINDOW_MONTHS
+    return months if months >= 0 else DEFAULT_OVERLAP_WINDOW_MONTHS
+
+
+def get_date_range(date_str, today=None, overlap_months=None):
     """
-    Calculates the date range from the day after the given date string up to today.
+    Rango de fechas a sincronizar para el ledger.
+
+    Combina dos criterios:
+    - Watermark forward-only: el día después de la última fecha sincronizada (`date_str`).
+    - Ventana solapada hacia atrás: re-pedir los últimos `overlap_months` (≈ año fiscal
+      en curso + margen para backdating de cierre del año anterior) para recuperar asientos
+      posteados-tarde / con fecha contable retroactiva.
+
+    La ventana solo mueve `date_from` hacia ATRÁS, nunca hacia adelante:
+    `date_from = min(watermark+1, inicio_de_ventana)`. Así, si el watermark va atrasado
+    respecto a la ventana, no se pierde el histórico ya pedido; si va adelantado (caso
+    normal), se retrocede al inicio de ventana para recuperar lo backdateado.
+
+    `today` y `overlap_months` son parámetros para testeo determinista; en producción se
+    derivan de `datetime.now()` y `SYNC_OVERLAP_WINDOW_MONTHS`.
     """
-    last_date = datetime.strptime(date_str, "%Y-%m-%d")
-    date_from = (last_date + relativedelta(days=1)).date()
-    date_to = datetime.now().date()
-    
+    if today is None:
+        today = datetime.now().date()
+    if overlap_months is None:
+        overlap_months = _overlap_window_months()
+
+    last_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    watermark_from = last_date + relativedelta(days=1)
+    window_start = today - relativedelta(months=overlap_months)
+
+    date_from = min(watermark_from, window_start)
+    date_to = today
+
     return date_from, date_to
 
 

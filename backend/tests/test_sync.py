@@ -767,3 +767,229 @@ def test_run_sync_laudus_failure_sets_failed(monkeypatch):
         assert svc._current_job["status"] == "failed"
         assert "bean-check failed" in svc._current_job["error"]
     reset_job_state()
+
+
+# ── Story 2.4: ventana solapada + rebuild de ledger_final que no falla en silencio ──
+
+from contextlib import ExitStack
+from datetime import date
+
+import pytest
+from dateutil.relativedelta import relativedelta
+
+import pipeline.sync as sync_module
+from pipeline.models import LEDGER_HEADERS
+from pipeline.utils.dates import get_date_range
+
+
+class _FakeWorksheet:
+    """Worksheet de gspread en memoria — soporta el subconjunto usado por sync_api."""
+
+    def __init__(self, title, rows=None):
+        self.title = title
+        self._rows = [list(r) for r in (rows or [])]  # [0] = headers
+
+    def get_all_values(self):
+        return [list(r) for r in self._rows]
+
+    def get_all_records(self):
+        if not self._rows:
+            return []
+        headers = self._rows[0]
+        records = []
+        for raw in self._rows[1:]:
+            record = {headers[i]: (raw[i] if i < len(raw) else "") for i in range(len(headers))}
+            if any(str(v) != "" for v in record.values()):
+                records.append(record)
+        return records
+
+    def clear(self):
+        self._rows = []
+
+    def update(self, values=None, range_name=None, value_input_option=None):
+        self._rows = [list(r) for r in values]
+
+    def append_row(self, row):
+        self._rows.append(list(row))
+
+
+class _FakeSpreadsheet:
+    def __init__(self):
+        self._sheets = {}
+
+    def seed(self, name, headers, records):
+        rows = [list(headers)] + [[rec.get(h, "") for h in headers] for rec in records]
+        self._sheets[name] = _FakeWorksheet(name, rows)
+
+    def worksheet(self, name):
+        if name in self._sheets:
+            return self._sheets[name]
+        raise Exception(f"Worksheet '{name}' not found")
+
+    def add_worksheet(self, title, rows, cols):
+        ws = _FakeWorksheet(title, [])
+        self._sheets[title] = ws
+        return ws
+
+
+def _raw_ledger_item(jeid, lineid, date_str, account="413900", debit=1000, credit=0):
+    """Item crudo al estilo del endpoint accounting/ledger de Laudus."""
+    return {
+        "journalEntryId": jeid,
+        "journalEntryNumber": jeid,
+        "date": date_str,
+        "accountNumber": account,
+        "lineId": lineid,
+        "description": "test",
+        "debit": debit,
+        "credit": credit,
+        "currencyCode": "CLP",
+        "parityToMainCurrency": 1,
+    }
+
+
+def _base_fake(watermark):
+    sh = _FakeSpreadsheet()
+    sh.seed("PlanCuentas", ["Cuenta"], [])
+    sh.seed("date_range", ["dateTo", "dateFrom"], [{"dateTo": watermark, "dateFrom": watermark}])
+    sh.seed("ledger", LEDGER_HEADERS, [])
+    return sh
+
+
+def _run_sync_api_with_fake(sh, ledger_items, replace_override=None):
+    """Corre pipeline.sync.sync_api() contra un spreadsheet fake con la IO externa parcheada.
+    upsert_to_sheet/replace_sheet quedan REALES (ejercitan dedup/merge de verdad) salvo override."""
+    with ExitStack() as stack:
+        stack.enter_context(patch("pipeline.sync.get_spreadsheet", return_value=sh))
+        stack.enter_context(patch("pipeline.sync.fetch_balance_sheet", return_value=[]))
+        stack.enter_context(patch("pipeline.sync.fetch_ledger", return_value=ledger_items))
+        stack.enter_context(patch(
+            "pipeline.sync.build_plan_cuentas_lookup",
+            return_value={"413900": {"accountName": "x", "Categoria1": "a", "Categoria2": "b", "Categoria3": "c"}},
+        ))
+        stack.enter_context(patch(
+            "pipeline.sync.get_endpoints",
+            return_value={"GET_LEDGER": {"url": "http://x", "params": {}}},
+        ))
+        if replace_override is not None:
+            stack.enter_context(patch("pipeline.sync.replace_sheet", side_effect=replace_override))
+        sync_module.sync_api()
+
+
+# ── AC1: get_date_range ventana solapada ──────────────────────────────────
+
+
+def test_get_date_range_recent_watermark_reaches_back_window():
+    """AC1: watermark reciente → date_from retrocede al inicio de ventana, no a watermark+1."""
+    today = date(2026, 6, 15)
+    date_from, date_to = get_date_range("2026-06-15", today=today, overlap_months=13)
+    assert date_to == today
+    assert date_from == today - relativedelta(months=13)  # 2025-05-15
+
+
+def test_get_date_range_old_watermark_keeps_history():
+    """AC1: watermark más viejo que la ventana → date_from = watermark+1 (no perder histórico)."""
+    today = date(2026, 6, 15)
+    date_from, _ = get_date_range("2023-01-01", today=today, overlap_months=13)
+    assert date_from == date(2023, 1, 2)
+
+
+def test_get_date_range_date_to_is_today():
+    """AC1: date_to siempre es hoy."""
+    today = date(2026, 6, 15)
+    _, date_to = get_date_range("2026-06-15", today=today)
+    assert date_to == today
+
+
+def test_get_date_range_env_var_controls_window(monkeypatch):
+    """AC1: SYNC_OVERLAP_WINDOW_MONTHS controla el tamaño de la ventana."""
+    monkeypatch.setenv("SYNC_OVERLAP_WINDOW_MONTHS", "3")
+    today = date(2026, 6, 15)
+    date_from, _ = get_date_range("2026-06-15", today=today)
+    assert date_from == today - relativedelta(months=3)  # 2026-03-15
+
+
+# ── AC2/AC3/AC5: integración sync_api contra fake ─────────────────────────
+
+
+def test_sync_recovers_backdated_entry_within_window():
+    """AC3: un asiento backdateado dentro de la ventana, ingresado tras el avance del
+    watermark, aparece en ledger tras el sync. (Forward-only no lo recuperaba: con el
+    watermark ya en hoy, date_from sería hoy+1 > hoy y el fetch se saltaba.)"""
+    today = date.today()
+    sh = _base_fake(today.isoformat())  # watermark ya en hoy
+    backdated = (today - relativedelta(months=2)).isoformat()
+    _run_sync_api_with_fake(sh, [_raw_ledger_item("JE-BACK", "1", backdated)])
+    ledger_ids = {str(r["journalentryid"]) for r in sh.worksheet("ledger").get_all_records()}
+    assert "JE-BACK" in ledger_ids
+
+
+def test_sync_idempotent_two_runs_same_ledger():
+    """AC2: dos corridas con el mismo input dejan ledger sin filas duplicadas."""
+    today = date.today()
+    sh = _base_fake(today.isoformat())
+    month_ago = (today - relativedelta(months=1)).isoformat()
+    items = [
+        _raw_ledger_item("JE-1", "1", month_ago),
+        _raw_ledger_item("JE-2", "1", month_ago),
+    ]
+    _run_sync_api_with_fake(sh, items)
+    _run_sync_api_with_fake(sh, items)
+    rows = sh.worksheet("ledger").get_all_records()
+    assert len(rows) == 2
+
+
+def test_sync_advances_watermark_to_today_on_success():
+    """AC5: tras una corrida completa exitosa (incl. rebuild), date_range avanza a hoy."""
+    today = date.today()
+    sh = _base_fake("2026-01-01")
+    _run_sync_api_with_fake(sh, [_raw_ledger_item("JE-1", "1", today.isoformat())])
+    dates = [str(r["dateTo"]) for r in sh.worksheet("date_range").get_all_records()]
+    assert today.isoformat() in dates
+
+
+# ── AC4/AC5: el fallo del rebuild deja de ser silencioso ──────────────────
+
+
+def test_sync_api_raises_when_rebuild_fails_and_watermark_not_advanced():
+    """AC4+AC5: si el rebuild de ledger_final lanza, sync_api propaga (no se traga) y
+    date_range NO avanza → la corrida es re-intentable."""
+    today = date.today()
+    sh = _base_fake("2026-01-01")
+
+    def boom_on_final(spreadsheet, sheet_name, data_list, headers):
+        if sheet_name == "ledger_final":
+            raise RuntimeError("write boom")
+
+    with pytest.raises(RuntimeError, match="write boom"):
+        _run_sync_api_with_fake(
+            sh, [_raw_ledger_item("JE-1", "1", today.isoformat())], replace_override=boom_on_final
+        )
+
+    dates = [str(r["dateTo"]) for r in sh.worksheet("date_range").get_all_records()]
+    assert today.isoformat() not in dates  # watermark NO avanzó
+    assert "2026-01-01" in dates
+
+
+def test_sync_api_raises_on_ledger_final_count_mismatch():
+    """AC4: si ledger_final queda con distinto número de filas que ledger (rebuild parcial),
+    sync_api propaga en vez de avanzar a ciegas."""
+    today = date.today()
+    sh = _base_fake("2026-01-01")
+    items = [
+        _raw_ledger_item("JE-1", "1", today.isoformat()),
+        _raw_ledger_item("JE-2", "1", today.isoformat()),
+    ]
+    real_replace = sync_module.replace_sheet
+
+    def truncating(spreadsheet, sheet_name, data_list, headers):
+        if sheet_name == "ledger_final":
+            real_replace(spreadsheet, sheet_name, data_list[:-1], headers)  # pierde una fila
+        else:
+            real_replace(spreadsheet, sheet_name, data_list, headers)
+
+    with pytest.raises(RuntimeError, match="inconsistente"):
+        _run_sync_api_with_fake(sh, items, replace_override=truncating)
+
+    dates = [str(r["dateTo"]) for r in sh.worksheet("date_range").get_all_records()]
+    assert today.isoformat() not in dates  # watermark NO avanzó tras el mismatch
