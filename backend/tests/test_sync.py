@@ -688,3 +688,82 @@ def test_sync_status_flag_off_still_uses_sheets(tmp_path, monkeypatch):
     data = response.json()
     # Sheets value (2026-04-10), not the JSONL value (2026-05-10).
     assert "2026-04-10" in data["balance_sheet"]["last_sync"]
+
+
+# ── Story 9.4 AC4/AC5: on-demand dispatches to the Beancount importer ─────────
+
+
+def test_run_sync_dispatches_to_laudus_importer_when_flag_on(monkeypatch):
+    """AC4: flag on → _run_sync runs the Laudus importer (incremental), stats from result."""
+    import backend.app.api.v1.sync.service as svc
+    reset_job_state()
+    monkeypatch.setenv("USE_BEANCOUNT_ENGINE_LEDGER", "true")
+
+    captured = {}
+
+    def fake_run_import(mode="incremental", from_date=None):
+        captured["mode"] = mode
+        return {"success": True, "jes_added": 42, "error_msg": None}
+
+    monkeypatch.setattr("pipeline.importers.laudus_run.run_import", fake_run_import)
+
+    job_id = "laudus-job"
+    with svc._job_lock:
+        svc._current_job.update({"job_id": job_id, "status": "running", "stats": None})
+    svc._run_sync(job_id, MagicMock())
+
+    with svc._job_lock:
+        assert svc._current_job["status"] == "done"
+        assert svc._current_job["stats"]["ledger_added"] == 42
+    assert captured["mode"] == "incremental"
+    reset_job_state()
+
+
+def test_run_backfill_dispatches_to_laudus_importer_when_flag_on(monkeypatch):
+    """AC5: flag on → _run_backfill runs the importer in backfill mode."""
+    import backend.app.api.v1.sync.service as svc
+    reset_job_state()
+    monkeypatch.setenv("USE_BEANCOUNT_ENGINE_LEDGER", "true")
+
+    captured = {}
+
+    def fake_run_import(mode="incremental", from_date=None):
+        captured["mode"] = mode
+        captured["from_date"] = from_date
+        return {"success": True, "jes_added": 7, "error_msg": None}
+
+    monkeypatch.setattr("pipeline.importers.laudus_run.run_import", fake_run_import)
+
+    job_id = "laudus-backfill-job"
+    with svc._job_lock:
+        svc._current_job.update({"job_id": job_id, "status": "running", "stats": None})
+    svc._run_backfill(job_id, MagicMock(), "2021-01-01")
+
+    with svc._job_lock:
+        assert svc._current_job["status"] == "done"
+        assert svc._current_job["stats"]["ledger_added"] == 7
+    assert captured["mode"] == "backfill"
+    assert captured["from_date"] == "2021-01-01"
+    reset_job_state()
+
+
+def test_run_sync_laudus_failure_sets_failed(monkeypatch):
+    """AC7: importer failure (e.g. bean-check) → job_status=failed with error."""
+    import backend.app.api.v1.sync.service as svc
+    reset_job_state()
+    monkeypatch.setenv("USE_BEANCOUNT_ENGINE_LEDGER", "true")
+
+    monkeypatch.setattr(
+        "pipeline.importers.laudus_run.run_import",
+        lambda mode="incremental", from_date=None: {"success": False, "jes_added": 0, "error_msg": "bean-check failed: boom"},
+    )
+
+    job_id = "laudus-fail-job"
+    with svc._job_lock:
+        svc._current_job.update({"job_id": job_id, "status": "running", "stats": None})
+    svc._run_sync(job_id, MagicMock())
+
+    with svc._job_lock:
+        assert svc._current_job["status"] == "failed"
+        assert "bean-check failed" in svc._current_job["error"]
+    reset_job_state()

@@ -1,7 +1,7 @@
 ---
 story: 9.4
 title: Importer Laudus en producción (cron sábados 23:59 + on-demand)
-status: ready-for-dev
+status: review
 epic: 9
 depends_on: [9.1]
 blocks: []
@@ -134,60 +134,58 @@ Lo nuevo:
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: `BeancountWriter` (AC1)
-  - [ ] Crear `pipeline/writers/beancount_writer.py`
-  - [ ] Input: lista de JEs normalizadas (mismo shape que el actual `map_ledger_row`)
-  - [ ] Output: archivos `.beancount` agrupados por mes
-  - [ ] **Sin lógica multi-currency** — todas las JEs CLP (Q4 cerrada)
-  - [ ] Resolver cuenta destino: parsear `accounts.beancount` al boot (cached in-memory, ~340 directivas, milisegundos), index por `code:` metadata. Aplicar tabla §2.3 + slug §2.1.
-  - [ ] **Filtro defensivo `journalEntryId = 0`:** descartar antes de procesar.
-  - [ ] Tests unitarios: 5-10 casos de JE → directivas; verificar metadata + format. Incluir caso `journalEntryId=0` que confirme descarte.
+- [x] Task 1: `BeancountWriter` (AC1)
+  - [x] Crear `pipeline/writers/beancount_writer.py`
+  - [x] Input: lista de JEs normalizadas (mismo shape que `map_ledger_row`)
+  - [x] Output: archivos `.beancount` agrupados por mes
+  - [x] **Sin lógica multi-currency** — todas las JEs CLP (Q4 cerrada)
+  - [x] Resolver cuenta destino: parsear `accounts.beancount` al boot (cached), index por `code:` metadata. (Mapping leído de accounts.beancount per AC1 — no se re-deriva §2.3/§2.1 para cuentas conocidas; el bootstrap 9.1 ya las codificó.)
+  - [x] **Filtro defensivo `journalEntryId = 0`:** descartado antes de procesar.
+  - [x] Tests unitarios: 11 casos (metadata, sign, CLP, id=0, carga sin errores). Incluye caso `journalEntryId=0`.
 
-- [ ] Task 2: Reescribir orquestación `pipeline/sync.py` → `pipeline/importers/laudus_run.py`
-  - [ ] Mantener `pipeline/sync.py` actual (path Sheets) como fallback durante F1+F3 (drift mitigation §7.8)
-  - [ ] Crear `pipeline/importers/laudus_run.py` que llama a `ledger_service.fetch + balance_sheet_service.fetch` y luego al `BeancountWriter`
-  - [ ] Modos: `incremental` (default) y `backfill` (con `from_date`)
-  - [ ] Determinar `from_date` para `incremental`: `max(date)` en `imports/laudus/*.beancount` actuales
+- [x] Task 2: Orquestación `pipeline/importers/laudus_run.py`
+  - [x] `pipeline/sync.py` actual (path Sheets) preservado intacto (drift mitigation §7.8)
+  - [x] `laudus_run.py` llama a `fetch_fn` (default = `ledger_service.fetch + map_ledger_row`) y luego al `BeancountWriter`
+  - [x] Modos: `incremental` (default) y `backfill` (con `from_date`)
+  - [x] `from_date` incremental: día siguiente al `max(date)` en `imports/laudus/*.beancount`
 
-- [ ] Task 3: Idempotencia (AC2)
-  - [ ] Pre-write: leer todos los `id:` existentes en `imports/laudus/*.beancount`
-  - [ ] Filtrar JEs nuevas: skip las que ya tienen `id` matching
-  - [ ] Agrupar por mes y regenerar `imports/laudus/YYYY-MM.beancount` write-and-replace
+- [x] Task 3: Idempotencia (AC2)
+  - [x] Pre-write: parsea los `id:` existentes (reconciliación lossless vía round-trip beancount)
+  - [x] Merge por `id` (new overrides existing); regenera `YYYY-MM.beancount` determinista → bit-idéntico
+  - [x] `replace=True` (backfill) regenera desde rows; `replace=False` (incremental) mergea sin perder data
 
-- [ ] Task 4: Cuentas nuevas (AC6)
-  - [ ] Pre-write: leer `accounts.beancount` y construir set de cuentas conocidas
-  - [ ] Si una JE referencia una cuenta nueva: emitir entry tentativo en `_new-accounts-pending.beancount` + tag JE con `#pending-account`
-  - [ ] Acumular contador para reporte al final
+- [x] Task 4: Cuentas nuevas (AC6)
+  - [x] Set de cuentas conocidas desde `accounts.beancount`
+  - [x] Cuenta nueva → `open` tentativo (cuarentena `Assets:EAG:PendingReview:Cuenta-<code>`) en `_new-accounts-pending.beancount` + JE con `#pending-account`
+  - [x] Contador `pending_accounts` en el resultado; pending file self-cleaning (cuenta promovida sale)
 
-- [ ] Task 5: Lock file (AC8)
-  - [ ] Función helper `acquire_lock(path, timeout=60, max_age=300)`
-  - [ ] Manejar limpiar stale locks (mtime > max_age)
-  - [ ] Liberar siempre — usar context manager / try-finally
+- [x] Task 5: Lock file (AC8)
+  - [x] `acquire_lock(path, timeout=60, max_age=300, poll=5)` context manager
+  - [x] Limpia stale locks (mtime > max_age); raise `LockTimeout` en timeout
+  - [x] Libera siempre (try-finally)
 
-- [ ] Task 6: bean-check pre-commit + git commit/push (AC7 + AC9)
-  - [ ] Después de write: `subprocess.run(["bean-check", "ledger/main.beancount"], ...)`
-  - [ ] Si OK: `git add ledger/imports/laudus/`, `git commit -m "..."`, `git push origin main`
-  - [ ] Si KO: revertir cambios (re-leer git tree y restore archivos), log error completo
-  - [ ] Auth git push: SSH key `BEANCOUNT_DEPLOY_KEY` (write access, configurado solo para este servicio)
+- [x] Task 6: bean-check pre-commit + git commit/push (AC7 + AC9)
+  - [x] Post-write: `bean_check(main.beancount)` (loader = mismo engine que el CLI bean-check)
+  - [x] Si OK: `git add/commit/push` (mensaje AC9 estructurado) — **guarded por `IMPORTER_GIT_ENABLED`**
+  - [x] Si KO: rollback (snapshot/restore, borra month files nuevos), log error a import-log
+  - [~] Auth git push: SSH key `BEANCOUNT_DEPLOY_KEY` → **HANDOFF a Ary** (secret en Render; código listo)
 
-- [ ] Task 7: `_meta/import-log.jsonl` append
-  - [ ] Cada corrida appendea una línea con: `ts`, `mode`, `from_date`, `to_date`, `jes_added`, `jes_dedup`, `pending_accounts`, `success`, `error_msg`, `git_commit_sha`
-  - [ ] Esta línea es lo que Story 9.2 lee para `GET /sync/status`
+- [x] Task 7: `_meta/import-log.jsonl` append
+  - [x] Cada corrida appendea: `importer`, `timestamp`, `mode`, `from_date`, `to_date`, `jes_added`, `jes_dedup`, `pending_accounts`, `success`, `error_msg`, `git_commit_sha`
+  - [x] Incluye `importer:"laudus"` + `timestamp` → lo que Story 9.2 `GET /sync/status` consume (loop cerrado)
 
-- [ ] Task 8: Render Cron Job config (AC3)
-  - [ ] Crear nuevo Render Cron Job `laudus-importer-laudus`
-  - [ ] Schedule: `59 23 * * 6` con `TZ=America/Santiago`
-  - [ ] Command: `python -m pipeline.importers.laudus_run`
-  - [ ] Env vars: Laudus credentials, Supabase credentials, `BEANCOUNT_DEPLOY_KEY`, `BEANCOUNT_REPO_URL`, `LEDGER_PATH`
-  - [ ] Persistent disk con git clone del ledger en startup
+- [ ] Task 8: Render Cron Job config (AC3) — **HANDOFF a Ary (requiere dashboard Render + secrets)**
+  - [ ] Crear Cron Job `laudus-importer-laudus`, schedule `59 23 * * 6` `TZ=America/Santiago`
+  - [ ] Command `python -m pipeline.importers.laudus_run`, persistent disk, env vars
+  - Runbook completo en `pipeline/importers/README.md` § HANDOFF.
 
-- [ ] Task 9: Endpoint on-demand (AC4 + AC5)
-  - [ ] Adaptar `backend/app/api/v1/sync/router.py` para llamar al nuevo `laudus_run` en lugar del path Sheets cuando flag `USE_BEANCOUNT_ENGINE_LEDGER=true`
-  - [ ] Mantener job_id tracking compatible con frontend actual
-  - [ ] RBAC sin cambios (de Story 1.4 + 2.1)
+- [x] Task 9: Endpoint on-demand (AC4 + AC5)
+  - [x] `_run_sync`/`_run_backfill` dispatchean a `laudus_run.run_import` cuando `USE_BEANCOUNT_ENGINE_LEDGER=true` (Sheets si off)
+  - [x] job_id tracking + stats (`ledger_added`) compatibles con frontend actual
+  - [x] RBAC sin cambios; `mode` acepta `incremental` (alias de `normal`)
 
-- [ ] Task 10: Smoke test (AC10)
-  - [ ] Documentar en `pipeline/importers/README.md` cómo correr smoke local + cómo verificar en Render
+- [x] Task 10: Smoke test (AC10) — doc
+  - [x] `pipeline/importers/README.md`: smoke local + verificación Render. Smoke en vivo = **HANDOFF a Ary** (requiere deploy).
 
 ---
 
@@ -243,3 +241,93 @@ ledger/_meta/import-log.jsonl              # NEW — append cada corrida
 - [Source: _bmad-output/spike-beancount/probe-empty-currency.py — caveat journalEntryId=0]
 - [Source: pipeline/services/ledger_service.py — preservado]
 - [Source: backend/app/api/v1/sync/router.py — endpoint on-demand existente]
+
+---
+
+## Dev Agent Record
+
+### Implementation Plan
+
+1. `BeancountWriter` (JE→directivas, mapping vía code, filtro id=0) → verify: unit tests + carga sin errores.
+2. Idempotencia por reconciliación (parsear existentes + merge por id + regenerar) → verify: doble corrida bit-idéntica.
+3. Cuentas nuevas → cuarentena + `#pending-account` → verify: pending file + self-clean.
+4. Orquestador `laudus_run` (incremental/backfill, fetch inyectable) → verify: tests con fake fetch.
+5. Lock + bean-check + rollback + import-log + git (guarded) → verify: tests de cada efecto.
+6. Selector endpoint on-demand vía flag → verify: dispatch tests (Sheets off / importer on).
+7. Render cron + git push + smoke en vivo → **handoff documentado** (no codeable).
+
+### Completion Notes
+
+**Núcleo entregado y testeado (23 tests nuevos):**
+- `BeancountWriter`: agrupa filas Laudus por `journalentryid` en `Transaction`s
+  (posting por línea, monto = debit − credit, CLP). Metadata `id`/`je_num`/`source`.
+  Mapeo de cuenta vía `code:` de `accounts.beancount` (255 cuentas cargadas OK).
+- **Idempotencia (AC2) por reconciliación lossless:** en vez de write-and-replace ciego
+  (que perdería data en incremental), el writer parsea las JEs ya escritas, mergea por
+  `id` y regenera los meses determinísticamente. El round-trip beancount es exacto
+  (verificado) → doble corrida con mismo input = archivos bit-idénticos.
+- **Filtro `journalEntryId == 0`** (AC1) — saldos sintéticos "Saldo anterior".
+- **Cuentas nuevas (AC6):** cuarentena `Assets:EAG:PendingReview:Cuenta-<code>` +
+  `#pending-account`; el pending file se auto-limpia cuando Ary promueve la cuenta.
+- **Lock (AC8), rollback en bean-check fail (AC7), import-log (AC7/Task7), commit
+  message estructurado (AC9).**
+- **Loop con Story 9.2 cerrado:** el import-log escribe `importer:"laudus"` + `timestamp`,
+  exactamente lo que el `/sync/status` de 9.2 lee.
+
+**Decisiones de diseño:**
+- **bean-check vía `beancount.loader`** (mismo engine que el CLI) en proceso — más
+  portable cross-platform (Windows/Render) que invocar el binario.
+- **git commit/push guarded por `IMPORTER_GIT_ENABLED`** (default off) — los tests y el
+  smoke local nunca pushean; producción lo activa. Push real necesita `BEANCOUNT_DEPLOY_KEY`.
+- **fetch inyectable** (`fetch_fn`) → el orquestador se testea sin red ni credenciales Laudus.
+- **`mode` acepta `incremental`** (alias de `normal`) para cumplir AC4 verbatim sin romper Story 2.x.
+
+**Pendientes = HANDOFF a Ary (deploy, no codeable):**
+- **Task 8 / AC3:** crear el Render Cron Job (`59 23 * * 6`, `TZ=America/Santiago`) — runbook en `pipeline/importers/README.md`.
+- **AC9 push real:** cargar `BEANCOUNT_DEPLOY_KEY` (SSH write) + `IMPORTER_GIT_ENABLED=true` en Render.
+- **AC10:** smoke post-deploy (correr en vivo, verificar < 10 min + commit + import-log).
+- **Activar `USE_BEANCOUNT_ENGINE_LEDGER=true`** cuando Beancount sea la fuente activa.
+
+### Debug Log
+
+- Bug propio detectado por test: el rollback (AC7) solo restauraba archivos
+  pre-existentes; los month files NUEVOS creados durante el write no se borraban al
+  revertir. Corregido (`_rollback` borra month files ausentes del snapshot).
+- `include "imports/laudus/*.beancount"` con glob vacío da error en beancount; en prod
+  siempre está `_init.beancount`. Los tests lo espejan.
+- Pre-existente (NO regresión, confirmado en 9.2): `test_run_backfill_calls_upsert_for_both_sheets`
+  (date-dependiente) + `test_fava_edit_validator.py` (dep `fava` no instalada local).
+
+### Test Results
+
+Suite backend (ignorando `test_fava_edit_validator.py`): **457 passed, 1 xfailed, 1 failed**
+(el failed = pre-existente date-dependiente). Tests nuevos de 9.4: 11 (writer) + 9
+(orquestador/lock/bean-check) + 3 (dispatch endpoint) = **23 verdes**.
+
+## File List
+
+**Nuevos:**
+- `pipeline/writers/__init__.py`
+- `pipeline/writers/beancount_writer.py`
+- `pipeline/importers/laudus_run.py`
+- `backend/tests/test_beancount_writer.py`
+- `backend/tests/test_laudus_run.py`
+
+**Modificados:**
+- `backend/app/api/v1/sync/service.py` — dispatch a `laudus_run` vía flag (`_run_laudus_import`)
+- `backend/app/api/v1/sync/schemas.py` — `mode` acepta `incremental`
+- `backend/tests/test_sync.py` — tests de dispatch flag-on (AC4/AC5/AC7)
+- `pipeline/importers/README.md` — sección importer Laudus + runbook + handoff Render
+
+## Change Log
+
+- 2026-06-12 — Fix post-smoke real: `default_fetch` faltaba `accountNumberFrom` (Laudus
+  `/accounting/ledger` da 422 sin él, igual que `pipeline/sync.py`). Agregado (= cuenta
+  mínima de `accounts.beancount`). Además: fetch que retorna None ahora se reporta como
+  `success:false` (no se enmascara como "0 filas"). Validado contra API real: 448 filas →
+  91 JE, 0 pending, bean-check 0 errores. +1 test (`test_fetch_error_reported_not_masked`).
+- 2026-06-10 — Story 9.4 implementada (núcleo autónomo). BeancountWriter + orquestador
+  incremental/backfill + idempotencia por reconciliación + cuentas pendientes + lock +
+  bean-check con rollback + import-log (cierra loop con 9.2) + selector endpoint on-demand.
+  23 tests nuevos verdes, cero regresiones. Task 8 (Render Cron) + AC3/AC10 + git push real
+  = handoff documentado a Ary (requieren dashboard Render + deploy key). Status → review.

@@ -122,8 +122,47 @@ def trigger_sync(
     return job_id
 
 
+def _run_laudus_import(job_id: str, mode: str, from_date: str | None = None) -> None:
+    """Story 9.4: run the Beancount Laudus importer in this background thread.
+
+    Used instead of the Sheets path when `USE_BEANCOUNT_ENGINE_LEDGER=true`.
+    """
+    try:
+        from pipeline.importers.laudus_run import run_import
+        result = run_import(mode=mode, from_date=from_date)
+        with _job_lock:
+            if _current_job["job_id"] != job_id:
+                return
+            if result["success"]:
+                _current_job.update({
+                    "status": "done",
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
+                    "stats": {"balance_sheet_added": 0, "ledger_added": result["jes_added"]},
+                })
+            else:
+                _current_job.update({
+                    "status": "failed",
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
+                    "error": result["error_msg"],
+                    "stats": None,
+                })
+    except Exception as exc:
+        logger.error("Laudus importer failed: %s", exc, exc_info=True)
+        with _job_lock:
+            if _current_job["job_id"] == job_id:
+                _current_job.update({
+                    "status": "failed",
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
+                    "error": str(exc),
+                    "stats": None,
+                })
+
+
 def _run_sync(job_id: str, repo: DataRepository) -> None:
     """Execute sync_api() in background thread. Counts records before/after for stats."""
+    if _flag("USE_BEANCOUNT_ENGINE_LEDGER"):
+        _run_laudus_import(job_id, mode="incremental")
+        return
     try:
         # Snapshot counts before sync (best-effort — silent on error)
         try:
@@ -169,6 +208,9 @@ def _run_sync(job_id: str, repo: DataRepository) -> None:
 
 def _run_backfill(job_id: str, repo: DataRepository, from_date: str | None) -> None:
     """Execute run_backfill() in background thread. Updates _current_job on completion/failure."""
+    if _flag("USE_BEANCOUNT_ENGINE_LEDGER"):
+        _run_laudus_import(job_id, mode="backfill", from_date=from_date)
+        return
     try:
         from backend.app.api.v1.sync.backfill import run_backfill
         result = run_backfill(from_date, repo)

@@ -4,6 +4,118 @@ Scripts y módulos que pueblan / actualizan el ledger Beancount.
 
 ---
 
+## cartola_pdf_importer — Cartola JSON → directivas Beancount (Story 9.6a)
+
+`beangulp.Importer` que consume el JSON canónico de Story 9.5
+(`ledger/imports/cartolas/_staging/{batch_id}.cartola.json`) y produce un
+`.beancount` por cartola, con una `Balance` directive al cierre que `bean-check`
+valida (FR22-25). Parser básico del path "match perfecto" — **sin** reconciliación
+cross-source (eso es 9.6b).
+
+Piezas:
+- [`cartola_pdf_importer.py`](cartola_pdf_importer.py) — `CartolaPdfImporter`, `_build_postings`, `convert_balance_to_pad`, `promote`.
+- [`bank_account_resolver.py`](bank_account_resolver.py) — `bank_account_id` → cuenta Beancount, leyendo `accounts.beancount` (NO Supabase).
+- [`category_predictor.py`](category_predictor.py) — hook de categorización; `NoopCategoryPredictor` (v1) manda todo a `Expenses:EAG:Suspense`/`pending`. Story 9.7 lo reemplaza.
+
+### Convención de signo (verificada contra cartolas reales)
+
+La cartola presenta saldos/montos en convención **natural de extracto**: para una TC,
+`opening`/`closing` y cargos son POSITIVOS (deuda como número positivo), con
+`opening + Σ amounts = closing`. Beancount usa liabilities crédito-normal (deuda
+negativa). Por eso para cuentas **Liabilities** se niega el signo (`target = -amount`,
+`balance = -closing`); para **Assets** se usa tal cual. Ambos postings suman 0.
+
+> ⚠️ El storyfile AC4 describe los postings con signos que no balancean en beancount
+> (sumarían 2×amount). La implementación sigue el gate real (AC5 = `bean-check` pasa),
+> verificado con la aritmética de un sample real. Ver Completion Notes de 9.6a.
+
+### Flujo
+
+```
+9.5 (Gemini)  →  _staging/{batch_id}.cartola.json
+                      │  CartolaPdfImporter.extract()
+                      ▼
+              N Transaction + 1 Balance (cierre)
+                      │  promote()  ── bean-check gate (Story 9.9) ──┐
+                      ▼                                              │ OK
+   imports/cartolas/{bank}-{last4}-{YYYY-MM}.beancount  + git commit (guarded)
+```
+
+`promote()` reusa el lock + `bean_check` + `git_commit_push` (guarded por
+`IMPORTER_GIT_ENABLED`) de [`laudus_run.py`](laudus_run.py).
+
+### Pendientes / dependencias
+
+- **Categorización real** = Story 9.7 (acá solo el hook noop).
+- **Override de Balance** (`convert_balance_to_pad`) lo dispara Story 9.9 desde el endpoint `/validate-balance`.
+- **Endpoint de upload + trigger de promote** = wiring en `cartolas/router.py` (Story 9.5/9.9), fuera de 9.6a.
+
+---
+
+## laudus_run — Importer Laudus → Beancount (Story 9.4)
+
+Orquestador [`laudus_run.py`](laudus_run.py). Toma JEs de la API Laudus y escribe
+directivas en `ledger/imports/laudus/YYYY-MM.beancount`, valida con bean-check y
+(en producción) commitea+pushea al repo del ledger.
+
+### Modos
+
+| Modo | Qué hace | from_date |
+|------|----------|-----------|
+| `incremental` (default) | JEs desde el día siguiente a la última fecha escrita hasta hoy; mergea por `id` (no pierde data) | auto |
+| `backfill` | Regenera todos los meses desde `from_date` (mismo modo que el bootstrap 9.1) | requerido |
+
+### Correr smoke local
+
+```bash
+# Incremental (git deshabilitado por default → solo escribe archivos, seguro)
+PYTHONUTF8=1 python -m pipeline.importers.laudus_run
+
+# Backfill desde 2021-01
+IMPORTER_MODE=backfill IMPORTER_FROM_DATE=2021-01-01 PYTHONUTF8=1 python -m pipeline.importers.laudus_run
+```
+
+Requiere `LAUDUS_USERNAME`, `LAUDUS_PASSWORD`, `LAUDUS_COMPANYVATID` en `.env`.
+
+### Variables de entorno
+
+| Var | Default | Para qué |
+|-----|---------|----------|
+| `LEDGER_DIR` | `<repo>/ledger` | Raíz del ledger (en Render: persistent disk) |
+| `IMPORTER_MODE` | `incremental` | Modo cuando se corre como `__main__` |
+| `IMPORTER_FROM_DATE` | — | `from_date` para backfill |
+| `IMPORTER_GIT_ENABLED` | `false` | `true` activa `git add/commit/push` |
+
+### On-demand desde el backend
+
+`POST /api/v1/sync/trigger` (Story 2.1, RBAC contador/admin) dispara este importer
+**cuando `USE_BEANCOUNT_ENGINE_LEDGER=true`**; con el flag off sigue el path Sheets.
+El resultado es visible vía `GET /api/v1/sync/status` (lee `_meta/import-log.jsonl`,
+gated por `USE_BEANCOUNT_ENGINE_SYNC_STATUS` — Story 9.2 AC7).
+
+### ⚠️ HANDOFF a Ary — requiere tus manos (Task 8 + AC10)
+
+El código está listo; lo siguiente necesita el dashboard de Render + secrets:
+
+1. **Render Cron Job `laudus-importer-laudus`** (AC3): type Cron Job; schedule
+   `59 23 * * 6` con `TZ=America/Santiago` (sábados 23:59 Chile); command
+   `python -m pipeline.importers.laudus_run`; persistent disk con git clone del ledger
+   (setear `LEDGER_DIR` al mount); env vars `LAUDUS_*`, `BEANCOUNT_REPO_URL`,
+   `BEANCOUNT_DEPLOY_KEY`, `IMPORTER_GIT_ENABLED=true`.
+2. **Deploy key git** (AC9): SSH key con **write** access al repo del ledger →
+   `BEANCOUNT_DEPLOY_KEY`. Sin esto el importer escribe pero no persiste al repo.
+3. **Smoke post-deploy** (AC10): correr manual desde Render → completa < 10 min →
+   `_meta/import-log.jsonl` con `success: true` → `git log` muestra el commit
+   `[importer-laudus] sync …`.
+4. **Activar flag** `USE_BEANCOUNT_ENGINE_LEDGER=true` cuando Beancount sea la fuente
+   activa. Hasta entonces convive con Sheets (§7.8: `pipeline/sync.py` corre en paralelo).
+
+**Limitación conocida:** al promover una cuenta de `_new-accounts-pending.beancount` a
+`accounts.beancount`, las JEs viejas siguen apuntando a la cuenta de cuarentena hasta
+que corras un **backfill**. El incremental solo re-resuelve JEs nuevas.
+
+---
+
 ## fx-bcch-eom — Dólar observado de cierre de mes (Story 9.10)
 
 Refetch idempotente del dólar observado del cierre de un mes. Lo escribe a
