@@ -81,6 +81,21 @@ def test_incremental_from_date_advances(tmp_path):
     assert seen[1] == "2024-03-16"          # day after the latest written JE
 
 
+def test_incremental_from_date_applies_overlap_window(tmp_path):
+    """Story 2.4 / code-review #1: con un JE reciente, el from_date incremental retrocede por la
+    ventana solapada (no forward-only) → recupera asientos backdateados en la nueva fuente Beancount."""
+    from datetime import date
+    from dateutil.relativedelta import relativedelta
+
+    root = _ledger_root(tmp_path)
+    recent = date.today().replace(day=15)
+    laudus_run.run_import(fetch_fn=lambda f, t: _balanced(date=recent.isoformat()), ledger_root=root)
+
+    nxt = date.fromisoformat(laudus_run._incremental_from_date(root / "imports" / "laudus"))
+    # No es recent+1 (forward-only): retrocede ~13 meses por la ventana.
+    assert nxt <= date.today() - relativedelta(months=12)
+
+
 def test_no_new_dates_skips_fetch(tmp_path):
     root = _ledger_root(tmp_path)
     called = []

@@ -19,7 +19,7 @@ import os
 import subprocess
 import time
 from contextlib import contextmanager
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 
 from beancount import loader
@@ -114,6 +114,13 @@ def git_commit_push(repo_root, paths: list[str], message: str) -> str | None:
         return None
     try:
         subprocess.run(["git", "-C", str(repo_root), "add", *paths], check=True)
+        # Nada staged → corrida idempotente (el writer es determinista; un re-fetch de la
+        # ventana solapada regenera archivos bit-idénticos). No es un error: se omite el commit
+        # en vez de dejar que `git commit` salga con código !=0 y se loguee como fallo (que
+        # además enmascararía un fallo real de staging).
+        if subprocess.run(["git", "-C", str(repo_root), "diff", "--cached", "--quiet"]).returncode == 0:
+            logger.info("git: nada que commitear (corrida idempotente) — se omite commit/push")
+            return None
         subprocess.run(["git", "-C", str(repo_root), "commit", "-m", message], check=True)
         sha = subprocess.run(
             ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
@@ -150,13 +157,19 @@ def _rollback(target_dir: Path, snapshot: dict[Path, str | None]) -> None:
 
 
 def _incremental_from_date(target_dir: Path) -> str:
-    """Day after the latest JE date already written, or the default start date."""
+    """Primer día a re-pedir en modo incremental.
+
+    NO es forward-only: retrocede por la ventana solapada (misma lógica que el path Sheets,
+    `pipeline.utils.dates.get_date_range`) para recuperar asientos posteados-tarde / con fecha
+    contable retroactiva. Sin JEs previos → fecha de inicio por defecto (backfill completo).
+    """
     jes = _parse_existing_jes(target_dir)
     dates = [je.date for je in jes.values() if je.date]
     if not dates:
         return _DEFAULT_FROM_DATE
-    latest = max(dates)
-    return (datetime.strptime(latest, "%Y-%m-%d").date() + timedelta(days=1)).isoformat()
+    from pipeline.utils.dates import get_date_range
+    date_from, _ = get_date_range(max(dates))
+    return date_from.isoformat()
 
 
 # ── default fetch (real Laudus) ─────────────────────────────────────────────
