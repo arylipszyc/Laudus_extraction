@@ -124,6 +124,11 @@ def detect_balance_mismatch(
     invariant is: closing - opening == sum(transactions) (with sign convention
     matched to the account type). When Gemini omits a line, this no longer
     holds and BALANCE_MISMATCH flags it immediately.
+
+    Roadmap: este check valida sólo los extremos (closing-opening) y el agregado.
+    Extensiones que cubren sus puntos ciegos (saldo corrido por línea, continuidad
+    inter-cartola, invariantes no-aritméticos para cartolas de inversión) en
+    deferred-work.md → "technical research — reconciliación cartolas (2026-06-10)".
     """
     expected = canonical.balances.closing - canonical.balances.opening
     actual = sum((tx.amount for tx in canonical.transactions), start=Decimal("0"))
