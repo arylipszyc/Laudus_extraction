@@ -665,12 +665,12 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -9500.00 CLP
   Expenses:EAG:ComprasCasaEfectivo-413049  9500.00 CLP
 
-2026-05-29 * "F#662 Plagas 911 SPA - control Sta Anita" #pending-account
+2026-05-29 * "F#662 Plagas 911 SPA - control Sta Anita"
   id: "5997"
   je_num: "5957"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -120000.00 CLP
-  Assets:EAG:PendingReview:Cuenta-411059  120000.00 CLP
+  Expenses:EAG:FumigacionControlPlagas-411059  120000.00 CLP
 
 2026-05-29 * "Ary Lipszyc de Johanna Avayu"
   id: "5998"

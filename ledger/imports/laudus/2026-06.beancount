@@ -122,9 +122,23 @@
   Expenses:EAG:SraRaquelVentura-430021  49000.00 CLP
   Expenses:EAG:OtrosGastosPersonales-430099  3980.00 CLP
 
+2026-06-14 * "Efectivo Eduardo Avayu"
+  id: "6013"
+  je_num: "5973"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -600000.00 CLP
+  Expenses:EAG:Efectivo-430001  600000.00 CLP
+
 2026-06-16 * "Pedro Leon Pozo - Examenes EAG"
   id: "6005"
   je_num: "5965"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -60000.00 CLP
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  60000.00 CLP
+
+2026-06-16 * "USD10.843,04 Visa BCI 1027 Mayo 2026"
+  id: "6012"
+  je_num: "5972"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -9994897.00 CLP
+  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  9994897.00 CLP
