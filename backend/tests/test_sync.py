@@ -856,17 +856,23 @@ def _base_fake(watermark):
     return sh
 
 
-def _run_sync_api_with_fake(sh, ledger_items, replace_override=None):
+def _run_sync_api_with_fake(sh, ledger_items, replace_override=None,
+                            plan_lookup=None, plan_side_effect=None):
     """Corre pipeline.sync.sync_api() contra un spreadsheet fake con la IO externa parcheada.
-    upsert_to_sheet/replace_sheet quedan REALES (ejercitan dedup/merge de verdad) salvo override."""
+    upsert_to_sheet/replace_sheet quedan REALES (ejercitan dedup/merge de verdad) salvo override.
+    `plan_lookup` permite forzar un lookup vacío; `plan_side_effect` un fallo de carga."""
+    default_plan = {"413900": {"accountName": "x", "Categoria1": "a", "Categoria2": "b", "Categoria3": "c"}}
     with ExitStack() as stack:
         stack.enter_context(patch("pipeline.sync.get_spreadsheet", return_value=sh))
         stack.enter_context(patch("pipeline.sync.fetch_balance_sheet", return_value=[]))
         stack.enter_context(patch("pipeline.sync.fetch_ledger", return_value=ledger_items))
-        stack.enter_context(patch(
-            "pipeline.sync.build_plan_cuentas_lookup",
-            return_value={"413900": {"accountName": "x", "Categoria1": "a", "Categoria2": "b", "Categoria3": "c"}},
-        ))
+        if plan_side_effect is not None:
+            stack.enter_context(patch("pipeline.sync.build_plan_cuentas_lookup", side_effect=plan_side_effect))
+        else:
+            stack.enter_context(patch(
+                "pipeline.sync.build_plan_cuentas_lookup",
+                return_value=default_plan if plan_lookup is None else plan_lookup,
+            ))
         stack.enter_context(patch(
             "pipeline.sync.get_endpoints",
             return_value={"GET_LEDGER": {"url": "http://x", "params": {}}},
@@ -993,3 +999,31 @@ def test_sync_api_raises_on_ledger_final_count_mismatch():
 
     dates = [str(r["dateTo"]) for r in sh.worksheet("date_range").get_all_records()]
     assert today.isoformat() not in dates  # watermark NO avanzó tras el mismatch
+
+
+def test_sync_api_raises_when_plancuentas_empty_and_watermark_not_advanced():
+    """code-review #3: PlanCuentas cargó vacío → sync_api aborta (no enriquece a ciegas) y NO
+    avanza el watermark, en vez de reportar éxito sirviendo data stale en silencio."""
+    today = date.today()
+    sh = _base_fake("2026-01-01")
+    with pytest.raises(RuntimeError, match="vac"):
+        _run_sync_api_with_fake(
+            sh, [_raw_ledger_item("JE-1", "1", today.isoformat())], plan_lookup={}
+        )
+    dates = [str(r["dateTo"]) for r in sh.worksheet("date_range").get_all_records()]
+    assert today.isoformat() not in dates
+    assert "2026-01-01" in dates
+
+
+def test_sync_api_propagates_plancuentas_load_failure():
+    """code-review #3: un fallo al cargar PlanCuentas (gspread) se propaga (job failed +
+    re-intentable), no se traga dejando el watermark congelado."""
+    today = date.today()
+    sh = _base_fake("2026-01-01")
+    with pytest.raises(RuntimeError, match="gspread boom"):
+        _run_sync_api_with_fake(
+            sh, [_raw_ledger_item("JE-1", "1", today.isoformat())],
+            plan_side_effect=RuntimeError("gspread boom"),
+        )
+    dates = [str(r["dateTo"]) for r in sh.worksheet("date_range").get_all_records()]
+    assert today.isoformat() not in dates

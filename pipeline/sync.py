@@ -80,13 +80,12 @@ def sync_api():
             logger.error("No se pudo conectar a Google Sheets.")
             return
 
-        # 1b. Cargar lookup de PlanCuentas para enriquecimiento
-        try:
-            plan_lookup = build_plan_cuentas_lookup(sh.worksheet("PlanCuentas").get_all_records())
-            logger.info("PlanCuentas cargado: %d cuentas.", len(plan_lookup))
-        except Exception as e:
-            plan_lookup = {}
-            logger.warning("No se pudo cargar PlanCuentas: %s. Las hojas _final no se enriquecerán.", e)
+        # 1b. Cargar lookup de PlanCuentas para enriquecimiento.
+        #     NO se traga un fallo de carga: sin enrichment las hojas _final no se reconstruyen y
+        #     el watermark quedaría congelado sirviendo data stale "con éxito" en silencio. Se deja
+        #     propagar al handler externo → job failed + re-intentable (consistente con el rebuild).
+        plan_lookup = build_plan_cuentas_lookup(sh.worksheet("PlanCuentas").get_all_records())
+        logger.info("PlanCuentas cargado: %d cuentas.", len(plan_lookup))
 
         # ──────────────────────────────────────
         # 2. BALANCE SHEET — último día del mes anterior
@@ -220,26 +219,32 @@ def sync_api():
                 enriched_ledger = [enrich_ledger_row(r, plan_lookup) for r in ledger_for_final]
                 replace_sheet(sh, "ledger_final", enriched_ledger, LEDGER_FINAL_HEADERS)
 
-                # Verificación: ledger_final debe quedar con tantas filas como ledger
-                # (enrich_ledger_row es 1:1). Si difieren, el rebuild no aterrizó
-                # (write parcial / hoja congelada) → propagar en vez de avanzar a ciegas.
+                # Verificación: ledger_final debe quedar con tantas filas como las que
+                # ESCRIBIMOS (enriched_ledger). Se compara contra el conteo en memoria, no
+                # re-leyendo `ledger` —cuyo get_all_records puede diferir por filas en blanco/
+                # coerción y dar un falso positivo que abortaría un rebuild correcto—. Si el
+                # re-read de ledger_final no coincide, el write no aterrizó (parcial / hoja
+                # congelada) → propagar en vez de avanzar a ciegas.
                 try:
                     final_count = len(sh.worksheet("ledger_final").get_all_records())
-                    ledger_count = len(sh.worksheet("ledger").get_all_records())
                 except Exception:
-                    final_count = ledger_count = None
-                if final_count is not None and final_count != ledger_count:
+                    final_count = None
+                if final_count is not None and final_count != len(enriched_ledger):
                     raise RuntimeError(
-                        "Rebuild ledger_final inconsistente: ledger_final=%d filas vs ledger=%d filas."
-                        % (final_count, ledger_count)
+                        "Rebuild ledger_final inconsistente: ledger_final=%d filas vs esperado=%d."
+                        % (final_count, len(enriched_ledger))
                     )
                 rebuild_ok = True
             else:
                 # Sin filas en ledger: nada que reconstruir, no es un fallo.
                 rebuild_ok = True
         else:
-            logger.warning(
-                "PlanCuentas no disponible: se omite el rebuild de ledger_final y NO se avanza el watermark."
+            # PlanCuentas cargó vacío: no se puede enriquecer. Abortar (propagar) en vez de
+            # avanzar el watermark sobre data sin enriquecer — si no, el reporte serviría data
+            # stale mientras el job reporta "éxito".
+            raise RuntimeError(
+                "PlanCuentas cargó vacío (0 cuentas): no se puede reconstruir ledger_final. "
+                "Se aborta la sincronización para no congelar el watermark sobre data sin enriquecer."
             )
 
         # ──────────────────────────────────────
