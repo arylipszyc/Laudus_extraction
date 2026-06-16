@@ -82,6 +82,38 @@
   Liabilities:EAG:TC:TcRaquelVentura-430019  224299.00 CLP
   Liabilities:EAG:TC:TcRaquelVentura-430019  775971.00 CLP
 
+2026-06-05 * "Efectivo Eduardo Avayu"
+  id: "6009"
+  je_num: "5969"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -600000.00 CLP
+  Expenses:EAG:Efectivo-430001  600000.00 CLP
+
+2026-06-05 * "Franco C. Comision venta Sportage TYYL55"
+  id: "6010"
+  je_num: "5970"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -90000.00 CLP
+  Assets:EAG:Bancos:BancoBci10160175-111005  -90000.00 CLP
+  Expenses:EAG:MantencinVehculosSeguros-411043  90000.00 CLP
+  Expenses:EAG:SraRaquelVentura-430021  90000.00 CLP
+
+2026-06-05 * "Com. Y Dist. Superkol de Johanna Avayu"
+  id: "6011"
+  je_num: "5971"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -203100.00 CLP
+  Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  203100.00 CLP
+
+2026-06-08 * "USD603,75 Levine y Partners - Asesoria"
+  id: "6008"
+  je_num: "5968"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -558650.00 CLP
+  Assets:EAG:Bancos:BancoBci10160175-111005  -10649.00 CLP
+  Expenses:EAG:GastosBancarios-430003  10649.00 CLP
+  Expenses:EAG:GastosLegalesNotara-430071  558650.00 CLP
+
 2026-06-12 * "Eliot - Remedios Sra Raquel/Plastif. USA"
   id: "6000"
   je_num: "5960"
