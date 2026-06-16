@@ -19,6 +19,7 @@ Exit 0 = paridad (0 diffs); 1 = hay diffs (imprime tabla); 2 = error de carga.
 from __future__ import annotations
 
 import argparse
+import calendar
 import os
 import sys
 from collections import defaultdict
@@ -93,8 +94,8 @@ def _load_rows(ym_from: str, ym_to: str):
 
     ledger_path = os.getenv("LEDGER_PATH") or "ledger/main.beancount"
     date_from = f"{ym_from}-01"
-    # último día del mes `ym_to`: pasar fin de mes amplio; aggregate ya filtra por YYYY-MM.
-    date_to = f"{ym_to}-31"
+    last_day = calendar.monthrange(int(ym_to[:4]), int(ym_to[5:7]))[1]
+    date_to = f"{ym_to}-{last_day:02d}"
     bean_rows = report_rows_via_beancount(LedgerService(ledger_path), date_from, date_to)
     return sheets_rows, bean_rows
 
