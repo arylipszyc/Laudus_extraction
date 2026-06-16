@@ -119,7 +119,7 @@ def build_plan_cuentas_lookup(records):
 
 def _eomonth(date_str):
     """Retorna el último día del mes de una fecha como string 'YYYY-MM-DD'."""
-    d = str(date_str).split(" ")[0]
+    d = str(date_str).split(" ")[0].split("T")[0]  # acepta "YYYY-MM-DD", "... HH:MM:SS" y ISO "...T..."
     y, m, _ = map(int, d.split("-"))
     last = _calendar.monthrange(y, m)[1]
     return str(_date(y, m, last))
