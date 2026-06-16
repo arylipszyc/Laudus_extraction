@@ -154,3 +154,48 @@ def ledger_entries_via_beancount(
             "Categoria3": str(m.get("laudus_categoria3", "")),
         })
     return {"data": data, "meta": {"last_sync": last_sync}}
+
+
+def report_rows_via_beancount(
+    ledger: LedgerService,
+    date_from: str | None = None,
+    date_to: str | None = None,
+) -> list[dict]:
+    """Filas estilo `ledger_final` desde Beancount — TODAS las entidades (#4 migración reporte).
+
+    El reporte de gastos (`report_builder`) agrega por código de cuenta y categoría
+    sobre EAG + las 4 hijas a la vez, así que a diferencia de
+    `ledger_entries_via_beancount` NO se filtra por entity. Cada posting del rango
+    se mapea a una fila con exactamente las claves que `report_builder` consume desde
+    `ledger_final` (date, accountnumber, accountName, Categoria1..3, debit, credit).
+    El split debit/credit por signo del número es el mismo que el resto del módulo.
+    """
+    entries = ledger.entries()
+    meta = _account_meta(entries)
+    conn = ledger.connection()
+
+    conds = []
+    if date_from:
+        conds.append(f"date >= {date_from}")
+    if date_to:
+        conds.append(f"date <= {date_to}")
+    where = (" WHERE " + " AND ".join(conds)) if conds else ""
+    bql = f"SELECT date, account, number, currency{where} ORDER BY date"
+    cursor = conn.execute(bql)
+
+    rows = []
+    for row_date, account, number, currency in cursor.fetchall():
+        m = meta.get(account, {})
+        amount = float(number) if number is not None else 0.0
+        iso_date = row_date.isoformat() if isinstance(row_date, date) else str(row_date)
+        rows.append({
+            "date": iso_date,
+            "accountnumber": str(m.get("code", "")),
+            "accountName": str(m.get("laudus_account_name", account)),
+            "Categoria1": str(m.get("laudus_categoria1", "")),
+            "Categoria2": str(m.get("laudus_categoria2", "")),
+            "Categoria3": str(m.get("laudus_categoria3", "")),
+            "debit": amount if amount >= 0 else 0.0,
+            "credit": -amount if amount < 0 else 0.0,
+        })
+    return rows
