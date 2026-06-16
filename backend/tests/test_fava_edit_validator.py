@@ -31,6 +31,18 @@ from fava.core import FavaLedger  # noqa: E402
 # ── helpers ──────────────────────────────────────────────────────────
 
 
+# Fixture de smoke-test que estos tests mutan. Vive ACÁ (no en el ledger de prod):
+# un asiento "(sample)" en ledger/manual/ contaminaba el reporte por el path
+# Beancount con cuentas reales que no existen en Laudus/Sheets (Story 9.11 paridad).
+# Se inyecta en la copia temporal del ledger para que el test tenga algo concreto que
+# editar/romper sin tocar producción.
+_SMOKE_FIXTURE = (
+    '2026-04-15 * "Smoke fixture — edit-validator test (no es data de prod)"\n'
+    "  Assets:EAG:Bancos:BancoBci10160175-111005    -65690.00 CLP\n"
+    "  Expenses:EAG:CombustibleVehculos-413044       65690.00 CLP\n"
+)
+
+
 def _copy_template_ledger(dst: Path) -> Path:
     """Copy the mock ledger to a tmp dir and return path to its main.beancount."""
     shutil.copytree(LEDGER_TEMPLATE, dst, dirs_exist_ok=True)
@@ -40,6 +52,8 @@ def _copy_template_ledger(dst: Path) -> Path:
     snap_dir = dst / "_meta" / ".snapshots"
     if snap_dir.exists():
         shutil.rmtree(snap_dir)
+    # Inyecta el fixture en la copia temporal (el prod manual/2026-04.beancount no lo trae).
+    (dst / "manual" / "2026-04.beancount").write_text(_SMOKE_FIXTURE, encoding="utf-8")
     return dst / "main.beancount"
 
 
