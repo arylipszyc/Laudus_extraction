@@ -10,6 +10,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
 from backend.app.audit.service import log_write_operation
+from backend.app.services.ledger_service import LedgerUnavailableError
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +71,20 @@ def add_middleware(app: FastAPI) -> None:
                     "code": f"HTTP_{exc.status_code}",
                     "message": exc.detail,
                     "detail": None,
+                }
+            },
+        )
+
+    # ── Ledger unavailable (503) — Story 9.2 AC1 ─────────────────────────────
+    @app.exception_handler(LedgerUnavailableError)
+    async def ledger_unavailable_handler(request: Request, exc: LedgerUnavailableError):
+        return JSONResponse(
+            status_code=503,
+            content={
+                "error": {
+                    "code": "LEDGER_UNAVAILABLE",
+                    "message": "Ledger has parse errors",
+                    "detail": exc.detail,
                 }
             },
         )

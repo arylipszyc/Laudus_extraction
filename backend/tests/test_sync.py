@@ -589,3 +589,102 @@ def test_run_backfill_upsert_called_once_per_sheet():
 
     # Should be exactly 2 total calls: one for balance_sheet, one for ledger
     assert mock_repo.upsert_records.call_count == 2
+
+
+# ── Story 9.2 AC7: sync/status from ledger/_meta/import-log.jsonl ─────────────
+
+
+def _enable_jsonl(monkeypatch, log_path):
+    monkeypatch.setenv("USE_BEANCOUNT_ENGINE_SYNC_STATUS", "true")
+    monkeypatch.setenv("LEDGER_IMPORT_LOG", str(log_path))
+
+
+def test_sync_status_jsonl_reads_last_laudus_run(tmp_path, monkeypatch):
+    """AC7: flag on → balance_sheet and ledger last_sync derive from last Laudus run."""
+    log = tmp_path / "import-log.jsonl"
+    log.write_text(
+        '{"importer": "laudus", "timestamp": "2026-05-01T12:00:00+00:00", "records": 10, "success": true}\n'
+        '{"importer": "laudus", "timestamp": "2026-05-10T08:30:00+00:00", "records": 12, "success": true}\n'
+        '{"importer": "cartolas", "timestamp": "2026-05-15T09:00:00+00:00", "records": 3, "success": true}\n',
+        encoding="utf-8",
+    )
+    _enable_jsonl(monkeypatch, log)
+    client = make_sync_test_app(mock_repo=make_mock_repo())
+    client.cookies.set("access_token", contador_token())
+    response = client.get("/api/v1/sync/status")
+    assert response.status_code == 200
+    data = response.json()
+    # Both data types share the latest Laudus run (single-pass importer under c4).
+    assert "2026-05-10" in data["balance_sheet"]["last_sync"]
+    assert "2026-05-10" in data["ledger"]["last_sync"]
+
+
+def test_sync_status_jsonl_ignores_failed_run(tmp_path, monkeypatch):
+    """AC7: a later failed (rolled-back) run must not report a fresher last_sync than
+    the last successful run."""
+    log = tmp_path / "import-log.jsonl"
+    log.write_text(
+        '{"importer": "laudus", "timestamp": "2026-05-10T08:30:00+00:00", "success": true}\n'
+        '{"importer": "laudus", "timestamp": "2026-05-12T08:30:00+00:00", "success": false, "error_msg": "bean-check failed"}\n',
+        encoding="utf-8",
+    )
+    _enable_jsonl(monkeypatch, log)
+    client = make_sync_test_app(mock_repo=make_mock_repo())
+    client.cookies.set("access_token", contador_token())
+    response = client.get("/api/v1/sync/status")
+    assert response.status_code == 200
+    data = response.json()
+    # Last successful run (05-10), not the failed run (05-12).
+    assert "2026-05-10" in data["balance_sheet"]["last_sync"]
+    assert "2026-05-10" in data["ledger"]["last_sync"]
+
+
+def test_sync_status_jsonl_missing_file_returns_null(tmp_path, monkeypatch):
+    """AC7: flag on + no import log (pre-bootstrap) → null per data type."""
+    _enable_jsonl(monkeypatch, tmp_path / "does-not-exist.jsonl")
+    client = make_sync_test_app(mock_repo=make_mock_repo())
+    client.cookies.set("access_token", contador_token())
+    response = client.get("/api/v1/sync/status")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["balance_sheet"]["last_sync"] is None
+    assert data["ledger"]["last_sync"] is None
+
+
+def test_sync_status_jsonl_no_laudus_record_returns_null(tmp_path, monkeypatch):
+    """AC7: flag on + only cartolas records → balance_sheet/ledger last_sync null."""
+    log = tmp_path / "import-log.jsonl"
+    log.write_text(
+        '{"importer": "cartolas", "timestamp": "2026-05-15T09:00:00+00:00", "records": 3}\n',
+        encoding="utf-8",
+    )
+    _enable_jsonl(monkeypatch, log)
+    client = make_sync_test_app(mock_repo=make_mock_repo())
+    client.cookies.set("access_token", contador_token())
+    response = client.get("/api/v1/sync/status")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["balance_sheet"]["last_sync"] is None
+    assert data["ledger"]["last_sync"] is None
+
+
+def test_sync_status_flag_off_still_uses_sheets(tmp_path, monkeypatch):
+    """AC7/AC2: flag off (default) → Sheets path unchanged even if a log exists."""
+    log = tmp_path / "import-log.jsonl"
+    log.write_text(
+        '{"importer": "laudus", "timestamp": "2026-05-10T08:30:00+00:00"}\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("LEDGER_IMPORT_LOG", str(log))
+    monkeypatch.delenv("USE_BEANCOUNT_ENGINE_SYNC_STATUS", raising=False)
+    mock_repo = make_mock_repo(
+        balance_sheet_records=[{"query_date": "2026-04-10", "account_id": 1}],
+        date_range_records=[{"dateTo": "2026-04-10", "dateFrom": "2026-04-01"}],
+    )
+    client = make_sync_test_app(mock_repo=mock_repo)
+    client.cookies.set("access_token", contador_token())
+    response = client.get("/api/v1/sync/status")
+    assert response.status_code == 200
+    data = response.json()
+    # Sheets value (2026-04-10), not the JSONL value (2026-05-10).
+    assert "2026-04-10" in data["balance_sheet"]["last_sync"]
