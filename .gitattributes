@@ -1,0 +1,3 @@
+# El entrypoint del cron corre en Linux (contenedor Render): forzar LF para que el
+# shebang no se rompa por el core.autocrlf=true del entorno Windows.
+backend/cron-importer-entry.sh text eol=lf
