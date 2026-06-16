@@ -122,6 +122,30 @@ def trigger_sync(
     return job_id
 
 
+def _refresh_ledger_clone() -> None:
+    """Trae el clon del ledger del backend a origin/main antes de importar.
+
+    El backend y el cron son ambos writers del repo del ledger (Story 9.11). Sin esto,
+    si el cron pusheó después del último clone/sync, el push del importer del backend
+    sería non-fast-forward y fallaría. fetch + reset --hard deja el clon == main (el
+    importer es determinista, así que resetear es seguro). No-op si LEDGER_DIR no apunta
+    a un clon git (tests / local sin deploy key).
+    """
+    import subprocess
+
+    ledger_dir = os.getenv("LEDGER_DIR")
+    if not ledger_dir:
+        return
+    repo_root = os.path.dirname(ledger_dir.rstrip("/\\"))  # LEDGER_DIR = <repo>/ledger
+    if not os.path.isdir(os.path.join(repo_root, ".git")):
+        return
+    try:
+        subprocess.run(["git", "-C", repo_root, "fetch", "origin", "main"], check=True, capture_output=True)
+        subprocess.run(["git", "-C", repo_root, "reset", "--hard", "origin/main"], check=True, capture_output=True)
+    except Exception as exc:  # noqa: BLE001 — refresh best-effort; el push de git_commit_push falla ruidoso si quedó atrás
+        logger.warning("No pude refrescar el clon del ledger antes de importar: %s", exc)
+
+
 def _run_laudus_import(job_id: str, mode: str, from_date: str | None = None) -> None:
     """Story 9.4: run the Beancount Laudus importer in this background thread.
 
@@ -129,6 +153,7 @@ def _run_laudus_import(job_id: str, mode: str, from_date: str | None = None) -> 
     """
     try:
         from pipeline.importers.laudus_run import run_import
+        _refresh_ledger_clone()
         result = run_import(mode=mode, from_date=from_date)
         with _job_lock:
             if _current_job["job_id"] != job_id:
