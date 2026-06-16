@@ -34,3 +34,14 @@ samples/*
 
 # Reportes generados por bootstrap/ (outputs del proceso, no source)
 bootstrap/report-*.csv
+
+# Validation runs de bootstrap/validate_cartolas_batch.py (Story 9.5c) — outputs locales
+_bmad-output/validation-runs/
+
+# Artefactos de runtime / cache (regenerables, no source)
+*.picklecache
+bootstrap/_cache/
+ledger/_meta/import-log.jsonl
+
+# Prototipos de reportes — outputs Excel generados localmente
+_reportes-prototipo/*.xlsx

@@ -191,7 +191,18 @@ def render_accounts_beancount(
     for record in sorted_records:
         bank_meta = bank_index.get(record["account_number"])
         parts.append(render_open_directive(record, bank_meta))
+    parts.append(_SYSTEM_ACCOUNTS)
     return "\n\n".join(parts) + "\n"
+
+
+# Cuentas de sistema (Story 9.6a) — no provienen de Laudus/Supabase.
+# Equity:Reconciliation:Discrepancias = destino del `pad` en overrides de Balance (AC6/FR25).
+# Expenses:EAG:Suspense = categoría placeholder del NoopCategoryPredictor (reemplazada en 9.7).
+_SYSTEM_ACCOUNTS = (
+    ";; ── Cuentas de sistema (Story 9.6a) ──────────────────────────────────────\n"
+    f"{OPENING_DATE} open Equity:Reconciliation:Discrepancias CLP, USD\n"
+    f"{OPENING_DATE} open Expenses:EAG:Suspense CLP, USD"
+)
 
 
 # ── Reporting ───────────────────────────────────────────────────────────────

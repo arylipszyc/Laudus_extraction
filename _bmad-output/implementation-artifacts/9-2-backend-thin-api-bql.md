@@ -1,7 +1,7 @@
 ---
 story: 9.2
 title: Backend thin API con BQL endpoints (F1)
-status: ready-for-dev
+status: review
 epic: 9
 depends_on: [9.1]
 blocks: [9.8]
@@ -126,38 +126,38 @@ F1 del plan de migración (`architecture-c4.md` §7.2 + §5). El backend actual 
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: `LedgerService` (AC1)
-  - [ ] Crear `backend/app/services/ledger_service.py` con la clase del artifact §5.1
-  - [ ] Inyectar via DI (FastAPI dependency) — singleton de proceso
-  - [ ] Background task para `watch_and_reload` (FastAPI startup hook)
-  - [ ] Manejar errores de `loader.load_file`: log + estado `unavailable` accesible vía property
-  - [ ] Test unitario: load → entries no vacío; reload tras change → entries actualizados; load con archivo roto → estado unavailable
-  - [ ] Env var `LEDGER_PATH` (default `ledger/main.beancount`)
+- [x] Task 1: `LedgerService` (AC1)
+  - [x] Crear `backend/app/services/ledger_service.py` (adaptado: load síncrono bajo lock — patrón `bank_account_index` — + watcher async, ver Completion Notes)
+  - [x] Inyectar via DI (FastAPI dependency `get_ledger_service`) — singleton de proceso (`@lru_cache`)
+  - [x] Background task para `watch_and_reload` (FastAPI lifespan en `main.py`)
+  - [x] Manejar errores de `loader.load_file`: log + `available` property; consumidores levantan `LedgerUnavailableError` → 503
+  - [x] Test unitario: load → entries no vacío; reload tras change → entries actualizados; load con archivo roto → unavailable + raise
+  - [x] Env var `LEDGER_PATH` (default `<repo>/ledger/main.beancount`)
 
-- [ ] Task 2: Feature flags granulares (AC2)
-  - [ ] Definir 4 env vars (`USE_BEANCOUNT_ENGINE_*`) en `.env.example` con default `false`
-  - [ ] Pattern de selección en `backend/app/services/dashboard_service.py`: nuevo método `get_balance_sheet_via_beancount()` + el actual queda como `get_balance_sheet_via_sheets()`. Selector lee la flag.
+- [x] Task 2: Feature flags granulares (AC2)
+  - [x] Definir env vars `USE_BEANCOUNT_ENGINE_*` en `.env.example` con default `false` (BALANCE_SHEET, LEDGER, SYNC_STATUS activos; INCOME_STATEMENT/EQUITY_VARIATION reservados — AC5/AC6 deferred)
+  - [x] Selector en `backend/app/api/v1/dashboard/service.py` (ruta real; no existe `services/dashboard_service.py`): `get_balance_sheets`/`get_ledger_entries` rutean a BQL vs Sheets según flag
 
-- [ ] Task 3: BQL queries para los 4 dashboards (AC3-AC6)
-  - [ ] `backend/app/services/bql_queries.py` con funciones puras `(LedgerService, entity, date_range) → JSON`
-  - [ ] Usar `beanquery.connect("beancount://...")` o `beanquery.run_query` directamente sobre los entries cargados
-  - [ ] Validar shape contra fixtures de respuesta actual de Sheets
-  - [ ] Cache LRU corto (60s) si performance lo requiere — skip si BQL responde < 200ms
+- [x] Task 3: BQL queries para los dashboards (AC3-AC4; **AC5/AC6 deferred** — ver Completion Notes)
+  - [x] `backend/app/services/bql_queries.py` con funciones puras `(LedgerService, entity, date_range) → JSON` (balance_sheet + ledger_entries)
+  - [x] Usar `beanquery.connect("beancount:", entries=…)` sobre los entries cargados
+  - [x] Validar shape contra los modelos Pydantic actuales (parity suite estructural)
+  - [x] Cache: omitido — BQL sobre el ledger actual responde < 200ms (la story lo permite explícitamente)
 
-- [ ] Task 4: `sync/status` desde JSONL (AC7)
-  - [ ] Leer `ledger/_meta/import-log.jsonl` (tail del archivo, last record por importer)
-  - [ ] Parsear timestamp + records counts; respond JSON con shape actual
-  - [ ] Si el archivo no existe (pre-bootstrap): respond `null` por data type (mismo shape que hoy)
+- [x] Task 4: `sync/status` desde JSONL (AC7)
+  - [x] Leer `ledger/_meta/import-log.jsonl` (último run `laudus`) — gated por `USE_BEANCOUNT_ENGINE_SYNC_STATUS` para no romper los tests Sheets de Story 2.x
+  - [x] Parsear timestamp; `balance_sheet` y `ledger` last_sync derivan del mismo run Laudus (single-pass c4)
+  - [x] Si el archivo no existe (pre-bootstrap): `null` por data type
 
-- [ ] Task 5: Tests de paridad (AC9)
-  - [ ] Crear `backend/tests/test_beancount_parity.py`
-  - [ ] Fixtures: subset del ledger ejecutado por Story 9.1 (o un mini-ledger de prueba)
-  - [ ] Tests parametrizados: para cada (entity, date_range, endpoint) → comparar JSON Sheets vs Beancount → assertEqual de structure, assertAlmostEqual de amounts
-  - [ ] Marcar como `@pytest.mark.beancount_parity` para correr en CI separado
+- [x] Task 5: Tests de paridad (AC9)
+  - [x] Crear `backend/tests/test_beancount_parity.py` + `README-beancount-parity.md`
+  - [x] Fixtures: mini-ledger sintético (el ledger real aún no está bootstrapeado — importer Laudus es 9.4)
+  - [x] Parity estructural (keys/modelo) corre ahora; parity de montos vs Sheets queda `xfail` documentado hasta 9.4
+  - [x] Marcado `@pytest.mark.beancount_parity` (registrado en `conftest.py`) para CI separado
 
-- [ ] Task 6: No tocar registries (AC8)
-  - [ ] Verificar que ningún cambio toca `backend/app/api/v1/plan_de_cuentas/` o `backend/app/api/v1/bank_accounts/`
-  - [ ] Tests existentes de 4.0 siguen verdes — assert en CI
+- [x] Task 6: No tocar registries (AC8)
+  - [x] Verificado: ningún cambio toca `plan_de_cuentas/` ni `bank_accounts/`
+  - [x] Tests existentes de 4.0 (`test_plan_de_cuentas`, `test_bank_accounts`) siguen verdes
 
 ---
 
@@ -247,3 +247,113 @@ watchfiles>=0.21
 - [Source: architecture-c4.md §7.8 — Riesgo de drift durante transición]
 - [Source: backend/app/services/dashboard_service.py — service pattern existente]
 - [Source: backend/app/api/v1/router.py — registration pattern]
+
+---
+
+## Dev Agent Record
+
+### Implementation Plan
+
+Slice pragmático acordado con Ary (2026-06-10): implementar la infraestructura del
+motor Beancount + los 2 endpoints que existen hoy (balance-sheets, ledger-entries) +
+sync/status, todo detrás de feature flags para coexistencia. AC5 (income-statement) y
+AC6 (equity-variation) **diferidos** porque sus páginas frontend no existen aún (solo
+hay `IncomeExpensesPage.tsx`) — serían endpoints net-new sin consumidor ni shape de
+referencia que validar.
+
+1. `LedgerService` (carga + watcher + 503) → verify: unit tests load/reload/broken.
+2. Feature flags + selector en dashboard service → verify: flag-off = Sheets sin cambios.
+3. BQL queries shape-compatibles → verify: unit tests de shape + correctitud vs mini-ledger.
+4. sync/status desde JSONL (flag-gated) → verify: tests JSONL + Sheets path intacto.
+5. Parity scaffold (estructural ahora, montos xfail) → verify: corre en suite.
+6. Registries intactos → verify: git diff vacío en esos dirs + sus tests verdes.
+
+### Completion Notes
+
+**Divergencias spec ↔ repo resueltas:**
+- La spec asumía `backend/app/services/dashboard_service.py` con métodos
+  `get_balance_sheet_via_beancount()/_via_sheets()`. La estructura real es
+  `backend/app/api/v1/dashboard/service.py`. Adapté el selector ahí mismo
+  (`get_balance_sheets`/`get_ledger_entries` con param `ledger=` + chequeo de flag),
+  sin crear un `services/dashboard_service.py` redundante. Sí creé el paquete
+  `backend/app/services/` para `ledger_service.py` + `bql_queries.py` (cross-cutting,
+  como pide la story).
+- **LedgerService — carga síncrona + watcher async:** el skeleton del artifact era
+  100% async (`asyncio.Lock`, `await load()`). Pero los endpoints de dashboard son
+  síncronos. Seguí el precedente probado del codebase (`integrations/bank_account_index.py`:
+  load síncrono bajo `threading.Lock`, usable desde endpoints sync) y agregué el
+  `watchfiles.awatch` async exigido por AC1 como tarea de background en el lifespan.
+  Mejor de ambos: acceso sync para los endpoints + reload proactivo ante edición externa.
+- **503 LEDGER_UNAVAILABLE:** el middleware global envuelve toda `HTTPException` en
+  `HTTP_<code>`, así que un `raise HTTPException(503, …)` no podía producir el body
+  exacto de AC1. Solución limpia: `LedgerUnavailableError` (en `ledger_service`) +
+  exception handler dedicado en `middleware.py` → body exacto `{"error":{"code":
+  "LEDGER_UNAVAILABLE", …}}`. Los endpoints solo dejan propagar la excepción.
+
+**Decisiones de diseño:**
+- AC7 (sync/status desde JSONL) quedó **gated por `USE_BEANCOUNT_ENGINE_SYNC_STATUS`**.
+  Sin flag rompía los tests Sheets de Story 2.1/2.2 (que esperan `null`/null vs valores
+  de mock_repo). Con flag off (default) el path Sheets queda idéntico; con flag on lee
+  el `import-log.jsonl`. Coherente con el principio de coexistencia de AC2.
+- `balance_sheet`/`ledger` last_sync derivan del **mismo run Laudus** (`importer:"laudus"`),
+  por el modelo single-pass de c4 (AC7).
+- Convención de montos en BQL (best-effort): split débito/crédito por signo del balance.
+  La paridad de montos real vs Sheets es `xfail` hasta el bootstrap del ledger (9.4),
+  documentado en `tests/README-beancount-parity.md` (AC9). El contrato que protege al
+  frontend hoy es la **paridad estructural** (keys == modelos Pydantic), que sí corre.
+
+**ACs diferidos (decisión de scope de Ary):**
+- **AC5 — `GET /api/v1/income-statement`:** NO implementado. No existe `IncomeStatementPage.tsx`.
+- **AC6 — `GET /api/v1/equity-variation`:** NO implementado. No existe `EquityVariationPage.tsx`.
+  Flags reservados (comentados) en `.env.example`. Retomar cuando esas páginas existan
+  (o plegar a Story 9.8 frontend).
+
+### Debug Log
+
+- `beanquery` no estaba instalado (sí en Dev Notes). Instalado `beanquery>=0.2` +
+  agregado a `requirements.txt` junto con `watchfiles>=0.21` (explícito).
+- Pre-existentes detectados (NO regresiones de 9.2, confirmados contra HEAD):
+  1. `test_sync.py::test_run_backfill_calls_upsert_for_both_sheets` — date-dependiente
+     (`from_date=2026-04-01` → 3 EOM hasta hoy 2026-06-10; el test hardcodea `== 1`).
+     Ya documentado en sprint-status como "único rojo pre-existente test_sync".
+  2. `test_fava_edit_validator.py` — `ModuleNotFoundError: fava` (dep no instalada en
+     venv local; Story 9.0). Se ignora localmente.
+
+### Test Results
+
+Suite backend (ignorando `test_fava_edit_validator.py` por dep faltante de entorno):
+**434 passed, 1 xfailed, 1 failed** — el único failed es el pre-existente date-dependiente
+de backfill. Tests nuevos de 9.2: 8 (ledger_service) + 13 (bql_queries) + 5
+(dashboard_beancount) + 2+1xfail (parity) + 4 (sync AC7) = **32 verdes + 1 xfail**.
+
+## File List
+
+**Nuevos:**
+- `backend/app/services/__init__.py`
+- `backend/app/services/ledger_service.py`
+- `backend/app/services/bql_queries.py`
+- `backend/tests/test_ledger_service.py`
+- `backend/tests/test_bql_queries.py`
+- `backend/tests/test_dashboard_beancount.py`
+- `backend/tests/test_beancount_parity.py`
+- `backend/tests/README-beancount-parity.md`
+- `backend/tests/conftest.py`
+
+**Modificados:**
+- `backend/app/api/v1/dashboard/router.py` — inyecta `get_ledger_service`, pasa `ledger=`
+- `backend/app/api/v1/dashboard/service.py` — selector flag Sheets↔BQL
+- `backend/app/api/v1/sync/service.py` — sync/status desde import-log.jsonl (AC7, flag-gated)
+- `backend/app/dependencies.py` — `get_ledger_service` singleton
+- `backend/app/middleware.py` — handler `LedgerUnavailableError` → 503
+- `backend/main.py` — lifespan que arranca el ledger watcher
+- `backend/requirements.txt` — `beanquery>=0.2`, `watchfiles>=0.21`
+- `.env.example` — `LEDGER_PATH` + flags `USE_BEANCOUNT_ENGINE_*`
+- `backend/tests/test_sync.py` — tests AC7 (JSONL path)
+
+## Change Log
+
+- 2026-06-10 — Story 9.2 implementada (slice pragmático). LedgerService + file watcher,
+  feature flags granulares, BQL para balance-sheets/ledger-entries, sync/status desde
+  JSONL, scaffold de paridad Sheets↔Beancount. AC5/AC6 (income-statement, equity-variation)
+  diferidos por ausencia de páginas frontend consumidoras. 32 tests nuevos verdes, cero
+  regresiones. Status → review.

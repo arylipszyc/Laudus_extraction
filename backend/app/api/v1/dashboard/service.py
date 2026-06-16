@@ -1,9 +1,20 @@
-"""Dashboard query and filter logic."""
+"""Dashboard query and filter logic.
+
+Story 9.2: each read can be served from the Beancount ledger (BQL) instead of
+Sheets, gated per-endpoint by a `USE_BEANCOUNT_ENGINE_*` env flag (AC2). When the
+flag is off (default) the original Sheets path runs unchanged.
+"""
 import logging
+import os
 
 from backend.app.repositories.base import DataRepository
 
 logger = logging.getLogger(__name__)
+
+
+def _flag(name: str) -> bool:
+    """True if the env var is set to a truthy value (default false)."""
+    return os.getenv(name, "false").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def get_balance_sheets(
@@ -11,8 +22,12 @@ def get_balance_sheets(
     entity: str,
     date_from: str | None = None,
     date_to: str | None = None,
+    ledger=None,
 ) -> dict:
     """Return balance sheet records for entity, optionally filtered by date range."""
+    if ledger is not None and _flag("USE_BEANCOUNT_ENGINE_BALANCE_SHEET"):
+        from backend.app.services.bql_queries import balance_sheet_via_beancount
+        return balance_sheet_via_beancount(ledger, entity, date_from, date_to)
     sheet_name = f"balance_sheet_{entity.lower()}"
     records = repo.get_records(sheet_name)  # returns [] if sheet doesn't exist
     if date_from or date_to:
@@ -27,8 +42,12 @@ def get_ledger_entries(
     date_from: str | None = None,
     date_to: str | None = None,
     account_number: str | None = None,
+    ledger=None,
 ) -> dict:
     """Return ledger entries for entity, optionally filtered by date range and/or account."""
+    if ledger is not None and _flag("USE_BEANCOUNT_ENGINE_LEDGER"):
+        from backend.app.services.bql_queries import ledger_entries_via_beancount
+        return ledger_entries_via_beancount(ledger, entity, date_from, date_to, account_number)
     sheet_name = f"ledger_{entity.lower()}"
     records = repo.get_records(sheet_name)  # returns [] if sheet doesn't exist
     if date_from or date_to:

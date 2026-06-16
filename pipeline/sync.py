@@ -80,13 +80,12 @@ def sync_api():
             logger.error("No se pudo conectar a Google Sheets.")
             return
 
-        # 1b. Cargar lookup de PlanCuentas para enriquecimiento
-        try:
-            plan_lookup = build_plan_cuentas_lookup(sh.worksheet("PlanCuentas").get_all_records())
-            logger.info("PlanCuentas cargado: %d cuentas.", len(plan_lookup))
-        except Exception as e:
-            plan_lookup = {}
-            logger.warning("No se pudo cargar PlanCuentas: %s. Las hojas _final no se enriquecerán.", e)
+        # 1b. Cargar lookup de PlanCuentas para enriquecimiento.
+        #     NO se traga un fallo de carga: sin enrichment las hojas _final no se reconstruyen y
+        #     el watermark quedaría congelado sirviendo data stale "con éxito" en silencio. Se deja
+        #     propagar al handler externo → job failed + re-intentable (consistente con el rebuild).
+        plan_lookup = build_plan_cuentas_lookup(sh.worksheet("PlanCuentas").get_all_records())
+        logger.info("PlanCuentas cargado: %d cuentas.", len(plan_lookup))
 
         # ──────────────────────────────────────
         # 2. BALANCE SHEET — último día del mes anterior
@@ -161,11 +160,12 @@ def sync_api():
         date_from, date_to = get_date_range(latest_date_to)
 
         merged_ledger = None
+        ledger_synced = False
 
         if date_from > date_to:
             logger.info("No hay nuevas fechas de ledger para sincronizar.")
         else:
-            logger.info("Consultando ledger desde %s hasta %s...", date_from, date_to)
+            logger.info("Consultando ledger desde %s hasta %s (ventana solapada)...", date_from, date_to)
             endpoints = get_endpoints(date_from, date_to)
             ledger_cfg = endpoints["GET_LEDGER"]
 
@@ -196,20 +196,14 @@ def sync_api():
             else:
                 logger.warning("Sin datos nuevos de ledger.")
 
-            # ──────────────────────────────────────
-            # 4. Actualizar fecha sincronizada
-            # ──────────────────────────────────────
-            upsert_to_sheet(
-                spreadsheet=sh,
-                sheet_name="date_range",
-                data_list=[{"dateTo": str(date_to), "dateFrom": str(date_from)}],
-                primary_key_func=lambda x: str(x.get("dateTo", "")),
-                headers=["dateTo", "dateFrom"],
-            )
+            ledger_synced = True
 
         # ──────────────────────────────────────
-        # 5. Rebuild ledger_final
+        # 4. Rebuild ledger_final — DEBE tener éxito antes de avanzar el watermark.
+        #    Si falla, se propaga (no se traga) → el job queda en estado failed y la
+        #    corrida es re-intentable: date_range NO avanza (Bug #1 + AC4/AC5).
         # ──────────────────────────────────────
+        rebuild_ok = False
         if plan_lookup:
             # Si tenemos datos en memoria, usarlos directamente.
             # Si no hubo datos nuevos, leer el sheet (puede haber cambiado PlanCuentas).
@@ -224,6 +218,48 @@ def sync_api():
             if ledger_for_final:
                 enriched_ledger = [enrich_ledger_row(r, plan_lookup) for r in ledger_for_final]
                 replace_sheet(sh, "ledger_final", enriched_ledger, LEDGER_FINAL_HEADERS)
+
+                # Verificación: ledger_final debe quedar con tantas filas como las que
+                # ESCRIBIMOS (enriched_ledger). Se compara contra el conteo en memoria, no
+                # re-leyendo `ledger` —cuyo get_all_records puede diferir por filas en blanco/
+                # coerción y dar un falso positivo que abortaría un rebuild correcto—. Si el
+                # re-read de ledger_final no coincide, el write no aterrizó (parcial / hoja
+                # congelada) → propagar en vez de avanzar a ciegas.
+                try:
+                    final_count = len(sh.worksheet("ledger_final").get_all_records())
+                except Exception:
+                    final_count = None
+                if final_count is not None and final_count != len(enriched_ledger):
+                    raise RuntimeError(
+                        "Rebuild ledger_final inconsistente: ledger_final=%d filas vs esperado=%d."
+                        % (final_count, len(enriched_ledger))
+                    )
+                rebuild_ok = True
+            else:
+                # Sin filas en ledger: nada que reconstruir, no es un fallo.
+                rebuild_ok = True
+        else:
+            # PlanCuentas cargó vacío: no se puede enriquecer. Abortar (propagar) en vez de
+            # avanzar el watermark sobre data sin enriquecer — si no, el reporte serviría data
+            # stale mientras el job reporta "éxito".
+            raise RuntimeError(
+                "PlanCuentas cargó vacío (0 cuentas): no se puede reconstruir ledger_final. "
+                "Se aborta la sincronización para no congelar el watermark sobre data sin enriquecer."
+            )
+
+        # ──────────────────────────────────────
+        # 5. Avanzar el watermark SOLO si se sincronizó ledger y el rebuild tuvo éxito.
+        #    Una corrida a medias deja date_range intacto → re-intentable (AC5).
+        # ──────────────────────────────────────
+        if ledger_synced and rebuild_ok:
+            upsert_to_sheet(
+                spreadsheet=sh,
+                sheet_name="date_range",
+                data_list=[{"dateTo": str(date_to), "dateFrom": str(date_from)}],
+                primary_key_func=lambda x: str(x.get("dateTo", "")),
+                headers=["dateTo", "dateFrom"],
+            )
+            logger.info("Watermark avanzado a %s tras rebuild exitoso de ledger_final.", date_to)
 
         # ──────────────────────────────────────
         # 6. Copiar hojas _final a hojas por entidad (para soporte multi-entidad)
@@ -248,7 +284,10 @@ def sync_api():
         logger.info("Sincronización completada.")
 
     except Exception as e:
+        # No se traga el error: se loguea y se propaga para que el orquestador
+        # (_run_sync) marque el job en estado failed y la corrida sea re-intentable.
         logger.error("Error inesperado: %s", e, exc_info=True)
+        raise
 
 
 if __name__ == '__main__':

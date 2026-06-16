@@ -24,7 +24,8 @@ class SyncStatusResponse(BaseModel):
 
 
 class TriggerRequest(BaseModel):
-    mode: Literal["normal", "backfill"] = "normal"
+    # "normal" and "incremental" are equivalent (incremental added for Story 9.4 AC4).
+    mode: Literal["normal", "incremental", "backfill"] = "normal"
     from_date: str | None = None  # ISO date "YYYY-MM-DD", required when mode="backfill"
 
 

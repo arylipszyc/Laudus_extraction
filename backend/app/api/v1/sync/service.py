@@ -1,12 +1,64 @@
 """Sync orchestration service — job tracking + background runner."""
+import json
 import logging
+import os
 import threading
 from datetime import datetime, timezone
+from pathlib import Path
 from uuid import uuid4
 
 from backend.app.repositories.base import DataRepository
 
 logger = logging.getLogger(__name__)
+
+
+def _flag(name: str) -> bool:
+    """True if the env var is set to a truthy value (default false)."""
+    return os.getenv(name, "false").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _import_log_path() -> Path:
+    """Path to the importer run log. `LEDGER_IMPORT_LOG` overrides the default."""
+    override = os.getenv("LEDGER_IMPORT_LOG")
+    if override:
+        return Path(override)
+    return Path(__file__).resolve().parents[5] / "ledger" / "_meta" / "import-log.jsonl"
+
+
+def _read_import_log_last_sync() -> datetime | None:
+    """Last Laudus importer run timestamp from `ledger/_meta/import-log.jsonl` (AC7).
+
+    Under c4 the Laudus importer writes balance-sheet and ledger data in one pass,
+    so both data types share this timestamp. Only successful runs count — a failed
+    (rolled-back) run must not report a fresh last_sync. Returns None pre-bootstrap
+    (file missing or no successful `laudus` record).
+    """
+    path = _import_log_path()
+    if not path.exists():
+        return None
+    latest: datetime | None = None
+    try:
+        for line in path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            record = json.loads(line)
+            if record.get("importer") != "laudus":
+                continue
+            if not record.get("success"):
+                continue
+            ts = record.get("timestamp")
+            if not ts:
+                continue
+            parsed = datetime.fromisoformat(ts)
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=timezone.utc)
+            if latest is None or parsed > latest:
+                latest = parsed
+    except (ValueError, OSError) as exc:
+        logger.warning("import-log.jsonl unreadable (%s): %s", path, exc)
+        return None
+    return latest
 
 # In-memory job state — volatile (lost on Cloud Run restart, acceptable for MVP)
 _current_job: dict = {
@@ -22,8 +74,13 @@ _job_lock = threading.Lock()
 
 def get_sync_status(repo: DataRepository) -> dict:
     """Return current sync status: per-type last sync dates + current job state."""
-    bs_last_sync = _read_balance_sheet_last_sync(repo)
-    ledger_last_sync = _read_last_sync_date(repo)
+    if _flag("USE_BEANCOUNT_ENGINE_SYNC_STATUS"):
+        # c4 path: both data types derive from the same Laudus importer run (AC7).
+        run_ts = _read_import_log_last_sync()
+        bs_last_sync = ledger_last_sync = run_ts
+    else:
+        bs_last_sync = _read_balance_sheet_last_sync(repo)
+        ledger_last_sync = _read_last_sync_date(repo)
     with _job_lock:
         return {
             "balance_sheet": {"last_sync": bs_last_sync},
@@ -65,8 +122,47 @@ def trigger_sync(
     return job_id
 
 
+def _run_laudus_import(job_id: str, mode: str, from_date: str | None = None) -> None:
+    """Story 9.4: run the Beancount Laudus importer in this background thread.
+
+    Used instead of the Sheets path when `USE_BEANCOUNT_ENGINE_LEDGER=true`.
+    """
+    try:
+        from pipeline.importers.laudus_run import run_import
+        result = run_import(mode=mode, from_date=from_date)
+        with _job_lock:
+            if _current_job["job_id"] != job_id:
+                return
+            if result["success"]:
+                _current_job.update({
+                    "status": "done",
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
+                    "stats": {"balance_sheet_added": 0, "ledger_added": result["jes_added"]},
+                })
+            else:
+                _current_job.update({
+                    "status": "failed",
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
+                    "error": result["error_msg"],
+                    "stats": None,
+                })
+    except Exception as exc:
+        logger.error("Laudus importer failed: %s", exc, exc_info=True)
+        with _job_lock:
+            if _current_job["job_id"] == job_id:
+                _current_job.update({
+                    "status": "failed",
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
+                    "error": str(exc),
+                    "stats": None,
+                })
+
+
 def _run_sync(job_id: str, repo: DataRepository) -> None:
     """Execute sync_api() in background thread. Counts records before/after for stats."""
+    if _flag("USE_BEANCOUNT_ENGINE_LEDGER"):
+        _run_laudus_import(job_id, mode="incremental")
+        return
     try:
         # Snapshot counts before sync (best-effort — silent on error)
         try:
@@ -112,6 +208,9 @@ def _run_sync(job_id: str, repo: DataRepository) -> None:
 
 def _run_backfill(job_id: str, repo: DataRepository, from_date: str | None) -> None:
     """Execute run_backfill() in background thread. Updates _current_job on completion/failure."""
+    if _flag("USE_BEANCOUNT_ENGINE_LEDGER"):
+        _run_laudus_import(job_id, mode="backfill", from_date=from_date)
+        return
     try:
         from backend.app.api.v1.sync.backfill import run_backfill
         result = run_backfill(from_date, repo)
