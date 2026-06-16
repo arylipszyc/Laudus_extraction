@@ -34,3 +34,65 @@
   Expenses:EAG:SueldosRopaRegalas-411001  35000.00 CLP
   Expenses:EAG:GastosLegalesNotara-430071  11093.00 CLP
   Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  18594.00 CLP
+
+2026-06-04 * "Mariela Mendez de Sra Raquel Ventura"
+  id: "6001"
+  je_num: "5961"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -270000.00 CLP
+  Expenses:EAG:SraRaquelVentura-430021  270000.00 CLP
+
+2026-06-04 * "Victoria Svigilizky de Sra Raquel Vent."
+  id: "6002"
+  je_num: "5962"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -1000000.00 CLP
+  Expenses:EAG:SraRaquelVentura-430021  1000000.00 CLP
+
+2026-06-04 * "USD7.000 Canje Alejandra Kleinman de EAG"
+  id: "6003"
+  je_num: "5963"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -6260030.00 CLP
+  Expenses:EAG:Efectivo-430001  6260030.00 CLP
+
+2026-06-04 * "Doris Feliu de Sra Raquel Ventura"
+  id: "6004"
+  je_num: "5964"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -237000.00 CLP
+  Expenses:EAG:SraRaquelVentura-430021  237000.00 CLP
+
+2026-06-04 * "Laboratorio Regonesi - Examenes EAG"
+  id: "6006"
+  je_num: "5966"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -365330.00 CLP
+  Assets:EAG:Bancos:BancoBci10160175-111005  -189080.00 CLP
+  Expenses:EAG:SraRaquelVentura-430021  189080.00 CLP
+  Expenses:EAG:ClnicasBonosMdicosExmenes-430053  365330.00 CLP
+
+2026-06-05 * "Tarjetas Santander Sra. Raquel Ventura"
+  id: "6007"
+  je_num: "5967"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -9580000.00 CLP
+  Liabilities:EAG:TC:TcRaquelVentura-430019  5235476.00 CLP
+  Liabilities:EAG:TC:TcRaquelVentura-430019  3344254.00 CLP
+  Liabilities:EAG:TC:TcRaquelVentura-430019  224299.00 CLP
+  Liabilities:EAG:TC:TcRaquelVentura-430019  775971.00 CLP
+
+2026-06-12 * "Eliot - Remedios Sra Raquel/Plastif. USA"
+  id: "6000"
+  je_num: "5960"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -52980.00 CLP
+  Expenses:EAG:SraRaquelVentura-430021  49000.00 CLP
+  Expenses:EAG:OtrosGastosPersonales-430099  3980.00 CLP
+
+2026-06-16 * "Pedro Leon Pozo - Examenes EAG"
+  id: "6005"
+  je_num: "5965"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -60000.00 CLP
+  Expenses:EAG:ClnicasBonosMdicosExmenes-430053  60000.00 CLP
