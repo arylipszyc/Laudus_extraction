@@ -8,6 +8,7 @@ celdas vacías. Subtotales en gris claro, totales en gris oscuro.
 """
 from __future__ import annotations
 
+import functools
 import io
 import json
 import os
@@ -27,12 +28,15 @@ BOTTOM = Border(bottom=Side(style="thin", color="808080"))
 
 TEMPLATE = os.path.join(os.path.dirname(__file__), "template_order.json")
 
-# El template es estático: se carga y particiona una sola vez al importar el módulo,
-# no en cada request a GET /reportes/gastos.
-with open(TEMPLATE, encoding="utf-8") as _f:
-    _TEMPLATE = json.load(_f)
-ING_TPL = [e for e in _TEMPLATE if e["section"] == "INGRESOS"]
-EGR_TPL = [e for e in _TEMPLATE if e["section"] == "EGRESOS"]
+@functools.lru_cache(maxsize=1)
+def _load_template():
+    """Carga y particiona template_order.json. Lazy + cacheado (una sola vez): un template
+    ausente/corrupto falla solo GET /reportes/gastos, no el arranque de toda la app."""
+    with open(TEMPLATE, encoding="utf-8") as f:
+        tpl = json.load(f)
+    ing = [e for e in tpl if e["section"] == "INGRESOS"]
+    egr = [e for e in tpl if e["section"] == "EGRESOS"]
+    return ing, egr
 
 ALIAS = {
     "310025": ["113002", "113003"],
@@ -59,6 +63,7 @@ DAUGHTERS = [
     ("Egresos Johanna", "EGRESOS JOHANNA AVAYU DEUTSCH"),
     ("Egresos Jael", "EGRESOS JAEL AVAYU DEUTSCH"),
 ]
+DAUGHTER_CAT1 = {k for _, k in DAUGHTERS}
 
 # Story 10.2 — guard "cuentas sin categorizar".
 # Una cuenta creada nueva en Laudus (ausente del plan de cuentas) llega con Categoria vacía
@@ -89,6 +94,23 @@ def _num(v):
         return 0.0
 
 
+def _row_ym(r):
+    """(año, mes) de la fecha ISO de la fila, o None si no es parseable. Una sola fila con
+    fecha malformada no debe abortar (500) el reporte entero — se saltea."""
+    ds = str(r.get("date", ""))[:10]
+    try:
+        return int(ds[:4]), int(ds[5:7])
+    except ValueError:
+        return None
+
+
+def _income_accounts(rows):
+    """Cuentas cuya Categoria1 indica INGRESOS — su saldo natural es crédito (cr-de).
+    Fuente única del signo, usada tanto por el detalle como por el resumen de egresos."""
+    return {str(r.get("accountnumber", "")) for r in rows
+            if "INGRESOS" in str(r.get("Categoria1", "")).upper()}
+
+
 def _months_in_range(start, end):
     out, y, m = [], start.year, start.month
     while (y, m) <= (end.year, end.month):
@@ -115,31 +137,29 @@ def norm_codes(a):
     return out
 
 
-def _laudus_by_code(rows, months):
+def _laudus_by_code(rows, months, income_accts):
     mindex = {ym: i for i, ym in enumerate(months)}
-    is_income = defaultdict(bool)
-    for r in rows:
-        if "INGRESOS" in str(r.get("Categoria1", "")).upper():
-            is_income[str(r.get("accountnumber", ""))] = True
     idx = defaultdict(lambda: [0.0] * len(months))
     for r in rows:
-        ds = str(r.get("date", ""))[:10]
-        if len(ds) < 7:
+        ym = _row_ym(r)
+        if ym is None:
             continue
-        mi = mindex.get((int(ds[:4]), int(ds[5:7])))
+        mi = mindex.get(ym)
         if mi is None:
             continue
         acc = str(r.get("accountnumber", ""))
         de, cr = _num(r.get("debit")), _num(r.get("credit"))
-        idx[acc][mi] += (cr - de) if is_income[acc] else (de - cr)
+        idx[acc][mi] += (cr - de) if acc in income_accts else (de - cr)
     return idx
 
 
 def build_report(start: date, end: date, get_records) -> bytes:
+    ing_tpl, egr_tpl = _load_template()
     rows = get_records("ledger_final")
     months = _months_in_range(start, end)
     nmon = len(months)
-    laudus = _laudus_by_code(rows, months)
+    income_accts = _income_accounts(rows)
+    laudus = _laudus_by_code(rows, months, income_accts)
     have = {c for c in laudus if any(laudus[c])}
     used = set()
     tc_codes = {str(r.get("accountnumber", "")) for r in rows
@@ -150,15 +170,24 @@ def build_report(start: date, end: date, get_records) -> bytes:
     cat2 = defaultdict(lambda: [0.0] * nmon)
     cat1 = defaultdict(lambda: [0.0] * nmon)
     for r in rows:
-        ds = str(r.get("date", ""))[:10]
-        if len(ds) < 7:
+        ym = _row_ym(r)
+        if ym is None:
             continue
-        mi = mindex.get((int(ds[:4]), int(ds[5:7])))
+        mi = mindex.get(ym)
         if mi is None:
             continue
-        amt = _num(r.get("debit")) - _num(r.get("credit"))
-        cat2[str(r.get("Categoria2", ""))][mi] += amt
-        cat1[str(r.get("Categoria1", ""))][mi] += amt
+        acc = str(r.get("accountnumber", ""))
+        de, cr = _num(r.get("debit")), _num(r.get("credit"))
+        amt = (cr - de) if acc in income_accts else (de - cr)
+        # Una fila pertenece a UN solo subtotal de egresos: Hijas (por Categoria1) o EAG
+        # (por Categoria2), nunca a ambos. Sin esta exclusividad, una fila de hija que además
+        # trae Categoria2 de un CC EAG se sumaría en Subtotal Hijas Y en Subtotal EAG, inflando
+        # TOTAL EGRESOS (doble conteo).
+        c1 = str(r.get("Categoria1", ""))
+        if c1 in DAUGHTER_CAT1:
+            cat1[c1][mi] += amt
+        else:
+            cat2[str(r.get("Categoria2", ""))][mi] += amt
 
     # ----- Story 10.2: detección de cuentas sin categorizar -----
     name_of, acc_cat = {}, {}
@@ -167,12 +196,11 @@ def build_report(start: date, end: date, get_records) -> bytes:
         if acc and acc not in acc_cat:
             acc_cat[acc] = (str(row.get("Categoria1", "")), str(row.get("Categoria2", "")))
             name_of[acc] = str(row.get("accountName", "")) or acc
-    daughter_cat1 = {k for _, k in DAUGHTERS}
     prefix_label = dict(EAG_EXPENSE_PREFIX)        # semilla EAG + prefijos de hijas aprendidos de la data
     for acc, (c1, c2) in acc_cat.items():
         if c2 in KNOWN_EAG_CAT2:
             prefix_label.setdefault(_cc_prefix(acc), c2)
-        elif c1 in daughter_cat1:
+        elif c1 in DAUGHTER_CAT1:
             prefix_label.setdefault(_cc_prefix(acc), c1)
     # El defecto es una cuenta SIN categoría (nueva en Laudus, ausente del plan). Una cuenta con
     # categoría —aunque no sea de gasto, p.ej. un activo "DISPONIBLE…"— está bien y NO se marca.
@@ -311,7 +339,7 @@ def build_report(start: date, end: date, get_records) -> bytes:
     # ----- INGRESOS -----
     section_title("INGRESOS")
     month_header()
-    render_template(ING_TPL)
+    render_template(ing_tpl)
 
     # ----- EGRESOS (resumen) -----
     section_title("EGRESOS (resumen)")
@@ -335,7 +363,7 @@ def build_report(start: date, end: date, get_records) -> bytes:
     # ----- DETALLE DE LOS GASTOS -----
     section_title("DETALLE DE LOS GASTOS")
     month_header()
-    render_template(EGR_TPL)
+    render_template(egr_tpl)
 
     # ----- TARJETAS DE CRÉDITO (a completar por el contador) -----
     section_title("TARJETAS DE CRÉDITO — detalle a completar por el contador (desde cartola)")
@@ -347,7 +375,7 @@ def build_report(start: date, end: date, get_records) -> bytes:
         return any(c in have for c in norm_codes(code))
 
     cats, ingp = [], False
-    for e in EGR_TPL:
+    for e in egr_tpl:
         if e["kind"] == "header" and e["label"].strip().upper() == "GASTOS PERSONALES":
             ingp = True; continue
         if e["kind"] == "subtotal" and "GASTOS PERSONALES" in e["label"].upper():

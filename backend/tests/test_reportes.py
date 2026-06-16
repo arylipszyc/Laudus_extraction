@@ -89,6 +89,39 @@ def test_codigo_no_parseable_sin_categoria_sigue_visible():
     assert any("desconocido" in str(l).lower() for l in labels)
 
 
+def _row_exact(labels, text):
+    return next(r for l, r in labels.items() if str(l).strip() == text)
+
+
+def test_fila_hija_con_categoria2_eag_no_se_doble_cuenta():
+    """code-review #2: una fila de hija (Categoria1) que además trae Categoria2 de un CC EAG
+    debe contarse UNA sola vez (en Egresos Hijas), no también en Egresos EAG."""
+    rows = [
+        {"date": "2025-03-10", "accountnumber": "690100", "accountName": "GASTO JOCELYN",
+         "debit": "1000000", "credit": "0",
+         "Categoria1": "EGRESOS JOCELYN AVAYU DEUTSCH", "Categoria2": "GASTOS PERSONALES",
+         "Categoria3": ""},
+    ]
+    ws = _ws(rows)
+    labels = _labels(ws)
+    # La fila de la hija (Egresos Jocelyn) toma el monto.
+    assert round(ws.cell(_row_exact(labels, "Egresos Jocelyn"), 2).value) == 1000000
+    # La fila del CC EAG (Gastos Personales) NO debe tomar el mismo monto (evita doble conteo).
+    assert round(ws.cell(_row_exact(labels, "Gastos Personales"), 2).value or 0) == 0
+
+
+def test_fila_con_fecha_malformada_no_rompe_el_reporte():
+    """code-review #9: una fila con fecha no-ISO (mes sin zero-pad) no debe abortar (500) el
+    reporte entero — se saltea esa fila y el reporte se genera igual."""
+    rows = [
+        {"date": "2025-3-10", "accountnumber": "413005", "accountName": "LUZ",
+         "debit": "1000", "credit": "0", "Categoria1": "GASTOS - EGRESOS",
+         "Categoria2": "Casa Sur", "Categoria3": "x"},
+    ]
+    ws = _ws(rows)  # no debe lanzar ValueError
+    assert ws is not None
+
+
 def test_cuentas_categorizadas_no_disparan_el_guard():
     """No-regresión: con cuentas bien categorizadas no aparece sección de sin-categorizar."""
     rows = [
