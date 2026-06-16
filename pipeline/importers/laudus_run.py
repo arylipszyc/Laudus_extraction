@@ -106,31 +106,34 @@ def append_import_log(meta_dir, record: dict) -> None:
 def git_commit_push(repo_root, paths: list[str], message: str) -> str | None:
     """Commit + push the given paths. No-op unless `IMPORTER_GIT_ENABLED=true`.
 
-    Returns the commit SHA, or None when disabled/failed. Push auth in production
-    uses the `BEANCOUNT_DEPLOY_KEY` SSH key configured on the Render service.
+    `paths` son relativos al toplevel del repo (ej. `ledger/imports/laudus/`); se resuelve el
+    toplevel desde `repo_root` para stagearlos bien aunque `repo_root` apunte a una subcarpeta
+    (el ledger vive en `<repo>/ledger`). Returns the commit SHA; None cuando git está
+    deshabilitado o no hay nada que commitear (corrida idempotente). Un fallo real de git
+    (add/commit/push — ej. deploy key sin permiso) se PROPAGA para que el orquestador marque la
+    corrida como fallida en vez de enmascararla como éxito sin push. Push auth en producción usa
+    la SSH key `BEANCOUNT_DEPLOY_KEY` configurada en el servicio Render.
     """
     if os.getenv("IMPORTER_GIT_ENABLED", "false").strip().lower() not in {"1", "true", "yes", "on"}:
         logger.info("git disabled (IMPORTER_GIT_ENABLED not set) — skipping commit/push")
         return None
-    try:
-        subprocess.run(["git", "-C", str(repo_root), "add", *paths], check=True)
-        # Nada staged → corrida idempotente (el writer es determinista; un re-fetch de la
-        # ventana solapada regenera archivos bit-idénticos). No es un error: se omite el commit
-        # en vez de dejar que `git commit` salga con código !=0 y se loguee como fallo (que
-        # además enmascararía un fallo real de staging).
-        if subprocess.run(["git", "-C", str(repo_root), "diff", "--cached", "--quiet"]).returncode == 0:
-            logger.info("git: nada que commitear (corrida idempotente) — se omite commit/push")
-            return None
-        subprocess.run(["git", "-C", str(repo_root), "commit", "-m", message], check=True)
-        sha = subprocess.run(
-            ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
-            check=True, capture_output=True, text=True,
-        ).stdout.strip()
-        subprocess.run(["git", "-C", str(repo_root), "push", "origin", "main"], check=True)
-        return sha
-    except subprocess.CalledProcessError as exc:
-        logger.error("git commit/push failed: %s", exc)
+    toplevel = subprocess.run(
+        ["git", "-C", str(repo_root), "rev-parse", "--show-toplevel"],
+        check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    subprocess.run(["git", "-C", toplevel, "add", *paths], check=True)
+    # Nada staged → corrida idempotente (el writer es determinista; un re-fetch de la
+    # ventana solapada regenera archivos bit-idénticos). No es un error: se omite el commit.
+    if subprocess.run(["git", "-C", toplevel, "diff", "--cached", "--quiet"]).returncode == 0:
+        logger.info("git: nada que commitear (corrida idempotente) — se omite commit/push")
         return None
+    subprocess.run(["git", "-C", toplevel, "commit", "-m", message], check=True)
+    sha = subprocess.run(
+        ["git", "-C", toplevel, "rev-parse", "HEAD"],
+        check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    subprocess.run(["git", "-C", toplevel, "push", "origin", "main"], check=True)
+    return sha
 
 
 # ── snapshot/restore for rollback (AC7) ─────────────────────────────────────

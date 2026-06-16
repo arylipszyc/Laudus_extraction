@@ -1,10 +1,19 @@
 """Tests for the Laudus importer orchestrator — Story 9.4 AC2/AC5/AC7/AC8/AC9."""
 import json
+import subprocess
 import time
 
 import pytest
 
 from pipeline.importers import laudus_run
+
+
+def _init_git_repo(path):
+    """Repo git mínimo y autónomo (sin firma ni red) para ejercitar git_commit_push."""
+    subprocess.run(["git", "init", "-b", "main", str(path)], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(path), "config", "user.email", "t@test"], check=True)
+    subprocess.run(["git", "-C", str(path), "config", "user.name", "Test"], check=True)
+    subprocess.run(["git", "-C", str(path), "config", "commit.gpgsign", "false"], check=True)
 
 MINI_ACCOUNTS = """\
 2020-12-31 open Assets:EAG:Bancos:BancoBci-111005 CLP
@@ -62,6 +71,62 @@ def test_git_disabled_by_default(tmp_path):
     root = _ledger_root(tmp_path)
     result = laudus_run.run_import(fetch_fn=lambda f, t: _balanced(), ledger_root=root)
     assert result["git_commit_sha"] is None
+
+
+def test_git_commit_push_stages_from_repo_toplevel(tmp_path, monkeypatch):
+    """code-review pathspec: git_commit_push resuelve el toplevel real del repo, así stagea
+    `ledger/imports/...` aunque reciba la subcarpeta `ledger` como repo_root (regresión del bug
+    `pathspec did not match` que dejaba success sin push)."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_git_repo(repo)
+    remote = tmp_path / "remote.git"
+    subprocess.run(["git", "init", "--bare", "-b", "main", str(remote)], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(repo), "remote", "add", "origin", str(remote)], check=True)
+    target = repo / "ledger" / "imports" / "laudus"
+    target.mkdir(parents=True)
+    (target / "2024-03.beancount").write_text("; data\n", encoding="utf-8")
+    monkeypatch.setenv("IMPORTER_GIT_ENABLED", "true")
+
+    sha = laudus_run.git_commit_push(repo / "ledger", ["ledger/imports/laudus/"], "msg")
+
+    assert sha  # commit creado pese a recibir la subcarpeta como repo_root
+    tracked = subprocess.run(
+        ["git", "-C", str(repo), "ls-files", "ledger/imports/laudus/"],
+        check=True, capture_output=True, text=True,
+    ).stdout
+    assert "2024-03.beancount" in tracked
+
+
+def test_git_commit_push_noop_when_nothing_staged(tmp_path, monkeypatch):
+    """Corrida idempotente (nada cambió) → None sin raise; no es un fallo (preserva review #10)."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_git_repo(repo)
+    target = repo / "ledger" / "imports" / "laudus"
+    target.mkdir(parents=True)
+    (target / "2024-03.beancount").write_text("; data\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo), "add", "-A"], check=True)
+    subprocess.run(["git", "-C", str(repo), "commit", "-m", "init"], check=True, capture_output=True)
+    monkeypatch.setenv("IMPORTER_GIT_ENABLED", "true")
+
+    # Segunda pasada sin cambios → no-op (None), no toca el remoto (no hay).
+    assert laudus_run.git_commit_push(repo / "ledger", ["ledger/imports/laudus/"], "msg") is None
+
+
+def test_run_import_marks_failure_when_push_fails(tmp_path, monkeypatch):
+    """Anti silent-success: si el git push falla (sin remoto/deploy key), la corrida NO queda
+    como success — el orquestador propaga el fallo a result['success']=False."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_git_repo(repo)
+    root = _ledger_root(repo)  # ledger dentro del working tree git, sin 'origin' → push falla
+    monkeypatch.setenv("IMPORTER_GIT_ENABLED", "true")
+
+    result = laudus_run.run_import(fetch_fn=lambda f, t: _balanced(), ledger_root=root)
+
+    assert result["success"] is False
+    assert result["error_msg"]
 
 
 # ── incremental from_date resolution (AC2) ───────────────────────────────────
