@@ -4,4 +4,8 @@
 ;; todavía en accounts.beancount. Cada entrada es un `open` tentativo +
 ;; sus JEs llevan tag #pending-account hasta que Ary las promueva
 ;; manualmente al accounts.beancount con su Cat1/2/3 + bank metadata.
-;; Vacío en estado inicial.
+;; Generado automáticamente — no editar a mano (se regenera en cada corrida).
+
+2020-01-01 open Assets:EAG:PendingReview:Cuenta-411059 CLP
+  code: "411059"
+  pending_review: "TRUE"
