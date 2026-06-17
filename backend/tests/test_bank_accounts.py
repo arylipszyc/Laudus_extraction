@@ -4,6 +4,8 @@ Reemplaza los mocks de SupabaseRepository por un ledger fixture en `tmp_path` (m
 que test_dashboard_beancount / test_cuentas_pendientes): GET arma el shape desde los `open`
 con metadata bancaria; POST agrega metadata al open existente; PATCH cierra/reabre/edita.
 """
+from subprocess import CalledProcessError
+
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -225,3 +227,49 @@ def test_patch_family_403(tmp_path):
     client = _make_app(_make_ledger(tmp_path))
     resp = client.patch(f"/api/v1/bank-accounts/{BCI_ID}", json={"active": False}, cookies=_family())
     assert resp.status_code == 403
+
+
+# ── Review: errores de escritura (espejo de 10.3) + toggle idempotente ──────
+
+
+def test_patch_doble_desactivacion_es_idempotente(tmp_path, monkeypatch):
+    # Desactivar una cuenta ya cerrada NO debe duplicar el close (que daría bean-check rojo/422).
+    _clean_env(monkeypatch)
+    svc = _make_ledger(tmp_path)
+    client = _make_app(svc)
+    assert client.patch(f"/api/v1/bank-accounts/{BCI_ID}", json={"active": False}, cookies=_contador()).status_code == 200
+    r2 = client.patch(f"/api/v1/bank-accounts/{BCI_ID}", json={"active": False}, cookies=_contador())
+    assert r2.status_code == 200, r2.text
+    assert r2.json()["active"] is False
+    written = (tmp_path / "accounts.beancount").read_text(encoding="utf-8")
+    assert written.count("close Assets:EAG:Bancos:BancoBci-111005") == 1
+
+
+def test_create_push_de_git_falla_502_no_500(tmp_path, monkeypatch):
+    # bean-check pasó pero el push falló → 502 claro (no 500, no enmascarado como éxito).
+    _clean_env(monkeypatch)
+    import backend.app.api.v1.bank_accounts.service as service
+
+    def _raise(*a, **k):
+        raise CalledProcessError(1, ["git", "push"])
+
+    monkeypatch.setattr(service, "apply_to_accounts", _raise)
+    client = _make_app(_make_ledger(tmp_path))
+    resp = client.post("/api/v1/bank-accounts/",
+                       json={"account_number": "111011", "account_type": "cta_corriente", "account_currency": "CLP"},
+                       cookies=_contador())
+    assert resp.status_code == 502, resp.text
+
+
+def test_patch_lock_ocupado_409_no_500(tmp_path, monkeypatch):
+    _clean_env(monkeypatch)
+    import backend.app.api.v1.bank_accounts.service as service
+    from pipeline.importers.laudus_run import LockTimeout
+
+    def _raise(*a, **k):
+        raise LockTimeout("import lock ocupado")
+
+    monkeypatch.setattr(service, "apply_to_accounts", _raise)
+    client = _make_app(_make_ledger(tmp_path))
+    resp = client.patch(f"/api/v1/bank-accounts/{BCI_ID}", json={"active": False}, cookies=_contador())
+    assert resp.status_code == 409, resp.text

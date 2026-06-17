@@ -1,7 +1,7 @@
 ---
 story: 9.7
 title: Categorización con smart_importer + Patrón B (era 5.1)
-status: review
+status: done
 epic: 9
 depends_on: [9.6]
 blocks: []
@@ -257,6 +257,20 @@ claude-opus-4-8[1m] (Amelia / dev-story)
 | Fecha | Cambio |
 |---|---|
 | 2026-06-17 | 9.7: pipeline de categorización 5-stage (core determinista; smart_importer/Gemini=seams) + feedback loop (PATCH/bulk/pending) + normalizer + history. 26 tests. Status → review. |
+| 2026-06-17 | Code review 3 capas → 2 patches aplicados (history en el commit [fix feedback-loop efímero]; bulk-confirm scoping real por batch [Decisión Ary: meta batch_id en el importer + filtro]) + 2 tests nuevos (612 suite, 0 regresiones). 6 defers anotados. Status → done. |
+
+### Review Findings
+
+Code review 3 capas (Blind Hunter + Edge Case Hunter + Acceptance Auditor), 2026-06-17. Verificado contra código real (los números de línea de las capas venían alucinados; corregidos abajo). Seams AC3/AC5 (smart_importer/Gemini) NO contados como defectos (out-of-scope declarado).
+
+- [x] [Review][Patch] bulk-confirm: scoping real por batch (AC8) — **Decisión Ary 2026-06-17: opción 2 ("el día de mañana lo podemos necesitar").** APLICADO: el importer ahora estampa `batch_id` en la meta de cada tx (derivado del staging `{batch_id}.cartola.json`); `bulk_confirm` filtra por `meta.batch_id` cuando el param viene seteado (vacío/None → confirma todas, backward-compatible). Las cartolas ya committeadas sin la meta necesitan re-import para ser batch-scopables (forward-looking). +1 test (2 batches → solo confirma el pedido).
+- [x] [Review][Patch] `categorization-history.jsonl` no se incluía en el commit → el feedback loop de la regla supra (AC2) era efímero — APLICADO: `_commit`/`update_category` ahora stagean también `ledger/_meta/categorization-history.jsonl` en el mismo commit (antes solo el archivo de cartola; el `git reset --hard` del refresh del backend lo descartaba SIEMPRE, así la supra ≥30 nunca acumulaba). +1 test (captura los paths del commit).
+- [x] [Review][Defer] AC9 incompleto: list_pending devuelve lista plana (no agrupada por bank_account_id→period) y sin `currency` ni `current_confidence` [transactions/service.py:46-70] — deferred; el frontend 9.8 consume el shape actual; confidence requiere persistir el score en la meta del importer (hoy solo propaga match_source/flag)
+- [x] [Review][Defer] Cache key = solo normalize(description), ignora amount + bank_account_id [categorization/service.py:66-72] — deferred; inerte mientras smart_importer/Gemini sean seams (supra/historical son description-only); al wirear los seams la key debe incluir amount+bank_account_id
+- [x] [Review][Defer] normalizer: descripciones que normalizan a "" colapsan juntas (all-numeric, "REF <folio>") + solo quita el último grupo de dígitos [categorization/normalizer.py:24-31] — deferred; bajo impacto (history descarta key vacía; resuelven a suspense igual)
+- [x] [Review][Defer] history._load crashea si una línea es JSON válido no-objeto (123, "foo", [..]) [categorization/history.py:52-59] — deferred; defensivo, el archivo lo escribe build_record (siempre objeto)
+- [x] [Review][Defer] regla supra: most_common(1) sin desempate determinista ante empate exacto (30 catA / 30 catB) [categorization/history.py:64-70] — deferred; spec-compliant (30 a la misma cat satisface AC2), solo nondeterminismo de tie-break
+- [x] [Review][Defer] meta["filename"] subscript duro en update_category/bulk_confirm → KeyError 500 si falta [transactions/service.py:145,193] — deferred; las entries del ledger siempre traen filename, bajo riesgo
 
 ## Dev Notes
 

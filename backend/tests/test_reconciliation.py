@@ -48,6 +48,17 @@ def test_filtro_por_state_y_year_month(tmp_path):
     assert len(svc.read_discrepancies(path=p, state="missing-in-laudus")["discrepancies"]) == 0
 
 
+def test_summary_no_colapsa_con_filtro_de_estado(tmp_path):
+    # Al filtrar por un estado, los chips de los OTROS estados deben seguir en el summary.
+    p = _jsonl(tmp_path, [_disc("d1", "value-mismatch"), _disc("d2", "missing-in-laudus"),
+                          _disc("d3", "missing-in-laudus")])
+    out = svc.read_discrepancies(path=p, state="value-mismatch")
+    assert len(out["discrepancies"]) == 1  # la lista sí se filtra
+    # el summary conserva TODOS los estados (para que los chips no desaparezcan)
+    assert out["summary"]["by_state"] == {"value-mismatch": 1, "missing-in-laudus": 2}
+    assert out["summary"]["total"] == 3
+
+
 def test_deep_link_por_id_incluye_resueltas(tmp_path):
     p = _jsonl(tmp_path, [_disc("d1", "value-mismatch"),
                           {"ref_discrepancy_id": "d1", "resolution": {"action": "accept-cartola"}}])
@@ -105,6 +116,28 @@ def test_escalate_no_cierra(tmp_path):
     svc.resolve("d1", "escalate", None, user_email="c@test.com", now_iso="2026-05-05T00:00:00Z", path=p)
     # escalate no oculta la discrepancia (AC4)
     assert len(svc.read_discrepancies(path=p)["discrepancies"]) == 1
+
+
+def test_escalate_permitido_en_estado_fx_que_no_esta_en_la_tabla(tmp_path):
+    # 9.6b emite fx-bcch-missing / fx-implausible (no en ACTIONS_BY_STATE): deben ser escalables,
+    # no un dead-end. escalate es universal.
+    p = _jsonl(tmp_path, [_disc("d1", "fx-bcch-missing")])
+    res = svc.resolve("d1", "escalate", None, user_email="c@test.com", now_iso="t", path=p)
+    assert res["status"] == "escalated"
+    # sigue visible (escalate no cierra) y una acción FX real igual se rechaza para ese estado
+    assert len(svc.read_discrepancies(path=p)["discrepancies"]) == 1
+    with pytest.raises(svc.ResolveError):
+        svc.resolve("d1", "accept-bcch-fx", "x" * 20, user_email="c", now_iso="t", path=p)
+
+
+def test_resolve_idempotente_rechaza_ya_resuelta(tmp_path):
+    p = _jsonl(tmp_path, [_disc("d1", "value-mismatch")])
+    svc.resolve("d1", "accept-cartola", "el banco informó mal, corrijo Laudus",
+                user_email="c@test.com", now_iso="t", path=p)
+    # un segundo resolve sobre la misma discrepancia ya cerrada se rechaza (audit trail limpio)
+    with pytest.raises(svc.ResolveError):
+        svc.resolve("d1", "accept-laudus", "otra justificación distinta y larga",
+                    user_email="c@test.com", now_iso="t", path=p)
 
 
 # ── RBAC ──────────────────────────────────────────────────────────────────────

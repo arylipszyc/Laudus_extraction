@@ -52,16 +52,17 @@ def _ledger(tmp_path):
     return tmp_path
 
 
-def _staging(root, txs, batch_id="b1"):
-    closing = str(sum(Decimal(str(a)) for _, a in txs))
+def _staging(root, txs, batch_id="b1", period=("2026-03-01", "2026-03-31"), tx_date="2026-03-15",
+             closing=None):
+    closing = str(closing if closing is not None else sum(Decimal(str(a)) for _, a in txs))
     payload = {
         "schema_version": "1.0",
         "source": {"bank_account_id": TC_ID, "bank_name": "Banco BCI", "account_label": "x",
                    "account_type": "tarjeta_credito", "entity": "EAG"},
-        "period": {"start": "2026-03-01", "end": "2026-03-31"},
+        "period": {"start": period[0], "end": period[1]},
         "currency": "CLP",
         "balances": {"opening": "0", "closing": closing},
-        "transactions": [{"line_no": i + 1, "date": "2026-03-15", "description": d,
+        "transactions": [{"line_no": i + 1, "date": tx_date, "description": d,
                           "amount": str(a), "currency": "CLP", "raw": {}} for i, (d, a) in enumerate(txs)],
         "extraction": {"model": "g", "extracted_at": "2026-04-01T10:00:00Z", "warnings": []},
     }
@@ -136,6 +137,44 @@ def test_bulk_confirm_confirma_sugeridas(tmp_path):
     assert "! " not in f.replace("\n", " ")  # ya no quedan flags ! (se confirmaron)
     svc.load()
     assert list_pending(svc.entries()) == []
+
+
+def test_bulk_confirm_scoped_solo_confirma_ese_batch(tmp_path):
+    # Dos batches (períodos distintos → archivos distintos): bulk-confirm("b1") solo confirma b1.
+    root = _ledger(tmp_path)
+    imp = CartolaPdfImporter(BankAccountResolver(root / "accounts.beancount"), _FakeSuggested())
+    _staging(root, [("JUMBO", 45000), ("FARMACIA", 12000)], batch_id="b1")
+    assert promote("b1", imp, root)["success"]
+    # misma cuenta TC → el Balance de cierre de b2 es acumulativo (b1 -57000 + b2 -9000 = -66000)
+    _staging(root, [("LIDER", 9000)], batch_id="b2",
+             period=("2026-04-01", "2026-04-30"), tx_date="2026-04-15", closing=66000)
+    assert promote("b2", imp, root)["success"]
+    svc = LedgerService(str(root / "main.beancount"))
+
+    res = bulk_confirm("b1", entries=svc.entries(), ledger_root=root, user_email="c@test.com")
+    assert res["confirmed"] == 2  # solo las 2 de b1, NO la de b2
+    svc.load()
+    pend = list_pending(svc.entries())
+    assert [p["current_category_status"] for p in pend] == ["suggested"]  # la de b2 sigue pendiente
+    assert pend[0]["narration"] == "LIDER"
+
+
+def test_update_category_commitea_la_history_jsonl(tmp_path, monkeypatch):
+    # La history debe entrar en el commit (si no, el reset --hard del refresh la descarta).
+    import pipeline.importers.laudus_run as lr
+    captured = {}
+    def _fake_push(repo_root, paths, message):
+        captured["paths"] = list(paths)
+        return "deadbeef0001"
+    monkeypatch.setattr(lr, "git_commit_push", _fake_push)
+
+    root = _ledger(tmp_path)
+    svc = _promote(root)
+    tx_id = list_pending(svc.entries())[0]["tx_id"]
+    update_category(tx_id, "Expenses:EAG:Farmacia", entries=svc.entries(),
+                    ledger_root=root, user_email="c@test.com", now_iso="2026-05-01T00:00:00Z")
+    assert "ledger/_meta/categorization-history.jsonl" in captured["paths"]
+    assert any("imports/cartolas/" in p for p in captured["paths"])
 
 
 # ── RBAC ──────────────────────────────────────────────────────────────────────

@@ -27,8 +27,10 @@ from backend.app.api.v1.cartolas.schemas import (
 )
 from backend.app.api.v1.cartolas.service import (
     BalanceDiscrepancy,
+    BeanCheckFailed,
     CartolaValidationError,
     MAX_PDF_SIZE_BYTES,
+    OverrideJustificationTooShort,
     StagingNotFound,
     get_job_store,
     new_batch_id,
@@ -162,11 +164,22 @@ def validate_balance_endpoint(
     except StagingNotFound:
         raise HTTPException(status_code=404, detail={
             "code": "NOT_FOUND", "message": f"staging {batch_id} no existe o expiró"})
+    except OverrideJustificationTooShort as exc:
+        return JSONResponse(status_code=400, content={"error": {
+            "code": "JUSTIFICATION_TOO_SHORT",
+            "message": f"La justificación del override debe tener al menos {exc.min_chars} caracteres",
+        }})
     except BalanceDiscrepancy as exc:
         return JSONResponse(status_code=400, content={"error": {
             "code": "VALIDATION_FAILED",
             "message": "Discrepancia detectada — provea override_justification para confirmar",
             "diff": exc.diff, "calculated": exc.calculated, "stated": exc.stated,
+        }})
+    except BeanCheckFailed as exc:
+        return JSONResponse(status_code=422, content={"error": {
+            "code": "BEAN_CHECK_FAILED",
+            "message": "La validación contable falló por un motivo distinto al balance enviado",
+            "detail": str(exc),
         }})
     return ValidateBalanceResponse(**result).model_dump()
 

@@ -35,6 +35,18 @@ El reporte `/reportes/gastos` ya leía categorías desde la metadata `Open` de B
 
 ---
 
+## ⚠️ Ventana de data congelada en los dashboards Activos/Pasivos (consecuencia del borrado del cron)
+
+**Identificado en el code-review de 9.11 (2026-06-17). Decisión Ary: documentar + flipear 9.15 pronto post-merge.**
+
+Al borrar `sync-weekly.yml` se retiró el **único writer** de las pestañas `balance_sheet_{entity}` (`pipeline/sync.py` → `replace_sheet`). Mientras `USE_BEANCOUNT_ENGINE_BALANCE_SHEET` siga **off**, los dashboards Activos/Pasivos (`BalanceSheetPage`) leen esas pestañas (`dashboard/service.py`, rama OFF) — y el importer Laudus→Beancount **no escribe a Sheets**. 
+
+**Consecuencia:** entre el merge de este branch y el flip de Story 9.15, los dashboards Activos/Pasivos muestran **data estática del último run del cron (último lunes)**, sin warning en la UI. El reporte `/reportes/gastos` NO está afectado (ya lee Beancount). 
+
+**Mitigación (acordada):** correr el parity + flipear `USE_BEANCOUNT_ENGINE_BALANCE_SHEET=true` (Story 9.15) **pronto después de mergear** este branch para cerrar la ventana. Hasta el flip, tratar los Activos/Pasivos como congelados a la fecha del último sync.
+
+---
+
 ## AC1 — Resultado de la paridad (caveat documentado)
 
 `scripts/parity_check_sheets_vs_beancount.py --from 2025-06 --to 2026-06` → exit 1 (no 0 CLP exacto):
@@ -72,5 +84,5 @@ Cubierto por construcción por el **git history del propio ledger Beancount** (c
 
 - **Sheets read-only en Drive (AC5):** acción manual de Ary — cambiar permisos family + service account a `Viewer`. Documentar en MEMORY.
 - **Smoke test del reporte (AC7):** navegar `/reportes/gastos` ene–may 2026 vs workbook del contador en prod.
-- **Balance-sheet flip:** story aparte.
+- **Balance-sheet flip (Story 9.15):** story aparte — **prioritario post-merge** para cerrar la ventana de data congelada (ver sección ⚠️ arriba).
 - **Apagar Supabase:** tras Story 9.14.

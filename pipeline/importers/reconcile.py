@@ -17,7 +17,10 @@ from pipeline.importers.fx_calculator import FXResult, calculate_fx, lookup_bcch
 from pipeline.importers.matching_engine import USD_FX_EPOCH, CartolaLine, LaudusEntry, MatchResult, match
 
 # Estados que NO emiten Transaction (bloqueantes hasta resolución manual via 9.12).
-_BLOCKING = {"value-mismatch"}
+# missing-in-cartola: la cartola es la fuente de verdad → el asiento que solo está en Laudus
+# no se contabiliza (evita doble conteo vs imports/laudus/*); se muestra como discrepancia
+# para que 9.12 lo despliegue y ofrezca borrarlo (decisión Ary 2026-06-17).
+_BLOCKING = {"value-mismatch", "missing-in-cartola"}
 _FX_FLAG_STATES = {"fx-out-of-tolerance", "fx-bcch-missing", "fx-implausible"}
 
 
@@ -64,9 +67,11 @@ def process_match_result(
 ) -> ProcessDecision:
     """Decisión de emisión + discrepancias para un MatchResult (AC4) + overlay FX (AC3)."""
     def _disc(state: str) -> dict:
+        # AC4: source = lado que tiene el dato cuando el otro falta.
+        source = "cartola" if mr.laudus_entry is None else ("laudus" if mr.cartola_line is None else None)
         return build_discrepancy(
             batch_id=batch_id, bank_account_id=bank_account_id, state=state, ts=ts,
-            cartola=_cartola_dict(mr), laudus=_laudus_dict(mr), fx=_fx_dict(fx),
+            cartola=_cartola_dict(mr), laudus=_laudus_dict(mr), fx=_fx_dict(fx), source=source,
         )
 
     discrepancies: list[dict] = []
@@ -124,33 +129,40 @@ def reconcile_and_build(
     for mr in results:
         cl = mr.cartola_line
         fx = None
-        if cl is not None and fx_era and cl.currency != "CLP" and mr.laudus_entry is not None:
-            fx = calculate_fx(cl.amount, mr.laudus_entry.amount, lookup_bcch(fx_jsonl_path, year_month))
+        if cl is not None and fx_era and cl.currency != "CLP":
+            bcch = lookup_bcch(fx_jsonl_path, year_month)
+            if mr.laudus_entry is not None:
+                # FX implícita per-línea = CLP_laudus / USD_cartola (AC2, Opción D).
+                fx = calculate_fx(cl.amount, mr.laudus_entry.amount, bcch)
+            elif bcch is not None:
+                # USD huérfana (sin contraparte Laudus) → FX de la cartola = BCCh del mes
+                # (decisión Ary 2026-06-17). Sin BCCh no se puede contabilizar (abajo).
+                fx = FXResult(implied=bcch, bcch=bcch, deviation_pct=Decimal("0"), state=None)
+            else:
+                fx = FXResult(implied=None, bcch=None, deviation_pct=None, state="fx-bcch-missing")
 
         decision = process_match_result(mr, fx, batch_id=batch_id, bank_account_id=bank_account_id, ts=ts)
         discrepancies.extend(decision.discrepancies)
         if not decision.emit:
             continue
+        # No contabilizar un USD sin tasa (huérfana sin BCCh): solo queda la discrepancia.
+        if fx_era and cl.currency != "CLP" and (fx is None or fx.implied is None):
+            continue
 
-        if cl is not None:  # emite desde la cartola (cartola manda fecha/desc/monto)
-            category = category_for(cl)
-            meta = {"source": "cartola-pdf", "bank_account_id": bank_account_id, "line": str(cl.line_no)}
-            if mr.state == "category-mismatch":
-                meta["suggested_category"] = cl.suggested_category
-            if fx is not None and fx.implied is not None:
-                meta.update(fx_metadata(fx, bank_slug, year_month))
-                postings = build_usd_postings(account_target, category, cl.amount, fx.implied, is_liability)
-            else:
-                postings = _build_postings(account_target, category, cl.amount, cl.currency, is_liability)
-            narration, when = cl.description or f"line {cl.line_no}", cl.date
-        else:  # missing-in-cartola → emite desde Laudus, CLP-only
-            le = mr.laudus_entry
-            meta = {"source": "laudus-erp", "bank_account_id": bank_account_id, "je_num": le.je_id}
-            postings = _build_postings(account_target, le.category_account or "Equity:Reconciliation:Discrepancias",
-                                       abs(le.amount), "CLP", is_liability)
-            narration, when = le.description or f"JE {le.je_id}", le.date
+        # Solo emiten líneas de cartola (la cartola es la fuente de verdad; missing-in-cartola
+        # es bloqueante y no llega acá).
+        category = category_for(cl)
+        meta = {"source": "cartola-pdf", "bank_account_id": bank_account_id, "line": str(cl.line_no)}
+        if mr.state == "category-mismatch":
+            meta["suggested_category"] = cl.suggested_category
+        if fx is not None and fx.implied is not None:
+            meta.update(fx_metadata(fx, bank_slug, year_month))
+            postings = build_usd_postings(account_target, category, cl.amount, fx.implied, is_liability)
+        else:
+            postings = _build_postings(account_target, category, cl.amount, cl.currency, is_liability)
+        narration, when = cl.description or f"line {cl.line_no}", cl.date
 
-        bmeta = data.new_metadata("<reconcile>", cl.line_no if cl else 0)
+        bmeta = data.new_metadata("<reconcile>", cl.line_no)
         bmeta.update(meta)
         entries.append(data.Transaction(
             meta=bmeta, date=when, flag=decision.flag, payee=None, narration=narration,

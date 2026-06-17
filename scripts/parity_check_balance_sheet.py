@@ -41,6 +41,18 @@ def _net(row: dict) -> float:
     return _num(row.get("debit_balance")) - _num(row.get("credit_balance"))
 
 
+def _snapshot_rows(rows: list[dict], snapshot: str) -> list[dict]:
+    """Filas del snapshot AT fin-de-mes. La hoja `balance_sheet_{entity}` es multi-snapshot
+    (upsert pk=account_id+query_date); sin filtrar, `aggregate_balance` sumaría N meses e
+    inflaría el neto vs el point-in-time de Beancount. Si la hoja es plana (sin `query_date`)
+    se devuelve tal cual."""
+    if not any(r.get("query_date") for r in rows):
+        return rows  # hoja plana sin dimensión de snapshot
+    if not snapshot:
+        return rows
+    return [r for r in rows if str(r.get("query_date", ""))[:10] == snapshot]
+
+
 def aggregate_balance(rows: list[dict]) -> dict[str, float]:
     """{account_number: net} sumando las filas (una por cuenta AT el snapshot)."""
     agg: dict[str, float] = defaultdict(float)
@@ -94,6 +106,8 @@ def _load(entity: str, as_of: str | None):
     sheets_rows = get_repository().get_records(f"balance_sheet_{entity.lower()}")
     snapshot = as_of or max((str(r.get("query_date", ""))[:10] for r in sheets_rows if r.get("query_date")),
                             default="")
+    # AT fin-de-mes: solo el snapshot del cierre, NUNCA sumar múltiples (ver docstring del módulo).
+    sheets_rows = _snapshot_rows(sheets_rows, snapshot)
     ledger = LedgerService(os.getenv("LEDGER_PATH") or "ledger/main.beancount")
     bean = balance_sheet_via_beancount(ledger, entity, date_to=snapshot or None)
     return sheets_rows, bean["data"], _account_roots(ledger), snapshot
@@ -123,8 +137,12 @@ def main() -> int:
                     help="lista separada por comas (default: las 5)")
     args = ap.parse_args()
     entities = [e.strip() for e in args.entities.split(",") if e.strip()]
+    if not entities:
+        print("Error: no se especificaron entidades (--entities vacío).", file=sys.stderr)
+        return 2
 
     total_unexpected = 0
+    total_compared = 0
     for entity in entities:
         try:
             sheets_rows, bean_rows, roots, snapshot = _load(entity, args.as_of)
@@ -137,8 +155,15 @@ def main() -> int:
         expected, unexpected = classify(diffs, roots)
         _print_entity(entity, snapshot, expected, unexpected, len(set(agg_s) | set(agg_b)))
         total_unexpected += len(unexpected)
+        total_compared += len(set(agg_s) | set(agg_b))
 
     print(f"\n{'='*60}")
+    # Fail-safe: cero cuentas comparadas = no se pudo verificar paridad (creds vacías, hoja/entity
+    # inexistente, ledger sin data). NO es un GO — un gate go/no-go no aprueba sin haber chequeado.
+    if total_compared == 0:
+        print("❌ No se comparó ninguna cuenta (¿creds/hoja/ledger vacíos?) — NO se puede verificar paridad.",
+              file=sys.stderr)
+        return 2
     if total_unexpected == 0:
         print("✅ Sólo diffs esperados (TC→Liabilities). Seguro flipear USE_BEANCOUNT_ENGINE_BALANCE_SHEET.")
         return 0

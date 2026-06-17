@@ -1,7 +1,7 @@
 ---
 story: 9.12
 title: Dashboard de reconciliación cartola ↔ Laudus
-status: review
+status: done
 epic: 9
 depends_on: [9.6b, 9.2]
 blocks: []
@@ -256,6 +256,20 @@ Story nueva derivada del cierre Q4 (2026-05-05, Opción D — FX cartola-derivad
   - [ ] Actualizar `docs/contador-onboarding-fava.md` (Story 9.3) con referencia al dashboard
 
 ---
+
+## Review Findings
+
+Code review 3 capas (Blind Hunter + Edge Case Hunter + Acceptance Auditor), 2026-06-17. Verificado contra código real (números de línea de las capas alucinados; corregidos abajo). El re-emit del `.beancount` por acción (AC3 paso 3 / AC7) es el SEAM declarado de 9.6b — no contado como defecto.
+
+- [x] [Review][Patch] El summary colapsa al estado filtrado → los chips de los OTROS estados desaparecen [reconciliation/service.py:98] — `read_discrepancies` incrementa `by_state` DENTRO del loop tras el `continue` del filtro `state`, así que al pasar `state=X` el `summary.by_state` queda `{X: n}` y `total` muestra el conteo filtrado. La UI ([ReconciliationPage.tsx:44-49]) renderiza los chips desde `summary.by_state` → al clickear un chip, los demás se esfuman y "Todas" muestra mal. Fix: computar el summary sobre el set sin-resolver (respetando bank/ym) PERO ignorando el filtro `state`.
+- [x] [Review][Patch] Estados FX que 9.6b emite (`fx-bcch-missing`, `fx-implausible`) son irresolubles → dead-end [reconciliation/service.py:138] — `ACTIONS_BY_STATE` solo tiene `fx-out-of-tolerance`, pero el `_FX_FLAG_STATES` de 9.6b también escribe `fx-bcch-missing` y `fx-implausible` al JSONL. Para esos, `ACTIONS_BY_STATE.get(state, set())` queda vacío → TODA acción se rechaza, incluso `escalate` (el frontend ofrece `['escalate']` de fallback y el backend lo rechaza 400). Fix: permitir `escalate` universalmente (no cierra; sirve para cualquier estado) → no hay dead-end.
+- [x] [Review][Patch] `resolve` no es idempotente → se puede re-resolver una discrepancia ya cerrada (audit trail contradictorio) [reconciliation/service.py:121-147] — solo busca el original para conocer el estado; nunca chequea `_resolved_ids`. Una segunda acción sobre una discrepancia ya resuelta appendea una línea de cierre contradictoria (y el re-emit seam dispararía dos veces). Fix: rechazar si `discrepancy_id in _resolved_ids` (escalate no cierra → re-escalate sigue permitido).
+- [x] [Review][Defer] AC6: el drill-down NO renderiza el historial de la discrepancia [ReconciliationPage.tsx DrillDown] — deferred (pase de UX a Sally per Dev Notes); `getHistory` existe en el service pero es dead code; AC6 pide mostrar el historial vía endpoint AC2 en el drill-down.
+- [x] [Review][Defer] Deep-link reabre el drill-down / botón cerrar muerto [ReconciliationPage.tsx:30-33] — deferred (frontend); `setSelected` se llama en el cuerpo del render; al resolver/cerrar un item deep-linked se reabre (el backend lo sigue devolviendo por el branch de id). Debe ser `useEffect` con flag de "ya abrí".
+- [x] [Review][Defer] El badge de reconciliación desaparece en error de `/count` → alerta bloqueante silenciada [PendingReconciliationBadge.tsx] — deferred (frontend); `data` undefined → `return null`, indistinguible de "0 pendientes". Surface error/stale.
+- [x] [Review][Defer] Filtros `year_month`/`bank_account_id` no llegan desde la UI (solo `state`) [ReconciliationPage.tsx:26] — deferred (frontend); el backend los soporta, la página no expone los dropdowns (AC5 medio-cableado; UX a Sally).
+- [x] [Review][Defer] `fx-bcch-missing`/`fx-implausible` sin action set propio ni clasificación blocking [reconciliation/service.py:18-26] — deferred; tras el patch P2 son escalables (no dead-end), pero falta decidir sus acciones de resolución y si son bloqueantes (decisión de producto + semántica FX).
+- [x] [Review][Defer] `bank_account_label` (shape AC1) nunca se popula + Laudus amount hardcoded CLP en la tabla [service.py / ReconciliationPage.tsx:75] — deferred; cosmético, 9.6b no emite el label y la celda Laudus no pasa currency.
 
 ## Dev Notes
 

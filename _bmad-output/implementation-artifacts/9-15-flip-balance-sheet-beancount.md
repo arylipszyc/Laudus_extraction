@@ -1,7 +1,7 @@
 ---
 story: 9.15
 title: Flip del balance-sheet a Beancount (dashboards Activos/Pasivos)
-status: review
+status: done
 epic: 9
 depends_on: [9.1, 9.2, 9.11]
 gate_condition: paridad-balance-por-entity-mes-confirmada
@@ -207,3 +207,15 @@ claude-opus-4-8[1m] (Amelia / dev-story)
 | Fecha | Cambio |
 |---|---|
 | 2026-06-17 | 9.15: tooling de parity del balance-sheet (script + clasificación TC→Liabilities + tests + README) + runbook de rollback. El flip del flag y su QA = handoff a Ary. Status → review. |
+| 2026-06-17 | Code review 3 capas → 2 patches al gate (filtra las filas Sheets al snapshot AT fin-de-mes — antes sumaba todos los meses e inflaba el neto → verdict no confiable; fail-safe exit 2 si no hay entities o no se comparó nada → no más false GO en vacío) + 3 tests nuevos (624 suite, 0 regresiones). 4 defers. El flip sigue handoff a Ary. Status → done. |
+
+### Review Findings
+
+Code review 3 capas (Blind Hunter + Edge Case Hunter + Acceptance Auditor), 2026-06-17. Verificado contra código real. El flip (AC2), correr el parity con creds prod (AC1/Task2), smoke (AC3) y aviso family (AC4) = handoffs manuales declarados, no defectos. Cero app-code → cero riesgo de regresión. El único entregable codeable (el script) ES el gate go/no-go del flip → su corrección importa.
+
+- [x] [Review][Patch] El lado Sheets suma TODOS los snapshots (no filtra por as-of) → el gate da verdicts no confiables [scripts/parity_check_balance_sheet.py:94-99,134] — Blind y Edge convergieron; el Auditor no trazó el lado Sheets. La hoja `balance_sheet` se UPSERTEA con pk=`account_id_query_date` (sync.py:130, backfill.py:57) → multi-snapshot (un row por (cuenta, cierre-de-mes), `is_latest` marca el reciente). `_load` calcula `snapshot` pero solo lo pasa a Beancount (`date_to`); devuelve `sheets_rows` SIN filtrar, y `aggregate_balance` los suma a todos → el neto Sheets queda inflado por N snapshots vs el point-in-time de Beancount. Contradice el propio docstring/README ("AT fin-de-mes, NUNCA rango multi-snapshot"). Fix: filtrar las filas Sheets al snapshot (`query_date == snapshot`) antes de agregar (seguro tanto si la hoja es multi-snapshot como si es plana).
+- [x] [Review][Patch] `--entities ""` o data vacía → exit 0 "Seguro flipear" sin comparar nada (FALSE GO) [scripts/parity_check_balance_sheet.py:125,142-144] — `entities=[]` (arg vacío/typo) salta el loop → `total_unexpected=0` → exit 0. Y data vacía en ambos lados → 0 diffs → exit 0. El gate no distingue "paridad verificada" de "no chequeó nada". Fix: fail-safe — exit 2 si no hay entities o si no se comparó ninguna cuenta.
+- [x] [Review][Defer] Colisión/ausencia de `code`: opens sin `code` → bucket "" en aggregate + last-write-wins en `_account_roots` [scripts/parity_check_balance_sheet.py:48,82-84] — deferred; dirección segura (tiende a clasificar como inesperado → bloquea, no false GO); cuentas del plan tienen code único por construcción.
+- [x] [Review][Defer] `--as-of` se aplica uniforme a todas las entidades [scripts/parity_check_balance_sheet.py:120,130] — deferred; si dos entidades tienen distinto último snapshot, un `--as-of` único fuerza diffs; el default per-entity (max query_date) lo evita.
+- [x] [Review][Defer] `get_repository().get_records` swallows errores → [] (no exit 2) [scripts/parity_check_balance_sheet.py:94] — deferred; un fallo de fetch de la hoja devuelve [] en vez de raise, así el guard exit-2 no dispara; depende del repo. Mitigado parcialmente por el fail-safe de empty (P2).
+- [x] [Review][Defer] La 2da categoría de diffs esperados (fantasmas Sheets conocidos) no se auto-clasifica [scripts/parity_check_balance_sheet.py:63-73] — deferred (Auditor LOW); aceptable: el humano que corre el gate investiga un diff marcado inesperado; el bias conservador (flag-and-stop) es correcto para un go/no-go.

@@ -1,7 +1,7 @@
 ---
 story: 9.6b
 title: Motor matching cartola ↔ Laudus + emisión de discrepancias a JSONL
-status: review
+status: done
 epic: 9
 depends_on: [9.6a, 9.4, 9.10]
 blocks: [9.7, 9.12]
@@ -313,3 +313,17 @@ claude-opus-4-8[1m] (Amelia / dev-story)
 | Fecha | Cambio |
 |---|---|
 | 2026-06-17 | 9.6b: motor de reconciliación cartola↔Laudus (7 estados + FX implícita + BCCh 5% + JSONL append-only + re-emit) en 4 módulos + orquestador. 31 tests. Seam: wiring del promote de upload pendiente. Status → review. |
+| 2026-06-17 | Code review 3 capas → 4 patches aplicados (dedup key+state, campo source AC4, missing-in-cartola no emite [Decisión Ary], USD huérfana usa BCCh [Decisión Ary]) + 4 tests nuevos (35 en 9.6b, 610 suite, 0 regresiones). 4 defers anotados. Status → done. |
+
+### Review Findings
+
+Code review 3 capas (Blind Hunter + Edge Case Hunter + Acceptance Auditor), 2026-06-17. Verificado contra código real (los números de línea de las capas venían alucinados; corregidos abajo).
+
+- [x] [Review][Patch] missing-in-cartola NO debe emitir Transaction; solo discrepancia [reconcile.py:146-151,20] — **Decisión Ary 2026-06-17: la cartola es la fuente de verdad.** Un asiento que está en Laudus y no en la cartola NO se contabiliza en el ledger de cartola (evita el doble conteo vs `imports/laudus/*`); se muestra como discrepancia (`source: "laudus"`) para que 9.12 lo despliegue y ofrezca la opción de borrarlo. Fix: agregar `"missing-in-cartola"` a `_BLOCKING` (emit=False + discrepancia) y eliminar la rama `else` muerta de `reconcile_and_build`. **Supersede AC4** (que mandaba emitir desde Laudus).
+- [x] [Review][Patch] USD missing-in-laudus usa el FX de la cartola (BCCh del mes) [reconcile.py:124-128,140-144] — **Decisión Ary 2026-06-17: la cartola completa usa el mismo FX; aplicar ese FX a la transacción.** Una línea USD sin contraparte Laudus no tiene FX implícita derivable → se usa la tasa BCCh del mes (`lookup_bcch`) como FX único de la cartola para emitirla con `@ rate` + leg CLP. Las líneas con match conservan su FX implícita per-línea (AC2). Si BCCh tampoco existe para el mes → no se emite + discrepancia `fx-bcch-missing` (no se contabiliza USD sin tasa).
+- [x] [Review][Patch] Dedup key no incluye `state` → la discrepancia FX out-of-tolerance se descarta al persistir [discrepancy_writer.py:19,65,74] — cuando una línea tiene a la vez un state-mismatch (date/description/category) Y overlay FX, `process_match_result` ([reconcile.py:82,88]) appendea dos discrepancias con el MISMO `(batch_id, line_no, je_id)`. `append_discrepancy` escribe la primera y devuelve False para la segunda → la discrepancia FX se pierde del JSONL. Fix: agregar `state` a `_dedup_key` y a los dos call sites (`_existing_dedup_keys`, `append_discrepancy`). Preserva idempotencia AC7.
+- [x] [Review][Patch] Falta campo `source` en las entradas de discrepancia (AC4) [discrepancy_writer.py:23-45] — AC4 exige `source: "cartola"` (missing-in-laudus) / `source: "laudus"` (missing-in-cartola). `build_discrepancy` no emite `source`. Derivable del `state`, pero el AC lo pide explícito. Fix: agregar `source` (one-liner).
+- [x] [Review][Defer] je_id="" colapsa discrepancias de Laudus sin meta `id` [matching_engine.py:88] — deferred, robustez de dedup; depende de si 9.4 puebla `id`
+- [x] [Review][Defer] load_laudus_entries descarta `_err` del parser [matching_engine.py:78] — deferred, un .beancount Laudus corrupto produce entries parciales en silencio; bajo riesgo (9.4 hace bean-check de su output)
+- [x] [Review][Defer] Round-trip float de montos/FX en el JSONL de auditoría [reconcile.py:31-32] — deferred, `_num` hace `float(Decimal)`; CLP son enteros, pero implied/deviation_pct pueden derivar (948.2000001); el JSONL es display, el ledger usa Decimal aparte
+- [x] [Review][Defer] category_account = solo el leg más grande, descarta splits multi-leg [matching_engine.py:86] — deferred, asientos Laudus con gasto dividido en varias cuentas pierden los legs menores; raro en este volumen

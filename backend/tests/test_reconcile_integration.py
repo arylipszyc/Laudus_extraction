@@ -89,6 +89,41 @@ def test_reconcile_and_build_multi_estado(tmp_path):
     assert _load(entries) == []
 
 
+def test_usd_huerfana_usa_bcch_como_fx(tmp_path):
+    # USD sin contraparte Laudus (missing-in-laudus): sin FX implícita derivable → usa la tasa
+    # BCCh del mes como FX de la cartola (decisión Ary 2026-06-17). Emite y balancea.
+    cartola = [CartolaLine(1, date(2026, 4, 15), Decimal("-100.00"), "USD", "AMAZON")]
+    entries, discrepancies = reconcile_and_build(
+        cartola_lines=cartola, laudus_entries=[], period_start=date(2026, 4, 1),
+        account_target="Liabilities:EAG:TC:Citi", is_liability=True,
+        category_for=lambda cl: "Expenses:EAG:Online",
+        fx_jsonl_path=_fx_file(tmp_path), bank_slug="citi", year_month="2026-04",
+        batch_id="b1", bank_account_id="acc1", ts="2026-05-05T00:00:00Z",
+    )
+    txns = [e for e in entries if isinstance(e, data.Transaction)]
+    assert len(txns) == 1
+    assert Decimal(txns[0].meta["fx_implied"]) == Decimal("948.20")  # BCCh del mes
+    assert _load(entries) == []                                       # balancea (bean-check verde)
+    assert [d["state"] for d in discrepancies] == ["missing-in-laudus"]
+    assert discrepancies[0]["source"] == "cartola"
+
+
+def test_usd_huerfana_sin_bcch_no_emite(tmp_path):
+    # USD huérfana sin tasa BCCh: no se puede contabilizar un USD sin FX → no emite, solo discrepancias.
+    empty_fx = tmp_path / "empty-fx.jsonl"
+    empty_fx.write_text("", encoding="utf-8")
+    cartola = [CartolaLine(1, date(2026, 4, 15), Decimal("-100.00"), "USD", "AMAZON")]
+    entries, discrepancies = reconcile_and_build(
+        cartola_lines=cartola, laudus_entries=[], period_start=date(2026, 4, 1),
+        account_target="Liabilities:EAG:TC:Citi", is_liability=True,
+        category_for=lambda cl: "Expenses:EAG:Online",
+        fx_jsonl_path=empty_fx, bank_slug="citi", year_month="2026-04",
+        batch_id="b1", bank_account_id="acc1", ts="2026-05-05T00:00:00Z",
+    )
+    assert [e for e in entries if isinstance(e, data.Transaction)] == []
+    assert sorted(d["state"] for d in discrepancies) == ["fx-bcch-missing", "missing-in-laudus"]
+
+
 def test_pre_2026_clp_only_sin_fx(tmp_path):
     cartola = [CartolaLine(1, date(2024, 4, 15), Decimal("-100.00"), "USD", "AMAZON")]
     laudus = [LaudusEntry("J1", date(2024, 4, 15), Decimal("-95045"), "AMAZON", "Expenses:EAG:Online")]

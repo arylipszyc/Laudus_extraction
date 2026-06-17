@@ -1,7 +1,7 @@
 ---
 story: 9.11
 title: Plan de cuentas en Beancount (SoT) + deprecación de Sheets/Supabase
-status: review
+status: done
 epic: 9
 depends_on: [9.1, 9.2, 9.4]
 gate_condition: paridad-1-1-confirmada
@@ -316,3 +316,7 @@ Corrida: `GOOGLE_APPLICATION_CREDENTIALS=pipeline/config/serviceAccountKey.json 
 - [x] [Review][Patch] (APLICADO 2026-06-17 — References suavizado) `manual/` presentado como destino decidido vs ADR-001 §3/§49 que lo deja "confirmar al implementar 10.3" — References ("destino promoción = manual/") y AC2 lo afirman como cerrado. Suavizar para no citarlo como decisión ratificada de 10.3.
 - [x] [Review][Patch] (APLICADO 2026-06-17) Cleanups menores de consistencia del doc — (a) `blocks: [balance-sheet-flip, ...]` usa un slug no resoluble a story-id; (b) AC4 "discontinuado en su totalidad" contradice retener `pipeline/sync.py` + `workflow_dispatch`; (c) AC8 "ejecutable en < 30 min" no es testeable sin un task que lo mida; (d) AC6 pide `epic-9-retrospective disponible` pero Task 6 lo dropeó.
 - [x] [Review][Defer] Dashboards balance-sheet (Activos/Pasivos) sin smoke post Sheets→read-only [9-11-deprecation-sheets.md AC7] — deferred, pertenece a la story del flip del balance-sheet. AC7 los excluye explícitamente; tras AC5 (read-only) quedan sin cobertura de regresión, pero el flip es out-of-scope.
+
+> **Segundo pase de code-review (3 capas, 2026-06-17, bmad-code-review formal).** Auditor PASS (los deliverables codeables — deprecación doc-only, rollback git-restore correcto [99bb5b0=36a202a~1], env preservado en pipeline/README.md, /sync/trigger gateado, endpoints intactos — todos verificados). Edge Hunter confirmó 7/8 claims CIERTOS con evidencia; las preocupaciones de NFR14/backup del Blind Hunter quedaron refutadas (backup.yml ya estaba roto; git history del ledger cubre NFR14). **Un hallazgo nuevo, distinto del defer de arriba (no es "sin smoke", es "data congelada"):**
+
+- [x] [Review][Decision→doc] Los dashboards Activos/Pasivos quedan CONGELADOS post-merge: 9.11 borró el ÚNICO writer de las tabs `balance_sheet_{entity}` ([pipeline/sync.py:271] `replace_sheet`, vía el `sync-weekly.yml` borrado), pero `USE_BEANCOUNT_ENGINE_BALANCE_SHEET` sigue **off** → la rama OFF de [dashboard/service.py:31-36] lee esas tabs, y el importer Laudus NO escribe a Sheets. Entre el merge y el flip de 9.15 (handoff deploy a Ary), `BalanceSheetPage` muestra data estática del último lunes, sin warning. **RESUELTO (Ary 2026-06-17, opción a): documentado** en `docs/deprecation-sheets-2026-06-17.md` (sección "⚠️ Ventana de data congelada") + acordado flipear 9.15 pronto post-merge para cerrar la ventana. El reporte `/reportes/gastos` NO está afectado.

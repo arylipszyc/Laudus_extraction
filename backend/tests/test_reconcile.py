@@ -1,4 +1,5 @@
 """Tests de discrepancy_writer + process_match_result — Story 9.6b AC4/AC5/AC7/AC3."""
+import json
 from datetime import date
 from decimal import Decimal
 
@@ -38,6 +39,17 @@ def test_missing_in_laudus_emite_flag_bang():
     d = _decide("missing-in-laudus", le=False)
     assert d.emit is True and d.flag == "!"
     assert d.discrepancies[0]["state"] == "missing-in-laudus"
+    assert d.discrepancies[0]["source"] == "cartola"  # AC4: la cartola tiene el dato
+
+
+def test_missing_in_cartola_no_emite_source_laudus():
+    # Decisión Ary 2026-06-17: la cartola es la fuente de verdad → no se contabiliza el
+    # asiento que solo está en Laudus; solo discrepancia (source=laudus) para que 9.12 lo borre.
+    d = _decide("missing-in-cartola", cl=False)
+    assert d.emit is False and d.flag is None
+    assert len(d.discrepancies) == 1
+    assert d.discrepancies[0]["state"] == "missing-in-cartola"
+    assert d.discrepancies[0]["source"] == "laudus"
 
 
 def test_date_mismatch_emite_con_discrepancia():
@@ -78,6 +90,18 @@ def test_append_y_dedup(tmp_path):
                               cartola={"line_no": 12}, laudus={"journal_entry_id": "12345"})
     assert append_discrepancy(disc2, p) is False
     assert len(p.read_text(encoding="utf-8").strip().splitlines()) == 1
+
+
+def test_state_y_fx_discrepancia_coexisten_al_persistir(tmp_path):
+    # Misma (batch, line_no, je_id) pero distinto state: la discrepancia FX NO debe pisar a la
+    # de estado al persistir (la dedup key ahora incluye state).
+    p = tmp_path / "cartola-discrepancies.jsonl"
+    fx = FXResult(implied=Decimal("1100"), bcch=Decimal("950"), deviation_pct=Decimal("15.8"),
+                  state="fx-out-of-tolerance")
+    d = _decide("date-mismatch", fx=fx)
+    assert [append_discrepancy(x, p) for x in d.discrepancies] == [True, True]
+    states = sorted(json.loads(l)["state"] for l in p.read_text(encoding="utf-8").splitlines() if l.strip())
+    assert states == ["date-mismatch", "fx-out-of-tolerance"]
 
 
 def test_resolution_se_appendea_sin_reescribir(tmp_path):

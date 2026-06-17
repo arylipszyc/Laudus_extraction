@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 MAX_PDF_SIZE_BYTES = 20 * 1024 * 1024  # NFR3: 20MB
 JOB_TTL_SECONDS = 60 * 60  # 1 hour
+MIN_JUSTIFICATION = 20  # Story 9.9 AC4 — piso de la justificación del override (server-side)
 # Story 9.5h: draws independientes ante fallo transitorio de Gemini (línea
 # omitida → BALANCE_MISMATCH, o JSON truncado → GeminiExtractionError).
 MAX_EXTRACTION_ATTEMPTS = 3
@@ -68,7 +69,7 @@ class StagingNotFound(Exception):
 
 
 class BalanceDiscrepancy(Exception):
-    """bean-check falló por discrepancia y no hubo override (HTTP 400) — Story 9.9 AC5."""
+    """closing ≠ opening + Σtx y no hubo override válido (HTTP 400) — Story 9.9 AC5."""
 
     def __init__(self, diff: float, calculated: float, stated: float, detail: str) -> None:
         super().__init__(detail)
@@ -76,6 +77,22 @@ class BalanceDiscrepancy(Exception):
         self.calculated = calculated
         self.stated = stated
         self.detail = detail
+
+
+class OverrideJustificationTooShort(Exception):
+    """Override con justificación < MIN_JUSTIFICATION chars (HTTP 400) — Story 9.9 AC4."""
+
+    def __init__(self, min_chars: int) -> None:
+        super().__init__(f"justificación < {min_chars} chars")
+        self.min_chars = min_chars
+
+
+class BeanCheckFailed(Exception):
+    """bean-check falló por un motivo distinto al balance enviado (HTTP 422) — Story 9.9.
+
+    El balance enviado cuadra (o el pad lo absorbió), pero el ledger no valida por otra causa
+    (cuenta sin abrir, archivo hermano roto, etc.). Un override no ayuda → se surfacea el detalle.
+    """
 
 
 # ── Job store (singleton, thread-safe) ───────────────────────────────────
@@ -424,22 +441,26 @@ def validate_balance(
     calculated = model.balances.opening + sum((t.amount for t in model.transactions), Decimal(0))
     diff = model.balances.closing - calculated
 
-    importer = importer or _build_importer(root)
+    justification = (override_justification or "").strip()
+    if justification and len(justification) < MIN_JUSTIFICATION:
+        raise OverrideJustificationTooShort(MIN_JUSTIFICATION)
 
-    if override_justification and override_justification.strip():
-        override = {
-            "justification": override_justification.strip(),
-            "user": user_email,
-            "at": now_iso or datetime.now(timezone.utc).isoformat(),
-        }
-        res = promote(batch_id, importer, root, override=override)
-        if not res["success"]:
-            raise BalanceDiscrepancy(float(diff), float(calculated), float(model.balances.closing),
-                                     res["error_msg"] or "bean-check falló pese al override")
-        return {"status": "validated", "file": res["file"], "git_sha": res["git_commit_sha"], "override": True}
-
-    res = promote(batch_id, importer, root)
-    if not res["success"]:
+    # Discrepancia de balance sin override válido → no se promueve (bean-check fallaría igual). AC5.
+    if diff != 0 and not justification:
         raise BalanceDiscrepancy(float(diff), float(calculated), float(model.balances.closing),
-                                 res["error_msg"] or "bean-check falló")
-    return {"status": "validated", "file": res["file"], "git_sha": res["git_commit_sha"], "override": False}
+                                 "closing ≠ opening + Σ transacciones")
+
+    # El override (pad+balance) solo aplica si hay una discrepancia REAL que absorber.
+    override = None
+    if diff != 0 and justification:
+        override = {"justification": justification, "user": user_email,
+                    "at": now_iso or datetime.now(timezone.utc).isoformat()}
+
+    importer = importer or _build_importer(root)
+    res = promote(batch_id, importer, root, override=override)
+    if not res["success"]:
+        # El balance enviado cuadra (o el pad lo absorbió) pero bean-check igual falló → la causa
+        # NO es el balance (cuenta sin abrir, archivo hermano roto). Override no ayuda; se surfacea.
+        raise BeanCheckFailed(res["error_msg"] or "bean-check falló")
+    return {"status": "validated", "file": res["file"], "git_sha": res["git_commit_sha"],
+            "override": override is not None}

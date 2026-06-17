@@ -139,6 +139,7 @@ class CartolaPdfImporter(beangulp.Importer):
             meta.update({
                 "source": "cartola-pdf",
                 "bank_account_id": model.source.bank_account_id,
+                "batch_id": Path(filepath).name.removesuffix(".cartola.json"),
                 "match_source": match_source,
                 "category_status": category_status,
                 "extraction_model": model.extraction.model,

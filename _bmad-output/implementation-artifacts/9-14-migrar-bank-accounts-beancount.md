@@ -1,7 +1,7 @@
 ---
 story: 9.14
 title: Migrar bank-accounts a Beancount + apagar Supabase
-status: review
+status: done
 epic: 9
 depends_on: [9.1, 10.3]
 gate_condition: cartola-upload-funciona-sin-supabase
@@ -273,3 +273,14 @@ claude-opus-4-8[1m] (Amelia / dev-story)
 | Fecha | Cambio |
 |---|---|
 | 2026-06-17 | 9.14: bank-accounts lee/escribe Beancount (no Supabase). Helper 10.3 generalizado y reusado. 13 tests. AC5 (apagar Supabase) = handoff a Ary. Status → review. |
+| 2026-06-17 | Code review 3 capas (Auditor PASS) → 2 patches aplicados (POST/PATCH manejan LockTimeout→409 y CalledProcessError→502 espejando 10.3, antes daban 500 + se perdía la escritura; toggle de active idempotente = no duplica close) + 3 tests nuevos (621 suite, 0 regresiones, 10.3 intacto). 5 defers. Status → done. |
+
+### Review Findings
+
+Code review 3 capas (Blind Hunter + Edge Case Hunter + Acceptance Auditor), 2026-06-17. Verificado contra código real (líneas de las capas alucinadas; corregidas abajo). Auditor: PASS (los 6 ACs satisfechos; la desviación Camino A es la decisión correcta). AC5 (apagar Supabase) + captura one-time de `active=false` = handoffs declarados a Ary, no defectos.
+
+- [x] [Review][Patch] POST/PATCH solo capturan `PromoteError` → `LockTimeout` y `CalledProcessError` dan 500 + se pierde la escritura [bank_accounts/service.py:96,135] — Blind y Edge convergieron. El consumidor hermano 10.3 ([cuentas_pendientes/router.py:103-122]) maneja `LockTimeout`→409 y `CalledProcessError`(push falla tras bean-check OK)→degradación con aviso. Acá propagan como 500 con stacktrace, y el commit local (ya escrito + bean-check verde) se descarta en el próximo `git reset --hard` del refresh — sin señal al usuario. Fix: espejar el patrón de 10.3 (LockTimeout→409; CalledProcessError→error claro 502 "escritura local persiste, push falló, reintentá", NO enmascarar como éxito).
+- [x] [Review][Patch] PATCH `active=false` sobre una cuenta ya cerrada → `close` duplicado → bean-check rojo → 422 opaco [bank_accounts/service.py:121-126] — `append_close` agrega un segundo `close` incondicionalmente; beancount da "Duplicate close" → rollback → 422 "bean-check falló". Seguro (rollback) pero confuso, y el `closed` set ya se conoce. Pasa con la captura one-time de inactivas (AC5 handoff) o un doble click. Fix: toggle idempotente — solo `append_close` si no está cerrada, solo `remove_close` si lo está.
+- [x] [Review][Defer] create no puede setear `bank_account_last4` → cuentas nuevas con last4=None pueden romper el matching de cartola [bank_accounts/service.py:80-87] — deferred; `BankAccountResolver` lee `bank_account_last4` para el matching; una cuenta registrada por este endpoint queda sin él (se puebla vía Fava, 9.3). Fuera del schema 9.14 pero gap real.
+- [x] [Review][Defer] create/update sin re-check bajo el lock (TOCTOU) → el 409 "ya registrada" se evalúa sobre el snapshot in-memory [bank_accounts/service.py:64-78,110-114] — deferred; en Render single-instance/single-worker el lock serializa; con multi-worker o cron concurrente el guard podría bypassearse (dup `bank_account_id`). Hardening de concurrencia.
+- [x] [Review][Defer] orden lexicográfico de `account_number` + line blanca acumulada en ciclos close/reopen + bank_name no reseteable a null [bank_accounts/service.py:54, beancount_promote.py append/remove_close, service.py:119] — deferred; cosméticos/menores (codes uniformes → lexi==numérico, == orden Supabase previo).

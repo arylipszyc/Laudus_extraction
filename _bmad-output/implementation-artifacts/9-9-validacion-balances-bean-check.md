@@ -1,7 +1,7 @@
 ---
 story: 9.9
 title: Validación de balances post-import via bean-check (era 4.2)
-status: review
+status: done
 epic: 9
 depends_on: [9.6]
 blocks: []
@@ -244,3 +244,18 @@ claude-opus-4-8[1m] (Amelia / dev-story)
 | Fecha | Cambio |
 |---|---|
 | 2026-06-17 | 9.9: endpoint validate-balance (promote + bean-check, 3 paths) + override pad+balance + panel frontend. Fix bug latente del pad (9.6a). 8 tests. Status → review. |
+| 2026-06-17 | Code review 3 capas → 3 patches aplicados (reestructura de `validate_balance`: fallo no-balance → `BeanCheckFailed` 422 con detalle real; piso ≥20 chars server-side → `JUSTIFICATION_TOO_SHORT` 400; override solo si diff≠0) + 3 tests nuevos (615 suite, 0 regresiones). 6 defers. Status → done. |
+
+### Review Findings
+
+Code review 3 capas (Blind Hunter + Edge Case Hunter + Acceptance Auditor), 2026-06-17. Verificado contra código real (los números de línea de las capas venían alucinados; corregidos abajo). El endpoint validate-balance está LIVE (sin flag gate, lo consume CartolaUploadPage).
+
+- [x] [Review][Patch] Fallo de bean-check NO-balance se reporta como discrepancia de balance + el detalle real se pierde [cartolas/service.py:441-445] — `validate_balance` calcula `diff` del modelo y ante CUALQUIER fallo de `promote` lanza `BalanceDiscrepancy` → 400 "provea override_justification". Un fallo no-balance (cuenta sin abrir, archivo hermano `imports/cartolas/*` roto) se misclasifica; el operador da un override que no ayuda (el pad absorbe balance, no errores de cuenta) y el `error_msg` real nunca llega a la respuesta. Fix: si `diff == 0` y promote falla → es no-balance → nuevo error `BeanCheckFailed` (422 con el detalle real); si `diff != 0` sin override → cortocircuito (no promueve) y devuelve la discrepancia.
+- [x] [Review][Patch] El piso de 20 chars de la justificación (AC4) es solo del cliente — el server acepta 1 char [cartolas/service.py:429] — el endpoint (el boundary de seguridad) solo chequea `.strip()` no-vacío; una llamada directa a la API escribe una justificación de 1 carácter al audit trail permanente. Fix: enforce `len(justification) >= 20` server-side → 400 `JUSTIFICATION_TOO_SHORT`.
+- [x] [Review][Patch] Override se aplica aunque `diff == 0` → pad espurio en una cartola que ya cuadra [cartolas/service.py:429-439] — la rama se elige por truthiness de la justificación, no por `diff`. Una request con justificación pero balance cuadrado inyecta un `Pad` innecesario + commit OVERRIDE. Fix: aplicar override solo si `diff != 0`.
+- [x] [Review][Defer] El opening/closing del staging se sobrescribe ANTES de promote y persiste mutado si promote falla [cartolas/service.py:419-422] — deferred; AC1 manda actualizar el staging si difieren, pero en fallo se pierden los balances extraídos originales. Revertir-en-fallo es nice-to-have.
+- [x] [Review][Defer] El 404 (StagingNotFound) usa shape `{detail:{...}}`; el frontend lee `data.error` → muestra "UNKNOWN: HTTP 404" [cartolas/router.py:162-164 vs services/cartolas.ts] — deferred; path raro (staging expirado), mensaje genérico no rompe el flujo.
+- [x] [Review][Defer] Tolerancia frontend `abs(disc) < 0.5` vs bean-check exacto → cartola USD con residuo sub-peso muestra "cuadra" y el server la rechaza 400 [BalanceValidationPanel.tsx] — deferred; CLP es entero (0.5 ≈ ==0); afecta solo cartolas USD con residuo de redondeo.
+- [x] [Review][Defer] Campos numéricos vacíos en el panel coercen a 0 (`parseFloat(x || '0')`) → puede habilitar confirmar con campo en blanco [BalanceValidationPanel.tsx] — deferred; el backend rechaza el Decimal inválido (422), robustez de input del frontend.
+- [x] [Review][Defer] `batch_id` se interpola al path del staging sin validar formato UUID [cartolas/service.py:413] — deferred; el sufijo `.cartola.json` + el manejo de path de FastAPI bloquean el traversal en la práctica; defense-in-depth.
+- [x] [Review][Defer] Una justificación con `"` o newline rompería la sintaxis beancount del pad meta [cartola_pdf_importer.py convert_balance_to_pad] — deferred; auto-limitado (bean-check rechaza → BeanCheckFailed tras el fix P1), no corrompe un archivo committeado; conviene escapar/validar.

@@ -72,7 +72,7 @@ def bulk_confirm_endpoint(
         raise HTTPException(status_code=404, detail="Beancount engine no habilitado")
     root = Path(ledger.main_path).parent
     try:
-        result = bulk_confirm(request.batch_id or "", entries=_entries(ledger),
+        result = bulk_confirm(request.batch_id, entries=_entries(ledger),
                               ledger_root=root, user_email=user.email)
     except CategoryEditError as exc:
         raise HTTPException(status_code=422, detail=f"bean-check falló: {exc}")

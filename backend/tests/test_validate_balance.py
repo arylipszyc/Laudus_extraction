@@ -8,6 +8,8 @@ from fastapi.testclient import TestClient
 
 from backend.app.api.v1.cartolas.service import (
     BalanceDiscrepancy,
+    BeanCheckFailed,
+    OverrideJustificationTooShort,
     StagingNotFound,
     validate_balance,
 )
@@ -111,6 +113,44 @@ def test_validate_balance_override(tmp_path):
     assert res["status"] == "validated" and res["override"] is True
     written = next((root / "imports" / "cartolas").glob("*2026-03.beancount")).read_text(encoding="utf-8")
     assert "pad" in written and "override_justification" in written
+
+
+def test_override_corto_se_rechaza_server_side(tmp_path):
+    # AC4 es el boundary: el server enforce ≥20 chars, no solo el cliente.
+    root = _root(tmp_path)
+    _staging(root, "0", "852689", [("ENEL", 852689)])
+    with pytest.raises(OverrideJustificationTooShort):
+        validate_balance("b1", "0", "999999", "muy corta", user_email="c@test.com",
+                         ledger_root=root, importer=_importer(root))
+    # no se promovió: staging persiste, sin archivo final
+    assert (root / "imports" / "cartolas" / "_staging" / "b1.cartola.json").exists()
+    assert not list((root / "imports" / "cartolas").glob("*2026-03.beancount"))
+
+
+def test_override_innecesario_cuando_cuadra_no_genera_pad(tmp_path):
+    # diff==0 + justificación → NO se inyecta pad espurio; override False.
+    root = _root(tmp_path)
+    _staging(root, "0", "852689", [("ENEL", 852689)])
+    res = validate_balance(
+        "b1", "0", "852689",
+        "Justificación larga e innecesaria porque el balance ya cuadra perfectamente",
+        user_email="c@test.com", ledger_root=root, importer=_importer(root))
+    assert res["status"] == "validated" and res["override"] is False
+    written = next((root / "imports" / "cartolas").glob("*2026-03.beancount")).read_text(encoding="utf-8")
+    assert "pad" not in written
+
+
+def test_fallo_no_balance_no_se_misclasifica(tmp_path):
+    # Un archivo hermano roto hace fallar bean-check por una causa que NO es el balance enviado
+    # (que cuadra). Debe dar BeanCheckFailed, no BalanceDiscrepancy.
+    root = _root(tmp_path)
+    (root / "imports" / "cartolas" / "zzz-broken.beancount").write_text(
+        '2026-03-20 * "roto"\n  Assets:DoesNotExist 10 CLP\n  Assets:AlsoMissing -10 CLP\n',
+        encoding="utf-8")
+    _staging(root, "0", "852689", [("ENEL", 852689)])  # cuadra (diff==0)
+    with pytest.raises(BeanCheckFailed):
+        validate_balance("b1", "0", "852689", None, user_email="c@test.com",
+                         ledger_root=root, importer=_importer(root))
 
 
 def test_staging_no_encontrado(tmp_path):

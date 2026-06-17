@@ -4,7 +4,13 @@ Valida la agregación net por cuenta, la comparación con tolerancia y la clasif
 diffs (TC/pasivo reclasificado a Liabilities = esperado; resto = investigar). La corrida real
 contra Sheets+Beancount es QA con data prod (handoff).
 """
-from scripts.parity_check_balance_sheet import aggregate_balance, classify, compare
+from scripts.parity_check_balance_sheet import (
+    _snapshot_rows,
+    aggregate_balance,
+    classify,
+    compare,
+    main,
+)
 
 
 def _row(acc, debit_balance=0, credit_balance=0):
@@ -48,3 +54,28 @@ def test_classify_unknown_root_is_unexpected():
     expected, unexpected = classify(diffs, {})
     assert expected == []
     assert unexpected[0]["root"] == ""
+
+
+# ── Review: snapshot point-in-time + fail-safe del gate ──────────────────────
+
+
+def test_snapshot_rows_filtra_al_cierre_no_suma_meses():
+    # La hoja es multi-snapshot (pk=account+query_date). Sin filtrar, aggregate sumaría ambos
+    # meses (100+170) e inflaría el neto vs el point-in-time de Beancount.
+    rows = [
+        {"account_number": "111005", "query_date": "2026-04-30", "debit_balance": 100, "credit_balance": 0},
+        {"account_number": "111005", "query_date": "2026-05-31", "debit_balance": 170, "credit_balance": 0},
+    ]
+    filtered = _snapshot_rows(rows, "2026-05-31")
+    assert aggregate_balance(filtered)["111005"] == 170.0  # solo el cierre pedido, no 270
+
+
+def test_snapshot_rows_hoja_plana_pasa_igual():
+    rows = [{"account_number": "111005", "debit_balance": 100, "credit_balance": 0}]
+    assert _snapshot_rows(rows, "2026-05-31") == rows  # sin query_date → sin dimensión de snapshot
+
+
+def test_main_sin_entities_no_es_un_go(monkeypatch):
+    # --entities vacío → el gate NO debe aprobar (exit 2), no exit 0 "Seguro flipear".
+    monkeypatch.setattr("sys.argv", ["parity", "--entities", ""])
+    assert main() == 2

@@ -84,20 +84,23 @@ def read_discrepancies(*, state=None, year_month=None, bank_account_id=None,
         if not _is_original(e):
             continue
         if discrepancy_id is not None:
-            if e["discrepancy_id"] != discrepancy_id:
-                continue
-        else:
-            if e["discrepancy_id"] in resolved:
-                continue
-            if state and e.get("state") != state:
-                continue
-            if bank_account_id and e.get("bank_account_id") != bank_account_id:
-                continue
-            if year_month and _year_month(e) != year_month:
-                continue
+            if e["discrepancy_id"] == discrepancy_id:
+                items.append({**e, "year_month": _year_month(e)})
+            continue
+        if e["discrepancy_id"] in resolved:
+            continue
+        if bank_account_id and e.get("bank_account_id") != bank_account_id:
+            continue
+        if year_month and _year_month(e) != year_month:
+            continue
+        # El summary cuenta por estado SIN aplicar el filtro `state`, para que los chips de los
+        # demás estados sigan visibles al filtrar por uno (si no, la UI los pierde).
         by_state[e.get("state")] = by_state.get(e.get("state"), 0) + 1
+        if state and e.get("state") != state:
+            continue
         items.append({**e, "year_month": _year_month(e)})
-    return {"discrepancies": items, "summary": {"total": len(items), "by_state": by_state}}
+    total = len(items) if discrepancy_id is not None else sum(by_state.values())
+    return {"discrepancies": items, "summary": {"total": total, "by_state": by_state}}
 
 
 def history(discrepancy_id: str, path: Path | None = None) -> list[dict]:
@@ -134,8 +137,12 @@ def resolve(discrepancy_id: str, action: str, justification: str | None,
                      if _is_original(e) and e["discrepancy_id"] == discrepancy_id), None)
     if original is None:
         raise ResolveError(f"discrepancy_id {discrepancy_id} no existe")
+    if discrepancy_id in _resolved_ids(path):
+        raise ResolveError(f"discrepancy_id {discrepancy_id} ya fue resuelta")
     state = original.get("state")
-    if action not in ACTIONS_BY_STATE.get(state, set()):
+    # `escalate` no cierra y sirve para cualquier estado (incl. fx-bcch-missing/fx-implausible que
+    # 9.6b emite y no están en la tabla) → siempre permitido, evita dead-ends. El resto se valida.
+    if action != "escalate" and action not in ACTIONS_BY_STATE.get(state, set()):
         raise ResolveError(f"acción '{action}' no permitida para estado '{state}'")
     if action != "escalate" and (not justification or len(justification.strip()) < 10):
         raise ResolveError("justification ≥ 10 caracteres requerida (excepto escalate)")

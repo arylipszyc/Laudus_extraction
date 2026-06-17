@@ -118,10 +118,10 @@ def _find(entries: list, tx_id: str) -> data.Transaction | None:
     return None
 
 
-def _commit(ledger_root: Path, file_path: Path, message: str):
+def _commit(ledger_root: Path, file_path: Path, message: str, *, extra_paths: list[str] | None = None):
     from pipeline.importers.laudus_run import git_commit_push
-    rel = f"ledger/imports/cartolas/{file_path.name}"
-    return git_commit_push(ledger_root, [rel], message)
+    rels = [f"ledger/imports/cartolas/{file_path.name}", *(extra_paths or [])]
+    return git_commit_push(ledger_root, rels, message)
 
 
 def update_category(
@@ -156,12 +156,14 @@ def update_category(
         if not ok:
             file_path.write_text(original, encoding="utf-8")
             raise CategoryEditError(detail)
-        # history (alimenta la regla supra)
+        # history (alimenta la regla supra) — debe entrar en el MISMO commit, si no el
+        # `git reset --hard` del refresh del backend la descarta y la supra nunca acumula.
         hp = history_path or (ledger_root / "_meta" / "categorization-history.jsonl")
         append_correction(hp, build_record(
             description=affected.get(tx_id, ""), corrected_category=new_category,
             original_suggestion=original_cat, user=user_email, ts=now_iso))
-        sha = _commit(ledger_root, file_path, f"[categorize] {tx_id} → {new_category}")
+        sha = _commit(ledger_root, file_path, f"[categorize] {tx_id} → {new_category}",
+                      extra_paths=["ledger/_meta/categorization-history.jsonl"])
 
     if service is not None:
         service.invalidate(affected.get(tx_id, ""))
@@ -169,17 +171,19 @@ def update_category(
 
 
 def bulk_confirm(
-    batch_id_unused: str,
+    batch_id: str | None,
     *,
     entries: list,
     ledger_root: Path,
     user_email: str,
     now_iso: str | None = None,
 ) -> dict:
-    """AC8: confirma todas las tx con flag `!` y match_source != pending (las pending NO).
+    """AC8: confirma las tx con flag `!` y match_source != pending (las pending NO).
 
-    Agrupa por archivo y re-genera cada uno una sola vez. No cambia la categoría (solo confirma
-    la sugerida): flag `!`→`*`, status confirmed. Un solo commit.
+    Si `batch_id` viene seteado, se restringe a las tx de ESE batch (meta `batch_id`, estampada
+    por el importer); si viene vacío/None, confirma todas las sugeridas del ledger. Agrupa por
+    archivo y re-genera cada uno una sola vez. No cambia la categoría: flag `!`→`*`, status
+    confirmed. Un solo commit.
     """
     from pipeline.importers.laudus_run import acquire_lock, bean_check, git_commit_push
 
@@ -189,6 +193,8 @@ def bulk_confirm(
             continue
         meta = e.meta or {}
         if meta.get("match_source") in (None, "pending"):
+            continue
+        if batch_id and meta.get("batch_id") != batch_id:
             continue
         by_file.setdefault(Path(meta["filename"]), set()).add(_tx_id_of(e))
 
