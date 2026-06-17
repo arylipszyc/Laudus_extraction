@@ -1,0 +1,198 @@
+"""Comportamiento por estado de matching — Story 9.6b AC4/AC3.
+
+Convierte un `MatchResult` (+ `FXResult` opcional) en una decisión de emisión:
+si emitir la Transaction, con qué flag, y qué discrepancia(s) registrar en el JSONL.
+La construcción de la Transaction beancount la hace el importer (9.6a); acá solo se
+decide QUÉ hacer.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from datetime import date
+from decimal import Decimal
+from typing import Callable
+
+from pipeline.importers.discrepancy_writer import build_discrepancy
+from pipeline.importers.fx_calculator import FXResult, calculate_fx, lookup_bcch
+from pipeline.importers.matching_engine import USD_FX_EPOCH, CartolaLine, LaudusEntry, MatchResult, match
+
+# Estados que NO emiten Transaction (bloqueantes hasta resolución manual via 9.12).
+_BLOCKING = {"value-mismatch"}
+_FX_FLAG_STATES = {"fx-out-of-tolerance", "fx-bcch-missing", "fx-implausible"}
+
+
+@dataclass
+class ProcessDecision:
+    emit: bool                       # ¿emitir la Transaction?
+    flag: str | None                 # "*" | "!" | None (si no se emite)
+    discrepancies: list[dict] = field(default_factory=list)
+
+
+def _num(x: Decimal | None):
+    return float(x) if x is not None else None
+
+
+def _cartola_dict(mr: MatchResult) -> dict | None:
+    cl = mr.cartola_line
+    if cl is None:
+        return None
+    return {"line_no": cl.line_no, "date": cl.date.isoformat(), "amount": _num(cl.amount),
+            "currency": cl.currency, "description": cl.description}
+
+
+def _laudus_dict(mr: MatchResult) -> dict | None:
+    le = mr.laudus_entry
+    if le is None:
+        return None
+    return {"journal_entry_id": le.je_id, "date": le.date.isoformat(),
+            "amount": _num(le.amount), "description": le.description}
+
+
+def _fx_dict(fx: FXResult | None) -> dict:
+    if fx is None:
+        return {"implied": None, "bcch": None, "deviation_pct": None}
+    return {"implied": _num(fx.implied), "bcch": _num(fx.bcch), "deviation_pct": _num(fx.deviation_pct)}
+
+
+def process_match_result(
+    mr: MatchResult,
+    fx: FXResult | None,
+    *,
+    batch_id: str,
+    bank_account_id: str,
+    ts: str,
+) -> ProcessDecision:
+    """Decisión de emisión + discrepancias para un MatchResult (AC4) + overlay FX (AC3)."""
+    def _disc(state: str) -> dict:
+        return build_discrepancy(
+            batch_id=batch_id, bank_account_id=bank_account_id, state=state, ts=ts,
+            cartola=_cartola_dict(mr), laudus=_laudus_dict(mr), fx=_fx_dict(fx),
+        )
+
+    discrepancies: list[dict] = []
+
+    if mr.state in _BLOCKING:
+        # No se emite Transaction; solo discrepancia bloqueante.
+        return ProcessDecision(emit=False, flag=None, discrepancies=[_disc(mr.state)])
+
+    if mr.state == "perfect":
+        emit, flag = True, "*"
+    else:
+        emit, flag = True, "!"
+        discrepancies.append(_disc(mr.state))
+
+    # Overlay FX (AC3): una desviación/ausencia/implausibilidad fuerza flag ! + discrepancia FX,
+    # incluso si el match era 'perfect'.
+    if fx is not None and fx.state in _FX_FLAG_STATES:
+        flag = "!"
+        discrepancies.append(_disc(fx.state))
+
+    return ProcessDecision(emit=emit, flag=flag, discrepancies=discrepancies)
+
+
+# ── Orquestador: cartola + Laudus → (entries beancount, discrepancias) (AC1-AC9) ──
+
+
+def reconcile_and_build(
+    *,
+    cartola_lines: list[CartolaLine],
+    laudus_entries: list[LaudusEntry],
+    period_start: date,
+    account_target: str,
+    is_liability: bool,
+    category_for: Callable[[CartolaLine], str],
+    fx_jsonl_path,
+    bank_slug: str,
+    year_month: str,
+    batch_id: str,
+    bank_account_id: str,
+    ts: str,
+):
+    """Corre el matching y arma (entries beancount, discrepancias) según el comportamiento por
+    estado. USD (era FX, period_start ≥ 2026) emite con price per-unit + metadata FX; pre-2026
+    es CLP-only (AC9). value-mismatch NO emite. missing-in-cartola emite desde Laudus CLP-only.
+    """
+    from beancount.core import data
+    from beancount.core.amount import Amount
+    from pipeline.importers.cartola_pdf_importer import _build_postings, build_usd_postings, fx_metadata
+
+    fx_era = period_start >= USD_FX_EPOCH
+    results = match(cartola_lines, laudus_entries, period_start=period_start)
+    entries: list = []
+    discrepancies: list[dict] = []
+
+    for mr in results:
+        cl = mr.cartola_line
+        fx = None
+        if cl is not None and fx_era and cl.currency != "CLP" and mr.laudus_entry is not None:
+            fx = calculate_fx(cl.amount, mr.laudus_entry.amount, lookup_bcch(fx_jsonl_path, year_month))
+
+        decision = process_match_result(mr, fx, batch_id=batch_id, bank_account_id=bank_account_id, ts=ts)
+        discrepancies.extend(decision.discrepancies)
+        if not decision.emit:
+            continue
+
+        if cl is not None:  # emite desde la cartola (cartola manda fecha/desc/monto)
+            category = category_for(cl)
+            meta = {"source": "cartola-pdf", "bank_account_id": bank_account_id, "line": str(cl.line_no)}
+            if mr.state == "category-mismatch":
+                meta["suggested_category"] = cl.suggested_category
+            if fx is not None and fx.implied is not None:
+                meta.update(fx_metadata(fx, bank_slug, year_month))
+                postings = build_usd_postings(account_target, category, cl.amount, fx.implied, is_liability)
+            else:
+                postings = _build_postings(account_target, category, cl.amount, cl.currency, is_liability)
+            narration, when = cl.description or f"line {cl.line_no}", cl.date
+        else:  # missing-in-cartola → emite desde Laudus, CLP-only
+            le = mr.laudus_entry
+            meta = {"source": "laudus-erp", "bank_account_id": bank_account_id, "je_num": le.je_id}
+            postings = _build_postings(account_target, le.category_account or "Equity:Reconciliation:Discrepancias",
+                                       abs(le.amount), "CLP", is_liability)
+            narration, when = le.description or f"JE {le.je_id}", le.date
+
+        bmeta = data.new_metadata("<reconcile>", cl.line_no if cl else 0)
+        bmeta.update(meta)
+        entries.append(data.Transaction(
+            meta=bmeta, date=when, flag=decision.flag, payee=None, narration=narration,
+            tags=frozenset(), links=frozenset(), postings=postings,
+        ))
+
+    return entries, discrepancies
+
+
+# ── Re-emit post-resolución (AC6) ─────────────────────────────────────────────
+
+
+def commit_reconciliation(file_path, new_content: str, discrepancy_id: str, action: str, ledger_root) -> dict:
+    """Re-genera (write-and-replace) un archivo de cartola tras una resolución (Story 9.12).
+
+    bean-check antes de commitear (rollback si rojo); commit `[reconciliation] resolve {id}: {action}`
+    + push, bajo el mismo lock que el importer. `new_content` lo provee el flujo de resolución de 9.12.
+    """
+    from pathlib import Path
+
+    from pipeline.importers.laudus_run import acquire_lock, bean_check, git_commit_push
+
+    root = Path(ledger_root)
+    path = Path(file_path)
+    main_path = root / "main.beancount"
+    lock_path = root / ".import.lock"
+    result = {"discrepancy_id": discrepancy_id, "action": action, "file": str(path),
+              "success": False, "error_msg": None, "git_commit_sha": None}
+
+    with acquire_lock(lock_path):
+        original = path.read_text(encoding="utf-8") if path.exists() else None
+        path.write_text(new_content, encoding="utf-8")
+        ok, detail = bean_check(main_path)
+        if not ok:
+            if original is None:
+                path.unlink(missing_ok=True)
+            else:
+                path.write_text(original, encoding="utf-8")
+            result["error_msg"] = f"bean-check failed: {detail}"
+            return result
+        rel = path.relative_to(root.parent) if root.parent in path.parents else path.name
+        result["git_commit_sha"] = git_commit_push(
+            root, [str(rel)], f"[reconciliation] resolve {discrepancy_id}: {action}")
+        result["success"] = True
+        return result

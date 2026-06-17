@@ -61,6 +61,41 @@ def _build_postings(
     ]
 
 
+def build_usd_postings(
+    account_target: str,
+    category_account: str,
+    usd_amount: Decimal,
+    fx_implied: Decimal,
+    is_liability: bool,
+) -> list[data.Posting]:
+    """Postings de una línea USD con price per-unit CLP (Story 9.6b AC2/AC8).
+
+    El posting del banco/TC lleva las unidades USD con `@ fx_implied CLP` (per-unit; equivale
+    al `@@ total` del storyfile y es lo que beancount serializa). El plugin `implicit_prices`
+    deriva la price directive. La contrapartida en CLP cierra el balance por construcción.
+    """
+    sign = Decimal(-1) if is_liability else Decimal(1)
+    usd_units = sign * usd_amount
+    clp_weight = (usd_units * fx_implied).quantize(Decimal("0.01"))
+    price = Amount(fx_implied, "CLP")
+    return [
+        data.Posting(account_target, Amount(usd_units, "USD"), None, price, None, None),
+        data.Posting(category_account, Amount(-clp_weight, "CLP"), None, None, None, None),
+    ]
+
+
+def fx_metadata(fx_result, bank_slug: str, year_month: str) -> dict:
+    """Metadata FX para la Transaction (todos strings, convención Beancount) — AC8."""
+    meta = {"fx_source": f"derived-cartola-{bank_slug}-{year_month}"}
+    if fx_result.implied is not None:
+        meta["fx_implied"] = str(fx_result.implied)
+    if fx_result.bcch is not None:
+        meta["fx_bcch"] = str(fx_result.bcch)
+    if fx_result.deviation_pct is not None:
+        meta["fx_deviation_pct"] = str(fx_result.deviation_pct)
+    return meta
+
+
 class CartolaPdfImporter(beangulp.Importer):
     """beangulp.Importer: `{batch_id}.cartola.json` → directivas Beancount."""
 
