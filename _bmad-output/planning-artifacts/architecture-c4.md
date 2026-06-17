@@ -695,7 +695,7 @@ Alternativa rechazada: shared volume entre servicios. Render no lo soporta clean
 
 **Removidos en c4 post-9.1:** los registries pasan a `accounts.beancount` (modelo unificado, sin entidad separada para bank_accounts); reconciliation y FX BCCh viven en `ledger/_meta/*.jsonl`. El servicio Supabase queda en standby hasta cierre de 9.11; durante la transición el código legacy puede seguir leyéndolo, pero el path c4 no lo toca.
 
-**Removidos eventualmente (al deprecate Sheets, F4):** `GOOGLE_SHEET_ID`, `GOOGLE_SERVICE_ACCOUNT_JSON`. Hasta entonces se mantienen para que el `pipeline/sync.py` legacy (Sheets) corra en paralelo durante la transición.
+**Removidos al deprecate Sheets (F4 — Story 9.11, 2026-06-17 DONE):** los crons de sync a Sheets (`sync-weekly.yml` + `backup.yml`) se discontinuaron; ya NO corre ningún sync legacy en paralelo. `pipeline/sync.py` se retiene solo como fallback de disaster-recovery (no programado). `GOOGLE_SHEET_ID`/`GOOGLE_SERVICE_ACCOUNT_JSON` se conservan únicamente para ese fallback DR + el rollback runbook.
 
 ---
 
@@ -730,14 +730,16 @@ Alternativa rechazada: shared volume entre servicios. Render no lo soporta clean
 2. Sesión 1-1 con el contador (pendiente, Ary debe asignar el rol primero) — recorrida de Fava: filtros, balances, drill-down, BQL básico.
 3. Definir flujo de edición: ¿el contador edita directamente vía Fava beta editor, o vía PR sobre el repo? Recomendación inicial: **vía PR** durante el primer mes (audit trail claro), después evaluar.
 
-### 7.4 F3 — Importer Laudus en producción (½ sprint)
+### 7.4 F3 — Importer Laudus en producción (½ sprint) — ✅ COMPLETADO (Story 9.11, 2026-06-17)
 
 **Objetivo:** dejar de sync a Sheets, dejar al importer Laudus → `.beancount` como único source.
 
-**Pasos:**
-1. Importer Laudus en cron Render. Sheets sync legacy queda corriendo en paralelo durante 1 mes (mirror).
-2. Validación cada lunes: diff Sheets vs `.beancount` mes pasado → 0 discrepancia.
-3. Tras 1 mes ok → desactivar Sheets sync. Sheets queda read-only como archivo histórico.
+**Estado final:** el importer Laudus corre en cron Render (Story 9.4 LIVE) como único source; los crons de sync a Sheets (`sync-weekly.yml` + `backup.yml`) se discontinuaron en 9.11 — **ya no hay sync legacy corriendo en paralelo**. Sheets queda read-only como archivo histórico. La paridad se re-verificó (parity_check, AC1): beancount = Laudus = validado vs contador; el único residual está del lado de Sheets (asientos fantasma históricos), que es justo lo que se retira.
+
+**Pasos (plan original, ya ejecutado):**
+1. ~~Importer Laudus en cron Render. Sheets sync legacy queda corriendo en paralelo durante 1 mes (mirror).~~ → cron LIVE; el periodo de mirror en paralelo concluyó.
+2. ~~Validación cada lunes: diff Sheets vs `.beancount` mes pasado → 0 discrepancia.~~ → reemplazado por `scripts/parity_check_sheets_vs_beancount.py` (AC1).
+3. ~~Tras 1 mes ok → desactivar Sheets sync.~~ → hecho en 9.11 (crons borrados). Sheets read-only.
 
 ### 7.5 F4 — Importer PDF (Story 4.1a + 4.1b)
 
@@ -771,9 +773,11 @@ Posteriormente (misma fecha, sesión directa Bob ↔ Ary) se cerraron 2 decision
 
 **Veredicto honesto post-2026-05-05:** Story 4.0 fue **0% productiva** bajo c4 final. ~1-2 días de trabajo descartado, producto del arrastre silencioso del costo hundido al cuestionar el diseño. Lección documentada en MEMORY: cuando se preserva infraestructura por costo hundido sin cuestionar si el nuevo diseño la necesita, se acumula deuda silenciosa.
 
-### 7.8 Riesgo de drift durante transición
+### 7.8 Riesgo de drift durante transición — ✅ CERRADO (Story 9.11, 2026-06-17)
 
-**Período crítico:** F1 + F3 (~3 sprints) donde Sheets y `.beancount` co-existen.
+> El período de co-existencia Sheets ↔ `.beancount` terminó: el sync legacy a Sheets se discontinuó en 9.11 (no hay dos sinks en paralelo). El drift residual observado al cerrar (parity_check AC1) es histórico y vive del lado de Sheets (archivo read-only), no del ledger Beancount autoritativo.
+
+**Período crítico (histórico):** F1 + F3 (~3 sprints) donde Sheets y `.beancount` co-existen.
 
 **Mitigaciones:**
 1. **Single writer por dataset.** Durante F1: importer Laudus escribe a Sheets (legacy) Y a `.beancount` (nuevo). Mismo source (Laudus API), dos sinks → consistencia automática.

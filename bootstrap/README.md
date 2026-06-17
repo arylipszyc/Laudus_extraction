@@ -2,11 +2,19 @@
 
 Scripts que hidratan `ledger/` desde cero combinando Laudus API (datos
 contables base) + Supabase one-time read (taxonomía + metadata bancaria).
-Después de que Story 9.11 desactive Supabase, `accounts.beancount` queda
-como single source of truth y estos scripts dejan de ser ejecutables tal
-cual — para re-bootstrapear post-9.11 hay que extraer la taxonomía de
-otra fuente (export Sheets, CSV manual, o re-implementarlo leyendo
-metadata del propio `accounts.beancount`).
+
+> **DEPRECATED como rutina (Story 9.11, 2026-06-17).** El **single source of
+> truth** del plan de cuentas es la metadata `Open` de **`ledger/accounts.beancount`**
+> (baseline) **+ la zona `manual/`** (edits humanos del contador vía Fava), editable
+> directamente — **no Supabase ni la pestaña `ledger_final` de Sheets**. Estos scripts
+> quedan **solo para re-bootstrap de disaster-recovery**; en operación normal la
+> taxonomía se edita en el `.beancount`. Apagar el proyecto Supabase standby está
+> **bloqueado** hasta migrar `bank-accounts` a leer metadata de `accounts.beancount`
+> (**Story 9.14** — último consumidor vivo de Supabase: `CartolaUploadPage`). Para
+> re-bootstrapear post-9.11 sin Supabase hay que extraer la taxonomía de otra fuente
+> (export Sheets, CSV manual, o re-implementarlo leyendo metadata del propio
+> `accounts.beancount`). Ver
+> `_bmad-output/planning-artifacts/adr-001-plan-de-cuentas-beancount-source-of-truth.md`.
 
 ---
 

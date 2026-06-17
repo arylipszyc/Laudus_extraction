@@ -14,6 +14,8 @@ date: '2026-04-08'
 
 # Architecture Decision Document
 
+> **DEPRECATED — superseded by `architecture-c4.md` desde 2026-06-17 (Story 9.11).** El pivot c4 (Beancount engine + importer Laudus único source + plan de cuentas como metadata `Open` editable = SoT) reemplaza el diseño Sheets/Supabase descrito acá. Este documento se conserva como registro histórico. Para la arquitectura vigente ver `architecture-c4.md`.
+
 _This document builds collaboratively through step-by-step discovery. Sections are appended as we work through each architectural decision together._
 
 ## Project Context Analysis
