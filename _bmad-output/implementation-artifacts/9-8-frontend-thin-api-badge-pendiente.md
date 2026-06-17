@@ -1,10 +1,11 @@
 ---
 story: 9.8
 title: Frontend LAUDUS consume thin API + badge "pendiente revisar" (era 4.3)
-status: ready-for-dev
+status: review
 epic: 9
 depends_on: [9.2]
 blocks: []
+status_note: "2026-06-17 dev-story → review (parcial-por-diseño; ver Dev Agent Record)"
 ---
 
 # Story 9.8 — Frontend LAUDUS consume thin API + badge "pendiente revisar"
@@ -258,3 +259,46 @@ Esta story consume la matriz de roles (`family` / `contador` / `admin`) implemen
 - [Source: 9-6b-matching-cartola-laudus-discrepancias.md — emisor del JSONL de discrepancias]
 - [Source: 9-12-dashboard-reconciliacion.md — chip de reconciliación complementario]
 - [Source: 9-13-rbac-3-roles.md — matriz de roles autoritativa]
+
+## Dev Agent Record
+
+### Agent Model Used
+
+claude-opus-4-8[1m] (Amelia / dev-story)
+
+### Completion Notes List
+
+**Entregado (review):**
+- **AC10 (obligatorio v1) — chip "Categorías pendientes":** `PendingCategorizationChip` en el
+  Header (amber, conteo desde `GET /api/v1/categorization/pending` de 9.7, RBAC contador/admin,
+  oculto si 0, polling 60s). Coexiste con el chip de reconciliación de 9.12 (renderizados separados).
+- **AC3/AC6/AC7 (confirmar categoría) — vía página de revisión:** `CategorizacionPage` (`/categorizacion`,
+  gated contador/admin) lista las tx pendientes (sugeridas/pending) y permite confirmar/corregir la
+  cuenta → `PATCH /api/v1/transactions/{tx_id}/category` (9.7). Subsume el review inline de 5.2 en una
+  página dedicada (Dev Notes lo permitían). RBAC frontend (family no ve chip ni página) + backend (9.7).
+- **AC1/AC2 (thin API):** ya vigente — el frontend consume `/balance-sheets`/`/ledger-entries` con los
+  flags on (Stories 9.2/9.11/9.15); sin cambios estructurales.
+- `services/categorizacion.ts` + ruta + nav. tsc limpio + Sidebar test verde.
+
+**SEAM documentado (no entregado — integración cross-cutting):**
+- **Badge inline `⚠ pendiente revisar` sobre los 4 dashboards Epic 3 (AC3 inline / AC4 / AC5)** +
+  el campo unificado **`pending_review_reason`** ("categorization"|"reconciliation"|"both"|null).
+  Requiere: (a) que `ledger_entries_via_beancount` exponga `category_status`/`match_source` +
+  cruce con `cartola-discrepancies.jsonl` para computar `pending_review_reason` server-side, y
+  (b) tocar las 4 páginas de dashboard + su drill-down. Es una integración mayor y de baja
+  verificabilidad sin browser; se deja como seam. El valor de revisión/confirmación ya está
+  cubierto por la página `/categorizacion` + los chips del header. Los deep-links de reconciliación
+  (badge→`/reconciliation?discrepancy_id=`) ya están soportados por 9.12.
+
+### File List
+
+**Nuevos (frontend):** `services/categorizacion.ts`, `pages/CategorizacionPage.tsx`,
+`components/layout/PendingCategorizationChip.tsx`
+**Modificados (frontend):** `components/layout/Header.tsx` (chip), `App.tsx` (ruta /categorizacion),
+`components/layout/Sidebar.tsx` (nav)
+
+## Change Log
+
+| Fecha | Cambio |
+|---|---|
+| 2026-06-17 | 9.8: chip "Categorías pendientes" (AC10) + página de revisión `/categorizacion` con confirmar categoría (AC3/6/7 vía PATCH 9.7). Badge inline en los 4 dashboards + pending_review_reason = seam documentado. Status → review. |

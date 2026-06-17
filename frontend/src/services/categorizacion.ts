@@ -1,0 +1,34 @@
+import { api } from './api'
+
+export interface PendingTx {
+  tx_id: string
+  bank_account_id: string | null
+  date: string
+  narration: string | null
+  amount: number | null
+  current_category: string | null
+  current_flag: string | null
+  current_match_source: string | null
+  current_category_status: string | null
+}
+
+/** GET /api/v1/categorization/pending — tx con category_status ∈ (suggested, pending) (Story 9.7 AC9). */
+export async function getPendingCategorization(): Promise<PendingTx[]> {
+  const res = await fetch(`${api.baseUrl}/api/v1/categorization/pending`, { credentials: 'include' })
+  if (!res.ok) throw new Error(`Error cargando pendientes (${res.status})`)
+  return res.json()
+}
+
+/** PATCH /api/v1/transactions/{tx_id}/category — corrige/confirma (Story 9.7 AC7). */
+export async function confirmCategory(txId: string, categoryAccount: string): Promise<void> {
+  const res = await fetch(`${api.baseUrl}/api/v1/transactions/${txId}/category`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ category_account: categoryAccount }),
+  })
+  if (!res.ok) {
+    const d = await res.json().catch(() => null)
+    throw new Error(d?.detail ?? `Error confirmando (${res.status})`)
+  }
+}
