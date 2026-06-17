@@ -15,7 +15,7 @@ const contadorNavItems = [
   { label: 'Cargar Cartola', to: '/upload' },
   { label: 'Reporte de Gastos', to: '/reportes' },
   { label: 'Cuentas Pendientes', to: '/cuentas-pendientes' },
-  { label: 'Reconciliación', to: '/reconcile' },
+  { label: 'Reconciliación', to: '/reconciliation' },
 ]
 
 function NavItem({ to, label }: { to: string; label: string }) {

@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { logout } from '@/services/auth'
 import { useSyncStatus } from '@/hooks'
+import { PendingReconciliationBadge } from './PendingReconciliationBadge'
 
 export function Header({ minimal = false }: { minimal?: boolean }) {
   const navigate = useNavigate()
@@ -18,6 +19,7 @@ export function Header({ minimal = false }: { minimal?: boolean }) {
         {minimal ? 'Reporte de Gastos' : 'Dashboard financiero'}
       </div>
       <div className="flex items-center gap-3">
+        <PendingReconciliationBadge />
         {!minimal && (
           <span className="text-sm text-muted-foreground">
             {syncStatus?.job_status === 'running' && (

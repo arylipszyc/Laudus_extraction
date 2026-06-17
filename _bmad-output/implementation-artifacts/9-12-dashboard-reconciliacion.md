@@ -1,7 +1,7 @@
 ---
 story: 9.12
 title: Dashboard de reconciliación cartola ↔ Laudus
-status: ready-for-dev
+status: review
 epic: 9
 depends_on: [9.6b, 9.2]
 blocks: []
@@ -179,6 +179,23 @@ Story nueva derivada del cierre Q4 (2026-05-05, Opción D — FX cartola-derivad
 
 ## Tasks / Subtasks
 
+> **Cierre 2026-06-17 (dev-story):** backend completo + frontend (página + chip). Tasks 1-3,6,8 ✅.
+> **Re-emit por acción (AC3 paso 3 / AC7):** se apoya en `commit_reconciliation` de 9.6b — el
+> resolve registra la resolución (audit trail) y oculta la diferencia; el re-emit del `.beancount`
+> ajustado se activa con el wiring del upload de 9.6b (mismo seam de esa story). Tests E2E frontend
+> (Task 7) cubiertos a nivel backend (10 tests) + tsc; Sally puede tomar pase de UX (Dev Notes).
+
+- [x] Task 1: `GET /discrepancies` — parse JSONL lazy + filtros (state/year_month/bank/id) + summary; oculta resueltas; deep-link por id incluye resueltas
+- [x] Task 2: `GET /history/{id}` — audit trail cronológico
+- [x] Task 3: `POST /discrepancies/{id}/resolve` — valida acción×estado + justificación ≥10 (salvo escalate) + append resolución; re-emit = seam 9.6b
+- [x] Task 4: `ReconciliationPage.tsx` — summary chips filtrables + tabla + deep-link (useSearchParams)
+- [x] Task 5: Drill-down + acciones contextuales + justificación
+- [x] Task 6: chip `PendingReconciliationBadge` (amber/rojo por bloqueante; oculto si 0; RBAC; polling 5min) + endpoint `GET /count {total,blocking}`
+- [x] Task 7: tests — 10 backend (filtros, summary, history, count blocking, resolve, escalate-no-cierra, acción inválida, justificación corta, deep-link, RBAC)
+- [x] Task 8: doc `docs/reconciliation-dashboard.md`
+
+<details><summary>Tasks originales</summary>
+
 - [ ] Task 1: Endpoint backend `GET /discrepancies` (AC1)
   - [ ] Crear `backend/app/api/v1/reconciliation/router.py`
   - [ ] Función que lee `ledger/_meta/cartola-discrepancies.jsonl` line-by-line (usar generator para no cargar todo a memoria si crece mucho)
@@ -245,6 +262,8 @@ Story nueva derivada del cierre Q4 (2026-05-05, Opción D — FX cartola-derivad
 ### Input autoritativo
 
 `q4-fx-decision-2026-05-05.md` — decisión Opción D + tabla estados. `bob-x-moishe-epic9-2026-04-30.md` — ítem #5 + ítem #7 (story 9.12 nueva) + ítem #9 (sin Supabase). `9-6b-...md` — emisor del JSONL que esta story consume.
+
+> **Cierre dev-story 2026-06-17 (Amelia / claude-opus-4-8[1m]):** backend `reconciliation/{service,router,models}.py` (parse JSONL lazy + filtros + summary + history + count + resolve con tabla ACTIONS_BY_STATE + escalate-no-cierra) + frontend `ReconciliationPage.tsx` (summary chips filtrables, tabla, drill-down con acciones contextuales + justificación, deep-link `?discrepancy_id=`) + `PendingReconciliationBadge` en el Header (amber/rojo por bloqueante, RBAC contador/admin, polling 5min) + ruta `/reconciliation` + nav. 10 tests backend + tsc limpio + Sidebar test verde. Suite 606 passed/1 xfailed/1 rojo pre-existente. SEAM: re-emit del `.beancount` por acción = `commit_reconciliation` de 9.6b, se activa con el wiring del upload (mismo seam de 9.6b). Sin Supabase. Files: backend/app/api/v1/reconciliation/*, frontend ReconciliationPage + PendingReconciliationBadge + services/reconciliation.ts, docs/reconciliation-dashboard.md, test_reconciliation.py.
 
 ### Sin SQL — JSONL como source
 

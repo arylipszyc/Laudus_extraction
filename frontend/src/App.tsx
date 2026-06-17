@@ -7,6 +7,7 @@ import { IncomeExpensesPage } from '@/pages/IncomeExpensesPage'
 import { CartolaUploadPage } from '@/pages/CartolaUploadPage'
 import { ReportesPage } from '@/pages/ReportesPage'
 import { CuentasPendientesPage } from '@/pages/CuentasPendientesPage'
+import { ReconciliationPage } from '@/pages/ReconciliationPage'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/hooks/useAuth'
 import { useHasRole } from '@/hooks/useHasRole'
@@ -78,6 +79,18 @@ function App() {
           }
         >
           <Route index element={<CuentasPendientesPage />} />
+        </Route>
+        <Route
+          path="/reconciliation"
+          element={
+            <RequireAuth>
+              <RequireContador>
+                <DashboardLayout />
+              </RequireContador>
+            </RequireAuth>
+          }
+        >
+          <Route index element={<ReconciliationPage />} />
         </Route>
         {/* Catch-all: redirect to login (Story 1.3 wires real auth) */}
         <Route path="*" element={<Navigate to="/login" replace />} />
