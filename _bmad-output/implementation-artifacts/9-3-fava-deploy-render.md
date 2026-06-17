@@ -1,7 +1,7 @@
 ---
 story: 9.3
 title: Fava deploy en Render con basic auth
-status: ready-for-dev
+status: review
 epic: 9
 depends_on: [9.0, 9.1]
 blocks: []
@@ -197,3 +197,39 @@ docs/
 - [Source: bob-x-moishe-epic9-2026-04-30.md — Q2, Q5 cierre + Flag 6 (last4 vive en Sheets, pre-condición en este AC8)]
 - [Source: 9-5-pdf-upload-gemini-json-canonico.md — consume `bank_account_last4` en validación AC1]
 - [External: https://beancount.github.io/fava/ — Fava docs]
+
+## Dev Agent Record
+
+### Agent Model Used
+
+claude-opus-4-8[1m] (Amelia / dev-story)
+
+### Completion Notes List
+
+**Artefactos codeables entregados (review):**
+- `Dockerfile.fava` — python:3.12-slim + nginx + apache2-utils (htpasswd) + git + fava/beancount/watchfiles.
+- `entrypoint-fava.sh` — clone/pull del ledger a `/ledger`, htpasswd desde env (AC2/AC6), loop de
+  `git pull` cada 60s (AC3/AC4), Fava en 127.0.0.1:$FAVA_PORT + nginx en $PORT. `bash -n` OK.
+- `nginx-fava.conf` — basic auth + reverse proxy a Fava + access log a stdout con timestamp ISO 8601
+  + user + method/path/status (AC7). `envsubst` de `$PORT`/`$FAVA_PORT`.
+- **Editor (AC5):** `EDIT_HOOK_ENABLED` (default `true`, 9.0 done) → editor activo; `false` →
+  `fava --read-only`. Flag `--read-only` **verificado** en la versión instalada de Fava.
+- `docs/contador-onboarding-fava.md` (AC8) — walkthrough + workflow "siempre vía UI" + sección
+  pre-condición `bank_account_last4` + smoke + nota de re-habilitar la detección last4 de 9.5h.
+
+**HANDOFF a Ary (no codeable — deploy/operación):**
+- Task 5: crear el web service `laudus-fava` en Render (Docker=`Dockerfile.fava`, persistent disk
+  `/ledger` ≥1GB) + env vars (`BEANCOUNT_REPO_URL`, `BEANCOUNT_DEPLOY_KEY`, `FAVA_BASIC_AUTH_USER/
+  PASSWORD`, `EDIT_HOOK_ENABLED`).
+- Task 7: smoke post-deploy (401 → auth → Trial Balance con datos → BQL > 0 → edit válido/inválido).
+- AC8: operar Fava ≥1 ciclo + poblar `bank_account_last4` en las 47 cuentas (requiere servicio vivo).
+
+### File List
+
+**Nuevos:** `Dockerfile.fava`, `entrypoint-fava.sh`, `nginx-fava.conf`, `docs/contador-onboarding-fava.md`
+
+## Change Log
+
+| Fecha | Cambio |
+|---|---|
+| 2026-06-17 | 9.3: artefactos de deploy de Fava (Dockerfile + entrypoint nginx basic-auth + git-sync + editor gateado por EDIT_HOOK_ENABLED) + onboarding doc. Servicio Render + smoke + poblar last4 = handoff. Status → review. |
