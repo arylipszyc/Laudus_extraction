@@ -14,6 +14,7 @@ const dashboardNavItems = [
 const contadorNavItems = [
   { label: 'Cargar Cartola', to: '/upload' },
   { label: 'Reporte de Gastos', to: '/reportes' },
+  { label: 'Cuentas Pendientes', to: '/cuentas-pendientes' },
   { label: 'Reconciliación', to: '/reconcile' },
 ]
 

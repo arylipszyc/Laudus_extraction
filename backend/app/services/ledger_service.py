@@ -75,6 +75,11 @@ class LedgerService:
             self.load()
 
     @property
+    def main_path(self) -> str:
+        """Ruta a `main.beancount`. Su dir es la raíz del ledger (Story 10.3 escribe ahí)."""
+        return self._main_path
+
+    @property
     def available(self) -> bool:
         """True if the ledger is loaded and has no parse errors."""
         self._ensure_loaded()

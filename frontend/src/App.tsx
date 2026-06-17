@@ -6,6 +6,7 @@ import { BalanceSheetPage } from '@/pages/BalanceSheetPage'
 import { IncomeExpensesPage } from '@/pages/IncomeExpensesPage'
 import { CartolaUploadPage } from '@/pages/CartolaUploadPage'
 import { ReportesPage } from '@/pages/ReportesPage'
+import { CuentasPendientesPage } from '@/pages/CuentasPendientesPage'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/hooks/useAuth'
 import { useHasRole } from '@/hooks/useHasRole'
@@ -65,6 +66,18 @@ function App() {
           }
         >
           <Route index element={<ReportesPage />} />
+        </Route>
+        <Route
+          path="/cuentas-pendientes"
+          element={
+            <RequireAuth>
+              <RequireContador>
+                <DashboardLayout />
+              </RequireContador>
+            </RequireAuth>
+          }
+        >
+          <Route index element={<CuentasPendientesPage />} />
         </Route>
         {/* Catch-all: redirect to login (Story 1.3 wires real auth) */}
         <Route path="*" element={<Navigate to="/login" replace />} />
