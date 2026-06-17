@@ -129,16 +129,18 @@ class CartolaPdfImporter(beangulp.Importer):
 
         entries: list = []
         for tx in model.transactions:
-            category_account, match_source = self.category_predictor.predict(
+            category_account, match_source, flag = self.category_predictor.predict(
                 tx.description, tx.amount, model.source.bank_account_id
             )
-            is_pending = match_source == "pending"
+            # category_status: confirmed solo cuando el motor está confiado (flag "*").
+            category_status = "pending" if match_source == "pending" else (
+                "confirmed" if flag == "*" else "suggested")
             meta = data.new_metadata(filepath, tx.line_no)
             meta.update({
                 "source": "cartola-pdf",
                 "bank_account_id": model.source.bank_account_id,
                 "match_source": match_source,
-                "category_status": "pending" if is_pending else "suggested",
+                "category_status": category_status,
                 "extraction_model": model.extraction.model,
                 "line": str(tx.line_no),
             })
@@ -146,7 +148,7 @@ class CartolaPdfImporter(beangulp.Importer):
             entries.append(data.Transaction(
                 meta=meta,
                 date=tx.date,
-                flag="!" if is_pending else "*",
+                flag=flag,
                 payee=None,
                 narration=tx.description or f"line {tx.line_no}",
                 tags=frozenset(),
