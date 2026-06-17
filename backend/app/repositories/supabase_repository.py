@@ -102,6 +102,10 @@ class SupabaseRepository(DataRepository):
         return query.execute().data or []
 
     # ── Bank accounts helpers ─────────────────────────────────────────────────
+    # DEPRECATED (Story 9.14, 2026-06-17): bank-accounts migró a accounts.beancount
+    # (modelo unificado 9.1). Estos métodos quedan SIN caller en runtime — el endpoint
+    # `/bank-accounts/` ahora lee/escribe Beancount vía LedgerService + beancount_promote.
+    # Se conservan hasta apagar Supabase (handoff Ary, AC5); eliminarlos es limpieza opcional.
 
     def list_bank_accounts(self) -> list[dict]:
         """List all bank accounts with linked account name from plan_de_cuentas."""

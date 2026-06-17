@@ -1,16 +1,17 @@
-"""Helper de escritura reusable — promover una cuenta al plan Beancount (Story 10.3).
+"""Helper de escritura reusable al plan Beancount — Stories 10.3 + 9.14.
 
-Appendea un `open` final + metadata `laudus_categoria1/2/3` a `ledger/accounts.beancount`
-(Camino A, ver D1 en la story), envuelto en el mismo andamiaje que el importer Laudus 9.4:
-`acquire_lock` (mismo lock que el cron) → `bean_check` (NO-NEGOCIABLE; rollback si rojo) →
-`git_commit_push` (degrada con gracia si el push falla).
+Toda escritura a `ledger/accounts.beancount` (Camino A, ver D1 en 10.3) pasa por
+`apply_to_accounts`, que envuelve la mutación en el mismo andamiaje que el importer
+Laudus 9.4: `acquire_lock` (mismo lock que el cron) → mutar el texto → `bean_check`
+(NO-NEGOCIABLE; rollback si rojo) → `git_commit_push` (degrada con gracia si el push
+falla).
 
-**Diseñado como pieza reutilizable** — Story 9.14 (migrar bank-accounts a Beancount) reusa
-`promote_account` para crear/editar cuentas bancarias con el mismo destino y garantías.
-
-Que el code quede en `accounts.beancount` lo hace visible para `load_account_index()` del
-writer, así que la próxima corrida del importer saca la cuenta de cuarentena y postea sus JEs
-a la cuenta real (AC4). El backfill re-resuelve las JEs históricas (AC5).
+Consumidores:
+- **10.3** `promote_account`: appendea un `open` + metadata `laudus_categoria1/2/3`
+  (promoción de cuentas en cuarentena).
+- **9.14** (bank-accounts): agrega metadata bancaria a un `open` existente, escribe
+  `close` para desactivar, edita `bank_name` — usando `apply_to_accounts` + los editores
+  de bloque (`add_meta_to_open`, `set_open_meta`, `append_close`, `remove_close`).
 """
 from __future__ import annotations
 
@@ -37,6 +38,7 @@ _OPEN_DATE = "2020-12-31"
 _ACCOUNT_RE = re.compile(
     r"^(Assets|Liabilities|Equity|Income|Expenses)(:[A-Z0-9][A-Za-z0-9-]*)+$"
 )
+_OPEN_LINE_RE = re.compile(r"^\d{4}-\d\d-\d\d open ")
 
 
 class PromoteError(RuntimeError):
@@ -72,6 +74,14 @@ def _esc(text: str) -> str:
     return str(text).replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ").strip()
 
 
+def format_open(account: str, meta: dict[str, str], date: str = _OPEN_DATE) -> str:
+    """Bloque `open` + metadata (orden de inserción del dict), espejo de accounts.beancount."""
+    lines = [f"\n{date} open {account} CLP"]
+    for key, value in meta.items():
+        lines.append(f'  {key}: "{_esc(value)}"')
+    return "\n".join(lines) + "\n"
+
+
 def build_open_block(
     account: str,
     code: str,
@@ -80,15 +90,138 @@ def build_open_block(
     categoria2: str,
     categoria3: str,
 ) -> str:
-    """Bloque `open` + metadata, espejo del formato de `accounts.beancount`."""
-    return (
-        f"\n{_OPEN_DATE} open {account} CLP\n"
-        f'  code: "{_esc(code)}"\n'
-        f'  laudus_account_name: "{_esc(laudus_account_name)}"\n'
-        f'  laudus_categoria1: "{_esc(categoria1)}"\n'
-        f'  laudus_categoria2: "{_esc(categoria2)}"\n'
-        f'  laudus_categoria3: "{_esc(categoria3)}"\n'
-    )
+    """Bloque `open` de una cuenta promovida (10.3) — espejo del formato de accounts.beancount."""
+    return format_open(account, {
+        "code": code,
+        "laudus_account_name": laudus_account_name,
+        "laudus_categoria1": categoria1,
+        "laudus_categoria2": categoria2,
+        "laudus_categoria3": categoria3,
+    })
+
+
+# ── Editores de bloque `open` (para 9.14) ────────────────────────────────────
+
+
+def _block_span(lines: list[str], predicate: Callable[[list[str]], bool]) -> tuple[int, int] | None:
+    """Rango [start, end) de líneas del bloque `open` donde predicate(block_lines) es True.
+
+    Un bloque va de una línea `open` hasta (sin incluir) la primera línea no indentada.
+    """
+    i, n = 0, len(lines)
+    while i < n:
+        if _OPEN_LINE_RE.match(lines[i]):
+            j = i + 1
+            while j < n and (lines[j].startswith(" ") or lines[j].startswith("\t")):
+                j += 1
+            if predicate(lines[i:j]):
+                return i, j
+            i = j
+        else:
+            i += 1
+    return None
+
+
+def _has_meta(block: list[str], key: str, value: str) -> bool:
+    return any(re.match(rf'^\s*{re.escape(key)}:\s*"{re.escape(value)}"\s*$', ln) for ln in block)
+
+
+def add_meta_to_open(text: str, code: str, meta: dict[str, str]) -> str:
+    """Agrega líneas de metadata al `open` cuyo `code` coincide (sin duplicar claves presentes)."""
+    lines = text.splitlines()
+    span = _block_span(lines, lambda b: _has_meta(b, "code", code))
+    if span is None:
+        raise PromoteError(f"no se encontró un open con code {code!r} en accounts.beancount")
+    start, end = span
+    present = {re.match(r"^\s*([A-Za-z_][\w-]*):", ln).group(1)
+               for ln in lines[start:end] if re.match(r"^\s*([A-Za-z_][\w-]*):", ln)}
+    new_meta = [f'  {k}: "{_esc(v)}"' for k, v in meta.items() if k not in present]
+    lines[end:end] = new_meta
+    return "\n".join(lines) + "\n"
+
+
+def set_open_meta(text: str, *, bank_account_id: str, key: str, value: str) -> str:
+    """Setea (reemplaza o agrega) una metadata en el `open` con ese `bank_account_id`."""
+    lines = text.splitlines()
+    span = _block_span(lines, lambda b: _has_meta(b, "bank_account_id", bank_account_id))
+    if span is None:
+        raise PromoteError(f"no se encontró un open con bank_account_id {bank_account_id!r}")
+    start, end = span
+    new_line = f'  {key}: "{_esc(value)}"'
+    for idx in range(start, end):
+        if re.match(rf"^\s*{re.escape(key)}:", lines[idx]):
+            lines[idx] = new_line
+            break
+    else:
+        lines[end:end] = [new_line]
+    return "\n".join(lines) + "\n"
+
+
+def append_close(text: str, account: str, date: str) -> str:
+    """Appendea una directiva `close` (desactivar una cuenta)."""
+    body = text if text.endswith("\n") or not text else text + "\n"
+    return body + f"\n{date} close {account}\n"
+
+
+def remove_close(text: str, account: str) -> str:
+    """Quita cualquier directiva `close` para esa cuenta (reactivar)."""
+    pattern = re.compile(rf"^\d{{4}}-\d\d-\d\d close {re.escape(account)}\s*$")
+    kept = [ln for ln in text.splitlines() if not pattern.match(ln)]
+    return "\n".join(kept) + "\n"
+
+
+# ── Core: lock → mutar → bean-check → rollback/commit+push ────────────────────
+
+
+def apply_to_accounts(
+    mutate: Callable[[str], str],
+    commit_msg: str,
+    *,
+    ledger_root: Path | None = None,
+    refresh_clone: Callable[[], None] | None = None,
+) -> str | None:
+    """Aplica `mutate` al texto de `accounts.beancount` con lock + bean-check + git.
+
+    Args:
+        mutate: `str -> str`, transforma el contenido actual del archivo.
+        commit_msg: mensaje del commit de git.
+        ledger_root: raíz del ledger (dir con `main.beancount`/`accounts.beancount`).
+            Default `_ledger_root()` (LEDGER_DIR o `<repo>/ledger`).
+        refresh_clone: callable opcional que trae el clon a origin/main ANTES de escribir
+            (dentro del lock). No-op en tests/local.
+
+    Returns: SHA del commit, o None si git está deshabilitado / nada que commitear.
+    Raises: PromoteError (bean-check rojo → rollback), LockTimeout.
+    """
+    root = Path(ledger_root) if ledger_root else _ledger_root()
+    accounts_path = root / "accounts.beancount"
+    main_path = root / "main.beancount"
+    lock_path = root / ".import.lock"
+
+    with acquire_lock(lock_path):
+        if refresh_clone is not None:
+            refresh_clone()  # dentro del lock → el cron no puede pushear entre refresh y push
+
+        original = accounts_path.read_text(encoding="utf-8") if accounts_path.exists() else ""
+        accounts_path.write_text(mutate(original), encoding="utf-8")
+
+        ok, detail = bean_check(main_path)
+        if not ok:
+            accounts_path.write_text(original, encoding="utf-8")  # rollback — no commit
+            logger.error("apply_to_accounts: bean-check rojo → rollback: %s", detail)
+            raise PromoteError(detail)
+
+        sha = git_commit_push(root, ["ledger/accounts.beancount"], commit_msg)
+        logger.info("apply_to_accounts: %s commit=%s", commit_msg, sha)
+        return sha
+
+
+def _append(block: str) -> Callable[[str], str]:
+    """mutate que appendea `block` al final del texto (separando con newline)."""
+    def _mutate(original: str) -> str:
+        sep = "" if (not original or original.endswith("\n")) else "\n"
+        return original + sep + block
+    return _mutate
 
 
 def promote_account(
@@ -102,53 +235,14 @@ def promote_account(
     ledger_root: Path | None = None,
     refresh_clone: Callable[[], None] | None = None,
 ) -> str | None:
-    """Appendea el `open` final a `accounts.beancount` con lock + bean-check + git.
+    """Appendea el `open` final de una cuenta promovida (10.3) — lock + bean-check + git.
 
-    Args:
-        code: número de cuenta Laudus a promover.
-        account: cuenta Beancount destino (ej. `Expenses:EAG:GastoNuevo-413077`).
-        laudus_account_name / categoria1..3: metadata a escribir.
-        ledger_root: raíz del ledger (dir que contiene `main.beancount` + `accounts.beancount`).
-            Default: `_ledger_root()` (LEDGER_DIR o `<repo>/ledger`).
-        refresh_clone: callable opcional que trae el clon a origin/main ANTES de escribir
-            (dentro del lock, para no chocar con el push del cron). No-op en tests/local.
-
-    Returns:
-        El SHA del commit, o None si git está deshabilitado / nada que commitear.
-
-    Raises:
-        PromoteError: `bean-check` falló tras escribir → se revirtió la escritura.
-        LockTimeout: no se pudo tomar el lock.
+    Raises: PromoteError (bean-check rojo → rollback), LockTimeout.
     """
-    root = Path(ledger_root) if ledger_root else _ledger_root()
-    accounts_path = root / "accounts.beancount"
-    main_path = root / "main.beancount"
-    lock_path = root / ".import.lock"
-
     block = build_open_block(account, code, laudus_account_name, categoria1, categoria2, categoria3)
-
-    with acquire_lock(lock_path):
-        if refresh_clone is not None:
-            # Trae el clon a origin/main antes de escribir. OJO: el lock NO serializa contra el
-            # cron (corre en otro proceso/disco con su propio .import.lock); si el cron pushea
-            # entre este refresh y el push de abajo, el push falla non-fast-forward y se degrada
-            # con gracia (CalledProcessError → el caller persiste local y avisa).
-            refresh_clone()
-
-        original = accounts_path.read_text(encoding="utf-8") if accounts_path.exists() else ""
-        sep = "" if (not original or original.endswith("\n")) else "\n"
-        accounts_path.write_text(original + sep + block, encoding="utf-8")
-
-        ok, detail = bean_check(main_path)
-        if not ok:
-            accounts_path.write_text(original, encoding="utf-8")  # rollback — no commit
-            logger.error("promote: bean-check rojo para %s → rollback: %s", code, detail)
-            raise PromoteError(detail)
-
-        sha = git_commit_push(
-            root,
-            ["ledger/accounts.beancount"],
-            f"[promote] cuenta {code} → {categoria1}/{categoria2}/{categoria3}",
-        )
-        logger.info("promote: cuenta %s promovida (%s) commit=%s", code, account, sha)
-        return sha
+    return apply_to_accounts(
+        _append(block),
+        f"[promote] cuenta {code} → {categoria1}/{categoria2}/{categoria3}",
+        ledger_root=ledger_root,
+        refresh_clone=refresh_clone,
+    )

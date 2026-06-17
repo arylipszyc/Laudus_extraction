@@ -1,7 +1,7 @@
 ---
 story: 9.15
 title: Flip del balance-sheet a Beancount (dashboards Activos/Pasivos)
-status: ready-for-dev
+status: review
 epic: 9
 depends_on: [9.1, 9.2, 9.11]
 gate_condition: paridad-balance-por-entity-mes-confirmada
@@ -80,25 +80,23 @@ Origen del diseño + estado verificado del path: `design-note-balance-sheet-flip
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Script de parity del balance (AC1)**
-  - [ ] Crear `scripts/parity_check_balance_sheet.py` (espejo de `parity_check_sheets_vs_beancount.py`): por (entity, cuenta) compara `balance_sheet_via_beancount(AT fin-de-mes)` vs la hoja `balance_sheet_{entity}` vigente
-  - [ ] Pinear `date_to` a cierres de mes (no rangos multi-snapshot)
-  - [ ] Clasificar diffs: TC→Liabilities (esperado), fantasmas Sheets conocidos (esperado), resto (investigar)
-  - [ ] Documentar uso en `scripts/README.md`
+- [x] **Task 1: Script de parity del balance (AC1)**
+  - [x] `scripts/parity_check_balance_sheet.py` (espejo de `parity_check_sheets_vs_beancount.py`): por (entity, cuenta) compara `balance_sheet_via_beancount(AT fin-de-mes)` vs la hoja `balance_sheet_{entity}` vigente; net = `debit_balance - credit_balance` (= frontend)
+  - [x] `--as-of` a cierre de mes (default = `query_date` más reciente de la hoja = snapshot vigente); point-in-time, NO rango multi-snapshot
+  - [x] Clasifica diffs: cuenta `Liabilities` en Beancount → TC/pasivo reclasificado (esperado); resto → inesperado (investigar). Exit 0 sólo si no hay inesperados
+  - [x] Documentado en `scripts/README.md`; núcleo puro cubierto por `test_parity_check_balance_sheet.py` (5 tests verde)
 
-- [ ] **Task 2: Correr el parity y clasificar (AC1)**
-  - [ ] Correr por las 5 entidades × cierres de mes del último año (`PYTHONUTF8=1` + creds Sheets + `LEDGER_PATH`)
-  - [ ] Confirmar que todo diff cae en las categorías esperadas; si no → STOP, investigar
-  - [ ] Pegar el resumen en Completion Notes
+- [~] **Task 2: Correr el parity y clasificar (AC1)** *(HANDOFF a Ary — necesita creds Sheets + LEDGER_PATH prod)*
+  - [ ] Correr por las 5 entidades × cierres de mes (`PYTHONUTF8=1` + creds Sheets + `LEDGER_PATH`)
+  - [ ] Confirmar que todo diff inesperado = 0 (los esperados son TC→Liabilities); si no → STOP, investigar
 
-- [ ] **Task 3: Flip del flag (AC2, AC3)** *(HANDOFF a Ary — deploy, no codeable)*
-  - [ ] Render: `USE_BEANCOUNT_ENGINE_BALANCE_SHEET=true` + `POST /deploys`
+- [~] **Task 3: Flip del flag (AC2, AC3)** *(HANDOFF a Ary — deploy, no codeable)*
+  - [ ] Render: `USE_BEANCOUNT_ENGINE_BALANCE_SHEET=true` + `POST /deploys` (redeploy explícito)
   - [ ] Smoke de `BalanceSheetPage` por 5 entidades + períodos; verificar TC como Liabilities
 
-- [ ] **Task 4: Aviso + docs (AC4, AC5)**
-  - [ ] Ary avisa a la family del cambio de TC
-  - [ ] Documentar en MEMORY (reference)
-  - [ ] Runbook de rollback (sumar a `docs/rollback-deprecation-sheets.md` o uno propio)
+- [~] **Task 4: Aviso + docs (AC4, AC5)**
+  - [x] Runbook de rollback: sección "Rollback del flip de balance-sheet" en `docs/rollback-deprecation-sheets.md` (< 30 min)
+  - [ ] **Handoff a Ary:** avisar a la family del cambio de TC + documentar en MEMORY (reference) la decisión de prender sin gate de contadora
 
 ---
 
@@ -163,8 +161,49 @@ backend/app/services/bql_queries.py       # READ (balance_sheet_via_beancount ya
 
 ### Agent Model Used
 
+claude-opus-4-8[1m] (Amelia / dev-story)
+
 ### Debug Log References
+
+- `test_parity_check_balance_sheet.py`: **5 passed** (núcleo puro: aggregate/compare/classify).
+- Suite backend completa: **533 passed / 1 xfailed / 1 failed**. El rojo es el pre-existente
+  date-dependiente `test_sync.py::test_run_backfill_calls_upsert_for_both_sheets` (sin relación).
+- Cero cambios de app code (el branch del flag + `balance_sheet_via_beancount` ya existían) → cero
+  riesgo de regresión; los deltas son un script en `scripts/` (no importado por la app) + tests.
 
 ### Completion Notes List
 
+- **Naturaleza de la story:** el flip NO requiere código nuevo de backend/frontend — la rama del
+  flag (`dashboard/service.py`) y `balance_sheet_via_beancount` ya existían (9.2). El entregable
+  codeable es el **tooling de parity** que da el go/no-go; el flip en sí es deploy (handoff a Ary).
+- **`scripts/parity_check_balance_sheet.py`:** compara net por (entity, cuenta) AT un cierre de mes,
+  Sheets `balance_sheet_{entity}` vs `balance_sheet_via_beancount`. Decisión de semántica
+  (siguiendo Dev Notes): se compara **AT fin-de-mes** (point-in-time, una fila por cuenta), default
+  = el `query_date` más reciente de la hoja (snapshot vigente), nunca un rango multi-snapshot.
+- **Clasificación de diffs:** el script carga la raíz Beancount de cada `code` desde los `open` y
+  marca los diffs de cuentas `Liabilities` como **esperados (TC reclasificada)**; cualquier otro
+  diff es **inesperado** y bloquea el flip (exit 1). Esto operacionaliza el criterio de AC1 sin
+  pedirle al humano clasificar a mano.
+- **HANDOFF a Ary (no codeable):**
+  - AC1/Task 2: correr el parity con creds Sheets + `LEDGER_PATH` prod por las 5 entidades; exit 0
+    (sólo diffs esperados) = go.
+  - AC2/Task 3: `USE_BEANCOUNT_ENGINE_BALANCE_SHEET=true` en Render + `POST /deploys` (redeploy
+    explícito — el PUT de env-vars no redeploya solo) + smoke `BalanceSheetPage`.
+  - AC4: avisar a la family que las TC ahora se ven como pasivo (corrección contable) + MEMORY.
+  - AC5: rollback documentado en `docs/rollback-deprecation-sheets.md`.
+
 ### File List
+
+**Nuevos:**
+- `scripts/parity_check_balance_sheet.py` — parity del balance-sheet por entity × cierre-de-mes (AC1)
+- `scripts/README.md` — instrucciones de ambos parity scripts
+- `backend/tests/test_parity_check_balance_sheet.py` — 5 tests del núcleo puro
+
+**Modificados:**
+- `docs/rollback-deprecation-sheets.md` — sección "Rollback del flip de balance-sheet" (AC5)
+
+## Change Log
+
+| Fecha | Cambio |
+|---|---|
+| 2026-06-17 | 9.15: tooling de parity del balance-sheet (script + clasificación TC→Liabilities + tests + README) + runbook de rollback. El flip del flag y su QA = handoff a Ary. Status → review. |

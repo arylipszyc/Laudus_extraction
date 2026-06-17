@@ -1,7 +1,7 @@
 ---
 story: 9.14
 title: Migrar bank-accounts a Beancount + apagar Supabase
-status: ready-for-dev
+status: review
 epic: 9
 depends_on: [9.1, 10.3]
 gate_condition: cartola-upload-funciona-sin-supabase
@@ -118,29 +118,27 @@ Falta sólo el **wiring del endpoint** a esa fuente. El importer de cartolas (9.
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Lectura desde Beancount (AC1, AC2)**
-  - [ ] Reescribir `list_bank_accounts()` ([bank_accounts/service.py:12](../../backend/app/api/v1/bank_accounts/service.py#L12)) para leer del `LedgerService` en vez de `SupabaseRepository`
-  - [ ] Helper que extraiga, de los `open` con metadata `bank_account_id`, los campos del schema `BankAccount`; derivar `active` de open/close
-  - [ ] Mantener orden por `account_number` (= `code`)
-  - [ ] Test de regresión: shape de `GET /bank-accounts/` contra ledger fixture; smoke de `CartolaUploadPage` (dropdown carga igual)
+- [x] **Task 1: Lectura desde Beancount (AC1, AC2)**
+  - [x] Reescribir `list_bank_accounts()` para leer del `LedgerService` en vez de `SupabaseRepository`
+  - [x] `BankAccount.from_ledger_open()` extrae los campos de los `open` con `bank_account_id`; `active` se deriva de open/close
+  - [x] Orden por `account_number` (= `code`)
+  - [x] Test de regresión: shape de `GET /bank-accounts/` contra ledger fixture (el shape JSON no cambió → `CartolaUploadPage` no se toca)
 
-- [ ] **Task 2: Escritura reusando 10.3 (AC3)** *(bloqueada hasta 10.3 done)*
-  - [ ] `create_bank_account` → escribe `open`+metadata a `manual/` vía el helper de promoción de 10.3 (lock + bean-check + git)
-  - [ ] `update_bank_account`: `active=false` → `close`; `bank_name` → editar metadata del `open`
-  - [ ] Validación "account_number en el plan" → contra `accounts.beancount` (reemplaza `plan_de_cuentas_exists`)
-  - [ ] RBAC sin cambios (contador/admin escriben)
-  - [ ] Tests de create/update contra ledger fixture (bean-check verde, idempotencia)
+- [x] **Task 2: Escritura reusando 10.3 (AC3)**
+  - [x] `create_bank_account` → **agrega metadata al `open` existente** (modelo unificado: la cuenta ya está en el plan; appendear un open nuevo duplicaría → bean-check rojo) vía `apply_to_accounts` (lock + bean-check + git). Destino = `accounts.beancount` (Camino A de 10.3, NO `manual/` — alineado a D1)
+  - [x] `update_bank_account`: `active=false` → `close`; `active=true` → quita el `close`; `bank_name` → edita metadata del `open`
+  - [x] Validación "account_number en el plan" → contra `accounts.beancount` (reemplaza `plan_de_cuentas_exists`); 409 si ya está registrada
+  - [x] RBAC sin cambios (contador/admin escriben; family lee)
+  - [x] Tests de create/update/close/reopen/bank_name contra ledger fixture (bean-check verde, sin duplicar el open)
 
-- [ ] **Task 3: Auditar y deprecar consumidores Supabase (AC4)**
-  - [ ] Grep de callers en runtime de `SupabaseRepository.{list_bank_accounts,get_bank_account_by_id,create_bank_account,update_bank_account,plan_de_cuentas_exists,list_plan_de_cuentas}`
-  - [ ] Confirmar que el importer de cartolas (9.6a `BankAccountResolver`) ya no usa Supabase
-  - [ ] Marcar deprecados los métodos sin caller (eliminación = limpieza opcional)
+- [x] **Task 3: Auditar y deprecar consumidores Supabase (AC4)**
+  - [x] Grep de callers en runtime: el ÚNICO consumidor vivo (bank-accounts) migró. `plan_de_cuentas/service.py` aún referencia Supabase pero son endpoints legacy sin vista activa (deprecados en 9.11)
+  - [x] Confirmado: `BankAccountResolver` (9.6a) ya lee `accounts.beancount`, no Supabase
+  - [x] Métodos de bank-accounts de `SupabaseRepository` marcados deprecados (sin borrar)
 
-- [ ] **Task 4: Apagar Supabase + docs (AC5, AC6)**
-  - [ ] Smoke completo sin Supabase (dashboards + reporte + carga de cartolas + bank-accounts)
-  - [ ] **Handoff a Ary (manual):** apagar proyecto Supabase standby; remover env vars de Render (documentar)
-  - [ ] Documentar apagado en MEMORY + cerrar Story 4.0 sunk-cost
-  - [ ] Runbook de rollback
+- [~] **Task 4: Apagar Supabase + docs (AC5, AC6)**
+  - [x] Runbook de rollback: `docs/rollback-bank-accounts-beancount.md` (< 30 min)
+  - [ ] **Handoff a Ary (manual, AC5):** smoke prod sin Supabase + apagar proyecto standby + remover env vars `SUPABASE_URL`/`SUPABASE_KEY` de Render + desinstalar `supabase==2.5.0` + documentar en MEMORY + cerrar Story 4.0 sunk-cost. **No codeable — fuera del alcance del dev-story.**
 
 ---
 
@@ -216,8 +214,62 @@ docs/
 
 ### Agent Model Used
 
+claude-opus-4-8[1m] (Amelia / dev-story)
+
 ### Debug Log References
+
+- `test_bank_accounts.py` reescrito (mocks Supabase → ledger fixture): **13 passed**.
+- Suite backend completa: **528 passed / 1 xfailed / 1 failed**. El rojo es el pre-existente
+  date-dependiente `test_sync.py::test_run_backfill_calls_upsert_for_both_sheets` (sin relación).
+  El delta de conteo vs corridas previas (531→528) es por el rewrite del test file (menos casos,
+  más enfocados), no por regresiones.
+- 10.3 (`test_cuentas_pendientes.py`) sigue **14 passed** tras refactorizar el helper compartido.
 
 ### Completion Notes List
 
+- **Decisión técnica clave (mía):** en el modelo unificado 9.1 las bank-accounts YA tienen su
+  `open` en `accounts.beancount`. Por eso **crear = agregar metadata al open existente**
+  (`add_meta_to_open`), no appendear un open nuevo (duplicaría → bean-check rojo). La story AC3
+  asumía "escribe un open a `manual/`"; lo alineé a **Camino A** (escribir a `accounts.beancount`),
+  consistente con la resolución D1 de 10.3.
+- **Helper compartido generalizado:** extraje de `promote_account` (10.3) el core
+  `apply_to_accounts(mutate, msg, ...)` (lock + bean-check + rollback + git) y agregué editores de
+  bloque `open` (`add_meta_to_open`, `set_open_meta`, `append_close`, `remove_close`,
+  `format_open`). 10.3 quedó intacto en comportamiento (14/14 verde). 9.14 reusa todo eso — la
+  "máquina de escritura" se construyó una sola vez (objetivo de la dependencia 10.3→9.14).
+- **AC1 lectura:** `GET /bank-accounts/` arma `BankAccount` desde los `open` con `bank_account_id`
+  (subset bancario del plan), `active` derivado de open/close, orden por `code`. Shape JSON
+  idéntico → `CartolaUploadPage` no se toca (AC2).
+- **AC3 escritura:** `POST` agrega metadata (400 si el code no está en el plan, 409 si ya es
+  bank-account, UUID nuevo generado); `PATCH active=false` → `close`, `active=true` → quita el
+  close, `bank_name` → edita metadata. bean-check NO-NEGOCIABLE con rollback (422). RBAC sin cambios.
+- **AC4:** único consumidor vivo de Supabase (bank-accounts) migrado; `BankAccountResolver` (9.6a)
+  ya estaba en Beancount; métodos de bank-accounts de `SupabaseRepository` marcados deprecados (sin
+  borrar). Los endpoints `plan-de-cuentas` siguen referenciando Supabase pero son legacy sin vista
+  activa (deprecados en 9.11).
+- **`active` (riesgo verificado):** hoy hay CERO `close` en el ledger → toda cuenta migrada arranca
+  `active=true`. El runbook documenta la captura one-time de las inactivas (vía PATCH active=false)
+  antes de apagar Supabase.
+- **HANDOFF a Ary (AC5, no codeable):** smoke prod sin Supabase → apagar proyecto standby → remover
+  env vars `SUPABASE_URL`/`SUPABASE_KEY` de Render (no están en `render.yaml`) → desinstalar
+  `supabase==2.5.0` → documentar en MEMORY → cerrar Story 4.0 sunk-cost. Rollback en
+  `docs/rollback-bank-accounts-beancount.md` (< 30 min).
+
 ### File List
+
+**Modificados (backend):**
+- `backend/app/api/v1/bank_accounts/service.py` — lee/escribe Beancount (antes Supabase)
+- `backend/app/api/v1/bank_accounts/router.py` — inyecta `LedgerService` (RBAC sin cambios)
+- `backend/app/api/v1/bank_accounts/schemas.py` — `from_ledger_open()` (+ `from_supabase` deprecado)
+- `backend/app/services/beancount_promote.py` — generalizado: `apply_to_accounts` + editores de bloque `open`
+- `backend/app/repositories/supabase_repository.py` — métodos de bank-accounts marcados deprecados
+- `backend/tests/test_bank_accounts.py` — reescrito sobre ledger fixture (13 tests)
+
+**Nuevos (docs):**
+- `docs/rollback-bank-accounts-beancount.md` — runbook de rollback (AC6)
+
+## Change Log
+
+| Fecha | Cambio |
+|---|---|
+| 2026-06-17 | 9.14: bank-accounts lee/escribe Beancount (no Supabase). Helper 10.3 generalizado y reusado. 13 tests. AC5 (apagar Supabase) = handoff a Ary. Status → review. |

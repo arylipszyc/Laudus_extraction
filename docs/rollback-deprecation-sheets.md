@@ -37,3 +37,16 @@
 
 - Investigar la causa raíz que motivó el rollback en el path Beancount (ledger, importer Laudus, o el reporte) antes de re-intentar la deprecación.
 - El git history del ledger Beancount sigue siendo el backup autoritativo (NFR14), independiente de Sheets.
+
+---
+
+## Rollback del flip de balance-sheet (Story 9.15)
+
+**Objetivo:** revertir los dashboards Activos/Pasivos (`BalanceSheetPage`) de Beancount a Sheets si el flip rompe o muestra números incoherentes. **< 30 min.**
+
+| # | Paso | Acción | Tiempo |
+|---|---|---|---|
+| 1 | **Balance-sheet vuelve a Sheets** | En Render (backend `srv-d7dk4hv41pts73a35aqg`), setear `USE_BEANCOUNT_ENGINE_BALANCE_SHEET=false` + `POST /deploys` (redeploy explícito — el PUT de env-vars NO redeploya solo). `GET /api/v1/balance-sheets` vuelve a leer la hoja `balance_sheet_{entity}`. | ~5 min |
+| 2 | **Smoke** | `BalanceSheetPage` por las 5 entidades carga con los números viejos (TC vuelven a verse como antes). | ~3 min |
+
+**Nota:** el flip de balance-sheet es independiente del reporte/ledger (flags separados). Bajar `USE_BEANCOUNT_ENGINE_BALANCE_SHEET` NO afecta al reporte (que sigue en `USE_BEANCOUNT_ENGINE_LEDGER`). El cambio visible esperado del flip es que las **TC pasan a Liabilities** (modelado contable correcto, architecture-c4 §2.5) — eso NO es motivo de rollback; sólo revertir ante un error real (charts rotos, balance que no cuadra fuera de la reclasificación de TC).
