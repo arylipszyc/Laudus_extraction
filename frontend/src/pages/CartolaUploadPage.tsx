@@ -8,7 +8,8 @@ import {
   useCartolaUploadMutation,
   useCartolaStatus,
 } from '@/hooks/useCartolaUpload'
-import type { CartolaError } from '@/services/cartolas'
+import type { CartolaError, CartolaCanonical, ValidateBalanceResult } from '@/services/cartolas'
+import { BalanceValidationPanel } from '@/components/BalanceValidationPanel'
 
 const MAX_PDF_BYTES = 20 * 1024 * 1024
 
@@ -202,6 +203,37 @@ function CartolaResult({
 
   // status === 'ready'
   const c = data.canonical!
+  return <CartolaReady c={c} batchId={batchId} onReset={onReset} />
+}
+
+function CartolaReady({
+  c,
+  batchId,
+  onReset,
+}: {
+  c: CartolaCanonical | null
+  batchId: string
+  onReset: () => void
+}) {
+  const [validated, setValidated] = useState<ValidateBalanceResult | null>(null)
+  if (!c) return null
+
+  if (validated) {
+    const pending = c.transactions.length  // todas pendientes de categorizar en v1 (Noop predictor)
+    return (
+      <Card className="p-6 space-y-3">
+        <p className="text-sm text-green-600">
+          ✅ Cartola importada — {c.transactions.length} transacciones, {pending} pendientes de categorizar
+          {validated.override && ' · (override con justificación registrado en git)'}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Archivo: <code className="font-mono">{validated.file}</code>
+        </p>
+        <Button variant="outline" onClick={onReset}>Subir otra</Button>
+      </Card>
+    )
+  }
+
   return (
     <Card className="p-6 space-y-4">
       <div className="flex items-baseline justify-between">
@@ -275,6 +307,8 @@ function CartolaResult({
           </tbody>
         </table>
       </details>
+
+      <BalanceValidationPanel canonical={c} batchId={batchId} onValidated={setValidated} />
 
       <p className="text-xs text-muted-foreground">
         batch_id: <code className="font-mono">{batchId}</code> · staging:{' '}

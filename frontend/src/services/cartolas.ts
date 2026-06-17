@@ -71,6 +71,38 @@ export async function uploadCartola(
   return res.json()
 }
 
+export interface ValidateBalanceResult {
+  status: 'validated'
+  file: string
+  git_sha: string | null
+  override: boolean
+}
+
+export interface BalanceDiscrepancyError extends CartolaError {
+  diff?: number
+  calculated?: number
+  stated?: number
+}
+
+/** PATCH /api/v1/cartolas/{batch_id}/validate-balance — Story 9.9. */
+export async function validateBalance(
+  batchId: string,
+  body: { opening: string; closing: string; override_justification: string | null },
+): Promise<ValidateBalanceResult> {
+  const res = await fetch(`${api.baseUrl}/api/v1/cartolas/${batchId}/validate-balance`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    const data = await res.json().catch(() => null)
+    const err = (data?.error ?? { code: 'UNKNOWN', message: `HTTP ${res.status}` }) as BalanceDiscrepancyError
+    throw err
+  }
+  return res.json()
+}
+
 /** GET /api/v1/cartolas/{batch_id} — polled by useCartolaUpload. */
 export async function getCartolaStatus(batchId: string): Promise<CartolaStatus> {
   const res = await fetch(`${api.baseUrl}/api/v1/cartolas/${batchId}`, {

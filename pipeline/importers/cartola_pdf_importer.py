@@ -188,7 +188,10 @@ def convert_balance_to_pad(
                 "override_user": override_user,
                 "override_at": override_at,
             })
-            out.append(data.Pad(pad_meta, entry.date, entry.account, discrepancias_account))
+            # El pad debe datear ANTES del Balance: los balance checks de beancount son
+            # start-of-day, así que un pad con la misma fecha no alcanza a aplicarse
+            # ("Unused Pad entry"). Un día antes garantiza que el padding entre antes del check.
+            out.append(data.Pad(pad_meta, entry.date - timedelta(days=1), entry.account, discrepancias_account))
         out.append(entry)
     return out
 
@@ -211,11 +214,16 @@ def promote(
     batch_id: str,
     importer: CartolaPdfImporter,
     ledger_root,
+    override: dict | None = None,
 ) -> dict:
     """Staging JSON → final `imports/cartolas/{slug}.beancount` + bean-check + git.
 
     git push is guarded by `IMPORTER_GIT_ENABLED` (same as Story 9.4). On bean-check
     failure, the output file is removed and the staging file is left intact.
+
+    `override` (Story 9.9 AC4): `{justification, user, at}` → la `Balance` de cierre se
+    convierte en `pad`+`balance` (la pad absorbe la discrepancia → bean-check pasa) y el
+    commit message marca `OVERRIDE pad+balance`. La metadata del override queda en la directiva.
     """
     from pipeline.importers.laudus_run import acquire_lock, bean_check, git_commit_push
 
@@ -230,10 +238,13 @@ def promote(
     out_file = out_dir / f"{_slug(model, resolved.last4)}.beancount"
 
     result = {"batch_id": batch_id, "file": str(out_file), "tx": len(model.transactions),
-              "success": False, "error_msg": None, "git_commit_sha": None}
+              "success": False, "error_msg": None, "git_commit_sha": None, "override": bool(override)}
 
     with acquire_lock(lock_path):
         entries = importer.extract(str(staging))
+        if override:
+            entries = convert_balance_to_pad(
+                entries, override["justification"], override["user"], override["at"])
         out_file.write_text(render_entries(entries), encoding="utf-8")
 
         ok, detail = bean_check(main_path)
@@ -244,7 +255,9 @@ def promote(
             return result
 
         staging.unlink(missing_ok=True)
-        message = f"[importer-cartola] {slugify(model.source.bank_name)} {model.period.end.strftime('%Y-%m')}: +{len(model.transactions)} tx"
+        suffix = ", OVERRIDE pad+balance" if override else ""
+        message = (f"[importer-cartola] {slugify(model.source.bank_name)} "
+                   f"{model.period.end.strftime('%Y-%m')}: +{len(model.transactions)} tx{suffix}")
         result["git_commit_sha"] = git_commit_push(
             root, [f"ledger/imports/cartolas/{out_file.name}"], message,
         )

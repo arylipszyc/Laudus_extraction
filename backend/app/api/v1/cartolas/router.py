@@ -22,13 +22,18 @@ from fastapi.responses import JSONResponse
 from backend.app.api.v1.cartolas.schemas import (
     StatusResponse,
     UploadAcceptedResponse,
+    ValidateBalanceRequest,
+    ValidateBalanceResponse,
 )
 from backend.app.api.v1.cartolas.service import (
+    BalanceDiscrepancy,
     CartolaValidationError,
     MAX_PDF_SIZE_BYTES,
+    StagingNotFound,
     get_job_store,
     new_batch_id,
     run_job,
+    validate_balance,
     validate_upload_inputs,
 )
 from backend.app.auth.schemas import UserSession
@@ -136,6 +141,34 @@ def get_cartola_status(
         canonical=job["canonical"],
         error=job["error"],
     )
+
+
+@router.patch("/{batch_id}/validate-balance", response_model=ValidateBalanceResponse)
+def validate_balance_endpoint(
+    batch_id: str,
+    request: ValidateBalanceRequest,
+    user: UserSession = Depends(require_role(["contador", "admin"])),
+):
+    """Promueve el staging a archivo final con validación de balance (Story 9.9).
+
+    OK → 200 validated. Discrepancia sin override → 400 VALIDATION_FAILED con el diff.
+    Con `override_justification` → re-promote con pad+balance (la pad absorbe).
+    """
+    try:
+        result = validate_balance(
+            batch_id, request.opening, request.closing, request.override_justification,
+            user_email=user.email,
+        )
+    except StagingNotFound:
+        raise HTTPException(status_code=404, detail={
+            "code": "NOT_FOUND", "message": f"staging {batch_id} no existe o expiró"})
+    except BalanceDiscrepancy as exc:
+        return JSONResponse(status_code=400, content={"error": {
+            "code": "VALIDATION_FAILED",
+            "message": "Discrepancia detectada — provea override_justification para confirmar",
+            "diff": exc.diff, "calculated": exc.calculated, "stated": exc.stated,
+        }})
+    return ValidateBalanceResponse(**result).model_dump()
 
 
 # Re-export for tests/runtime introspection.
