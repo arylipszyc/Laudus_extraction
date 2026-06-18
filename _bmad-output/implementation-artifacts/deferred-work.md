@@ -1,5 +1,14 @@
 # Deferred Work
 
+## Deferred from: code review of 9-8-frontend-thin-api-badge-pendiente (2026-06-17)
+
+Nota: 9.8 es frontend parcial-por-diseño; el scope entregado (chip + página /categorizacion) está limpio y RBAC correcto. Defers de UX (pase a Sally) + el seam grande.
+
+- AC6: la página /categorizacion usa input free-text para la cuenta de categoría en vez de un dropdown filtrado de Expenses ([frontend/src/pages/CategorizacionPage.tsx:58-67]) — AC6 pide "dropdown filtrado por root Expenses"; el texto libre es propenso a typos → bean-check 422. Cargar las cuentas Expenses (de accounts.beancount / plan-de-cuentas) y ofrecerlas como dropdown/autocomplete.
+- El chip PendingCategorizationChip desaparece en error de fetch ([frontend/src/components/layout/PendingCategorizationChip.tsx:21-22]) — `data` undefined → count 0 → `return null`, indistinguible de "0 pendientes". Mismo patrón que el badge de 9.12. Bajo impacto (amber=no bloqueante) pero conviene surfacing de error/stale.
+- No se muestra `confidence` ni tooltip diferenciado por `pending_review_reason` ([frontend/src/pages/CategorizacionPage.tsx:55]) — upstream: 9.7 `list_pending` no expone confidence (defer de 9.7); se muestra `current_match_source` como proxy. Ligado al defer de 9.7 (persistir el score en la meta del importer).
+- SEAM grande (acknowledged, partial-by-design): badge inline ⚠ sobre los 4 dashboards Epic 3 (AC3-inline/AC4/AC5) + campo unificado `pending_review_reason` ("categorization"|"reconciliation"|"both"|null) — requiere exponer `category_status`/`match_source` en `ledger_entries_via_beancount` + cruzar con `cartola-discrepancies.jsonl` server-side + tocar las 4 páginas de dashboard + su drill-down. Integración cross-cutting de baja verificabilidad sin browser; el valor de revisión/confirmación ya está cubierto por /categorizacion + los chips del header. Si Ary lo pide, abrir story aparte.
+
 ## Deferred from: code review of 9-15-flip-balance-sheet-beancount (2026-06-17)
 
 - colisión/ausencia de `code` en el parity ([scripts/parity_check_balance_sheet.py:48,82-84]) — opens sin meta `code` caen al bucket "" en `aggregate_balance` (conflando cuentas distintas) y `_account_roots` los saltea; dos opens con el mismo `code` → last-write-wins en la raíz. Dirección segura (tiende a clasificar como inesperado → bloquea, no false GO); las cuentas del plan tienen code único por construcción.

@@ -1,7 +1,7 @@
 ---
 story: 9.3
 title: Fava deploy en Render con basic auth
-status: review
+status: done
 epic: 9
 depends_on: [9.0, 9.1]
 blocks: []
@@ -233,3 +233,15 @@ claude-opus-4-8[1m] (Amelia / dev-story)
 | Fecha | Cambio |
 |---|---|
 | 2026-06-17 | 9.3: artefactos de deploy de Fava (Dockerfile + entrypoint nginx basic-auth + git-sync + editor gateado por EDIT_HOOK_ENABLED) + onboarding doc. Servicio Render + smoke + poblar last4 = handoff. Status → review. |
+| 2026-06-17 | Code review 3 capas (NO testeable local) → 3 HIGH resueltos: F1 auth git SSH portada del importer (el clone del repo privado fallaba); F2 [Decisión Ary opción 1] editor wirea commit+push post-bean-check (antes los edits quedaban siloed; +1 test repo-git real); F3 path del ledger corregido al subdir `ledger/` (Fava no encontraba main.beancount). bash -n OK, 7/7 wrapper, 625 suite, 0 regresiones. 3 defers (disco no-git wedge, Fava muerto se ve healthy por el 401, hardening). Deploy Render + smoke + poblar last4 siguen handoff a Ary. Status → done. |
+
+### Review Findings
+
+Code review 3 capas (Blind Hunter + Edge Case Hunter + Acceptance Auditor), 2026-06-17. Verificado contra el código real (incl. comparación con el entrypoint del importer 9.4 y el wrapper de 9.0). Crear el servicio Render + env vars + smoke + poblar last4 = handoffs declarados. **No testeable local (sin Docker/Render) — verificación = `bash -n` + lectura adversarial.** Convergieron las 3 capas en 2 HIGH.
+
+- [x] [Review][Patch] El entrypoint NO configuraba auth git → el clone del repo PRIVADO fallaba → el servicio nunca arrancaba [entrypoint-fava.sh:18-29] — APLICADO 2026-06-17: portado el bloque SSH del importer ([backend/cron-importer-entry.sh:11-27]) antes del clone (base64-decode `BEANCOUNT_DEPLOY_KEY` → `id_ed25519` chmod 600, `ssh-keyscan github.com` → known_hosts, `export GIT_SSH_COMMAND`, `git config`) + guard `:?` de `BEANCOUNT_DEPLOY_KEY`. `GIT_SSH_COMMAND` exportado → el loop de `git pull` también autentica. `bash -n` OK. (Antes: nunca referenciaba la deploy key → clone SSH sin auth → `set -e` mataba el container.)
+- [x] [Review][Decision→Patch] El editor NO persistía los edits a origin (AC5 incumplido) → el wrapper de 9.0 no commiteaba/pusheaba [ledger/fava_edit_validator/__init__.py] — **RESUELTO (Ary 2026-06-17, opción 1): wireado commit+push.** APLICADO: `_commit_and_push(target)` en el success path de `after_write_source` — tras bean-check OK hace `git add`+`commit -m "[fava-edit] {rel}"`+`push origin HEAD` contra el toplevel (`git rev-parse --show-toplevel`, robusto al subdir `ledger/`). Best-effort: si no es repo git (tests/dev local) se omite; si el PUSH falla, el edit NO se revierte (es válido + commiteado local) pero se deja `last-revert-message.json` avisando que no está respaldado. Auth = `GIT_SSH_COMMAND` del entrypoint (deploy key, ahora WRITE). +1 test (repo git real + remote bare: verifica commit `[fava-edit]` + push OK). 7/7 wrapper verde, 625 suite, 0 regresiones. Ahora los edits (incl. la pre-condición AC8 de `bank_account_last4`) propagan a origin → visibles al backend/reporte.
+- [x] [Review][Patch] El entrypoint apuntaba `MAIN` a la raíz del clone, pero `main.beancount` vive en el subdir `ledger/` → Fava no encontraría el ledger [entrypoint-fava.sh:9-12] — tercer HIGH (las capas no trazaron el layout clone-vs-path). El entrypoint clona el repo a `/ledger` y usaba `MAIN="${LEDGER_DIR}/main.beancount"`, pero en el repo el archivo está en `ledger/main.beancount` (subdir, verificado: NO hay main.beancount en la raíz; el importer usa `LEDGER_DIR=<clone>/ledger`). APLICADO: `MAIN="${LEDGER_DIR}/ledger/main.beancount"` (los checks de `.git`/clone/pull siguen contra la raíz `${LEDGER_DIR}`). `bash -n` OK.
+- [x] [Review][Defer] Disco persistente con contenido no-git wedgea el arranque (sin `rm -rf` reset como el importer) [entrypoint-fava.sh:18-24] — deferred; si `/ledger` existe pero `.git` falta/corrupto (clone interrumpido), va al branch `else` y el `pull || true` lo silencia → Fava arranca contra un main.beancount inexistente.
+- [x] [Review][Defer] Fava muerto se ve "healthy": el health-check en `/` da 401 (auth antes del proxy) [nginx-fava.conf:24-26, entrypoint-fava.sh:42-47] — deferred; Fava corre en background sin supervisor; si muere, nginx (PID 1) sigue y devuelve 401 en `/` → Render lo cree vivo, el usuario autenticado recibe 502. Sin auto-restart. Considerar un `/health` sin auth que proxee a Fava.
+- [x] [Review][Defer] Hardening menor: htpasswd password en cmdline (`-b`, ps-visible) + hash MD5 (sin `-B`) + /tmp/htpasswd world-readable; corre como root; audit log usa `$uri` (pierde query string); apt sin pin; sin security headers [entrypoint-fava.sh:27, nginx-fava.conf:14, Dockerfile.fava] — deferred; servicio single-user interno detrás de HTTPS/basic-auth; bajo riesgo, mejoras de robustez.

@@ -33,6 +33,8 @@ LOCK_TIMEOUT_SEC = 300
 LOCK_POLL_INTERVAL_SEC = 1.0
 LOCK_WAIT_MAX_SEC = 60
 BEAN_CHECK_TIMEOUT_SEC = 30
+GIT_TIMEOUT_SEC = 15
+GIT_PUSH_TIMEOUT_SEC = 60
 
 SAVE_ENDPOINTS = frozenset({"json_api.put_source", "json_api.put_source_slice"})
 
@@ -86,6 +88,9 @@ class EditValidator(FavaExtensionBase):
         if check.returncode == 0:
             snap_path.unlink(missing_ok=True)
             self._clear_revert_message()
+            # Story 9.3 F2: un edit válido se commitea+pushea a origin, si no queda siloed en el
+            # disco de Fava (invisible al backend/reporte) y choca con el git pull loop.
+            self._commit_and_push(target)
             return
 
         error_text = (check.stdout or "") + (check.stderr or "")
@@ -98,6 +103,53 @@ class EditValidator(FavaExtensionBase):
         )
 
     # ── helpers ───────────────────────────────────────────────────────
+
+    def _git_toplevel(self) -> Path | None:
+        """Raíz del repo git que contiene el ledger, o None si no es un repo (tests / dev local)."""
+        try:
+            r = subprocess.run(
+                ["git", "-C", str(self._ledger_root), "rev-parse", "--show-toplevel"],
+                capture_output=True, text=True, timeout=GIT_TIMEOUT_SEC, check=True,
+            )
+            return Path(r.stdout.strip())
+        except Exception:  # noqa: BLE001 — no es repo / git ausente → se omite el commit
+            return None
+
+    def _commit_and_push(self, target: Path) -> None:
+        """Tras un edit válido: `git add` + `commit` + `push` a origin (Story 9.3 F2).
+
+        Best-effort y NO bloqueante: si el ledger no es un repo git (tests / dev local) se omite
+        en silencio. El edit ya fue validado por bean-check y persistido en disco; si el commit
+        local o el push fallan NO se revierte — pero si el PUSH falla se deja un aviso (el edit no
+        está respaldado en origin todavía). Auth git = `GIT_SSH_COMMAND` del entrypoint (deploy key).
+        """
+        root = self._git_toplevel()
+        if root is None:
+            return
+        try:
+            rel = str(target.resolve().relative_to(root)).replace("\\", "/")
+        except ValueError:
+            return  # el target no está bajo el repo → nada que hacer
+        try:
+            subprocess.run(["git", "-C", str(root), "add", rel],
+                           check=True, capture_output=True, text=True, timeout=GIT_TIMEOUT_SEC)
+            # Nada staged (re-guardar contenido idéntico) → no hay commit que hacer.
+            if subprocess.run(["git", "-C", str(root), "diff", "--cached", "--quiet"]).returncode == 0:
+                return
+            subprocess.run(["git", "-C", str(root), "commit", "-m", f"[fava-edit] {rel}"],
+                           check=True, capture_output=True, text=True, timeout=GIT_TIMEOUT_SEC)
+        except Exception:  # noqa: BLE001 — commit local falló (raro): el edit sigue en disco
+            return
+        try:
+            subprocess.run(["git", "-C", str(root), "push", "origin", "HEAD"],
+                           check=True, capture_output=True, text=True, timeout=GIT_PUSH_TIMEOUT_SEC)
+        except Exception:  # noqa: BLE001 — push falló: edit válido+commiteado local pero sin respaldo
+            self._write_revert_message(
+                target,
+                "Edit guardado y validado, PERO el push a git falló — NO está respaldado en el "
+                "repo todavía. Reintentá guardando de nuevo o avisá al admin.",
+                None,
+            )
 
     def _snapshot_path_for(self, target: Path) -> Path:
         digest = hashlib.sha256(str(target.resolve()).encode("utf-8")).hexdigest()[:16]

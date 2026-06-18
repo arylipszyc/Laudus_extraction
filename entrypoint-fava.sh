@@ -6,13 +6,30 @@
 #   4. arranca Fava en 127.0.0.1:$FAVA_PORT y nginx (basic auth) en $PORT
 set -euo pipefail
 
+# LEDGER_DIR = raíz del clone (disco persistente). El ledger vive en el subdir `ledger/` DENTRO
+# del repo (mismo layout que usa el importer: <clone>/ledger/main.beancount), no en la raíz.
 LEDGER_DIR="${LEDGER_DIR:-/ledger}"
 FAVA_PORT="${FAVA_PORT:-5000}"
-MAIN="${LEDGER_DIR}/main.beancount"
+MAIN="${LEDGER_DIR}/ledger/main.beancount"
 : "${PORT:?PORT no seteado (lo inyecta Render)}"
 : "${FAVA_BASIC_AUTH_USER:?FAVA_BASIC_AUTH_USER requerido}"
 : "${FAVA_BASIC_AUTH_PASSWORD:?FAVA_BASIC_AUTH_PASSWORD requerido}"
 : "${BEANCOUNT_REPO_URL:?BEANCOUNT_REPO_URL requerido}"
+: "${BEANCOUNT_DEPLOY_KEY:?BEANCOUNT_DEPLOY_KEY requerido (deploy key SSH; el repo del ledger es privado)}"
+
+# ── 0. auth git (SSH) ───────────────────────────────────────────────────────
+# El repo del ledger es PRIVADO (origin SSH). Sin esto, el `git clone` de abajo falla y
+# `set -e` mata el container. Mismo patrón que el importer (backend/cron-importer-entry.sh).
+# La deploy key necesita WRITE (el editor de Fava commitea+pushea los edits del contador, ver
+# fava_edit_validator). La key va base64 en la env var para no manglear los newlines.
+mkdir -p /root/.ssh
+printf '%s' "${BEANCOUNT_DEPLOY_KEY}" | base64 -d > /root/.ssh/id_ed25519
+chmod 600 /root/.ssh/id_ed25519
+ssh-keyscan -t ed25519 github.com >> /root/.ssh/known_hosts 2>/dev/null
+export GIT_SSH_COMMAND="ssh -i /root/.ssh/id_ed25519 -o IdentitiesOnly=yes"
+git config --global user.email "fava-editor@familyoffice.eag"
+git config --global user.name  "laudus-fava"
+git config --global --add safe.directory '*'
 
 # ── 1. ledger (clone o pull) ────────────────────────────────────────────────
 if [ ! -d "${LEDGER_DIR}/.git" ]; then
