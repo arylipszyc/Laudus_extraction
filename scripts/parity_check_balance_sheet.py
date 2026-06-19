@@ -161,6 +161,12 @@ def main() -> int:
         except Exception as exc:  # noqa: BLE001 — script CLI: reportar y salir
             print(f"Error cargando {entity}: {exc}", file=sys.stderr)
             return 2
+        # Sin tab en Sheets (o vacío) → no hay baseline contra qué comparar; se omite en vez de
+        # marcar todas las cuentas de beancount como diff. En el modelo consolidado (EAG incluye a
+        # las hijas) las entidades hijas no tienen tab propio y caen acá.
+        if not sheets_rows:
+            print(f"\n── {entity} — sin data en Sheets (tab inexistente o vacío) — se omite")
+            continue
         agg_s = balance_only(aggregate_balance(sheets_rows), roots)
         agg_b = balance_only(aggregate_balance(bean_rows), roots)
         diffs = compare(agg_s, agg_b)

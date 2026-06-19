@@ -90,8 +90,16 @@ Runbooks de rollback ya escritos: `docs/rollback-deprecation-sheets.md` (9.11 + 
       del bootstrap 9.1; la apertura vive solo en el JE 140 "Saldo inicial" del importer Laudus (fuente
       canónica). Verificado: `211005` = **-349.482.802 CLP** (antes -698M doblado) = valor Sheets;
       `bean-check` exit 0. Por construcción no queda segunda fuente para ninguna de las 12 cuentas.
-- [ ] (3) Spot-check de 2-3 cuentas vs Laudus.
-- [ ] (4) Flip + smoke. Re-correr el parity (script ya filtra A/L/E; falta el modo consolidado):
+- [x] (3) Spot-check — **HECHO 2026-06-19.** Tras #1+#2, el parity bajó a **11 diffs de EAG** (de
+      164). El script ahora omite entidades sin tab en Sheets (las 4 hijas → 0 ruido en el modelo
+      consolidado). Los 11 son chicos y son del lado Sheets: ej. `111005` (BCI) bean 18M vs Sheets
+      42M = la fila "2026-05-31" de Sheets trae balance acumulado a fecha posterior (21 movs post-
+      snapshot suman +24M → 18+24≈42); **beancount es el point-in-time correcto**. `113018` -30M
+      sobre -3.300M (0,9%) = fantasma chico. Por "Laudus prima" no bloquean.
+      ⚠️ **Avisar a la family:** post-flip, números point-in-time históricos se verán distintos del
+      Sheets viejo (más bajos a fecha pasada) porque beancount es as-of-date real, no acumulado.
+- [ ] (4) Flip + smoke. El parity da exit 1 por diseño (no conoce "Laudus prima"); el GO es humano:
+      los 11 residuales son Sheets-side → **GO**. Re-correr el parity para confirmar el set:
       `GOOGLE_APPLICATION_CREDENTIALS=... GOOGLE_SHEET_ID=... LEDGER_PATH=ledger/main.beancount PYTHONUTF8=1 python scripts/parity_check_balance_sheet.py`
 - [ ] Verificar **exit 0** (solo diffs esperados TC→Liabilities). Si exit 1 con inesperados →
       **NO flipear**, investigar.
