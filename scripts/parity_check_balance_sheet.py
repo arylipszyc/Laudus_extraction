@@ -35,6 +35,12 @@ from backend.app.api.v1.reportes.report_builder import _num
 
 DEFAULT_ENTITIES = ["EAG", "Jocelyn", "Jeannette", "Johanna", "Jael"]
 
+# Un balance-sheet solo lleva Activos/Pasivos/Patrimonio. La pestaña legacy de Sheets mete además
+# cuentas de resultado (Income/Expenses, acumuladas en miles de millones) que el
+# `balance_sheet_via_beancount` excluye a propósito → comparar todo genera ~140 diffs falsos
+# (P&L) que tapan los reales. Se compara solo el universo del balance.
+BALANCE_ROOTS = {"Assets", "Liabilities", "Equity"}
+
 
 def _net(row: dict) -> float:
     """Posición neta de una fila de balance: debit_balance - credit_balance (= frontend)."""
@@ -59,6 +65,12 @@ def aggregate_balance(rows: list[dict]) -> dict[str, float]:
     for r in rows:
         agg[str(r.get("account_number", ""))] += _net(r)
     return agg
+
+
+def balance_only(agg: dict[str, float], account_roots: dict[str, str]) -> dict[str, float]:
+    """Filtra a las cuentas del balance (raíz ∈ Assets|Liabilities|Equity). Descarta las de
+    resultado (Income/Expenses) que el tab legacy de Sheets incluye pero un balance-sheet no."""
+    return {a: v for a, v in agg.items() if account_roots.get(a, "") in BALANCE_ROOTS}
 
 
 def compare(sheets: dict[str, float], beancount: dict[str, float], tol: float = 0.5) -> list[dict]:
@@ -149,8 +161,8 @@ def main() -> int:
         except Exception as exc:  # noqa: BLE001 — script CLI: reportar y salir
             print(f"Error cargando {entity}: {exc}", file=sys.stderr)
             return 2
-        agg_s = aggregate_balance(sheets_rows)
-        agg_b = aggregate_balance(bean_rows)
+        agg_s = balance_only(aggregate_balance(sheets_rows), roots)
+        agg_b = balance_only(aggregate_balance(bean_rows), roots)
         diffs = compare(agg_s, agg_b)
         expected, unexpected = classify(diffs, roots)
         _print_entity(entity, snapshot, expected, unexpected, len(set(agg_s) | set(agg_b)))

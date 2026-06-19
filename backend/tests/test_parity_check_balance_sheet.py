@@ -7,6 +7,7 @@ contra Sheets+Beancount es QA con data prod (handoff).
 from scripts.parity_check_balance_sheet import (
     _snapshot_rows,
     aggregate_balance,
+    balance_only,
     classify,
     compare,
     main,
@@ -73,6 +74,15 @@ def test_snapshot_rows_filtra_al_cierre_no_suma_meses():
 def test_snapshot_rows_hoja_plana_pasa_igual():
     rows = [{"account_number": "111005", "debit_balance": 100, "credit_balance": 0}]
     assert _snapshot_rows(rows, "2026-05-31") == rows  # sin query_date → sin dimensión de snapshot
+
+
+def test_balance_only_descarta_income_y_expenses():
+    # El tab de Sheets trae cuentas de resultado (Income/Expenses) que el balance no debe comparar.
+    agg = {"111005": 100.0, "211005": -50.0, "310011": -999999.0, "413044": 200.0, "510001": 5.0}
+    roots = {"111005": "Assets", "211005": "Liabilities", "310011": "Income",
+             "413044": "Expenses", "510001": "Equity"}
+    out = balance_only(agg, roots)
+    assert set(out) == {"111005", "211005", "510001"}  # solo A/L/E; fuera Income/Expenses
 
 
 def test_main_sin_entities_no_es_un_go(monkeypatch):

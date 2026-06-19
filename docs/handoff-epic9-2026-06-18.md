@@ -31,7 +31,33 @@ Runbooks de rollback ya escritos: `docs/rollback-deprecation-sheets.md` (9.11 + 
 > Al mergear, el cron que refrescaba las tabs `balance_sheet_{entity}` se borró (9.11). Los
 > dashboards Activos/Pasivos quedan **estáticos** hasta este flip. Hacerlo pronto.
 
-- [ ] Correr el parity con creds prod:
+> **⚠️ RESULTADO del parity (corrido 2026-06-18, read-only) — NO-GO, requiere investigación tuya:**
+> Se corrió `parity_check_balance_sheet.py` contra prod (Sheets + ledger local, que estaba al día
+> con origin/main). Hallazgos:
+> 1. **El tab legacy de Sheets `balance_sheet` no es un balance limpio** — incluía cuentas de
+>    resultado (Income/Expenses) **y** las cuentas de las hijas (Jocelyn/Jeannette/Johanna/Jael)
+>    amontonadas bajo EAG. Se ajustó el script para comparar solo `Assets|Liabilities|Equity`
+>    (filtro `balance_only`), bajando el ruido de 164 → 40 diffs.
+> 2. **4 de 5 entidades (Jocelyn/Jeannette/Johanna/Jael) NO tienen tab `balance_sheet_*`** en el
+>    Sheet → sus dashboards en la rama OFF hoy leen un tab inexistente; flipear les daría data.
+> 3. **EAG: 24 diffs reales.** ~13 son cuentas de las hijas que el tab viejo metía en EAG (beancount
+>    las separa por entidad). **Decisión Ary 2026-06-18: los movimientos de las hijas deben tratarse
+>    como EGRESOS de EAG** → la separación estricta por entidad de beancount puede NO ser lo que se
+>    quiere para el dashboard de EAG; es una decisión de consolidación (EAG solo vs EAG+hijas) a
+>    confirmar con el contador/Winston antes de flipear.
+> 4. **`Liabilities:EAG:Apertura-211005` está DOBLE-CONTADO en beancount** (-698M vs -349M de
+>    Sheets): tiene el "Saldo inicial" de Laudus (2021-01-01) **+** un `pad` del bootstrap
+>    (2020-12-31), ambos -349M. Bug del ledger/bootstrap (9.1) a corregir — chequear si otras
+>    cuentas "Apertura" tienen el mismo doble.
+> 5. ~10 diffs chicos en cuentas reales de EAG (millones) — estilo "fantasmas de marzo" (9.11),
+>    probable staleness de Sheets; confirmar cuenta por cuenta vs Laudus.
+>
+> **→ El flip NO va hasta resolver: (a) la decisión de consolidación EAG+hijas, (b) el doble de
+> 211005, (c) crear/poblar los tabs de las 4 entidades o aceptar que su balance vive solo en
+> beancount.** Output completo en `_handoff/parity-out2.txt` (gitignored).
+
+- [ ] Resolver los 3 puntos del bloque ⚠️ de arriba (decisión + fix de 211005 + entidades).
+- [ ] Re-correr el parity con creds prod (script ya filtra A/L/E):
       `GOOGLE_APPLICATION_CREDENTIALS=... GOOGLE_SHEET_ID=... LEDGER_PATH=ledger/main.beancount PYTHONUTF8=1 python scripts/parity_check_balance_sheet.py`
 - [ ] Verificar **exit 0** (solo diffs esperados TC→Liabilities). Si exit 1 con inesperados →
       **NO flipear**, investigar.
