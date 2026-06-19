@@ -1,7 +1,7 @@
 ---
 story: 9.6b
 title: Motor matching cartola ↔ Laudus + emisión de discrepancias a JSONL
-status: ready-for-dev
+status: done
 epic: 9
 depends_on: [9.6a, 9.4, 9.10]
 blocks: [9.7, 9.12]
@@ -187,54 +187,23 @@ So that the contador and Ary can resolve discrepancies manually via Story 9.12 d
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: `MatchingEngine` core (AC1)
-  - [ ] Crear `pipeline/importers/matching_engine.py`
-  - [ ] Función `match(cartola_lines, laudus_entries) → list[MatchResult]`
-  - [ ] Algoritmo: matching greedy con scoring (date ± 3 días, amount tolerance, description similarity)
-  - [ ] Tests con 6 fixtures (uno por estado): cada fixture tiene cartola JSON + laudus entries esperados + expected MatchResults
+- [x] Task 1: `MatchingEngine` core (AC1) — `pipeline/importers/matching_engine.py`: `match()` greedy con scoring (fecha ±3, monto exacto CLP, desc ≥0.85), 7 estados + `missing-in-cartola` para sobrantes. + `load_laudus_entries()` (carga asientos del período desde imports/laudus/*.beancount). 11 tests.
 
-- [ ] Task 2: FX calculation + BCCh validation (AC2 + AC3)
-  - [ ] Función `calculate_fx(cartola_line_usd, laudus_entry_clp, bcch_table) → FXResult`
-  - [ ] FXResult: `implied`, `bcch`, `deviation_pct`, `out_of_tolerance` (bool)
-  - [ ] Lookup BCCh: leer `ledger/_meta/fx-bcch-eom.jsonl` (populated por 9.10), encontrar entry para `period.year_month` de la cartola
-  - [ ] Tests: 5 casos (in-tolerance, out-of-tolerance, BCCh missing, USD=0 edge, FX implausible >2000)
+- [x] Task 2: FX calculation + BCCh validation (AC2 + AC3) — `fx_calculator.py`: `calculate_fx()` + `lookup_bcch()`. FXResult con estados ok/out-of-tolerance/bcch-missing/implausible. 7 tests (incl. USD=0, >2000).
 
-- [ ] Task 3: Behavior por estado (AC4)
-  - [ ] Función `process_match_result(match_result, fx_result) → (transaction_or_none, discrepancy_or_none)`
-  - [ ] Switch sobre `state` con la tabla de comportamiento
-  - [ ] Tests: 7 casos (uno por estado) + edge cases (FX out-of-tolerance combinado con date-mismatch, etc.)
+- [x] Task 3: Behavior por estado (AC4) — `reconcile.process_match_result()` → `ProcessDecision(emit, flag, discrepancies)`. Overlay FX (AC3) fuerza `!` + discrepancia FX incluso sobre `perfect`.
 
-- [ ] Task 4: JSONL emission + dedup (AC5 + AC7)
-  - [ ] Función `append_discrepancy(discrepancy, jsonl_path)` con dedup por `(batch_id, cartola_line_no, laudus_je_id)`
-  - [ ] Schema versioning: `schema_version: "1.0"` en cada entrada (futureproofing)
-  - [ ] Tests: append + idempotencia (re-correr no duplica)
+- [x] Task 4: JSONL emission + dedup (AC5 + AC7) — `discrepancy_writer.py`: `build_discrepancy` (shape AC5, `schema_version 1.0`) + `append_discrepancy` (dedup por `(batch_id, line_no, je_id)`) + `append_resolution` (append-only). 8 tests con reconcile.
 
-- [ ] Task 5: Storage FX en Transaction (AC8)
-  - [ ] Modificar `_build_postings` de 9.6a para soportar el caso USD con `@@` notation
-  - [ ] Inyección de metadata FX (`fx_source`, `fx_implied`, etc.) cuando el state lo amerita
-  - [ ] Tests: 3 casos (TC USD perfect, TC USD out-of-tolerance, cta_corriente USD)
+- [x] Task 5: Storage FX en Transaction (AC8) — `cartola_pdf_importer.build_usd_postings()` (price per-unit CLP; `implicit_prices` deriva la price) + `fx_metadata()`. Verificado vía bean-check sobre el render.
 
-- [ ] Task 6: Re-emit post-resolución (AC6)
-  - [ ] Función `re_emit_after_resolution(discrepancy_id) → file_path`
-  - [ ] Lee la cadena de discrepancies (original + resolución), determina nuevo estado del file
-  - [ ] Re-genera `imports/cartolas/{slug}.beancount` write-and-replace
-  - [ ] `bean-check` + git commit + push (mismo patrón que 9.4)
-  - [ ] Lock file (mismo `.import.lock`)
+- [x] Task 6: Re-emit post-resolución (AC6) — `reconcile.commit_reconciliation(file, new_content, id, action, root)`: write-and-replace + bean-check (rollback si rojo) + git commit `[reconciliation] resolve {id}: {action}` + lock. La derivación de `new_content` desde la acción la provee Story 9.12. 2 tests (verde + rollback).
 
-- [ ] Task 7: Pre-2026 CLP-only (AC9)
-  - [ ] Branch lógico en `MatchingEngine.match`: si `period.start < 2026-01-01` → skip lógica FX
-  - [ ] Tests: cartola 2024 (full CLP) → no aparecen entradas FX en discrepancies, no `@@` notation en directivas
+- [x] Task 7: Pre-2026 CLP-only (AC9) — `USD_FX_EPOCH` en el engine; `period_start < 2026-01-01` → sin lógica FX. Test pre-2026.
 
-- [ ] Task 8: Integration tests con `cartola_pdf_importer` (9.6a)
-  - [ ] Fixture: cartola JSON de TC USD con 5 líneas (mix de estados)
-  - [ ] Run pipeline: 9.6a parser → 9.6b matching → output `.beancount` + JSONL
-  - [ ] Verificar bean-check OK, JSONL bien formado, transactions con metadata correcta
+- [x] Task 8: Integration — `reconcile.reconcile_and_build()` ata matching→FX→behavior→(entries beancount + discrepancias). Tests: fixture multi-estado (perfect/value-mismatch/USD+FX/missing) → render + load (bean-check verde), pre-2026 CLP-only. **SEAM pendiente:** flipear el `promote()` del upload real (9.6a) para llamar `reconcile_and_build` (con `load_laudus_entries`) en vez del extract perfecto — ver Completion Notes.
 
-- [ ] Task 9: Documentación
-  - [ ] Update `pipeline/importers/README.md` con sección "Matching engine + reconciliation"
-  - [ ] Diagrama de flujo: cartola JSON → MatchingEngine → MatchResults → process_match_result → (Transactions + Discrepancies)
-  - [ ] Tabla de los 7 estados con ejemplos
-  - [ ] Runbook para resolver discrepancias manualmente desde 9.12
+- [x] Task 9: Documentación — sección "Matching engine + reconciliación" en `pipeline/importers/README.md` (diagrama de flujo, tabla 7 estados, FX, runbook de resolución manual).
 
 ---
 
@@ -288,3 +257,73 @@ ledger/_meta/
 - [Source: 9-6a-beangulp-importer-parser-basico.md — parser que esta story extiende]
 - [Source: 9-10-cron-prices-clp-usd.md — fuente BCCh end-of-month]
 - [Source: 9-12-dashboard-reconciliacion.md — consumidor del JSONL]
+
+## Dev Agent Record
+
+### Agent Model Used
+
+claude-opus-4-8[1m] (Amelia / dev-story)
+
+### Debug Log References
+
+- Tests nuevos 9.6b: `test_matching_engine.py` (11), `test_fx_calculator.py` (7),
+  `test_reconcile.py` (8), `test_reconcile_integration.py` (5) = **31 passed**.
+- Suite backend completa: **563 passed / 1 xfailed / 1 failed**. El rojo es el pre-existente
+  date-dependiente `test_sync.py::test_run_backfill_calls_upsert_for_both_sheets` (sin relación).
+- Balance de los postings (CLP y USD `@`) + derivación de price verificados cargando el render
+  con `loader.load_string` (equivalente a bean-check), no solo por aritmética.
+
+### Completion Notes List
+
+- **4 módulos puros + 1 orquestador** (testeables sin red): `matching_engine.py` (estados +
+  `load_laudus_entries`), `fx_calculator.py` (FX + BCCh), `discrepancy_writer.py` (JSONL
+  append-only + dedup), `reconcile.py` (`process_match_result` + `reconcile_and_build` +
+  `commit_reconciliation`).
+- **USD `@@` → `@` per-unit:** beancount serializa price per-unit; usé price per-unit =
+  `fx_implied` (equivalente, balancea, `implicit_prices` deriva la price — verificado por bean-check).
+- **`value-mismatch` NO emite** Transaction (bloqueante hasta 9.12); `missing-in-cartola` emite
+  desde Laudus CLP-only; el resto emite con flag `!`.
+- **SEAM de integración (lo único que falta para correr en prod):** el upload real sigue usando el
+  `promote()` perfect-path de 9.6a. Para activar la reconciliación en vivo: en el flujo de upload,
+  reemplazar el `extract` por `reconcile_and_build(...)` alimentado con `load_laudus_entries(...)` +
+  appendear las discrepancias retornadas. No flipeé el `promote` de 9.6a para no cambiar su
+  comportamiento ni romper sus tests — el *cuándo* corre la reconciliación es decisión del flujo de
+  upload. Engine + loader + orquestador ya listos y testeados para wirear.
+- **AC6 (re-emit)** lo invoca Story 9.12: `commit_reconciliation` hace el mecanismo (write-replace +
+  bean-check + git + lock); 9.12 deriva el `new_content` desde la acción de resolución.
+
+### File List
+
+**Nuevos (pipeline):**
+- `pipeline/importers/matching_engine.py` — `match()` + 7 estados + `load_laudus_entries()`
+- `pipeline/importers/fx_calculator.py` — `calculate_fx()` + `lookup_bcch()`
+- `pipeline/importers/discrepancy_writer.py` — JSONL append-only + dedup + `append_resolution`
+- `pipeline/importers/reconcile.py` — behavior + orquestador + re-emit
+
+**Modificados (pipeline):**
+- `pipeline/importers/cartola_pdf_importer.py` — `build_usd_postings()` + `fx_metadata()` (AC8)
+- `pipeline/importers/README.md` — sección matching/reconciliación (Task 9)
+
+**Nuevos (tests):**
+- `backend/tests/test_matching_engine.py`, `test_fx_calculator.py`, `test_reconcile.py`,
+  `test_reconcile_integration.py` — 31 tests
+
+## Change Log
+
+| Fecha | Cambio |
+|---|---|
+| 2026-06-17 | 9.6b: motor de reconciliación cartola↔Laudus (7 estados + FX implícita + BCCh 5% + JSONL append-only + re-emit) en 4 módulos + orquestador. 31 tests. Seam: wiring del promote de upload pendiente. Status → review. |
+| 2026-06-17 | Code review 3 capas → 4 patches aplicados (dedup key+state, campo source AC4, missing-in-cartola no emite [Decisión Ary], USD huérfana usa BCCh [Decisión Ary]) + 4 tests nuevos (35 en 9.6b, 610 suite, 0 regresiones). 4 defers anotados. Status → done. |
+
+### Review Findings
+
+Code review 3 capas (Blind Hunter + Edge Case Hunter + Acceptance Auditor), 2026-06-17. Verificado contra código real (los números de línea de las capas venían alucinados; corregidos abajo).
+
+- [x] [Review][Patch] missing-in-cartola NO debe emitir Transaction; solo discrepancia [reconcile.py:146-151,20] — **Decisión Ary 2026-06-17: la cartola es la fuente de verdad.** Un asiento que está en Laudus y no en la cartola NO se contabiliza en el ledger de cartola (evita el doble conteo vs `imports/laudus/*`); se muestra como discrepancia (`source: "laudus"`) para que 9.12 lo despliegue y ofrezca la opción de borrarlo. Fix: agregar `"missing-in-cartola"` a `_BLOCKING` (emit=False + discrepancia) y eliminar la rama `else` muerta de `reconcile_and_build`. **Supersede AC4** (que mandaba emitir desde Laudus).
+- [x] [Review][Patch] USD missing-in-laudus usa el FX de la cartola (BCCh del mes) [reconcile.py:124-128,140-144] — **Decisión Ary 2026-06-17: la cartola completa usa el mismo FX; aplicar ese FX a la transacción.** Una línea USD sin contraparte Laudus no tiene FX implícita derivable → se usa la tasa BCCh del mes (`lookup_bcch`) como FX único de la cartola para emitirla con `@ rate` + leg CLP. Las líneas con match conservan su FX implícita per-línea (AC2). Si BCCh tampoco existe para el mes → no se emite + discrepancia `fx-bcch-missing` (no se contabiliza USD sin tasa).
+- [x] [Review][Patch] Dedup key no incluye `state` → la discrepancia FX out-of-tolerance se descarta al persistir [discrepancy_writer.py:19,65,74] — cuando una línea tiene a la vez un state-mismatch (date/description/category) Y overlay FX, `process_match_result` ([reconcile.py:82,88]) appendea dos discrepancias con el MISMO `(batch_id, line_no, je_id)`. `append_discrepancy` escribe la primera y devuelve False para la segunda → la discrepancia FX se pierde del JSONL. Fix: agregar `state` a `_dedup_key` y a los dos call sites (`_existing_dedup_keys`, `append_discrepancy`). Preserva idempotencia AC7.
+- [x] [Review][Patch] Falta campo `source` en las entradas de discrepancia (AC4) [discrepancy_writer.py:23-45] — AC4 exige `source: "cartola"` (missing-in-laudus) / `source: "laudus"` (missing-in-cartola). `build_discrepancy` no emite `source`. Derivable del `state`, pero el AC lo pide explícito. Fix: agregar `source` (one-liner).
+- [x] [Review][Defer] je_id="" colapsa discrepancias de Laudus sin meta `id` [matching_engine.py:88] — deferred, robustez de dedup; depende de si 9.4 puebla `id`
+- [x] [Review][Defer] load_laudus_entries descarta `_err` del parser [matching_engine.py:78] — deferred, un .beancount Laudus corrupto produce entries parciales en silencio; bajo riesgo (9.4 hace bean-check de su output)
+- [x] [Review][Defer] Round-trip float de montos/FX en el JSONL de auditoría [reconcile.py:31-32] — deferred, `_num` hace `float(Decimal)`; CLP son enteros, pero implied/deviation_pct pueden derivar (948.2000001); el JSONL es display, el ledger usa Decimal aparte
+- [x] [Review][Defer] category_account = solo el leg más grande, descarta splits multi-leg [matching_engine.py:86] — deferred, asientos Laudus con gasto dividido en varias cuentas pierden los legs menores; raro en este volumen

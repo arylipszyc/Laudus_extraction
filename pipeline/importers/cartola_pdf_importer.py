@@ -61,6 +61,41 @@ def _build_postings(
     ]
 
 
+def build_usd_postings(
+    account_target: str,
+    category_account: str,
+    usd_amount: Decimal,
+    fx_implied: Decimal,
+    is_liability: bool,
+) -> list[data.Posting]:
+    """Postings de una línea USD con price per-unit CLP (Story 9.6b AC2/AC8).
+
+    El posting del banco/TC lleva las unidades USD con `@ fx_implied CLP` (per-unit; equivale
+    al `@@ total` del storyfile y es lo que beancount serializa). El plugin `implicit_prices`
+    deriva la price directive. La contrapartida en CLP cierra el balance por construcción.
+    """
+    sign = Decimal(-1) if is_liability else Decimal(1)
+    usd_units = sign * usd_amount
+    clp_weight = (usd_units * fx_implied).quantize(Decimal("0.01"))
+    price = Amount(fx_implied, "CLP")
+    return [
+        data.Posting(account_target, Amount(usd_units, "USD"), None, price, None, None),
+        data.Posting(category_account, Amount(-clp_weight, "CLP"), None, None, None, None),
+    ]
+
+
+def fx_metadata(fx_result, bank_slug: str, year_month: str) -> dict:
+    """Metadata FX para la Transaction (todos strings, convención Beancount) — AC8."""
+    meta = {"fx_source": f"derived-cartola-{bank_slug}-{year_month}"}
+    if fx_result.implied is not None:
+        meta["fx_implied"] = str(fx_result.implied)
+    if fx_result.bcch is not None:
+        meta["fx_bcch"] = str(fx_result.bcch)
+    if fx_result.deviation_pct is not None:
+        meta["fx_deviation_pct"] = str(fx_result.deviation_pct)
+    return meta
+
+
 class CartolaPdfImporter(beangulp.Importer):
     """beangulp.Importer: `{batch_id}.cartola.json` → directivas Beancount."""
 
@@ -94,16 +129,19 @@ class CartolaPdfImporter(beangulp.Importer):
 
         entries: list = []
         for tx in model.transactions:
-            category_account, match_source = self.category_predictor.predict(
+            category_account, match_source, flag = self.category_predictor.predict(
                 tx.description, tx.amount, model.source.bank_account_id
             )
-            is_pending = match_source == "pending"
+            # category_status: confirmed solo cuando el motor está confiado (flag "*").
+            category_status = "pending" if match_source == "pending" else (
+                "confirmed" if flag == "*" else "suggested")
             meta = data.new_metadata(filepath, tx.line_no)
             meta.update({
                 "source": "cartola-pdf",
                 "bank_account_id": model.source.bank_account_id,
+                "batch_id": Path(filepath).name.removesuffix(".cartola.json"),
                 "match_source": match_source,
-                "category_status": "pending" if is_pending else "suggested",
+                "category_status": category_status,
                 "extraction_model": model.extraction.model,
                 "line": str(tx.line_no),
             })
@@ -111,7 +149,7 @@ class CartolaPdfImporter(beangulp.Importer):
             entries.append(data.Transaction(
                 meta=meta,
                 date=tx.date,
-                flag="!" if is_pending else "*",
+                flag=flag,
                 payee=None,
                 narration=tx.description or f"line {tx.line_no}",
                 tags=frozenset(),
@@ -153,7 +191,10 @@ def convert_balance_to_pad(
                 "override_user": override_user,
                 "override_at": override_at,
             })
-            out.append(data.Pad(pad_meta, entry.date, entry.account, discrepancias_account))
+            # El pad debe datear ANTES del Balance: los balance checks de beancount son
+            # start-of-day, así que un pad con la misma fecha no alcanza a aplicarse
+            # ("Unused Pad entry"). Un día antes garantiza que el padding entre antes del check.
+            out.append(data.Pad(pad_meta, entry.date - timedelta(days=1), entry.account, discrepancias_account))
         out.append(entry)
     return out
 
@@ -176,11 +217,16 @@ def promote(
     batch_id: str,
     importer: CartolaPdfImporter,
     ledger_root,
+    override: dict | None = None,
 ) -> dict:
     """Staging JSON → final `imports/cartolas/{slug}.beancount` + bean-check + git.
 
     git push is guarded by `IMPORTER_GIT_ENABLED` (same as Story 9.4). On bean-check
     failure, the output file is removed and the staging file is left intact.
+
+    `override` (Story 9.9 AC4): `{justification, user, at}` → la `Balance` de cierre se
+    convierte en `pad`+`balance` (la pad absorbe la discrepancia → bean-check pasa) y el
+    commit message marca `OVERRIDE pad+balance`. La metadata del override queda en la directiva.
     """
     from pipeline.importers.laudus_run import acquire_lock, bean_check, git_commit_push
 
@@ -195,10 +241,13 @@ def promote(
     out_file = out_dir / f"{_slug(model, resolved.last4)}.beancount"
 
     result = {"batch_id": batch_id, "file": str(out_file), "tx": len(model.transactions),
-              "success": False, "error_msg": None, "git_commit_sha": None}
+              "success": False, "error_msg": None, "git_commit_sha": None, "override": bool(override)}
 
     with acquire_lock(lock_path):
         entries = importer.extract(str(staging))
+        if override:
+            entries = convert_balance_to_pad(
+                entries, override["justification"], override["user"], override["at"])
         out_file.write_text(render_entries(entries), encoding="utf-8")
 
         ok, detail = bean_check(main_path)
@@ -209,7 +258,9 @@ def promote(
             return result
 
         staging.unlink(missing_ok=True)
-        message = f"[importer-cartola] {slugify(model.source.bank_name)} {model.period.end.strftime('%Y-%m')}: +{len(model.transactions)} tx"
+        suffix = ", OVERRIDE pad+balance" if override else ""
+        message = (f"[importer-cartola] {slugify(model.source.bank_name)} "
+                   f"{model.period.end.strftime('%Y-%m')}: +{len(model.transactions)} tx{suffix}")
         result["git_commit_sha"] = git_commit_push(
             root, [f"ledger/imports/cartolas/{out_file.name}"], message,
         )

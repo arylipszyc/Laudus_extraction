@@ -1,5 +1,12 @@
 """Genera ledger/accounts.beancount con las 255 cuentas hoja del plan — Story 9.1 Task 2.
 
+DEPRECATED como paso de rutina (Story 9.11, 2026-06-17) — solo re-bootstrap de
+disaster-recovery. El plan de cuentas (taxonomía Categoria1/2/3 + metadata bancaria)
+es ahora editable directamente como metadata `Open` en `ledger/accounts.beancount`
+(+ zona `manual/`), que es la single source of truth. Este script lee Laudus + Supabase
+`plan_de_cuentas` para regenerar el baseline desde cero; NO se corre en operación normal.
+Ver `_bmad-output/planning-artifacts/adr-001-plan-de-cuentas-beancount-source-of-truth.md` §4.
+
 Pipeline:
     1. Lee plan completo desde Laudus API (293 cuentas, longitud variable de account_number).
     2. Lee plan + bank_accounts desde Supabase (293 + 47 entries, todo padded a 6 dígitos).

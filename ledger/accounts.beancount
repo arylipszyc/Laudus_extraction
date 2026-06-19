@@ -1,6 +1,9 @@
-;; ledger/accounts.beancount — generado por bootstrap/generate_accounts.py
-;; Story 9.1 (Bootstrap histórico Beancount).
-;; NO editar a mano sin re-correr el script o sincronizar con Supabase.
+;; ledger/accounts.beancount — fuente única (SoT) del plan de cuentas.
+;; Bootstrap inicial por bootstrap/generate_accounts.py (Story 9.1); ese script quedó
+;; retirado a disaster-recovery-only tras 9.11/ADR-001 — NO se re-corre en rutina.
+;; La edición ahora es por append (manual o vía POST /cuentas-pendientes/{code}/promover,
+;; Story 10.3): lock + bean-check + git. Las categorías (laudus_categoria1/2/3) y la
+;; metadata bancaria viven acá; el reporte y los dashboards leen de este archivo.
 ;; Modelo unificado: las 47 cuentas bancarias son subset del plan,
 ;; identificadas por la metadata bank_account_id.
 

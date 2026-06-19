@@ -1,5 +1,71 @@
 # Deferred Work
 
+## Deferred from: code review of 9-8-frontend-thin-api-badge-pendiente (2026-06-17)
+
+Nota: 9.8 es frontend parcial-por-diseño; el scope entregado (chip + página /categorizacion) está limpio y RBAC correcto. Defers de UX (pase a Sally) + el seam grande.
+
+- AC6: la página /categorizacion usa input free-text para la cuenta de categoría en vez de un dropdown filtrado de Expenses ([frontend/src/pages/CategorizacionPage.tsx:58-67]) — AC6 pide "dropdown filtrado por root Expenses"; el texto libre es propenso a typos → bean-check 422. Cargar las cuentas Expenses (de accounts.beancount / plan-de-cuentas) y ofrecerlas como dropdown/autocomplete.
+- El chip PendingCategorizationChip desaparece en error de fetch ([frontend/src/components/layout/PendingCategorizationChip.tsx:21-22]) — `data` undefined → count 0 → `return null`, indistinguible de "0 pendientes". Mismo patrón que el badge de 9.12. Bajo impacto (amber=no bloqueante) pero conviene surfacing de error/stale.
+- No se muestra `confidence` ni tooltip diferenciado por `pending_review_reason` ([frontend/src/pages/CategorizacionPage.tsx:55]) — upstream: 9.7 `list_pending` no expone confidence (defer de 9.7); se muestra `current_match_source` como proxy. Ligado al defer de 9.7 (persistir el score en la meta del importer).
+- SEAM grande (acknowledged, partial-by-design): badge inline ⚠ sobre los 4 dashboards Epic 3 (AC3-inline/AC4/AC5) + campo unificado `pending_review_reason` ("categorization"|"reconciliation"|"both"|null) — requiere exponer `category_status`/`match_source` en `ledger_entries_via_beancount` + cruzar con `cartola-discrepancies.jsonl` server-side + tocar las 4 páginas de dashboard + su drill-down. Integración cross-cutting de baja verificabilidad sin browser; el valor de revisión/confirmación ya está cubierto por /categorizacion + los chips del header. Si Ary lo pide, abrir story aparte.
+
+## Deferred from: code review of 9-15-flip-balance-sheet-beancount (2026-06-17)
+
+- colisión/ausencia de `code` en el parity ([scripts/parity_check_balance_sheet.py:48,82-84]) — opens sin meta `code` caen al bucket "" en `aggregate_balance` (conflando cuentas distintas) y `_account_roots` los saltea; dos opens con el mismo `code` → last-write-wins en la raíz. Dirección segura (tiende a clasificar como inesperado → bloquea, no false GO); las cuentas del plan tienen code único por construcción.
+- `--as-of` se aplica uniforme a todas las entidades ([scripts/parity_check_balance_sheet.py:120,130]) — si dos entidades tienen distinto último snapshot, un `--as-of` único consulta Beancount AT esa fecha para ambas mientras la hoja de cada una refleja su propio cierre → diff forzado. El default per-entity (max query_date de cada hoja) lo evita; solo afecta el uso explícito de `--as-of` cross-entity.
+- `get_repository().get_records` swallows errores → [] ([scripts/parity_check_balance_sheet.py:94]) — un fallo de fetch de la hoja (creds/red/tab ausente) devuelve [] en vez de raise, así el guard `except → exit 2` no dispara y el verdict puede ser engañoso. Mitigado parcialmente por el fail-safe de data-vacía agregado en review. Fix durable: validar que la hoja devolvió filas / que la entity es una de las 5 conocidas.
+- 2da categoría de diffs esperados (fantasmas Sheets conocidos) no auto-clasificada ([scripts/parity_check_balance_sheet.py:63-73]) — `classify` solo marca esperados los diffs de cuentas `Liabilities` (TC reclass); un fantasma conocido en una cuenta de balance no-Liabilities saldría como "inesperado" y requeriría juicio manual. Aceptable: el bias flag-and-stop es correcto para un go/no-go; el humano investiga.
+
+## Deferred from: code review of 9-14-migrar-bank-accounts-beancount (2026-06-17)
+
+- create no puede setear `bank_account_last4` ([bank_accounts/service.py:80-87]) — el create escribe `bank_account_id/type/currency/[bank_name]` pero no `bank_account_last4`, que `BankAccountResolver` ([pipeline/importers/bank_account_resolver.py]) lee para el matching cartola↔cuenta. Una cuenta registrada por este endpoint queda con last4=None hasta poblarlo vía Fava (9.3). Fuera del schema 9.14, pero el matching de cartolas de esa cuenta nueva no andará hasta que se popule.
+- create/update sin re-check bajo el lock (TOCTOU) ([bank_accounts/service.py:64-78,110-114]) — el 400/409 (create) y 404 (update) se evalúan sobre el snapshot `ledger.entries()` tomado al inicio del request, pero la mutación corre dentro del lock tras `_refresh_ledger_clone()`. En Render single-instance/single-worker el lock serializa; con multi-worker o cron concurrente el guard "ya registrada" podría bypassearse y duplicar `bank_account_id`. Sin constraint único que reemplace lo que enforceaba Supabase.
+- orden lexicográfico de `account_number` ([bank_accounts/service.py:54]) — `out.sort(key=lambda b: b.account_number)` ordena el code como string; con codes uniformes (plan chileno 6 dígitos) lexicográfico == numérico y == el orden de la columna Supabase previa, así que no es regresión. Codes de ancho variable ordenarían mal.
+- ciclos close/reopen acumulan línea en blanco ([beancount_promote.py] append_close/remove_close) — `append_close` antepone `\n`, `remove_close` solo borra la línea `close` → queda una línea en blanco huérfana. Cosmético, inocuo para bean-check.
+- PATCH no puede resetear `bank_name` a null ([bank_accounts/service.py:119]) — `mutate` solo edita bank_name si `is not None`; mandar `{"bank_name": null}` se descarta. Se puede cambiar a "" pero no a null. Gap menor de producto.
+
+## Deferred from: code review of 9-12-dashboard-reconciliacion (2026-06-17)
+
+Nota: 9.12 es mayormente frontend con pase de UX explícito a Sally (Dev Notes). Los findings de frontend van acá; los 3 de backend se parchearon.
+
+- AC6: el drill-down NO renderiza el historial de la discrepancia ([frontend/src/pages/ReconciliationPage.tsx] DrillDown) — `getHistory` existe en `services/reconciliation.ts` pero nunca se llama. AC6 pide mostrar el historial completo (vía endpoint AC2) en el panel. Prioridad alta del pase de UX.
+- Deep-link reabre el drill-down / botón cerrar muerto ([ReconciliationPage.tsx:30-33]) — `setSelected(match)` se llama en el cuerpo del render; al resolver o cerrar un item deep-linked (`?discrepancy_id=`) se reabre solo (el backend lo sigue devolviendo por el branch de id, que ignora el filtro de resueltas). Debe ser `useEffect` keyed en deepLinkId/data con un flag de "ya auto-abrí".
+- El badge de reconciliación desaparece en error de `/count` ([PendingReconciliationBadge.tsx]) — `data` undefined → `return null`, indistinguible de "0 pendientes". Una falla transitoria oculta la alerta bloqueante hasta el próximo poll (5min). Surface error/stale.
+- Filtros `year_month`/`bank_account_id` no llegan desde la UI ([ReconciliationPage.tsx:26] solo manda `state`) — el backend y el service TS los soportan, pero la página no expone los dropdowns. AC5 (filtros por bank/year_month/threshold) medio-cableado.
+- `fx-bcch-missing`/`fx-implausible` sin action set propio ni clasificación blocking ([reconciliation/service.py] ACTIONS_BY_STATE/BLOCKING_STATES) — tras el patch de review son escalables (no dead-end), pero falta decidir sus acciones de resolución reales y si cuentan como bloqueantes (chip rojo). Decisión de producto + semántica FX; coordinar con 9.6b.
+- `bank_account_label` (shape AC1) nunca se popula — 9.6b `build_discrepancy` no lo emite y el backend no lo deriva; cosmético (la tabla muestra por cuenta, no label).
+- Celda Laudus en la tabla hardcodea CLP ([ReconciliationPage.tsx:75] `fmt(d.laudus?.amount)` sin currency) — filas FX/USD muestran símbolo de moneda equivocado.
+- `resolve` sin lock ante concurrencia ([reconciliation/service.py] resolve + append_resolution) — bajo riesgo en deploy single-instance Render; dos resolves simultáneos del mismo id podrían appendear dos líneas (mitigado parcialmente por el chequeo de idempotencia agregado en review).
+
+## Deferred from: code review of 9-9-validacion-balances-bean-check (2026-06-17)
+
+- staging opening/closing se sobrescribe antes de promote y persiste mutado en fallo ([cartolas/service.py:419-422]) — AC1 manda actualizar el staging si los balances enviados difieren del canónico, pero si promote falla (discrepancia sin override) los balances extraídos originales se pierden. Revertir-en-fallo (snapshot+restore) es nice-to-have para idempotencia de reintentos.
+- 404 StagingNotFound usa shape `{detail:{...}}` mientras el resto usa `{error:{...}}` ([cartolas/router.py:162-164] vs [frontend/src/services/cartolas.ts]) — el frontend lee `data.error` y cae a "UNKNOWN: HTTP 404" en vez del mensaje "staging no existe o expiró". Path raro (staging expirado).
+- tolerancia frontend `abs(discrepancia) < 0.5` vs bean-check exacto ([frontend/src/components/BalanceValidationPanel.tsx]) — para CLP (entero) 0.5 ≈ ==0, pero una cartola USD con residuo sub-peso muestra "✓ cuadra", habilita confirmar sin override y el server la rechaza 400 → dead-end. Alinear la tolerancia (estricta en el cliente, o tolerante en el server).
+- campos numéricos vacíos en el panel coercen a 0 (`Number.parseFloat(x || '0')`) ([frontend/src/components/BalanceValidationPanel.tsx]) — limpiar el campo closing computa la discrepancia como si fuera 0 y puede habilitar confirmar; el backend rechaza el Decimal vacío (422) pero el frontend no valida los campos numéricos.
+- `batch_id` se interpola al path del staging sin validar formato UUID ([cartolas/service.py:413]) — el sufijo `.cartola.json` + el manejo de path params de FastAPI bloquean el traversal en la práctica; agregar validación de formato es defense-in-depth.
+- justificación de override con `"` o newline rompería la sintaxis beancount del pad meta ([cartola_pdf_importer.py] convert_balance_to_pad) — auto-limitado (bean-check rechaza el render → BeanCheckFailed tras el fix de review), no corrompe un archivo committeado, pero conviene escapar/validar el string antes de renderizarlo.
+
+## Deferred from: code review of 9-7-categorizacion-smart-importer-patron-b (2026-06-17)
+
+- AC9 `list_pending` incompleto ([transactions/service.py:46-70]) — devuelve lista plana (no agrupada por `bank_account_id → period` como pide AC9) y sin los campos `currency` ni `current_confidence`. El frontend 9.8 ya consume el shape actual; `current_confidence` requiere persistir el score en la meta del importer (hoy `category_predictor` solo propaga match_source/flag, descartó confidence en el adapter a 9.6a).
+- Cache key del CategorizationService = solo `normalize(description)` ([categorization/service.py:66-72]) — ignora `amount` y `bank_account_id`, que SÍ consumen los seams smart_importer/Gemini. Inerte hoy (seams no wireados; supra/historical son description-only). Al instalar smart_importer/Gemini, la cache key debe incluir amount+bank_account_id o servirá la categoría del primer tx con esa descripción.
+- normalizer: descripciones que normalizan a cadena vacía colapsan juntas ([categorization/normalizer.py:24-31]) — all-numeric ("123456789") y "REF <folio>" → "". history descarta la key vacía y resuelven a suspense igual, así que el impacto es bajo. Además `_TRAILING_DIGITS` solo quita el último grupo de dígitos (folios internos se retienen). Robustez de agrupación.
+- history._load crashea ante una línea JSON válida no-objeto ([categorization/history.py:52-59]) — `json.loads("123")` u `["a"]` pasa el `except JSONDecodeError` y luego `.get` lanza AttributeError, matando la carga del índice. Defensivo: el archivo lo escribe siempre `build_record` (objeto).
+- regla supra sin desempate determinista ([categorization/history.py:64-70]) — `most_common(1)` ante empate exacto (30 correcciones a catA y 30 a catB) elige por orden de inserción. Spec-compliant (30 a la misma cat satisface AC2), solo nondeterminismo cosmético del tie-break.
+- `meta["filename"]` subscript duro en update_category/bulk_confirm ([transactions/service.py:145,193]) — una Transaction `!` sin meta `filename` lanzaría KeyError (500) en vez de un error limpio. Las entries cargadas del ledger siempre traen filename; bajo riesgo.
+
+## Deferred from: code review of 9-6b-matching-cartola-laudus-discrepancias (2026-06-17)
+
+- `je_id=""` colapsa discrepancias — `load_laudus_entries` ([matching_engine.py:88]) usa `str((e.meta or {}).get("id", ""))`; dos asientos Laudus sin meta `id` colapsan a `je_id=""` y, combinado con missing-in-cartola (`line_no` None), comparten dedup key `(batch, None, "")` → solo se escribe la primera. Robustez; depende de si el importer 9.4 puebla `id`.
+- `load_laudus_entries` descarta el `_err` del parser ([matching_engine.py:78]) — un `.beancount` Laudus con error de sintaxis produce entries parciales/vacíos en silencio → falsos missing. Bajo riesgo (9.4 hace bean-check de su output antes de escribir).
+- Round-trip float de montos/FX en el JSONL ([reconcile.py:31-32]) — `_num` hace `float(Decimal)`; los montos CLP son enteros pero `fx.implied`/`fx.deviation_pct` reintroducen imprecisión binaria (p.ej. 948.2000001) en datos de auditoría. El JSONL es para el dashboard 9.12 (display), no para aritmética del ledger.
+- `category_account` = solo el leg más grande ([matching_engine.py:86]) — `max(others, key=abs(units))` descarta los legs menores de un asiento Laudus con gasto dividido (split); afecta la comparación de category-mismatch y la emisión de missing-in-cartola. Raro en el volumen real del proyecto.
+
+## Deferred from: code review of 9-11-deprecation-sheets (2026-06-17)
+
+- Dashboards balance-sheet (Activos/Pasivos) sin smoke test post Sheets→read-only — AC7 los excluye explícitamente; tras AC5 (read-only manual) los dashboards que aún leen Sheets quedan sin cobertura de regresión. Pertenece a la story del flip del balance-sheet (out-of-scope de 9.11).
+
 ## Deferred from: code review of 1-4-role-based-access-control-rbac (2026-04-10)
 
 - `decode_jwt` algorithm confusion (alg:none attack) — pre-existing in `backend/app/auth/service.py` from Story 1.3; should add explicit algorithm pinning on decode

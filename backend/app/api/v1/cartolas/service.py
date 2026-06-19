@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 MAX_PDF_SIZE_BYTES = 20 * 1024 * 1024  # NFR3: 20MB
 JOB_TTL_SECONDS = 60 * 60  # 1 hour
+MIN_JUSTIFICATION = 20  # Story 9.9 AC4 — piso de la justificación del override (server-side)
 # Story 9.5h: draws independientes ante fallo transitorio de Gemini (línea
 # omitida → BALANCE_MISMATCH, o JSON truncado → GeminiExtractionError).
 MAX_EXTRACTION_ATTEMPTS = 3
@@ -61,6 +62,37 @@ class CartolaValidationError(Exception):
         super().__init__(message)
         self.code = code
         self.message = message
+
+
+class StagingNotFound(Exception):
+    """No staging file para ese batch_id (HTTP 404) — Story 9.9."""
+
+
+class BalanceDiscrepancy(Exception):
+    """closing ≠ opening + Σtx y no hubo override válido (HTTP 400) — Story 9.9 AC5."""
+
+    def __init__(self, diff: float, calculated: float, stated: float, detail: str) -> None:
+        super().__init__(detail)
+        self.diff = diff
+        self.calculated = calculated
+        self.stated = stated
+        self.detail = detail
+
+
+class OverrideJustificationTooShort(Exception):
+    """Override con justificación < MIN_JUSTIFICATION chars (HTTP 400) — Story 9.9 AC4."""
+
+    def __init__(self, min_chars: int) -> None:
+        super().__init__(f"justificación < {min_chars} chars")
+        self.min_chars = min_chars
+
+
+class BeanCheckFailed(Exception):
+    """bean-check falló por un motivo distinto al balance enviado (HTTP 422) — Story 9.9.
+
+    El balance enviado cuadra (o el pad lo absorbió), pero el ledger no valida por otra causa
+    (cuenta sin abrir, archivo hermano roto, etc.). Un override no ayuda → se surfacea el detalle.
+    """
 
 
 # ── Job store (singleton, thread-safe) ───────────────────────────────────
@@ -360,3 +392,75 @@ def run_job(
 
 def new_batch_id() -> str:
     return str(uuid.uuid4())
+
+
+# ── Validación de balance + promote (Story 9.9) ───────────────────────────
+
+
+def _build_importer(ledger_root: Path):
+    """CartolaPdfImporter con resolver sobre accounts.beancount del ledger root."""
+    from pipeline.importers.bank_account_resolver import BankAccountResolver
+    from pipeline.importers.cartola_pdf_importer import CartolaPdfImporter
+    return CartolaPdfImporter(BankAccountResolver(ledger_root / "accounts.beancount"))
+
+
+def validate_balance(
+    batch_id: str,
+    opening,
+    closing,
+    override_justification: str | None,
+    *,
+    user_email: str,
+    ledger_root: Path | None = None,
+    importer=None,
+    now_iso: str | None = None,
+) -> dict:
+    """Promueve el staging a archivo final con validación de balance (Story 9.9 AC1/AC4/AC5).
+
+    - Actualiza opening/closing del staging si difieren del JSON canónico.
+    - Corre `promote()` (bean-check). OK → validated. bean-check rojo sin override → discrepancia.
+    - Con `override_justification` → re-promote con `pad`+`balance` (la pad absorbe; bean-check pasa).
+    """
+    from decimal import Decimal
+
+    from pipeline.importers.cartola_pdf_importer import promote
+    from pipeline.importers.laudus_run import _ledger_root
+
+    root = Path(ledger_root) if ledger_root else _ledger_root()
+    staging = root / "imports" / "cartolas" / "_staging" / f"{batch_id}.cartola.json"
+    if not staging.exists():
+        raise StagingNotFound(batch_id)
+
+    model = CartolaCanonicalV1.model_validate_json(staging.read_text(encoding="utf-8"))
+    new_open, new_close = Decimal(str(opening)), Decimal(str(closing))
+    if new_open != model.balances.opening or new_close != model.balances.closing:
+        model.balances.opening = new_open
+        model.balances.closing = new_close
+        staging.write_text(model.model_dump_json(indent=2, by_alias=False), encoding="utf-8")
+
+    calculated = model.balances.opening + sum((t.amount for t in model.transactions), Decimal(0))
+    diff = model.balances.closing - calculated
+
+    justification = (override_justification or "").strip()
+    if justification and len(justification) < MIN_JUSTIFICATION:
+        raise OverrideJustificationTooShort(MIN_JUSTIFICATION)
+
+    # Discrepancia de balance sin override válido → no se promueve (bean-check fallaría igual). AC5.
+    if diff != 0 and not justification:
+        raise BalanceDiscrepancy(float(diff), float(calculated), float(model.balances.closing),
+                                 "closing ≠ opening + Σ transacciones")
+
+    # El override (pad+balance) solo aplica si hay una discrepancia REAL que absorber.
+    override = None
+    if diff != 0 and justification:
+        override = {"justification": justification, "user": user_email,
+                    "at": now_iso or datetime.now(timezone.utc).isoformat()}
+
+    importer = importer or _build_importer(root)
+    res = promote(batch_id, importer, root, override=override)
+    if not res["success"]:
+        # El balance enviado cuadra (o el pad lo absorbió) pero bean-check igual falló → la causa
+        # NO es el balance (cuenta sin abrir, archivo hermano roto). Override no ayuda; se surfacea.
+        raise BeanCheckFailed(res["error_msg"] or "bean-check falló")
+    return {"status": "validated", "file": res["file"], "git_sha": res["git_commit_sha"],
+            "override": override is not None}

@@ -1,0 +1,74 @@
+import { useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { confirmCategory, getPendingCategorization, type PendingTx } from '@/services/categorizacion'
+
+const fmt = (n: number | null) =>
+  n == null ? '—' : new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(n)
+
+/**
+ * Story 9.8 — revisión inline de categorías pendientes (subsume 5.2). Lista las tx con
+ * categoría sugerida/pendiente y permite al contador confirmar/corregir (PATCH de 9.7).
+ */
+export function CategorizacionPage() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['categorization-pending'],
+    queryFn: getPendingCategorization,
+  })
+
+  return (
+    <div className="p-6 space-y-6 max-w-4xl">
+      <h1 className="text-2xl font-semibold">Categorías pendientes</h1>
+      <p className="text-sm text-muted-foreground">
+        Transacciones con categoría sugerida automáticamente. Confirmá la sugerida o corregí la cuenta.
+      </p>
+
+      {isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
+      {error && <p className="text-sm text-destructive">{(error as Error).message}</p>}
+      {data && data.length === 0 && (
+        <Card className="p-6"><p className="text-sm text-muted-foreground">Nada pendiente. 🎉</p></Card>
+      )}
+
+      {data?.map((tx) => <PendingRow key={tx.tx_id} tx={tx} />)}
+    </div>
+  )
+}
+
+function PendingRow({ tx }: { tx: PendingTx }) {
+  const qc = useQueryClient()
+  const [category, setCategory] = useState(tx.current_category ?? '')
+
+  const mutation = useMutation({
+    mutationFn: () => confirmCategory(tx.tx_id, category.trim()),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['categorization-pending'] })
+    },
+  })
+
+  return (
+    <Card className="p-4 flex flex-wrap items-end gap-3">
+      <div className="flex-1 min-w-[200px]">
+        <p className="font-medium">{tx.narration || '(sin descripción)'}</p>
+        <p className="text-sm text-muted-foreground">
+          {tx.date} · {fmt(tx.amount)} ·{' '}
+          <span className="text-amber-600">⚠ {tx.current_match_source ?? 'pendiente'}</span>
+        </p>
+      </div>
+      <div className="flex-1 min-w-[240px]">
+        <label className="block text-xs text-muted-foreground mb-1">Cuenta de categoría</label>
+        <input
+          type="text"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          placeholder="Expenses:EAG:..."
+          className="w-full border rounded-md px-3 py-2 bg-background text-sm font-mono"
+        />
+      </div>
+      <Button onClick={() => mutation.mutate()} disabled={mutation.isPending || !category.trim()}>
+        {mutation.isPending ? 'Confirmando…' : 'Confirmar'}
+      </Button>
+      {mutation.error && <p className="w-full text-sm text-destructive">{(mutation.error as Error).message}</p>}
+    </Card>
+  )
+}

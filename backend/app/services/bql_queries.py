@@ -26,6 +26,12 @@ from backend.app.services.ledger_service import LedgerService
 # Roots that make up the balance sheet (AC3).
 _BALANCE_SHEET_ROOTS = "Assets|Liabilities|Equity"
 
+# Entidad matriz cuyo balance-sheet es CONSOLIDADO (EAG + las 4 hijas),
+# espejando el tab legacy `balance_sheet_eag` de Sheets. Las hijas son egresos
+# de EAG (971/1077 tx con contraparte en EAG). Seleccionar una hija en el filtro
+# sigue devolviendo SU slice — la separación por entidad no se pierde.
+_CONSOLIDATED_ENTITY = "EAG"
+
 
 def _account_meta(entries: list) -> dict[str, dict]:
     """Map full account name → its Open directive metadata."""
@@ -68,7 +74,11 @@ def balance_sheet_via_beancount(
     meta = _account_meta(entries)
     conn = ledger.connection()
 
-    pattern = _entity_pattern(_BALANCE_SHEET_ROOTS, entity)
+    if entity == _CONSOLIDATED_ENTITY:
+        # Consolidado: roots-only, sin segmento de entidad → todas las entidades.
+        pattern = f"^({_BALANCE_SHEET_ROOTS}):"
+    else:
+        pattern = _entity_pattern(_BALANCE_SHEET_ROOTS, entity)
     where = f'account ~ "{pattern}"'
     if date_to:
         where += f" AND date <= {date_to}"

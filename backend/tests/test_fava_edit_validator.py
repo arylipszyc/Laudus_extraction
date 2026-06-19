@@ -43,6 +43,10 @@ _SMOKE_FIXTURE = (
 )
 
 
+def _git(*args: str) -> None:
+    subprocess.run(["git", *args], check=True, capture_output=True, text=True)
+
+
 def _copy_template_ledger(dst: Path) -> Path:
     """Copy the mock ledger to a tmp dir and return path to its main.beancount."""
     shutil.copytree(LEDGER_TEMPLATE, dst, dirs_exist_ok=True)
@@ -92,6 +96,44 @@ def test_valid_edit_passes_no_revert(ledger_dir: Path) -> None:
     assert target.read_text("utf-8") == new_source, "valid edit must persist"
     snap = ext._snapshot_path_for(target)
     assert not snap.exists(), "snapshot must be cleaned up after success"
+    assert not (ledger_dir / "_meta" / "last-revert-message.json").exists()
+
+
+# ── Story 9.3 F2 — valid edit is committed + pushed to origin ────────
+
+
+def test_valid_edit_is_committed_and_pushed(ledger_dir: Path, tmp_path: Path) -> None:
+    main = ledger_dir / "main.beancount"
+    target = ledger_dir / "manual" / "2026-04.beancount"
+
+    # Convertir el ledger temporal en un repo git con un remote bare (origin).
+    bare = tmp_path / "origin.git"
+    _git("init", "--bare", str(bare))
+    _git("init", str(ledger_dir))
+    _git("-C", str(ledger_dir), "config", "user.email", "t@test")
+    _git("-C", str(ledger_dir), "config", "user.name", "t")
+    _git("-C", str(ledger_dir), "add", "-A")
+    _git("-C", str(ledger_dir), "commit", "-m", "init")
+    _git("-C", str(ledger_dir), "remote", "add", "origin", str(bare))
+    _git("-C", str(ledger_dir), "push", "origin", "HEAD")
+
+    pre = target.read_text("utf-8")
+    new_source = pre + "\n;; comentario válido agregado por el editor\n"
+
+    ledger = _load_ledger(main)
+    ext = _validator(ledger)
+    ext._snapshot_path_for(target).write_bytes(pre.encode("utf-8"))
+    target.write_text(new_source, encoding="utf-8")
+    ext.after_write_source(str(target), new_source)
+
+    # El edit válido persiste y se commiteó con mensaje [fava-edit].
+    assert target.read_text("utf-8") == new_source
+    local_log = subprocess.run(
+        ["git", "-C", str(ledger_dir), "log", "--oneline"], capture_output=True, text=True, check=True
+    ).stdout
+    assert "[fava-edit] manual/2026-04.beancount" in local_log
+    # El push a origin fue OK → NO se escribió el aviso de push fallido (si hubiera fallado,
+    # _commit_and_push deja last-revert-message.json). Junto con el commit local, prueba F2.
     assert not (ledger_dir / "_meta" / "last-revert-message.json").exists()
 
 

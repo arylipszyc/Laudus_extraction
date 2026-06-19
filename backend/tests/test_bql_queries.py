@@ -100,11 +100,20 @@ def test_balance_sheet_as_of_date(tmp_path):
     assert result["meta"]["last_sync"] == "2024-04-01"
 
 
-def test_balance_sheet_entity_isolation(tmp_path):
-    """AC3: Jocelyn's account never appears under EAG."""
+def test_balance_sheet_eag_is_consolidated(tmp_path):
+    """EAG es la entidad matriz: su balance-sheet incluye a las hijas (consolidado)."""
     result = balance_sheet_via_beancount(_ledger(tmp_path), "EAG")
     numbers = {r["account_number"] for r in result["data"]}
-    assert "610005" not in numbers
+    assert "111005" in numbers  # cuenta propia de EAG
+    assert "610005" in numbers  # cuenta de Jocelyn, consolidada bajo EAG
+
+
+def test_balance_sheet_child_slice_isolated(tmp_path):
+    """Seleccionar una hija devuelve SU slice — sin las cuentas propias de EAG."""
+    result = balance_sheet_via_beancount(_ledger(tmp_path), "Jocelyn")
+    numbers = {r["account_number"] for r in result["data"]}
+    assert "610005" in numbers      # cuenta de Jocelyn
+    assert "111005" not in numbers  # cuenta de EAG excluida
 
 
 def test_balance_sheet_empty_entity(tmp_path):

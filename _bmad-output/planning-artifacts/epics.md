@@ -936,7 +936,9 @@ Producto de la decisión de pivot c4 documentada en:
 
 El motor Beancount nos da: (a) double-entry validation nativa (`bean-check`), (b) directivas `Balance`/`pad` que reemplazan toda la lógica custom de FR22-25, (c) BQL para queries ad-hoc del contador vía Fava, (d) git history como audit log, (e) categorización con `smart_importer` integrada al import en lugar de pipeline separado. Costo: descartar ~30% de Story 4.0 (tablas `cartola_*`); preservar 70% (registries `plan_de_cuentas` + `bank_accounts`).
 
-### Scope incluido — 12 stories
+### Scope incluido — 16 stories
+
+> **Plan original = 12 stories (9.0–9.11).** Agregadas después por correct-course: 9.12 (2026-05-05, reconciliación cartolas), 9.13 (2026-05-06, RBAC), 9.14 (2026-06-17, migrar bank-accounts → cierre de Supabase) y 9.15 (2026-06-17, flip del balance-sheet a Beancount). Además, la Story 9.5 generó spikes/sub-stories con sufijo de letra (9.5b–9.5h) documentados en `sprint-status.yaml` — no se listan acá por ser derivados de ejecución, no scope de planning.
 
 - **Story 9.0** — Wrapper `bean-check` para Fava editor (pre-requisito de F2)
 - **Story 9.1** — Bootstrap histórico Beancount (F0; depende de Q4 cerrada antes de ejecutar)
@@ -949,7 +951,11 @@ El motor Beancount nos da: (a) double-entry validation nativa (`bean-check`), (b
 - **Story 9.8** — Frontend LAUDUS consume thin API + badge "pendiente revisar" (era 4.3 reformulada)
 - **Story 9.9** — Validación de balances post-import via `bean-check` (era 4.2 reformulada)
 - **Story 9.10** — Cron prices CLP/USD *(blocked-by-Q4)*
-- **Story 9.11** — Deprecation Sheets como source of truth
+- **Story 9.11** — Plan de cuentas en Beancount (SoT) + deprecación de Sheets/Supabase *(scope ampliado per ADR-001)*
+- **Story 9.12** — Dashboard de reconciliación sobre `cartola-discrepancies.jsonl` *(NUEVA 2026-05-05)*
+- **Story 9.13** — RBAC 3 roles (family / contador / admin) *(NUEVA 2026-05-06 — done)*
+- **Story 9.14** — Migrar bank-accounts a Beancount + apagar Supabase *(NUEVA 2026-06-17; depends_on 9.1, 10.3 — cierra el sunk-cost de Story 4.0)*
+- **Story 9.15** — Flip del balance-sheet a Beancount (dashboards Activos/Pasivos) *(NUEVA 2026-06-17; desbloqueada por 9.11 — último paso del cutover de dashboards)*
 
 ### Scope excluido (explícito)
 
@@ -1001,4 +1007,10 @@ Cada story tiene su propio archivo con AC + tasks + dev notes en `_bmad-output/i
 - [9.8 — Frontend LAUDUS consume thin API + badge](../implementation-artifacts/9-8-frontend-thin-api-badge-pendiente.md)
 - [9.9 — Validación de balances post-import](../implementation-artifacts/9-9-validacion-balances-bean-check.md)
 - [9.10 — Cron prices CLP/USD *(blocked-by-Q4)*](../implementation-artifacts/9-10-cron-prices-clp-usd.md)
-- [9.11 — Deprecation Sheets como source of truth](../implementation-artifacts/9-11-deprecation-sheets.md)
+- [9.11 — Plan de cuentas en Beancount (SoT) + deprecación de Sheets/Supabase](../implementation-artifacts/9-11-deprecation-sheets.md)
+- [9.12 — Dashboard de reconciliación](../implementation-artifacts/9-12-dashboard-reconciliacion.md) *(NUEVA 2026-05-05)*
+- [9.13 — RBAC 3 roles](../implementation-artifacts/9-13-rbac-3-roles.md) *(NUEVA 2026-05-06 — done)*
+- [9.14 — Migrar bank-accounts a Beancount + apagar Supabase](../implementation-artifacts/9-14-migrar-bank-accounts-beancount.md) *(NUEVA 2026-06-17 — destapada al verificar el frontend para 9.11; bank-accounts es el último consumidor vivo de Supabase. depends_on: [9.1, 10.3]. Cierra el sunk-cost de Story 4.0.)*
+- [9.15 — Flip del balance-sheet a Beancount](../implementation-artifacts/9-15-flip-balance-sheet-beancount.md) *(NUEVA 2026-06-17 — último paso del cutover de dashboards; desbloqueada por 9.11. Diseño: [design-note](design-note-balance-sheet-flip-2026-06-17.md).)*
+
+> **Nota de actualización (2026-06-17):** el encabezado "12 stories" y el listado de scope arriba quedaron desactualizados respecto de `sprint-status.yaml` (no reflejan 9.12, 9.13 ni 9.14, agregadas después del plan original). El índice autoritativo por-story es esta lista de links + `sprint-status.yaml`.

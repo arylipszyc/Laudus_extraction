@@ -214,3 +214,71 @@ hasta entonces.
 - Cron diario (Q4 cerrada con cron mensual).
 - Populación de `prices.beancount` — derivación automática vía plugin
   `implicit_prices` de Beancount es responsabilidad de Story 9.6b.
+
+---
+
+## Matching engine + reconciliación cartola ↔ Laudus (Story 9.6b)
+
+El parser básico (9.6a) emite el path "match perfecto". 9.6b agrega la **reconciliación
+cross-source**: cruza cada línea de cartola contra el asiento Laudus del mismo período/cuenta,
+clasifica en 7 estados, deriva la FX implícita de las líneas USD, valida contra BCCh y emite
+un log append-only de discrepancias.
+
+### Flujo
+
+```
+cartola JSON ─┐
+              ├─► MatchingEngine.match() ─► [MatchResult]  (1 por línea cartola + Laudus sobrantes)
+imports/laudus┘                                  │
+                                                 ▼
+                          ┌── USD + era FX (≥2026) ──► fx_calculator.calculate_fx() ──► FXResult
+                          │                                                                │
+                                                 ▼                                         ▼
+                          reconcile.process_match_result(MatchResult, FXResult) ──► ProcessDecision
+                                                 │                                         │
+                          (emit? flag? discrepancias)                                      │
+                                                 ▼                                         ▼
+                          reconcile.reconcile_and_build() ──► (entries beancount, discrepancias)
+                                                 │                                         │
+                                                 ▼                                         ▼
+                          imports/cartolas/{slug}.beancount            _meta/cartola-discrepancies.jsonl
+```
+
+### Los 7 estados (`matching_engine.py`)
+
+| Estado | Emite Transaction | Flag | Discrepancia | Sistema de verdad |
+|---|---|---|---|---|
+| `perfect` | sí | `*` | no | ambos |
+| `value-mismatch` | **NO** (bloqueante) | — | sí | resolución manual (9.12) |
+| `missing-in-laudus` | sí (desde cartola) | `!` | sí | cartola |
+| `missing-in-cartola` | sí (desde Laudus, CLP-only) | `!` | sí | Laudus |
+| `date-mismatch` | sí (fecha de cartola manda) | `!` | sí | cartola |
+| `description-mismatch` | sí (desc de cartola manda) | `!` | sí | cartola |
+| `category-mismatch` | sí (`suggested_category` en meta) | `!` | sí | cartola sugiere |
+
+Tolerancias: fecha ±3 días, similitud de descripción ≥ 0.85, monto exacto para CLP. USD no se
+compara por monto (moneda distinta al CLP de Laudus) → matchea por fecha+desc y la FX se deriva.
+
+### FX implícita (USD, era ≥ 2026-01-01)
+
+`fx_implied = CLP_laudus / USD_cartola`. Se valida contra el dólar observado de cierre de mes
+(`_meta/fx-bcch-eom.jsonl`, Story 9.10) con threshold 5%. Estados FX: `fx-out-of-tolerance`
+(> 5% → flag `!` + discrepancia), `fx-bcch-missing` (9.10 no corrió ese mes), `fx-implausible`
+(USD=0 o rate > 2000). El posting USD lleva price per-unit CLP → `implicit_prices` deriva la
+price directive. **Pre-2026 es CLP-only** (sin lógica FX, AC9).
+
+### Discrepancias (`_meta/cartola-discrepancies.jsonl`)
+
+Append-only, fuente única (sin mirror Supabase). Dedup por `(batch_id, cartola_line_no,
+laudus_je_id)` → re-correr el matching no duplica. La **resolución** (Story 9.12) se appendea
+como línea nueva referenciando el `discrepancy_id` original (audit trail completo). Al resolver,
+`reconcile.commit_reconciliation()` re-genera el archivo de cartola (write-and-replace) con
+bean-check + git commit `[reconciliation] resolve {id}: {action}` bajo el mismo `.import.lock`.
+
+### Resolver una discrepancia manualmente (runbook)
+
+1. Leer `_meta/cartola-discrepancies.jsonl` (Story 9.12 dashboard lo sirve; o `grep` directo).
+2. Decidir la acción (aceptar cartola / aceptar Laudus / ajuste manual).
+3. 9.12 invoca `commit_reconciliation(file, nuevo_contenido, discrepancy_id, action, ledger_root)`
+   → re-genera el `.beancount`, bean-check, commit + push.
+4. La resolución queda registrada con `append_resolution(discrepancy_id, {...})`.

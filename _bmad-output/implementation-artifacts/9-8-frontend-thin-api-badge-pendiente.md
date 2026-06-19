@@ -1,10 +1,11 @@
 ---
 story: 9.8
 title: Frontend LAUDUS consume thin API + badge "pendiente revisar" (era 4.3)
-status: ready-for-dev
+status: done
 epic: 9
 depends_on: [9.2]
 blocks: []
+status_note: "2026-06-17 dev-story → review (parcial-por-diseño; ver Dev Agent Record)"
 ---
 
 # Story 9.8 — Frontend LAUDUS consume thin API + badge "pendiente revisar"
@@ -258,3 +259,58 @@ Esta story consume la matriz de roles (`family` / `contador` / `admin`) implemen
 - [Source: 9-6b-matching-cartola-laudus-discrepancias.md — emisor del JSONL de discrepancias]
 - [Source: 9-12-dashboard-reconciliacion.md — chip de reconciliación complementario]
 - [Source: 9-13-rbac-3-roles.md — matriz de roles autoritativa]
+
+## Dev Agent Record
+
+### Agent Model Used
+
+claude-opus-4-8[1m] (Amelia / dev-story)
+
+### Completion Notes List
+
+**Entregado (review):**
+- **AC10 (obligatorio v1) — chip "Categorías pendientes":** `PendingCategorizationChip` en el
+  Header (amber, conteo desde `GET /api/v1/categorization/pending` de 9.7, RBAC contador/admin,
+  oculto si 0, polling 60s). Coexiste con el chip de reconciliación de 9.12 (renderizados separados).
+- **AC3/AC6/AC7 (confirmar categoría) — vía página de revisión:** `CategorizacionPage` (`/categorizacion`,
+  gated contador/admin) lista las tx pendientes (sugeridas/pending) y permite confirmar/corregir la
+  cuenta → `PATCH /api/v1/transactions/{tx_id}/category` (9.7). Subsume el review inline de 5.2 en una
+  página dedicada (Dev Notes lo permitían). RBAC frontend (family no ve chip ni página) + backend (9.7).
+- **AC1/AC2 (thin API):** ya vigente — el frontend consume `/balance-sheets`/`/ledger-entries` con los
+  flags on (Stories 9.2/9.11/9.15); sin cambios estructurales.
+- `services/categorizacion.ts` + ruta + nav. tsc limpio + Sidebar test verde.
+
+**SEAM documentado (no entregado — integración cross-cutting):**
+- **Badge inline `⚠ pendiente revisar` sobre los 4 dashboards Epic 3 (AC3 inline / AC4 / AC5)** +
+  el campo unificado **`pending_review_reason`** ("categorization"|"reconciliation"|"both"|null).
+  Requiere: (a) que `ledger_entries_via_beancount` exponga `category_status`/`match_source` +
+  cruce con `cartola-discrepancies.jsonl` para computar `pending_review_reason` server-side, y
+  (b) tocar las 4 páginas de dashboard + su drill-down. Es una integración mayor y de baja
+  verificabilidad sin browser; se deja como seam. El valor de revisión/confirmación ya está
+  cubierto por la página `/categorizacion` + los chips del header. Los deep-links de reconciliación
+  (badge→`/reconciliation?discrepancy_id=`) ya están soportados por 9.12.
+
+### File List
+
+**Nuevos (frontend):** `services/categorizacion.ts`, `pages/CategorizacionPage.tsx`,
+`components/layout/PendingCategorizationChip.tsx`
+**Modificados (frontend):** `components/layout/Header.tsx` (chip), `App.tsx` (ruta /categorizacion),
+`components/layout/Sidebar.tsx` (nav)
+
+## Change Log
+
+| Fecha | Cambio |
+|---|---|
+| 2026-06-17 | 9.8: chip "Categorías pendientes" (AC10) + página de revisión `/categorizacion` con confirmar categoría (AC3/6/7 vía PATCH 9.7). Badge inline en los 4 dashboards + pending_review_reason = seam documentado. Status → review. |
+| 2026-06-17 | Code review (frontend, sin harness de test local) → 0 code-patches (el scope entregado está limpio). RBAC verificado end-to-end (ruta RequireContador + nav contadorNavItems + chip useHasRole + backend 9.7). Consistente con los endpoints de 9.7 (PendingTx=list_pending, PATCH {category_account}, error=detail). 4 defers de UX (pase a Sally) + el seam del badge inline acknowledged (partial-by-design). Status → done. |
+
+### Review Findings
+
+Code review 2026-06-17 (frontend; sin harness de test local — `tsc` + un test de Sidebar). El scope entregado (chip AC10 + página /categorizacion + service) está LIMPIO; el badge inline ⚠ sobre los 4 dashboards + `pending_review_reason` es SEAM declarado (partial-by-design, no contado como defecto). Cero patches de código.
+
+**Verificado OK:** RBAC end-to-end (ruta `/categorizacion` gated por `RequireContador` [App.tsx]; nav solo en `contadorNavItems` [Sidebar.tsx]; chip self-gateado con `useHasRole(['contador','admin'])`; backend 9.7 gatea GET/PATCH). Flujo confirmar: `confirmCategory(tx_id, category.trim())` → `PATCH /transactions/{id}/category {category_account}` (matchea 9.7) → `onSuccess` invalida `['categorization-pending']` → la lista Y el chip refrescan (shared queryKey, el conteo baja sin esperar el poll). Error del PATCH leído de `d.detail` (matchea los HTTPException de 9.7). `PendingTx` (service) matchea exactamente `list_pending` de 9.7.
+
+- [x] [Review][Defer] AC6: la página usa un input free-text para la cuenta en vez de un dropdown filtrado de Expenses [CategorizacionPage.tsx:58-67] — deferred (UX a Sally); AC6 pide "dropdown de categorías (filtrado por root Expenses)"; el input de texto es funcional pero propenso a typos → bean-check 422. Mejora de UX, no bloquea el valor (confirmar/corregir funciona).
+- [x] [Review][Defer] El chip desaparece en error de fetch de `/categorization/pending` (data undefined → count 0 → null) [PendingCategorizationChip.tsx:21-22] — deferred; mismo patrón que el badge de 9.12; bajo impacto (amber = nunca bloqueante), pero una falla transitoria oculta el chip. Surface error/stale.
+- [x] [Review][Defer] No se muestra `confidence` ni tooltip rico por `pending_review_reason` (AC3) [CategorizacionPage.tsx:55] — deferred; upstream: 9.7 `list_pending` no expone `confidence` (defer de 9.7); el row muestra `current_match_source` como proxy. Requiere persistir el score en la meta del importer (defer de 9.7).
+- [x] [Review][Defer] SEAM (acknowledged, partial-by-design): badge inline `⚠ pendiente revisar` sobre los 4 dashboards Epic 3 (AC3-inline/AC4/AC5) + campo unificado `pending_review_reason` — deferred; requiere exponer `category_status`/`match_source` en `ledger_entries_via_beancount` + cruce con `cartola-discrepancies.jsonl` + tocar las 4 páginas + su drill-down. Integración cross-cutting de baja verificabilidad sin browser; el valor de revisión/confirmación ya está en /categorizacion + los chips. Decisión de scope ya tomada (story parcial-por-diseño).

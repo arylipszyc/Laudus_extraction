@@ -1,7 +1,7 @@
 ---
 story: 9.7
 title: Categorización con smart_importer + Patrón B (era 5.1)
-status: ready-for-dev
+status: done
 epic: 9
 depends_on: [9.6]
 blocks: []
@@ -138,6 +138,23 @@ Esta story implementa el `CategorizationService` real que Story 9.6 inyecta como
 
 ## Tasks / Subtasks
 
+> **Cierre 2026-06-17 (dev-story):** decisión Ary — implementar el core determinista; **smart_importer
+> (Task 3 / AC3) y Gemini fallback (AC5) quedan como SEAMS inyectables** (sin agregar la dep ML al
+> deploy ni llamadas Gemini pagas en una corrida autónoma; la API de smart_importer estaba sin
+> verificar). AC5 lee cuentas de `accounts.beancount` (Supabase deprecado en 9.11/9.14), no Supabase.
+
+- [x] Task 1: Description normalizer — `categorization/normalizer.py` + 10 tests (AC10)
+- [x] Task 2: `categorization-history.jsonl` reader/writer — `categorization/history.py` (count_for, dominant_category, build_record, append_correction)
+- [~] Task 3: Integración smart_importer — **SEAM** (`SmartImporterAdapter` Protocol; se inyecta cuando se decida instalar la dep)
+- [x] Task 4: `CategorizationService` orquestador — pipeline 5-stage (supra/smart/historical/gemini/suspense) + cache LRU + invalidate
+- [x] Task 5: Adapter para 9.6 — predictor extendido a `(category, match_source, flag)`; 9.6a propaga la flag al `data.Transaction`
+- [x] Task 6: Endpoint `PATCH /api/v1/transactions/{tx_id}/category` (AC7) — re-render + bean-check + history + git; tx_id = sha256(file,line,narration,monto)[:12]
+- [x] Task 7: Endpoint `POST /api/v1/transactions/bulk-confirm` (AC8) — confirma sugeridas (no las pending), single commit
+- [x] Task 8: Endpoint `GET /api/v1/categorization/pending` (AC9) — tx con category_status ∈ (suggested, pending)
+- [x] Task 9: Tests — 26 (normalizer 10, history+service 11, endpoints 5)
+
+<details><summary>Tasks originales</summary>
+
 - [ ] Task 1: Description normalizer
   - [ ] Crear `pipeline/importers/categorization/normalizer.py`
   - [ ] Función pura `normalize(description: str) → str`
@@ -191,7 +208,69 @@ Esta story implementa el `CategorizationService` real que Story 9.6 inyecta como
   - [ ] Integration smart_importer: train sobre fixture ledger → predict en test set
   - [ ] Integration endpoint PATCH: edit válido → flag pasa a `*`, history appended, bean-check OK; edit inválido → 400, ledger intocado
 
+</details>
+
 ---
+
+## Dev Agent Record
+
+### Agent Model Used
+
+claude-opus-4-8[1m] (Amelia / dev-story)
+
+### Debug Log References
+
+- 26 tests nuevos: `test_categorization_normalizer.py` (10), `test_categorization_service.py` (11),
+  `test_transactions_categorization.py` (5). Suite completa **596 passed / 1 xfailed / 1 failed**
+  (rojo pre-existente date-dependiente).
+
+### Completion Notes List
+
+- **Decisión Ary:** core determinista ahora; smart_importer (AC3) + Gemini (AC5) = seams inyectables.
+  Sin esos adapters el pipeline corre supra → historical → suspense (degradación limpia).
+- **Pipeline 5-stage** en `CategorizationService` (regla supra ≥30 gana siempre; smart_importer
+  threshold 0.85; historical 1-29; Gemini lista-cerrada; Suspense). Cache LRU + `invalidate` (AC7).
+- **Wiring a 9.6a (Task 5):** extendí el `CategoryPredictor` a `(category, match_source, flag)` y
+  `cartola_pdf_importer.extract` ahora propaga la flag del predictor (antes la derivaba de
+  match_source=="pending"). `category_status`: confirmed si flag `*`, suggested si `!`+sugerencia,
+  pending si sin sugerencia. Backward-compatible (Noop sigue pending/!).
+- **Feedback loop (AC7/8/9):** `PATCH /transactions/{tx_id}/category` re-genera el archivo de cartola
+  (write-and-replace determinista, no text-surgery), bean-check (rollback si rojo), appendea a
+  `categorization-history.jsonl` (cierra el loop con la regla supra) y commitea. `tx_id` estable =
+  sha256(file,line,narration,monto)[:12]. `bulk-confirm` confirma las sugeridas (no las pending).
+  `GET /categorization/pending` lista lo pendiente. Gated por flag + RBAC contador/admin.
+- **AC5 alineado a la deprecación:** la lista `allowed` de Gemini son las cuentas Expenses de
+  `accounts.beancount`, no la tabla Supabase `plan_de_cuentas`.
+- **PENDIENTE (seam):** instalar `smart_importer` + verificar su API + escribir `SmartImporterAdapter`
+  real; agregar `GeminiClient.suggest_category`. Decisión de dependencia/costo para Ary.
+
+### File List
+
+**Nuevos (pipeline):** `pipeline/importers/categorization/{__init__,normalizer,history,service}.py` + `README.md`
+**Modificados (pipeline):** `category_predictor.py` (3-tuple flag), `cartola_pdf_importer.py` (propaga flag)
+**Nuevos (backend):** `api/v1/transactions/{__init__,service,router,schemas}.py`, `api/v1/categorization/{__init__,router}.py`
+**Modificados (backend):** `api/v1/router.py` (registra transactions + categorization)
+**Nuevos (tests):** `test_categorization_normalizer.py`, `test_categorization_service.py`, `test_transactions_categorization.py`
+
+## Change Log
+
+| Fecha | Cambio |
+|---|---|
+| 2026-06-17 | 9.7: pipeline de categorización 5-stage (core determinista; smart_importer/Gemini=seams) + feedback loop (PATCH/bulk/pending) + normalizer + history. 26 tests. Status → review. |
+| 2026-06-17 | Code review 3 capas → 2 patches aplicados (history en el commit [fix feedback-loop efímero]; bulk-confirm scoping real por batch [Decisión Ary: meta batch_id en el importer + filtro]) + 2 tests nuevos (612 suite, 0 regresiones). 6 defers anotados. Status → done. |
+
+### Review Findings
+
+Code review 3 capas (Blind Hunter + Edge Case Hunter + Acceptance Auditor), 2026-06-17. Verificado contra código real (los números de línea de las capas venían alucinados; corregidos abajo). Seams AC3/AC5 (smart_importer/Gemini) NO contados como defectos (out-of-scope declarado).
+
+- [x] [Review][Patch] bulk-confirm: scoping real por batch (AC8) — **Decisión Ary 2026-06-17: opción 2 ("el día de mañana lo podemos necesitar").** APLICADO: el importer ahora estampa `batch_id` en la meta de cada tx (derivado del staging `{batch_id}.cartola.json`); `bulk_confirm` filtra por `meta.batch_id` cuando el param viene seteado (vacío/None → confirma todas, backward-compatible). Las cartolas ya committeadas sin la meta necesitan re-import para ser batch-scopables (forward-looking). +1 test (2 batches → solo confirma el pedido).
+- [x] [Review][Patch] `categorization-history.jsonl` no se incluía en el commit → el feedback loop de la regla supra (AC2) era efímero — APLICADO: `_commit`/`update_category` ahora stagean también `ledger/_meta/categorization-history.jsonl` en el mismo commit (antes solo el archivo de cartola; el `git reset --hard` del refresh del backend lo descartaba SIEMPRE, así la supra ≥30 nunca acumulaba). +1 test (captura los paths del commit).
+- [x] [Review][Defer] AC9 incompleto: list_pending devuelve lista plana (no agrupada por bank_account_id→period) y sin `currency` ni `current_confidence` [transactions/service.py:46-70] — deferred; el frontend 9.8 consume el shape actual; confidence requiere persistir el score en la meta del importer (hoy solo propaga match_source/flag)
+- [x] [Review][Defer] Cache key = solo normalize(description), ignora amount + bank_account_id [categorization/service.py:66-72] — deferred; inerte mientras smart_importer/Gemini sean seams (supra/historical son description-only); al wirear los seams la key debe incluir amount+bank_account_id
+- [x] [Review][Defer] normalizer: descripciones que normalizan a "" colapsan juntas (all-numeric, "REF <folio>") + solo quita el último grupo de dígitos [categorization/normalizer.py:24-31] — deferred; bajo impacto (history descarta key vacía; resuelven a suspense igual)
+- [x] [Review][Defer] history._load crashea si una línea es JSON válido no-objeto (123, "foo", [..]) [categorization/history.py:52-59] — deferred; defensivo, el archivo lo escribe build_record (siempre objeto)
+- [x] [Review][Defer] regla supra: most_common(1) sin desempate determinista ante empate exacto (30 catA / 30 catB) [categorization/history.py:64-70] — deferred; spec-compliant (30 a la misma cat satisface AC2), solo nondeterminismo de tie-break
+- [x] [Review][Defer] meta["filename"] subscript duro en update_category/bulk_confirm → KeyError 500 si falta [transactions/service.py:145,193] — deferred; las entries del ledger siempre traen filename, bajo riesgo
 
 ## Dev Notes
 
