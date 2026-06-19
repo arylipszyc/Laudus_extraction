@@ -80,8 +80,16 @@ Runbooks de rollback ya escritos: `docs/rollback-deprecation-sheets.md` (9.11 + 
 > 4. Recién ahí: flip `USE_BEANCOUNT_ENGINE_BALANCE_SHEET=true` + smoke.
 > Output en `_handoff/parity-out2.txt` (gitignored).
 
-- [ ] (1) Consolidar el motor del balance-sheet (con Winston).
-- [ ] (2) Fix del doble de 211005 + chequear otras "Apertura".
+- [x] (1) Consolidar el motor del balance-sheet (con Winston) — **HECHO 2026-06-19**.
+      `balance_sheet_via_beancount`: `entity=="EAG"` → patrón roots-only `^(Assets|Liabilities|Equity):`
+      (consolidado, todas las entidades); hijas conservan su slice. Shape JSON intacto, tests verdes
+      (14/14). Selector frontend sin cambios (EAG=consolidado, hija=su slice). Drill-down per-entidad
+      = decisión abierta (ver 🟡). Flag sigue OFF.
+- [x] (2) Fix del doble de apertura — **HECHO 2026-06-19** (commit `fc4f2ff`, ancestro de HEAD).
+      `opening-2021.beancount` quedó vacío (solo comentarios) → se removieron TODOS los `pad`/`balance`
+      del bootstrap 9.1; la apertura vive solo en el JE 140 "Saldo inicial" del importer Laudus (fuente
+      canónica). Verificado: `211005` = **-349.482.802 CLP** (antes -698M doblado) = valor Sheets;
+      `bean-check` exit 0. Por construcción no queda segunda fuente para ninguna de las 12 cuentas.
 - [ ] (3) Spot-check de 2-3 cuentas vs Laudus.
 - [ ] (4) Flip + smoke. Re-correr el parity (script ya filtra A/L/E; falta el modo consolidado):
       `GOOGLE_APPLICATION_CREDENTIALS=... GOOGLE_SHEET_ID=... LEDGER_PATH=ledger/main.beancount PYTHONUTF8=1 python scripts/parity_check_balance_sheet.py`
@@ -138,6 +146,12 @@ Runbooks de rollback ya escritos: `docs/rollback-deprecation-sheets.md` (9.11 + 
 - [ ] **Pase de UX a Sally** — defers de frontend (9.8/9.12): badge inline sobre los 4 dashboards,
       dropdown de Expenses en `/categorizacion`, chips que desaparecen en error de fetch. Detalle
       en `_bmad-output/implementation-artifacts/deferred-work.md`.
+- [ ] **Drill-down del balance-sheet consolidado de EAG** (post-consolidación, paso 1 hecho
+      2026-06-19): `balance_sheet_via_beancount` ya consolida EAG (EAG + hijas), pero el detalle de
+      ledger (`ledger_entries_via_beancount`) **sigue filtrando por entidad**. Si en el balance de EAG
+      se hace click en una cuenta de hija, su detalle NO aparece bajo "EAG". Decidir al hacer el flip
+      si el drill-down de EAG también consolida (mismo patrón roots-only) o se deja per-entidad.
+      Confinado a UX del drill-down; no bloquea el flip del balance-sheet.
 
 ---
 
