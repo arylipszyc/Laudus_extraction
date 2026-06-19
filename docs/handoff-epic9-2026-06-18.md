@@ -52,12 +52,32 @@ Runbooks de rollback ya escritos: `docs/rollback-deprecation-sheets.md` (9.11 + 
 > 5. ~10 diffs chicos en cuentas reales de EAG (millones) — estilo "fantasmas de marzo" (9.11),
 >    probable staleness de Sheets; confirmar cuenta por cuenta vs Laudus.
 >
-> **→ El flip NO va hasta resolver: (a) la decisión de consolidación EAG+hijas, (b) el doble de
-> 211005, (c) crear/poblar los tabs de las 4 entidades o aceptar que su balance vive solo en
-> beancount.** Output completo en `_handoff/parity-out2.txt` (gitignored).
+> **Decisión Ary 2026-06-18 (refinada):** los movimientos de las hijas **son egresos de EAG** —
+> verificado: de 1077 tx que tocan cuentas de hijas, **971 tienen contraparte en EAG** (604
+> Assets/bancos + 347 Expenses). → **Consolidar** (EAG = EAG + hijas); la separación por entidad se
+> hará después como reporte. Además: **"Laudus prima sobre Sheets"** → los diffs chicos donde
+> beancount espeja Laudus son Sheets stale, no bloquean (beancount es la verdad).
+>
+> **Probado (read-only, sin tocar el motor):** beancount CONSOLIDADO (todas las entidades, A/L/E)
+> vs el tab `balance_sheet_eag` (que ya era consolidado) → **~20 diffs**. De esos: `211005` es el
+> doble real de beancount (va el fix del ledger); las otras ~19 son beancount-vs-Sheets (ej.
+> inversiones de hijas `6/7/8/9 0005`, `613019`) que por "Laudus prima" son Sheets stale → beancount
+> correcto, pero conviene spot-check de 2-3 contra Laudus.
+>
+> **→ Camino al flip (supersede el 9.15 per-entity original):**
+> 1. **Consolidar el motor** (`balance_sheet_via_beancount`: EAG → sin filtro de entidad, o un modo
+>    "consolidado") — cambio de diseño chico, **pasar por Winston** (afecta el selector de entidad
+>    del frontend). NO es un flip de config.
+> 2. **Fix del doble de `211005`** (Laudus "Saldo inicial" + `pad` del bootstrap) en el ledger/9.1;
+>    chequear otras cuentas "Apertura".
+> 3. **Spot-check de 2-3 de los ~19** contra Laudus para confirmar "Laudus prima".
+> 4. Recién ahí: flip `USE_BEANCOUNT_ENGINE_BALANCE_SHEET=true` + smoke.
+> Output en `_handoff/parity-out2.txt` (gitignored).
 
-- [ ] Resolver los 3 puntos del bloque ⚠️ de arriba (decisión + fix de 211005 + entidades).
-- [ ] Re-correr el parity con creds prod (script ya filtra A/L/E):
+- [ ] (1) Consolidar el motor del balance-sheet (con Winston).
+- [ ] (2) Fix del doble de 211005 + chequear otras "Apertura".
+- [ ] (3) Spot-check de 2-3 cuentas vs Laudus.
+- [ ] (4) Flip + smoke. Re-correr el parity (script ya filtra A/L/E; falta el modo consolidado):
       `GOOGLE_APPLICATION_CREDENTIALS=... GOOGLE_SHEET_ID=... LEDGER_PATH=ledger/main.beancount PYTHONUTF8=1 python scripts/parity_check_balance_sheet.py`
 - [ ] Verificar **exit 0** (solo diffs esperados TC→Liabilities). Si exit 1 con inesperados →
       **NO flipear**, investigar.
