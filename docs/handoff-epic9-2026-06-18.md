@@ -18,13 +18,11 @@ Runbooks de rollback ya escritos: `docs/rollback-deprecation-sheets.md` (9.11 + 
 
 ---
 
-## Fase 0 — Merge + baseline (pre-condición de todo lo demás)
+## Fase 0 — Merge + baseline (pre-condición de todo lo demás) — ✅ HECHO 2026-06-19
 
-- [ ] Revisar/abrir PR de `feat/10-3-cuentas-pendientes` → `main` (trae el remanente del Epic 9:
-      7 stories de código + el review).
-- [ ] Merge a `main`.
-- [ ] Redeploy del **backend** desde `main` (`POST /deploys`). Health check OK. Los flags
-      `USE_BEANCOUNT_ENGINE_*` ya están como en prod → sin cambio de comportamiento.
+- [x] PR #16 `feat/10-3-cuentas-pendientes` → `main` creado y **mergeado** (merge commit `527dfe2`).
+- [x] **Backend redeployado** desde main (auto-deploy de Render, `dep-d8qsuvv...` → **live**). Health OK.
+      Flags sin cambio en ese deploy → sin cambio de comportamiento; prod tomó #1+#2 + los 16 patches.
 
 ## Fase 1 — 🔴 Cerrar la ventana de dashboards congelados (URGENTE) — 9.15 + 9.11
 
@@ -98,16 +96,20 @@ Runbooks de rollback ya escritos: `docs/rollback-deprecation-sheets.md` (9.11 + 
       sobre -3.300M (0,9%) = fantasma chico. Por "Laudus prima" no bloquean.
       ⚠️ **Avisar a la family:** post-flip, números point-in-time históricos se verán distintos del
       Sheets viejo (más bajos a fecha pasada) porque beancount es as-of-date real, no acumulado.
-- [ ] (4) Flip + smoke. El parity da exit 1 por diseño (no conoce "Laudus prima"); el GO es humano:
-      los 11 residuales son Sheets-side → **GO**. Re-correr el parity para confirmar el set:
-      `GOOGLE_APPLICATION_CREDENTIALS=... GOOGLE_SHEET_ID=... LEDGER_PATH=ledger/main.beancount PYTHONUTF8=1 python scripts/parity_check_balance_sheet.py`
-- [ ] Verificar **exit 0** (solo diffs esperados TC→Liabilities). Si exit 1 con inesperados →
-      **NO flipear**, investigar.
-- [ ] En Render: `USE_BEANCOUNT_ENGINE_BALANCE_SHEET=true` + **`POST /deploys`**.
-- [ ] Smoke `BalanceSheetPage` (5 entidades, Q1 2026 + FY 2025): charts cargan, **TC aparecen
-      como Pasivo** (cambio esperado).
-- [ ] **Avisar a la family**: las tarjetas ahora se ven como pasivo (modelado contable correcto).
-- [ ] MEMORY (reference): balance-sheet en beancount + decisión de prender sin gate de contadora.
+- [x] (4) **FLIP HECHO 2026-06-19.** GO humano por "Laudus prima" (los 11 residuales son Sheets-side).
+      `USE_BEANCOUNT_ENGINE_BALANCE_SHEET=true` seteado vía Render API (las otras flags intactas) +
+      deploy `dep-d8qt3ce...` → **live**. Los dashboards Activos/Pasivos ahora leen Beancount
+      consolidado.
+- [ ] **Smoke `BalanceSheetPage`** (Ary, en browser — Google OAuth): charts cargan, **TC como Pasivo**.
+- [ ] **Avisar a la family** (Ary): TC ahora se ven como pasivo (modelado correcto) + números
+      point-in-time históricos más bajos a fecha pasada (beancount es as-of-date real, no acumulado).
+- [ ] MEMORY (reference): balance-sheet en beancount LIVE 2026-06-19 + consolidación EAG+hijas +
+      fix del doble de apertura (~727M) + decisión de prender sin gate de contadora.
+
+> **Rollback si algo se ve mal:** `USE_BEANCOUNT_ENGINE_BALANCE_SHEET=false` (Render API o dashboard)
+> + `POST /deploys` → vuelve a leer Sheets. Runbook: `docs/rollback-deprecation-sheets.md`. (Nota: los
+> tabs de Sheets ya no se refrescan — el cron se borró en 9.11 — así que el rollback muestra el último
+> snapshot estático.)
 
 ## Fase 2 — Deploy de Fava (9.3)
 
