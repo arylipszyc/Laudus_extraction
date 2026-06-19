@@ -68,8 +68,14 @@ Runbooks de rollback ya escritos: `docs/rollback-deprecation-sheets.md` (9.11 + 
 > 1. **Consolidar el motor** (`balance_sheet_via_beancount`: EAG → sin filtro de entidad, o un modo
 >    "consolidado") — cambio de diseño chico, **pasar por Winston** (afecta el selector de entidad
 >    del frontend). NO es un flip de config.
-> 2. **Fix del doble de `211005`** (Laudus "Saldo inicial" + `pad` del bootstrap) en el ledger/9.1;
->    chequear otras cuentas "Apertura".
+> 2. **Fix del doble de apertura — SISTÉMICO (chequeo 2026-06-18):** NO es solo el 211005.
+>    **12 de 12 cuentas con apertura están dobladas exacto** (cada una con un `pad` del bootstrap
+>    9.1 + un "Saldo inicial" de Laudus, ambos por el mismo monto) → **~727M CLP doble-contados**,
+>    en EAG y las 4 hijas (111005/111007/111009/115099/115019/115005/211005 de EAG; 610005/613019
+>    de Jocelyn; 710005 Jeannette; 810005 Johanna; 910005 Jael). Explica el grueso de los diffs del
+>    parity consolidado. **Confinado al balance-sheet** (cuentas Assets/apertura) → el reporte de
+>    gastos NO está afectado (por eso 9.11 cuadra y esto no). Fix = quitar el `pad` redundante (o el
+>    "Saldo inicial") para esas 12 cuentas + re-validar bean-check. Territorio 9.1/9.4.
 > 3. **Spot-check de 2-3 de los ~19** contra Laudus para confirmar "Laudus prima".
 > 4. Recién ahí: flip `USE_BEANCOUNT_ENGINE_BALANCE_SHEET=true` + smoke.
 > Output en `_handoff/parity-out2.txt` (gitignored).
