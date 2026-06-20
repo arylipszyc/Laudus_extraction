@@ -11,6 +11,10 @@ class BalanceSheetRecord(BaseModel):
     # Patch 4: add defaults to all required string fields — guards against empty Sheets cells
     account_id: Any = None
     account_number: str = ""
+    # Path beancount completo (ej. "Assets:Jocelyn:..."). El frontend agrupa por la raíz contable;
+    # sin declararlo aquí, el response_model lo descartaba y las cuentas de las hijas (códigos 6/7/8/9)
+    # y las T/C caían en "Otros". Default "" → el path legacy de Sheets (sin `account`) sigue válido.
+    account: str = ""
     account_name: str = ""
     debit: float = 0.0
     credit: float = 0.0

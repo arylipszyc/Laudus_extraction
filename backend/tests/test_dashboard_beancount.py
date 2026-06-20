@@ -61,6 +61,9 @@ def test_balance_sheets_beancount_path(tmp_path, monkeypatch):
     body = resp.json()
     bank = next(r for r in body["data"] if r["account_number"] == "111005")
     assert bank["debit_balance"] == 70000.0
+    # El response_model debe exponer `account` (path beancount) para que el frontend agrupe por raíz
+    # contable; sin esto las cuentas de hijas/T/C caen en "Otros".
+    assert bank["account"] == "Assets:EAG:Bancos:TestBank-111005"
     assert body["meta"]["last_sync"] is not None
 
 
