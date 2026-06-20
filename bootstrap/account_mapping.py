@@ -46,6 +46,16 @@ MAP_CATEGORIA1_TO_ROOT_ENTITY: dict[str, tuple[str, str]] = {
 # Q7 (corrección semántica): tarjeta_credito y linea_credito pasan a
 # Liabilities — independiente de la Categoria1 Laudus (que históricamente
 # las clasificaba mal en Activos).
+#
+# ⚠️ SUPERSEDED 2026-06-20 (para tarjeta_credito): decisión de Ary — el ledger debe ser
+# espejo FIEL de Laudus, y en Laudus las TC son GASTO (código 4xxx). El override que las
+# forzaba a Liabilities se DESHIZO en el ledger vivo: las 9 cuentas TC son ahora
+# `Expenses:EAG:TC:*` (ver docs/handoff-tc-gasto-2026-06-20.md, PR #19). La corrección
+# contable plena (deuda real como pasivo) se hace con asientos al importar la cartola
+# (diseño de Valentina), NO con este override. La SoT del plan de cuentas es
+# `ledger/accounts.beancount`; este script es solo disaster-recovery (deprecado, depende
+# de Supabase). Si se re-bootstrappea desde cero, este override REINTRODUCE el bug —
+# ajustar el mapping de tarjeta_credito a Expenses antes de regenerar.
 
 MAP_BANK_TYPE_TO_ROOT_GROUP: dict[str, tuple[str, str]] = {
     "cta_corriente": ("Assets", "Bancos"),
