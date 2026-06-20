@@ -6,6 +6,15 @@
 option "title" "LAUDUS — EAG Family Office"
 option "operating_currency" "CLP"
 
+;; Display SOLO (no toca valores): CLP sin decimales (el peso chileno no tiene
+;; centavos); USD mantiene 2. `display_precision` afecta cómo se MUESTRAN los
+;; números, nunca cómo se almacenan ni cómo se valida el balance.
+option "display_precision" "CLP:1"
+option "display_precision" "USD:0.01"
+
+;; Formato de números en Fava: locale chileno (separador de miles con punto).
+2020-01-01 custom "fava-option" "locale" "es_CL"
+
 plugin "beancount.plugins.implicit_prices"
 plugin "beancount.plugins.check_commodity"
 ;; NO usar auto_accounts — explicit opens only.

@@ -135,16 +135,16 @@
   Assets:EAG:Bancos:BancoSantander63188824-111009  2036517.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -502120.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1534397.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  1534397.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  502120.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  1534397.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  502120.00 CLP
 
 2021-04-07 * "USD46,31 Visa/Mastercard Santander EAG"
   id: "225"
   je_num: "224"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -33390.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  27196.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  6194.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  27196.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  6194.00 CLP
 
 2021-04-07 * "Gabriela Navarro - Finiquito"
   id: "226"
@@ -195,8 +195,8 @@
   je_num: "228"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1231964.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  178270.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  1053694.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  178270.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  1053694.00 CLP
 
 2021-04-09 * "Margarita G. Psicologa Jael Avayu"
   id: "248"
@@ -269,7 +269,7 @@
   je_num: "257"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -197163.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  197163.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  197163.00 CLP
 
 2021-04-13 * "V. Celia Uscuvilca Impto Unico Marzo-21"
   id: "261"
@@ -381,21 +381,21 @@
   Assets:EAG:ControlYLiquidacin-115099  7340.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  35680.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  101650.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  11727224.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  11727224.00 CLP
 
 2021-04-19 * "American Express  8083 Marzo-21 EAG"
   id: "266"
   je_num: "265"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -75363.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  75363.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  75363.00 CLP
 
 2021-04-19 * "Visa Banco de Chile 1168 Marzo-21 EAG"
   id: "267"
   je_num: "266"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -52625.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  52625.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  52625.00 CLP
 
 2021-04-20 * "F29 Odontologia - Marzo 2021"
   id: "282"

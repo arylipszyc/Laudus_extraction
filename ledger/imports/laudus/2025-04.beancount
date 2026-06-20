@@ -230,14 +230,14 @@
   je_num: "4627"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -6197367.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  6197367.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  6197367.00 CLP
 
 2025-04-10 * "Mastercard Santander 1234 Eduardo Avayu"
   id: "4729"
   je_num: "4706"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1583775.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  1583775.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  1583775.00 CLP
 
 2025-04-10 * "Visa Santander 0858 Eduardo Avayu"
   id: "4730"
@@ -250,7 +250,7 @@
   Assets:EAG:ControlYLiquidacin-115099  61993.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  4599375.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2456067.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  620625.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  620625.00 CLP
 
 2025-04-10 * "Victoria Svigilsky de Raquel Ventura"
   id: "4739"
@@ -317,7 +317,7 @@
   je_num: "4709"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -44440.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  44440.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  44440.00 CLP
 
 2025-04-15 * "Visa BCI 1027 EAG Marzo 2025"
   id: "4740"
@@ -330,7 +330,7 @@
   Assets:EAG:ControlYLiquidacin-115099  7930.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  37250.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  150550.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  6766294.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  6766294.00 CLP
 
 2025-04-16 * "F#14120 Serv. Neltume consumo Abril 2025"
   id: "4673"

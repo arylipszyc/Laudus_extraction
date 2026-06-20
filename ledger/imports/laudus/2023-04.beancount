@@ -114,8 +114,8 @@
   je_num: "2325"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -230694.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  218537.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  12157.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  218537.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  12157.00 CLP
 
 2023-04-06 * "Jael - Devol gastos Tarjeta credito"
   id: "2333"
@@ -167,10 +167,10 @@
   Assets:EAG:ControlYLiquidacin-115099  55046.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  1487976.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  4381929.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  6761649.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  4442661.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  630653.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  6571.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  6761649.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  4442661.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  630653.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  6571.00 CLP
 
 2023-04-06 * "PAC Seguro fraude Santander"
   id: "2401"
@@ -236,7 +236,7 @@
   je_num: "2341"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -178619.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  178619.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  178619.00 CLP
 
 2023-04-11 * "Yerbas Buenas SPA - Psicologa Jael Avayu"
   id: "2351"
@@ -300,14 +300,14 @@
   Assets:EAG:ControlYLiquidacin-115099  182160.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  13380.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  58817.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  26665352.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  26665352.00 CLP
 
 2023-04-13 * "Visa Banco de Chile 1168 Eduardo Avayu"
   id: "2404"
   je_num: "2397"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -63085.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  63085.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  63085.00 CLP
 
 2023-04-13 * "Devol Isapre B#30629 Nutriologia Jael"
   id: "2412"

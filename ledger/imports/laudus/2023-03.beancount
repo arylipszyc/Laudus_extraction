@@ -161,10 +161,10 @@
   je_num: "2220"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -794499.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  14685.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  139903.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  8058.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  631853.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  14685.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  139903.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  8058.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  631853.00 CLP
 
 2023-03-08 * "Visa Santander pesos 0790 Febrero EAG"
   id: "2226"
@@ -181,10 +181,10 @@
   Assets:EAG:ControlYLiquidacin-115099  22436.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  1477108.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  4635413.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  4857129.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  1822694.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  445908.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  6722.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  4857129.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  1822694.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  445908.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  6722.00 CLP
 
 2023-03-09 * "USD50.000 de Cta Cte BCI EAG 10160175"
   id: "2208"
@@ -270,7 +270,7 @@
   je_num: "2227"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -7488522.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  7488522.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  7488522.00 CLP
 
 2023-03-14 * "Alberto Gassmann de Eduardo Avayu"
   id: "2233"
@@ -305,7 +305,7 @@
   je_num: "2305"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -80533.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  80533.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  80533.00 CLP
 
 2023-03-15 * "Visa BCI 1027 EAG Febrero 2023"
   id: "2320"
@@ -317,7 +317,7 @@
   Assets:EAG:ControlYLiquidacin-115099  121390.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  65640.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  58588.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  20349698.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  20349698.00 CLP
 
 2023-03-16 * "FGK - Devol permisos de circ. TC EAG"
   id: "2255"

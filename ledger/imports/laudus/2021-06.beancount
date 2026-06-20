@@ -106,10 +106,10 @@
   Assets:EAG:Bancos:BancoSantander63188824-111009  -4181133.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -835887.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1769224.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  4181133.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  1762818.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  835887.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  6406.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  4181133.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  1762818.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  835887.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  6406.00 CLP
 
 2021-06-04 * "BH21 Indumotora - Dieta  Mayo 2021"
   id: "459"
@@ -151,9 +151,9 @@
   je_num: "425"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2544025.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  2424592.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  64520.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  54913.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  2424592.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  64520.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  54913.00 CLP
 
 2021-06-09 * "Salfa - Mant tractor JD D170 jardin EAG"
   id: "424"
@@ -233,7 +233,7 @@
   je_num: "433"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -3960919.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  3960919.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  3960919.00 CLP
 
 2021-06-15 * "Devol Isapre BH#133 Toma muestras EAG"
   id: "436"
@@ -258,7 +258,7 @@
   Assets:EAG:ControlYLiquidacin-115099  388021.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  31300.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  72810.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  3206017.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  3206017.00 CLP
 
 2021-06-17 * "Gastos reñaca Visa BCI EAG Mayo 2021"
   id: "438"
@@ -283,7 +283,7 @@
   je_num: "467"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -64503.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  64503.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  64503.00 CLP
 
 2021-06-18 * "Devol de JAB Impto unico Patricio Gall."
   id: "440"
@@ -323,7 +323,7 @@
   je_num: "432"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -75374.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  75374.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  75374.00 CLP
 
 2021-06-22 * "Aria 31 Gasto comun Mayo 2021"
   id: "443"

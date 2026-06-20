@@ -178,8 +178,8 @@
   je_num: "4806"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -39955.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  32950.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  7005.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  32950.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  7005.00 CLP
 
 2025-06-09 * "Mariela Mendez - Prestamo de EAG"
   id: "4831"
@@ -193,7 +193,7 @@
   je_num: "4808"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -51601688.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  51601688.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  51601688.00 CLP
 
 2025-06-10 * "Cotizaciones Mayo 2025"
   id: "4853"
@@ -214,14 +214,14 @@
   je_num: "4891"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -2283765.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  2283765.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  2283765.00 CLP
 
 2025-06-10 * "USD17.085,51 Mastercard Sant. 1234 EAG"
   id: "4920"
   je_num: "4893"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -16581146.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  16581146.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  16581146.00 CLP
 
 2025-06-10 * "Visa Santander 0858 Eduardo Avayu"
   id: "4921"
@@ -235,7 +235,7 @@
   Assets:EAG:ControlYLiquidacin-115099  61993.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  3105135.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2750367.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  569820.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  569820.00 CLP
 
 2025-06-11 * "Devol FGK Visa BCI 1027 EAG Mayo 2025"
   id: "4855"
@@ -312,7 +312,7 @@
   Assets:EAG:ControlYLiquidacin-115099  7940.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  7940.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  40000.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  9318906.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  9318906.00 CLP
 
 2025-06-12 * "F#14464 Serv. Neltume consumo Junio 2025"
   id: "4869"
@@ -347,7 +347,7 @@
   je_num: "4886"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -54930.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  54930.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  54930.00 CLP
 
 2025-06-13 * "Moises Moncada - Anticipo de sueldo"
   id: "4860"

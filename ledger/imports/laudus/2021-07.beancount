@@ -205,10 +205,10 @@
   Assets:EAG:Bancos:BancoSantander63188824-111009  -2628996.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -490632.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -2298661.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  2628996.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  610967.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  490632.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  1687694.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  2628996.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  610967.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  490632.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  1687694.00 CLP
 
 2021-07-08 * "Rendicion casa sur EAG Mayo/Junio 2021"
   id: "494"
@@ -231,9 +231,9 @@
   je_num: "495"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2371087.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  4845.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  1745044.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  621198.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  4845.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  1745044.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  621198.00 CLP
 
 2021-07-09 * "Leyes sociales empl sur/stgo EAG Junio"
   id: "497"
@@ -264,7 +264,7 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -38394698.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -8975.00 CLP
   Expenses:EAG:GastosBancarios-430003  8975.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  38394698.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  38394698.00 CLP
 
 2021-07-12 * "Previred Odontologia EIRL Junio 2021"
   id: "502"
@@ -331,7 +331,7 @@
   Assets:EAG:ControlYLiquidacin-115099  9060.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  68520.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  29390.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  3184509.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  3184509.00 CLP
 
 2021-07-19 * "Daniel Cadenas 4 naumeticos Mahindra EAG"
   id: "508"
@@ -361,7 +361,7 @@
   je_num: "518"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -67196.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  67196.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  67196.00 CLP
 
 2021-07-20 * "PAC BCI Seguros generales Julio 2021"
   id: "511"

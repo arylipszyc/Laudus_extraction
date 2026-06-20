@@ -87,10 +87,10 @@
   je_num: "5874"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -8685000.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  193367.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  3192341.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  3482543.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  1816749.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  193367.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  3192341.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  3482543.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  1816749.00 CLP
 
 2026-05-06 * "Visa Santander 0858 Eduardo Avayu"
   id: "5915"
@@ -107,10 +107,10 @@
   Assets:EAG:ControlYLiquidacin-115099  53450.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2842868.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2562364.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  4413031.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  51301494.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  428645.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  26967.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  4413031.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  51301494.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  428645.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  26967.00 CLP
 
 2026-05-06 * "Mariela Mendez - Leyes soc Abril 2026"
   id: "5916"
@@ -278,7 +278,7 @@
   je_num: "5927"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -62682.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  62682.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  62682.00 CLP
 
 2026-05-12 * "Seguro proteccion bancaria Banco Chile"
   id: "5968"
@@ -314,7 +314,7 @@
   je_num: "5906"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -23543848.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  23543848.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  23543848.00 CLP
 
 2026-05-14 * "F#498525 Acevedo Ltda Combustible Abril"
   id: "5947"
@@ -356,7 +356,7 @@
   je_num: "5959"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -3219948.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  3219948.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  3219948.00 CLP
 
 2026-05-15 * "Via Gris - El Bosque TC EAG"
   id: "5920"
@@ -559,6 +559,13 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -16000000.00 CLP
   Expenses:EAG:OtrosGastosPersonales-430099  16000000.00 CLP
+
+2026-05-26 * "Mundo Tour devol seguro Jael Avayu"
+  id: "6029"
+  je_num: "5989"
+  source: "laudus-erp"
+  Assets:Jael:Bancos:BancoBci28980981Jael-910005  259259.00 CLP
+  Assets:Jael:ControlYLiquidacin-910099  -259259.00 CLP
 
 2026-05-27 * "Saesa F#10117179 EAG del 18/02 al 20/04"
   id: "5932"

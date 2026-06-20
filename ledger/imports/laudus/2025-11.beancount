@@ -149,9 +149,9 @@
   je_num: "5330"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -6376000.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  763553.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  2793295.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  2819152.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  763553.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  2793295.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  2819152.00 CLP
 
 2025-11-06 * "Farmaceutica - Remedios Sra Raquel"
   id: "5370"
@@ -188,8 +188,8 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -26025971.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -691753.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  26025971.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  691753.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  26025971.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  691753.00 CLP
 
 2025-11-06 * "Victoria Svigilisky Previred Oct. 2025"
   id: "5458"
@@ -219,7 +219,7 @@
   je_num: "5334"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -7848545.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  7848545.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  7848545.00 CLP
 
 2025-11-07 * "Salcobrand - Remedio EAG"
   id: "5374"
@@ -274,8 +274,8 @@
   Assets:EAG:ControlYLiquidacin-115099  3482743.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  43958.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  1770132.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  1052428.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  434913.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  1052428.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  434913.00 CLP
 
 2025-11-10 * "Moises Moncada - Comida perritos"
   id: "5380"
@@ -351,7 +351,7 @@
   Assets:EAG:ControlYLiquidacin-115099  8430.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  8440.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  26140.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  2028861.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  2028861.00 CLP
 
 2025-11-13 * "Devol Visa BCI 1027 EAG Octubre 2025 FGK"
   id: "5354"
@@ -407,7 +407,7 @@
   je_num: "5424"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -57292.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  57292.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  57292.00 CLP
 
 2025-11-14 * "UF2.522,48 Mandato mutuo Inv. Tecnion"
   id: "5389"

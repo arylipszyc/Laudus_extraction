@@ -110,8 +110,8 @@
   je_num: "1019"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -360351.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  354026.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  6325.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  354026.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  6325.00 CLP
 
 2022-01-06 * "Marcelo Ciraulo - Devol mant 2 motos EAG"
   id: "1022"
@@ -126,8 +126,8 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -517516.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -6834679.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  6834679.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  517516.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  6834679.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  517516.00 CLP
 
 2022-01-06 * "USD5.552,50 Odis J. Olivero - Depto EAG"
   id: "1024"
@@ -185,7 +185,7 @@
   je_num: "1027"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -19280.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  19280.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  19280.00 CLP
 
 2022-01-07 * "Canc Impto unico Dic 2021 Empl EAG"
   id: "1029"
@@ -241,8 +241,8 @@
   je_num: "1032"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1044139.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  119170.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  924969.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  119170.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  924969.00 CLP
 
 2022-01-10 * "Traspaso de Jael Avayu"
   id: "1076"
@@ -314,7 +314,7 @@
   je_num: "1039"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -15590818.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  15590818.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  15590818.00 CLP
 
 2022-01-13 * "Alberto Bitran - Compras super casa sur"
   id: "1041"
@@ -392,14 +392,14 @@
   je_num: "1073"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -77395.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  77395.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  77395.00 CLP
 
 2022-01-19 * "Visa Banco de Chile 1168 Diciembre 2021"
   id: "1078"
   je_num: "1076"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -44970.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  44970.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  44970.00 CLP
 
 2022-01-19 * "Devol B#1079-777 Consultas medicas EAG"
   id: "1080"
@@ -433,7 +433,7 @@
   Assets:EAG:ControlYLiquidacin-115099  429801.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  38740.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  85750.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  10565105.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  10565105.00 CLP
 
 2022-01-20 * "F29 Odontologia Diciembre 2021"
   id: "1065"

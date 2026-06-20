@@ -207,9 +207,9 @@
   je_num: "5401"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -11719000.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  7087703.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  4501563.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  129734.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  7087703.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  4501563.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  129734.00 CLP
 
 2025-12-10 * "UF107,81 FID - Maserati LZDV19 Raquel V."
   id: "5441"
@@ -258,14 +258,14 @@
   je_num: "5491"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -29284291.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  29284291.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  29284291.00 CLP
 
 2025-12-10 * "USD12.658,96 Mastercard Santander EAG"
   id: "5531"
   je_num: "5492"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -11796885.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  11796885.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  11796885.00 CLP
 
 2025-12-10 * "Visa Santander 0858 Eduardo Avayu"
   id: "5532"
@@ -281,14 +281,14 @@
   Assets:EAG:ControlYLiquidacin-115099  2154209.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2811194.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  103352.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  575121.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  575121.00 CLP
 
 2025-12-11 * "USD241,76 Visa BCI 1027 Noviembre 2025"
   id: "5443"
   je_num: "5404"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -224655.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  224655.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  224655.00 CLP
 
 2025-12-11 * "Efectivo Eduardo Avayu"
   id: "5456"
@@ -394,7 +394,7 @@
   je_num: "5524"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -51118.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  51118.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  51118.00 CLP
 
 2025-12-15 * "Visa BCI 1027 EAG Noviembre 2025"
   id: "5572"
@@ -406,7 +406,7 @@
   Assets:EAG:ControlYLiquidacin-115099  672498.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  132470.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  17660.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  2210518.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  2210518.00 CLP
 
 2025-12-15 * "Traspaso de Fondos de Jael Avayu"
   id: "5580"

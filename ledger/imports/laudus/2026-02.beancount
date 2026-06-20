@@ -94,9 +94,9 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -28400000.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -14853000.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  28400000.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  7517600.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  3808791.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  3526609.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  7517600.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  3808791.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  3526609.00 CLP
 
 2026-02-06 * "FxR Moises Moncada - Duplicado"
   id: "5680"
@@ -129,10 +129,10 @@
   Assets:EAG:ControlYLiquidacin-115099  383648.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2565003.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  98102.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  9038300.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  12731744.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  572990.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  1695085.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  9038300.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  12731744.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  572990.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  1695085.00 CLP
 
 2026-02-09 * "Victoria Svigilisky Previred Nov 2025"
   id: "5608"
@@ -158,7 +158,7 @@
   je_num: "5603"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2500000.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  2500000.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  2500000.00 CLP
 
 2026-02-09 * "Abono J.V Eduardo Avayu - Personal"
   id: "5681"
@@ -225,14 +225,14 @@
   je_num: "5644"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1250161.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  1250161.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  1250161.00 CLP
 
 2026-02-12 * "Visa BCI 1027 EAG Enero 2026"
   id: "5684"
   je_num: "5645"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4757783.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  4757783.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  4757783.00 CLP
 
 2026-02-12 * "Jocelyn Avayu - Devol compras sur EAG"
   id: "5709"
@@ -248,7 +248,7 @@
   je_num: "5681"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -114844.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  114844.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  114844.00 CLP
 
 2026-02-12 * "Seguro proteccion bancaria Banco Chile"
   id: "5721"

@@ -134,9 +134,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -16835714.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -10466166.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  16835714.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  10059136.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  407030.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  16835714.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  10059136.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  407030.00 CLP
 
 2021-01-07 * "Visa/Mastercard Santander EAG Dic-20"
   id: "13"
@@ -146,8 +146,8 @@
   Assets:EAG:Bancos:BancoSantander63188824-111009  5226475.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -3961943.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -902582.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  3961943.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  902582.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  3961943.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  902582.00 CLP
 
 2021-01-07 * "EAG casa sur/stgo Leyes sociales Dic-20"
   id: "15"
@@ -176,8 +176,8 @@
   je_num: "17"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -627221.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  541759.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  85462.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  541759.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  85462.00 CLP
 
 2021-01-08 * "Devol isapre BH#624 Catalina Alvarez EAG"
   id: "28"
@@ -299,7 +299,7 @@
   Assets:EAG:ControlYLiquidacin-115099  398921.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  32440.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  68090.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  5645124.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  5645124.00 CLP
 
 2021-01-13 * "Inversion en MBI"
   id: "38"
@@ -313,7 +313,7 @@
   je_num: "39"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -54369.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  54369.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  54369.00 CLP
 
 2021-01-14 * "Saesa F#400000137443 del 27/10 al 29/12"
   id: "35"
@@ -364,7 +364,7 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -75349.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  75349.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -75349.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  75349.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  75349.00 CLP
 
 2021-01-18 * "Gladys Arriagada - Examenes Jael Avayu"
   id: "43"

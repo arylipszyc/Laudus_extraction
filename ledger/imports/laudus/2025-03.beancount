@@ -87,7 +87,7 @@
   je_num: "4428"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -789108.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  789108.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  789108.00 CLP
 
 2025-03-06 * "F#1290000 Kia Sportage 2025 TYYL55 EAG"
   id: "4452"
@@ -166,8 +166,8 @@
   je_num: "4464"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2496932.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  431942.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  64990.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  431942.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  64990.00 CLP
   Expenses:EAG:SraRaquelVentura-430021  2000000.00 CLP
 
 2025-03-10 * "Traspaso de Fondos a Otro Banco en Linea"
@@ -203,21 +203,21 @@
   Assets:EAG:ControlYLiquidacin-115099  1370145.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  4522783.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2981263.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  808337.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  808337.00 CLP
 
 2025-03-10 * "Mastercard Santander 1234 Eduardo Avayu"
   id: "4607"
   je_num: "4584"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -2352638.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  2352638.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  2352638.00 CLP
 
 2025-03-10 * "USD45,59 Mastercard Santander 1234 EAG"
   id: "4608"
   je_num: "4585"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -44121.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  44121.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  44121.00 CLP
 
 2025-03-10 * "Trasp. desde linea de credito Santander"
   id: "4641"
@@ -367,7 +367,7 @@
   je_num: "4548"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -67051.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  67051.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  67051.00 CLP
 
 2025-03-13 * "Visa BCI 1027 EAG Febrero 2025"
   id: "4586"
@@ -380,7 +380,7 @@
   Assets:EAG:ControlYLiquidacin-115099  7700.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  39650.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  188700.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  3933359.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  3933359.00 CLP
 
 2025-03-13 * "Marion Leal - Kinesiologia EAG"
   id: "4627"

@@ -174,8 +174,8 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -602778.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -4249543.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  4249543.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  602778.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  4249543.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  602778.00 CLP
 
 2022-03-08 * "Saesa F#7277996 - EAG del 18/12 al 18/02"
   id: "1176"
@@ -232,9 +232,9 @@
   je_num: "1179"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -468203.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  42465.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  407078.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  18660.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  42465.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  407078.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  18660.00 CLP
 
 2022-03-09 * "2/4 Gloria Amollao 34 dias trab verano"
   id: "1183"
@@ -340,7 +340,7 @@
   je_num: "1192"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -263004.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  263004.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  263004.00 CLP
 
 2022-03-14 * "Psiquiatra Marcela Larraguibel B#1376"
   id: "1196"
@@ -411,7 +411,7 @@
   Assets:EAG:ControlYLiquidacin-115099  44870.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  99830.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  7530.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  8287052.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  8287052.00 CLP
 
 2022-03-16 * "Abono prestamo Jhonny - Auto"
   id: "1205"
@@ -425,7 +425,7 @@
   je_num: "1206"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -46262.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  46262.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  46262.00 CLP
 
 2022-03-16 * "USD1.000.000 a Cta BCI USD 18565743 EAG"
   id: "1239"
@@ -475,7 +475,7 @@
   je_num: "1243"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -76570.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  76570.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  76570.00 CLP
 
 2022-03-23 * "Retiro de Inversiones Tecnion Limitada"
   id: "1237"

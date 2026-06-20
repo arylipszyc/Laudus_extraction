@@ -148,16 +148,16 @@
   je_num: "5490"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -759579.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  759579.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  759579.00 CLP
 
 2026-01-07 * "Tarjetas Santander Sra. Raquel Ventura"
   id: "5533"
   je_num: "5494"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -9405000.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  3082510.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  2909995.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  3412495.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  3082510.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  2909995.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  3412495.00 CLP
 
 2026-01-07 * "Traspaso a Cuenta Santander EAG 63188824"
   id: "5534"
@@ -190,8 +190,8 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -62540.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1305115.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  1305115.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  62540.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  1305115.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  62540.00 CLP
 
 2026-01-08 * "Dr. Patricio Fischman - Atenciones EAG"
   id: "5540"
@@ -233,7 +233,7 @@
   je_num: "5651"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -4988614.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  4988614.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  4988614.00 CLP
 
 2026-01-09 * "Visa Santander 0858 Eduardo Avayu"
   id: "5691"
@@ -248,7 +248,7 @@
   Assets:EAG:ControlYLiquidacin-115099  174514.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  78350.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2479715.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  595036.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  595036.00 CLP
 
 2026-01-12 * "UF806,28 Mandato mutuo Inv. Tecnion"
   id: "5545"
@@ -369,7 +369,7 @@
   Assets:EAG:ControlYLiquidacin-115099  589308.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  19950.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  131410.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  2956314.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  2956314.00 CLP
 
 2026-01-14 * "Jocelyn Avayu - Abono gastos Odontologia"
   id: "5612"
@@ -390,7 +390,7 @@
   je_num: "5675"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -73362.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  73362.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  73362.00 CLP
 
 2026-01-15 * "Eliot Avendaño - Remedios EAG"
   id: "5585"

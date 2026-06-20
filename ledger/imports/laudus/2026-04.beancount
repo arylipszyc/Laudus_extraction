@@ -156,9 +156,9 @@
   je_num: "5814"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -11270900.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  2989595.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  874852.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  7406453.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  2989595.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  874852.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  7406453.00 CLP
 
 2026-04-07 * "Traspaso Santander tarjetas EAG"
   id: "5890"
@@ -173,8 +173,8 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -59759.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1483930.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  1483930.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  59759.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  1483930.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  59759.00 CLP
 
 2026-04-07 * "Visa Santander 0858 Eduardo Avayu"
   id: "5892"
@@ -191,8 +191,8 @@
   Assets:EAG:ControlYLiquidacin-115099  4160607.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2306097.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  76161.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  17045465.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  1315744.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  17045465.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  1315744.00 CLP
 
 2026-04-07 * "Catalina Alvarez - 2 Sesion EAG"
   id: "5899"
@@ -307,14 +307,14 @@
   je_num: "5796"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2054314.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  2054314.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  2054314.00 CLP
 
 2026-04-14 * "Visa Banco de Chile 1168 Eduardo Avayu"
   id: "5884"
   je_num: "5844"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -101675.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  101675.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  101675.00 CLP
 
 2026-04-15 * "F#1351715 Kia Chile Dif. Sportage VTFG50"
   id: "5838"
@@ -356,7 +356,7 @@
   je_num: "5809"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -7808845.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  7808845.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  7808845.00 CLP
 
 2026-04-16 * "La Fábrica de Sobres SpA Fiorella Galli"
   id: "5851"

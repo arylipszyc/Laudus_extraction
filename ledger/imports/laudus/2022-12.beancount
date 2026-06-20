@@ -160,7 +160,7 @@
   je_num: "1975"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -171970.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  171970.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  171970.00 CLP
 
 2022-12-09 * "USD150 Yoly Hernandez - Miami EAG"
   id: "1980"
@@ -194,22 +194,22 @@
   Assets:EAG:ControlYLiquidacin-115099  53538.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  1397055.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  1750708.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  958210.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  958210.00 CLP
 
 2022-12-09 * "Master Santander pesos 2735 Nov. EAG"
   id: "1999"
   je_num: "1995"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -8368902.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  8368902.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  8368902.00 CLP
 
 2022-12-09 * "USD 1.236,71  Santander Visa/Master EAG"
   id: "2066"
   je_num: "2061"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1075010.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  182099.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  892911.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  182099.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  892911.00 CLP
 
 2022-12-12 * "Seguro proteccion bancaria Banco Chile"
   id: "2045"
@@ -273,7 +273,7 @@
   je_num: "1986"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -40569940.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  40569940.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  40569940.00 CLP
 
 2022-12-14 * "Gloria Amoyao de Raquel Ventura"
   id: "1991"
@@ -315,14 +315,14 @@
   Assets:EAG:ControlYLiquidacin-115099  117790.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  7420.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  26670.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  9966074.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  9966074.00 CLP
 
 2022-12-15 * "Visa Banco de Chile 1168 Noviembre 2022"
   id: "2048"
   je_num: "2043"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -57270.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  57270.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  57270.00 CLP
 
 2022-12-15 * "Prestamo terreno Inv. Pirihueico SPA"
   id: "2067"

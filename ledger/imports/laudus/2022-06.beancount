@@ -171,8 +171,8 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -3620269.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -563799.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  3620269.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  563799.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  3620269.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  563799.00 CLP
 
 2022-06-07 * "Venta Benley Bentayga LJPD58 EAG"
   id: "1454"
@@ -186,7 +186,7 @@
   je_num: "1451"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -5990.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  5990.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  5990.00 CLP
 
 2022-06-08 * "B#4144 Agua Choshuenco EAG Mayo 2022"
   id: "1456"
@@ -325,7 +325,7 @@
   je_num: "1461"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -11420077.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  11420077.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  11420077.00 CLP
 
 2022-06-16 * "Eduardo Figueroa - Locomocion"
   id: "1468"
@@ -344,14 +344,14 @@
   Assets:EAG:ControlYLiquidacin-115099  490251.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  48680.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  90610.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  16246004.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  16246004.00 CLP
 
 2022-06-16 * "Visa Banco de Chile 1168 Mayo 2022"
   id: "1503"
   je_num: "1499"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -64407.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  64407.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  64407.00 CLP
 
 2022-06-16 * "Devol Isapre B#6196 Pisiquiatrica Jael"
   id: "1508"
@@ -396,7 +396,7 @@
   je_num: "1535"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -71349.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  71349.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  71349.00 CLP
 
 2022-06-22 * "Aria 31 Gasto comun Mayo 2022"
   id: "1476"

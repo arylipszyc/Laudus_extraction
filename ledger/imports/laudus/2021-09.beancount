@@ -124,17 +124,17 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -645805.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -12989654.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  5556008.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  7433646.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  645805.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  5556008.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  7433646.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  645805.00 CLP
 
 2021-09-07 * "USD1.048,64 Visa/Mastercard Agosto 2021"
   id: "649"
   je_num: "648"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -821085.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  814638.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  6447.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  814638.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  6447.00 CLP
 
 2021-09-07 * "USD5.000 Odis J. Olivero - Remodelacion"
   id: "650"
@@ -185,8 +185,8 @@
   je_num: "654"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2088186.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  90786.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  1997400.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  90786.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  1997400.00 CLP
 
 2021-09-09 * "Marcelo Ventura de Eduardo Avayu"
   id: "654"
@@ -318,7 +318,7 @@
   je_num: "669"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2176892.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  2176892.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  2176892.00 CLP
 
 2021-09-13 * "Seguro proteccion bancaria Banco Chile"
   id: "686"
@@ -418,14 +418,14 @@
   Assets:EAG:ControlYLiquidacin-115099  5620.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  42000.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  126460.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  6960853.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  6960853.00 CLP
 
 2021-09-20 * "Visa Banco de Chile 1168 Agosto 2021 EAG"
   id: "687"
   je_num: "686"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -43908.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  43908.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  43908.00 CLP
 
 2021-09-21 * "Devol gastos reñaca Visa BCI EAG Agosto"
   id: "681"

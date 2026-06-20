@@ -113,8 +113,8 @@
   Assets:EAG:Bancos:BancoSantander63188824-111009  3131985.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1707033.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1424952.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  1424952.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  1707033.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  1424952.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  1707033.00 CLP
 
 2021-10-06 * "1/2 Traspaso a Cta Edwards EAG 162338082"
   id: "739"
@@ -187,8 +187,8 @@
   je_num: "745"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -5834007.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  5827300.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  6707.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  5827300.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  6707.00 CLP
 
 2021-10-07 * "Potenza Inversiones - Flores de EAG"
   id: "747"
@@ -202,7 +202,7 @@
   je_num: "747"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1902302.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  1902302.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  1902302.00 CLP
 
 2021-10-09 * "Jael Avayu - Isapre Colmena Sept 2021"
   id: "749"
@@ -290,7 +290,7 @@
   je_num: "759"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4787466.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  4787466.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  4787466.00 CLP
 
 2021-10-14 * "DJ-1939 RRE del AT2019 Boxc - EAG"
   id: "762"
@@ -397,14 +397,14 @@
   je_num: "799"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -77355.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  77355.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  77355.00 CLP
 
 2021-10-20 * "Visa Banco de Chile 1168 Septiembre 2021"
   id: "806"
   je_num: "805"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -44315.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  44315.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  44315.00 CLP
 
 2021-10-20 * "Visa BCI 1027 EAG Septiembre 2021"
   id: "811"
@@ -416,7 +416,7 @@
   Assets:EAG:ControlYLiquidacin-115099  29430.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  7340.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  117730.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  5866149.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  5866149.00 CLP
 
 2021-10-20 * "Retiro de Indumotora One"
   id: "829"

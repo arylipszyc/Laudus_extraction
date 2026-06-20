@@ -106,7 +106,7 @@
   je_num: "2989"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -250724.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  250724.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  250724.00 CLP
 
 2023-11-09 * "Visa Santander pesos 0790 Octubre EAG"
   id: "2999"
@@ -119,8 +119,8 @@
   Assets:EAG:ControlYLiquidacin-115099  58123.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  1886715.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  430047.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  32567.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  599251.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  32567.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  599251.00 CLP
 
 2023-11-09 * "Tarjetas Santander Raquel Ventura"
   id: "3000"
@@ -179,7 +179,7 @@
   je_num: "2997"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -4996204.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  4996204.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  4996204.00 CLP
 
 2023-11-13 * "Seguro proteccion bancaria Banco Chile"
   id: "3154"
@@ -236,14 +236,14 @@
   Assets:EAG:ControlYLiquidacin-115099  60201.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  115990.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  58690.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  2455699.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  2455699.00 CLP
 
 2023-11-14 * "Visa Banco de Chile 1168 Eduardo Avayu"
   id: "3155"
   je_num: "3146"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -70163.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  70163.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  70163.00 CLP
 
 2023-11-14 * "Devol Isapre B#535 Kinesiologia EAG"
   id: "3157"

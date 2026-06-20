@@ -133,7 +133,7 @@
   je_num: "3253"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -875879.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  875879.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  875879.00 CLP
 
 2024-02-07 * "Traspaso pago tarjetas Visa/Master EAG"
   id: "3270"
@@ -147,7 +147,7 @@
   je_num: "3255"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -301903.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  301903.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  301903.00 CLP
 
 2024-02-07 * "B#646 Lorena Ross - 5 Sesiones EAG"
   id: "3272"
@@ -161,8 +161,8 @@
   je_num: "3257"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -5454984.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  5446224.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  8760.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  5446224.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  8760.00 CLP
 
 2024-02-07 * "UF450 Tektonica - Inversion Puerto Fui"
   id: "3274"
@@ -189,8 +189,8 @@
   Assets:EAG:ControlYLiquidacin-115099  50221.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  3531795.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  1934311.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  84256.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  1043143.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  84256.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  1043143.00 CLP
 
 2024-02-09 * "B#9081 Agua Choshuenco EAG Enero 2024"
   id: "3276"
@@ -297,14 +297,14 @@
   Assets:EAG:ControlYLiquidacin-115099  117810.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  47870.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  193000.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  12471388.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  12471388.00 CLP
 
 2024-02-14 * "Visa Banco de Chile 1168 Eduardo Avayu"
   id: "3353"
   je_num: "3337"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -61291.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  61291.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  61291.00 CLP
 
 2024-02-15 * "Jocelyn devol Previred/F29 Odontologia"
   id: "3367"

@@ -51,16 +51,16 @@
   Assets:EAG:Bancos:BancoSantander63188824-111009  5575778.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1199501.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -4376277.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  4376277.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  1199501.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  4376277.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  1199501.00 CLP
 
 2021-05-05 * "USD2.452,66 Visa/Mastercard Sant. EAG"
   id: "322"
   je_num: "321"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1736974.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  1721387.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  15587.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  1721387.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  15587.00 CLP
 
 2021-05-05 * "EAG Gastos Inv Tecnion Ltda Abril 2021"
   id: "324"
@@ -116,8 +116,8 @@
   je_num: "330"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -3714618.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  543483.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  3171135.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  543483.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  3171135.00 CLP
 
 2021-05-07 * "Margarita G. Psicologa Jael Avayu"
   id: "332"
@@ -182,7 +182,7 @@
   je_num: "337"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -650005.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  650005.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  650005.00 CLP
 
 2021-05-11 * "Seguro proteccion bancaria Banco Chile"
   id: "393"
@@ -214,7 +214,7 @@
   je_num: "343"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  3271438.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  -3271438.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  -3271438.00 CLP
 
 2021-05-12 * "Previred Odontologia EIRL Abril 2021"
   id: "345"
@@ -293,7 +293,7 @@
   je_num: "339"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -75368.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  75368.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  75368.00 CLP
 
 2021-05-18 * "UF13,685 Sura Item 5 P6621111 Sportage21"
   id: "352"
@@ -334,14 +334,14 @@
   Assets:EAG:ControlYLiquidacin-115099  82070.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  27940.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  7340.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  2609683.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  2609683.00 CLP
 
 2021-05-19 * "Visa Banco de Chile 1168 Abril 2021 EAG"
   id: "341"
   je_num: "340"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -98506.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  98506.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  98506.00 CLP
 
 2021-05-19 * "Psiquiatra Marcela Larraguibel B426 Jael"
   id: "356"

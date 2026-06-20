@@ -124,9 +124,9 @@
   je_num: "2416"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1862898.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  1112642.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  11992.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  738264.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  1112642.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  11992.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  738264.00 CLP
 
 2023-05-05 * "Traspaso pago tarjetas Visa/Master EAG"
   id: "2424"
@@ -150,10 +150,10 @@
   Assets:EAG:ControlYLiquidacin-115099  14990.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  1692123.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  5088507.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  4480094.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  2160283.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  938137.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  254694.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  4480094.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  2160283.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  938137.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  254694.00 CLP
 
 2023-05-05 * "Devol FGK Reñaca / Via Gris"
   id: "2426"
@@ -194,7 +194,7 @@
   je_num: "2422"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -1790888.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  1790888.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  1790888.00 CLP
 
 2023-05-08 * "Kia Chile - 5 Vacunas influenza EAG"
   id: "2430"
@@ -329,14 +329,14 @@
   Assets:EAG:ControlYLiquidacin-115099  110390.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  41560.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  59176.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  13985934.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  13985934.00 CLP
 
 2023-05-11 * "Visa Banco de Chile 1168 Eduardo Avayu"
   id: "2501"
   je_num: "2492"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -66975.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  66975.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  66975.00 CLP
 
 2023-05-12 * "Costanera norte B#84694795 SFXG88 EAG"
   id: "2446"

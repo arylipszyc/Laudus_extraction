@@ -135,8 +135,8 @@
   Assets:EAG:Bancos:BancoSantander63188824-111009  -2625543.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -958909.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  3584452.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  2625543.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  958909.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  2625543.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  958909.00 CLP
 
 2021-03-05 * "B701 Catalina Alvarez Consultas EneroEAG"
   id: "246"
@@ -178,8 +178,8 @@
   je_num: "170"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -7780365.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  7774018.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  6347.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  7774018.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  6347.00 CLP
 
 2021-03-08 * "Dr Ricardo Espinoza B#192 y 193 EAG"
   id: "173"
@@ -221,15 +221,15 @@
   je_num: "169"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1565105.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  450619.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  1114486.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  450619.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  1114486.00 CLP
 
 2021-03-09 * "USD733,27 Visa BCI 1027 EAG Febrero-21"
   id: "172"
   je_num: "171"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -541997.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  541997.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  541997.00 CLP
 
 2021-03-09 * "Gilma Carrasco leyes sociales Febrero-21"
   id: "174"
@@ -385,7 +385,7 @@
   je_num: "167"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -36643.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  36643.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  36643.00 CLP
 
 2021-03-17 * "Visa BCI 1027 EAG Febrero 2021"
   id: "239"
@@ -397,7 +397,7 @@
   Assets:EAG:ControlYLiquidacin-115099  35400.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  123240.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  7340.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  3452575.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  3452575.00 CLP
 
 2021-03-18 * "Zita Miranda - de Sra Coca"
   id: "188"
@@ -413,7 +413,7 @@
   je_num: "239"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -75360.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  75360.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  75360.00 CLP
 
 2021-03-18 * "Devol isapre B#188 Psciquiatria  Jael"
   id: "254"

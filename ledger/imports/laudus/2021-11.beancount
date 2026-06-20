@@ -149,8 +149,8 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -550952.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  550952.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -555749.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  549354.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  6395.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  549354.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  6395.00 CLP
 
 2021-11-08 * "Canc Visa/Mastercard Santander EAG pesos"
   id: "834"
@@ -160,8 +160,8 @@
   Assets:EAG:Bancos:BancoSantander63188824-111009  -4219864.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -483230.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  4703094.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  4219864.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  483230.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  4219864.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  483230.00 CLP
 
 2021-11-08 * "Devol de EAG gastos FC Octubre 2021"
   id: "837"
@@ -182,8 +182,8 @@
   je_num: "831"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2535203.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  312595.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  2222608.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  312595.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  2222608.00 CLP
 
 2021-11-09 * "Jael Avayu - Isapre Colmena Octubre 2021"
   id: "835"
@@ -206,7 +206,7 @@
   je_num: "900"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -8.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  8.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  8.00 CLP
 
 2021-11-10 * "Leyes sociales empl casa sur/stgo EAG"
   id: "841"
@@ -251,7 +251,7 @@
   je_num: "845"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -11985747.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  11985747.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  11985747.00 CLP
 
 2021-11-11 * "USD425.000 Tauro Limited - Comision"
   id: "872"
@@ -394,7 +394,7 @@
   Assets:EAG:ControlYLiquidacin-115099  7340.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  42170.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  101680.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  5897762.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  5897762.00 CLP
 
 2021-11-18 * "Gastos reñaca Visa BCI EAG Octubre 2021"
   id: "859"
@@ -419,7 +419,7 @@
   je_num: "903"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -49467.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  49467.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  49467.00 CLP
 
 2021-11-19 * "F29 Odontologia Octubre 2021"
   id: "861"
@@ -462,7 +462,7 @@
   je_num: "897"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -78969.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  78969.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  78969.00 CLP
 
 2021-11-21 * "Alberto Bitran - Abono prestamo mutuo"
   id: "865"

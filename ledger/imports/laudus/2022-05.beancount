@@ -130,22 +130,22 @@
   Assets:EAG:Bancos:BancoSantander63188824-111009  6800946.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -6248035.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -552911.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  6248035.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  552911.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  6248035.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  552911.00 CLP
 
 2022-05-04 * "USD24,98 Master Sant 2019 Abril Sra Coca"
   id: "1352"
   je_num: "1349"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -21383.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  21383.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  21383.00 CLP
 
 2022-05-04 * "USD415,27 Master Santander Abril 2022"
   id: "1383"
   je_num: "1380"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -364192.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  364192.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  364192.00 CLP
 
 2022-05-04 * "Canc Master Santander USD Abril 2022"
   id: "1385"
@@ -269,8 +269,8 @@
   je_num: "1362"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -3720990.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  3429338.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  291652.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  3429338.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  291652.00 CLP
 
 2022-05-09 * "Devol Isapre B#5892 Pisiquiatrica Jael"
   id: "1422"
@@ -353,7 +353,7 @@
   je_num: "1371"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -22157900.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  22157900.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  22157900.00 CLP
 
 2022-05-13 * "Marcello C. Hibernaciones motos/lanchas"
   id: "1375"
@@ -392,7 +392,7 @@
   Assets:EAG:ControlYLiquidacin-115099  49580.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  477121.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  291990.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  7537997.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  7537997.00 CLP
 
 2022-05-18 * "Gastos reñaca Visa BCI EAG Abril 2022"
   id: "1380"
@@ -426,7 +426,7 @@
   je_num: "1384"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -62134.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  62134.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  62134.00 CLP
 
 2022-05-19 * "PAC BCI Seguros generales Mayo 2022"
   id: "1391"
@@ -448,7 +448,7 @@
   je_num: "1355"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -70409.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  70409.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  70409.00 CLP
 
 2022-05-20 * "F29 Odontologia EIRL Abril 2022"
   id: "1390"
@@ -749,7 +749,7 @@
   source: "laudus-erp"
   Assets:EAG:ControlYLiquidacin-115099  -2445782.00 CLP
   Expenses:EAG:MantencinVehculosSeguros-411043  2656.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  22025.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  22025.00 CLP
   Expenses:EAG:RegalosDeMatrimonioOtros-430091  22666.00 CLP
   Expenses:EAG:RegalosDeMatrimonioOtros-430091  18334.00 CLP
   Expenses:EAG:OtrosGastosPersonales-430099  2296000.00 CLP

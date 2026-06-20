@@ -174,7 +174,7 @@
   je_num: "4417"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2495243.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  2495243.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  2495243.00 CLP
 
 2025-02-10 * "Visa Santander 0858 Eduardo Avayu"
   id: "4598"
@@ -187,21 +187,21 @@
   Assets:EAG:ControlYLiquidacin-115099  1401464.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  4412139.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2604836.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  494072.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  494072.00 CLP
 
 2025-02-10 * "USD601,22 Mastercard Santander 1234 EAG"
   id: "4600"
   je_num: "4577"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -595659.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  595659.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  595659.00 CLP
 
 2025-02-10 * "Mastercard Santander 1234 Eduardo Avayu"
   id: "4601"
   je_num: "4578"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1875414.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  1875414.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  1875414.00 CLP
 
 2025-02-11 * "Mauricio Altamirano - Bebestibles sur"
   id: "4428"
@@ -250,7 +250,7 @@
   je_num: "4415"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -9000000.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  9000000.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  9000000.00 CLP
 
 2025-02-13 * "Jocelyn Avayu - Abono gastos Odontologia"
   id: "4460"
@@ -284,14 +284,14 @@
   Assets:EAG:ControlYLiquidacin-115099  95930.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  7290.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  40970.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  9357690.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  9357690.00 CLP
 
 2025-02-13 * "Visa Banco de Chile 1168 Eduardo Avayu"
   id: "4515"
   je_num: "4492"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -69005.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  69005.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  69005.00 CLP
 
 2025-02-14 * "Traspaso a Cuenta Edwards EAG 162338082"
   id: "4435"
