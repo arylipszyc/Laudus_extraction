@@ -140,8 +140,8 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -32509.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -71800.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  71800.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  32509.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  71800.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  32509.00 CLP
 
 2023-09-07 * "Devol Isapre B#901005 Psiquiatria Jael"
   id: "2886"
@@ -160,7 +160,7 @@
   Assets:EAG:ControlYLiquidacin-115099  23443.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  1762843.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  560690.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  1554346.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  1554346.00 CLP
 
 2023-09-08 * "EAG - Isapre Cruz Blanca Agosto 2023"
   id: "2800"
@@ -205,8 +205,8 @@
   je_num: "2795"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -3231333.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  2146890.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  1084443.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  2146890.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  1084443.00 CLP
 
 2023-09-08 * "F29 Odontologia EIRL Agosto 2023"
   id: "2805"
@@ -228,7 +228,7 @@
   je_num: "2798"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -4130071.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  4130071.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  4130071.00 CLP
 
 2023-09-11 * "L. Regonessi - B#9595-9596 Sra Raquel"
   id: "2809"
@@ -323,14 +323,14 @@
   Assets:EAG:ControlYLiquidacin-115099  127600.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  60037.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  60037.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  34903759.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  34903759.00 CLP
 
 2023-09-13 * "Visa Banco de Chile 1168 Eduardo Avayu"
   id: "2879"
   je_num: "2870"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -44403.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  44403.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  44403.00 CLP
 
 2023-09-14 * "Visa BCI 1027 EAG Agosto 2023"
   id: "2817"

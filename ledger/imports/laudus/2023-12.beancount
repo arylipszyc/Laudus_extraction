@@ -104,8 +104,8 @@
   je_num: "3064"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -3786943.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  3784323.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  2620.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  3784323.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  2620.00 CLP
 
 2023-12-07 * "Gricelda Vergara Compras Sept. casa EAG"
   id: "3074"
@@ -135,14 +135,14 @@
   je_num: "3158"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -66463.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  66463.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  66463.00 CLP
 
 2023-12-07 * "USD43,55 Master Santander EAG"
   id: "3172"
   je_num: "2779"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -39226.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  39226.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  39226.00 CLP
 
 2023-12-07 * "Visa BCI 1027 EAG Noviembre 2023"
   id: "3173"
@@ -150,7 +150,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -89996.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  14990.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  75006.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  75006.00 CLP
 
 2023-12-11 * "USD123,75 Levine & Partners - Taxes USA"
   id: "3077"
@@ -185,7 +185,7 @@
   je_num: "3073"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -196108.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  196108.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  196108.00 CLP
 
 2023-12-12 * "Aguinaldos de navidad 2023 Santiago"
   id: "3083"
@@ -296,14 +296,14 @@
   Assets:EAG:ControlYLiquidacin-115099  49800.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  6800.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  111240.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  5809280.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  5809280.00 CLP
 
 2023-12-14 * "Visa Banco de Chile 1168 Eduardo Avayu"
   id: "3165"
   je_num: "3156"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -60303.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  60303.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  60303.00 CLP
 
 2023-12-14 * "Devol Isapre B#4951 Psiquiatra EAG"
   id: "3167"

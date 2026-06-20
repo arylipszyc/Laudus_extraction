@@ -59,8 +59,8 @@
   Assets:EAG:Bancos:BancoSantander63188824-111009  1195839.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -677278.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -518561.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  677278.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  518561.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  677278.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  518561.00 CLP
 
 2021-02-04 * "Devol JAB gastos reñaca visa BCI EAG"
   id: "87"
@@ -101,10 +101,10 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4148941.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -725400.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  2561001.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  1587940.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  599738.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  125662.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  2561001.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  1587940.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  599738.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  125662.00 CLP
 
 2021-02-08 * "PAC Seguro Fraude Santander"
   id: "118"
@@ -162,14 +162,14 @@
   je_num: "95"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -335817.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  335817.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  335817.00 CLP
 
 2021-02-09 * "USD19.899,91 Visa BCI EAG Enero 2021"
   id: "97"
   je_num: "97"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -14675388.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  14675388.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  14675388.00 CLP
 
 2021-02-09 * "EAG - Sueldo Inv Tecnion Ltda Enero 2021"
   id: "98"
@@ -265,7 +265,7 @@
   je_num: "110"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -55397.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  55397.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  55397.00 CLP
 
 2021-02-15 * "Visa BCI 1027 EAG Enero 2021"
   id: "86"
@@ -277,7 +277,7 @@
   Assets:EAG:ControlYLiquidacin-115099  7340.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  31160.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  109230.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  4890449.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  4890449.00 CLP
 
 2021-02-16 * "Noelia Farfal - Rendicion casa sur EAG"
   id: "108"
@@ -345,7 +345,7 @@
   je_num: "120"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -75352.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  75352.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  75352.00 CLP
 
 2021-02-18 * "Traspaso por gastos EAG sur"
   id: "123"

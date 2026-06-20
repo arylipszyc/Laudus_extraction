@@ -134,10 +134,10 @@
   je_num: "2590"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -1726250.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  975589.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  634533.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  12059.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  104069.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  975589.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  634533.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  12059.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  104069.00 CLP
 
 2023-07-07 * "Jocelyn devol Previred/F29 Odontologia"
   id: "2639"
@@ -160,15 +160,15 @@
   Assets:EAG:ControlYLiquidacin-115099  23169.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2165454.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  1408024.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  539980.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  590430.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  539980.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  590430.00 CLP
 
 2023-07-10 * "Visa Santander 5966 Sra Raquel Ventura"
   id: "2605"
   je_num: "2596"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2893516.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  2893516.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  2893516.00 CLP
 
 2023-07-10 * "Jorge Leyton - Decorador casa sur EAG"
   id: "2606"
@@ -245,7 +245,7 @@
   je_num: "2603"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -4387867.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  4387867.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  4387867.00 CLP
 
 2023-07-12 * "USD3.250 Levine - Tramites varios EAG"
   id: "2613"
@@ -333,7 +333,7 @@
   Assets:EAG:ControlYLiquidacin-115099  44380.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  115530.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  59729.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  2607202.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  2607202.00 CLP
 
 2023-07-13 * "Servipag - Autopistas varias EAG/Jael A."
   id: "2678"
@@ -350,7 +350,7 @@
   je_num: "2676"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -68879.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  68879.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  68879.00 CLP
 
 2023-07-13 * "Inversiones Nuevo Ciclo - Prestamo"
   id: "2719"

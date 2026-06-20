@@ -100,7 +100,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -708009.00 CLP
   Expenses:EAG:Efectivo-430001  10923.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  697086.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  697086.00 CLP
 
 2022-07-06 * "PAT Aguas Cordillera - Via Gris"
   id: "1526"
@@ -111,8 +111,8 @@
   Income:EAG:OtrosIngresos-310099  -3555717.00 CLP
   Income:EAG:OtrosIngresos-310099  -5990.00 CLP
   Income:EAG:OtrosIngresos-310099  -3894952.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  3555717.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  549279.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  3555717.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  549279.00 CLP
   Expenses:EAG:SraRaquelVentura-430021  5990.00 CLP
 
 2022-07-06 * "Visa BCI 1027 EAG Junio 2022"
@@ -120,7 +120,7 @@
   je_num: "1523"
   source: "laudus-erp"
   Income:EAG:OtrosIngresos-310099  -2882736.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  2882736.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  2882736.00 CLP
 
 2022-07-06 * "Kia Chile - 5 Vacunas influenza"
   id: "1528"
@@ -281,7 +281,7 @@
   je_num: "1544"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -3618460.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  3618460.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  3618460.00 CLP
 
 2022-07-13 * "Alberto Bitran - Abono prestamo mutuo"
   id: "1556"
@@ -362,7 +362,7 @@
   Assets:EAG:ControlYLiquidacin-115099  483685.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  102400.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  52910.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  1995156.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  1995156.00 CLP
 
 2022-07-18 * "Visa BCI 1027 EAG Junio 2022"
   id: "1559"
@@ -394,7 +394,7 @@
   je_num: "1602"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -55506.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  55506.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  55506.00 CLP
 
 2022-07-19 * "Abono de Johanna Avayu"
   id: "1562"
@@ -455,7 +455,7 @@
   je_num: "1601"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -73248.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  73248.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  73248.00 CLP
 
 2022-07-20 * "B#4394 Agua Choshuenco EAG Junio 2022"
   id: "1565"

@@ -270,7 +270,7 @@
   je_num: "5000"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -12730984.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  12730984.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  12730984.00 CLP
 
 2025-08-08 * "Moises Moncada - Bateria/Manguera jardin"
   id: "5032"
@@ -298,21 +298,21 @@
   Assets:EAG:ControlYLiquidacin-115099  43980.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  1676044.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2861957.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  528410.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  528410.00 CLP
 
 2025-08-08 * "Mastercard Santander 1234 Eduardo Avayu"
   id: "5112"
   je_num: "5078"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -3566021.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  3566021.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  3566021.00 CLP
 
 2025-08-08 * "USD36.137,84 Mastercard Sant.1234 EAG"
   id: "5113"
   je_num: "5079"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -35966185.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  35966185.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  35966185.00 CLP
 
 2025-08-08 * "BH.143 IP Chile Directiva Julio 2025"
   id: "5127"
@@ -401,7 +401,7 @@
   Assets:EAG:ControlYLiquidacin-115099  574312.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  17300.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  142000.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  4607152.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  4607152.00 CLP
 
 2025-08-13 * "Eliot Avendaño - Sastre EAG"
   id: "5061"
@@ -647,7 +647,7 @@
   je_num: "5045"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -9500000.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  9500000.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  9500000.00 CLP
 
 2025-08-26 * "Magaly Vergara - Utiles aseo"
   id: "5079"

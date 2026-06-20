@@ -143,8 +143,8 @@
   je_num: "1883"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -2177453.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  118146.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  2059307.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  118146.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  2059307.00 CLP
 
 2022-11-09 * "Devol a FC gastos EAG Octubre 2022"
   id: "1884"
@@ -196,14 +196,14 @@
   Assets:EAG:ControlYLiquidacin-115099  55538.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2080431.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  1436220.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  602025.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  602025.00 CLP
 
 2022-11-09 * "Master Santander pesos 2735 Octubre EAG"
   id: "1965"
   je_num: "1961"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -3781264.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  3781264.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  3781264.00 CLP
 
 2022-11-10 * "Orquideas - Regalo de EAG a Sra Raquel"
   id: "1888"
@@ -280,7 +280,7 @@
   je_num: "1894"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -4524522.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  4524522.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  4524522.00 CLP
 
 2022-11-16 * "Mariela Mendez - Sueldo Noviembre 2022"
   id: "1900"
@@ -316,14 +316,14 @@
   Assets:EAG:ControlYLiquidacin-115099  118170.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  101130.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  567735.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  2283385.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  2283385.00 CLP
 
 2022-11-16 * "Visa Banco de Chile 1168 Octubre 2022"
   id: "1958"
   je_num: "1954"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -80606.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  80606.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  80606.00 CLP
 
 2022-11-16 * "Kia Chile - Devol hotel Seminole Miami"
   id: "1967"

@@ -71,8 +71,8 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -5164846.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -943172.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  5164846.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  943172.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  5164846.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  943172.00 CLP
 
 2021-08-05 * "Canc TC Master y Visa USD Julio 2021"
   id: "558"
@@ -81,8 +81,8 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -669902.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  669902.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -677163.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  284844.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  392319.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  284844.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  392319.00 CLP
 
 2021-08-05 * "Sra Raquel - Regalo chocolates de EAG"
   id: "559"
@@ -160,9 +160,9 @@
   je_num: "566"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4515593.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  107529.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  1789089.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  2618975.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  107529.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  1789089.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  2618975.00 CLP
 
 2021-08-09 * "Jael Avayu - Isapre Colmena Julio 2021"
   id: "568"
@@ -211,7 +211,7 @@
   je_num: "573"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -875130.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  875130.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  875130.00 CLP
 
 2021-08-11 * "Seguro proteccion bancaria Banco Chile"
   id: "630"
@@ -286,7 +286,7 @@
   je_num: "565"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -44334.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  44334.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  44334.00 CLP
 
 2021-08-18 * "Visa BCI 1027 EAG Julio 2021"
   id: "576"
@@ -297,7 +297,7 @@
   Assets:EAG:ControlYLiquidacin-115099  99370.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  43110.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  81010.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  6694185.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  6694185.00 CLP
 
 2021-08-18 * "Devol Eluchans Autorizacion de firma EAG"
   id: "585"
@@ -339,8 +339,8 @@
   je_num: "596"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -153369.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  76685.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  76684.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  76685.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  76684.00 CLP
 
 2021-08-19 * "PAC BCI Seguros generales Agosto 2021"
   id: "623"
@@ -439,14 +439,14 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -3000000.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  3000000.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -3000000.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  3000000.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  3000000.00 CLP
 
 2021-08-23 * "Inmobiliaria e Inversiones Binian SpA"
   id: "640"
   je_num: "639"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  7433646.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  -7433646.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  -7433646.00 CLP
 
 2021-08-24 * "Elias Gomez F#42 50% trabajos caldera"
   id: "598"

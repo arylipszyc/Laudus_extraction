@@ -176,15 +176,15 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -3000722.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1291675.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  1291675.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  3000722.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  1291675.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  3000722.00 CLP
 
 2026-03-09 * "USD465,59 Visa BCI 1027 Febrero 2026"
   id: "5737"
   je_num: "5698"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -433488.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  433488.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  433488.00 CLP
 
 2026-03-09 * "Shupu Yang - Orquidea Sra Raquel Ventura"
   id: "5738"
@@ -289,8 +289,8 @@
   Assets:EAG:ControlYLiquidacin-115099  4866830.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  62050.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2641378.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  2037342.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  739160.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  2037342.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  739160.00 CLP
 
 2026-03-11 * "Manuel Nova - Traslado cosas varias EAG"
   id: "5723"
@@ -376,7 +376,7 @@
   je_num: "5771"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -114708.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  114708.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  114708.00 CLP
 
 2026-03-12 * "Seguro proteccion bancaria Banco Chile"
   id: "5812"
@@ -397,7 +397,7 @@
   je_num: "5781"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -3724232.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  3724232.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  3724232.00 CLP
 
 2026-03-13 * "Productos del Mar - Solicitud Sra Raquel"
   id: "5725"
@@ -420,7 +420,7 @@
   je_num: "5687"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -100000.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  100000.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  100000.00 CLP
 
 2026-03-16 * "Paola Estrada Rosenberg de Eduardo Avayu"
   id: "5797"
@@ -441,8 +441,8 @@
   je_num: "5695"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2842998.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  2267103.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  575895.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  2267103.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  575895.00 CLP
 
 2026-03-17 * "Full Plagas B#5819 Desratizacion EAG"
   id: "5735"

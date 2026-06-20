@@ -93,8 +93,8 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -525654.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1977839.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  1977839.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  525654.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  1977839.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  525654.00 CLP
 
 2022-02-09 * "Eluchans - Certificado EAG"
   id: "1151"
@@ -109,8 +109,8 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -84723.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -219216.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  84723.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  219216.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  84723.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  219216.00 CLP
 
 2022-02-10 * "Devol a FC gastos EAG Enero 2022"
   id: "1106"
@@ -125,8 +125,8 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -81942.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -212022.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  81942.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  212022.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  81942.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  212022.00 CLP
 
 2022-02-10 * "Leyes sociales empl sur/stgo EAG Enero"
   id: "1108"
@@ -189,16 +189,16 @@
   je_num: "1110"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2000000.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  1030243.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  26480.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  943277.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  1030243.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  26480.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  943277.00 CLP
 
 2022-02-15 * "USD5.305,41 Visa BCI 1027 Enero EAG"
   id: "1113"
   je_num: "1111"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4261305.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  4261305.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  4261305.00 CLP
 
 2022-02-16 * "Visa BCI 1027 EAG Enero 2022"
   id: "1115"
@@ -210,7 +210,7 @@
   Assets:EAG:ControlYLiquidacin-115099  54380.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  105510.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  7460.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  9457844.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  9457844.00 CLP
 
 2022-02-16 * "Nuevo Ciclo: Devolución de préstamos"
   id: "1148"
@@ -231,7 +231,7 @@
   je_num: "1149"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -62056.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  62056.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  62056.00 CLP
 
 2022-02-17 * "Gastos reñaca Visa BCI EAG Enero 2022"
   id: "1116"
@@ -296,7 +296,7 @@
   je_num: "1153"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -77404.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  77404.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  77404.00 CLP
 
 2022-02-22 * "Rend. Noelia Farfal - Gastos casa sur EA"
   id: "1122"

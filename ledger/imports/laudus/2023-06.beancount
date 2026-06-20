@@ -112,8 +112,8 @@
   je_num: "2514"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1513997.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  1502050.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  11947.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  1502050.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  11947.00 CLP
 
 2023-06-08 * "Cotizaciones Mayo 2023"
   id: "2524"
@@ -157,14 +157,14 @@
   Assets:EAG:ControlYLiquidacin-115099  1735613.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  3680661.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2180.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  1442347.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  1442347.00 CLP
 
 2023-06-08 * "Master Santander pesos 2735 Mayo EAG"
   id: "2689"
   je_num: "2680"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -2407264.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  2407264.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  2407264.00 CLP
 
 2023-06-08 * "USD3.008,14 Santander Visa 0790 Mayo EAG"
   id: "2690"
@@ -172,15 +172,15 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -2461892.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -948218.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  948218.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  2461892.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  948218.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  2461892.00 CLP
 
 2023-06-12 * "USD4.696,23 Visa BCI 1027 Mayo 2023"
   id: "2527"
   je_num: "2518"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -3816861.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  3816861.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  3816861.00 CLP
 
 2023-06-12 * "B#7105 Agua Choshuenco EAG Mayo 2023"
   id: "2528"
@@ -244,14 +244,14 @@
   Assets:EAG:ControlYLiquidacin-115099  44930.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  96500.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  59267.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  9800588.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  9800588.00 CLP
 
 2023-06-13 * "Visa Banco de Chile 1168 Eduardo Avayu"
   id: "2578"
   je_num: "2569"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -106400.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  106400.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  106400.00 CLP
 
 2023-06-14 * "Rend. Noelia Farfal Gastos casa sur EAG"
   id: "2531"

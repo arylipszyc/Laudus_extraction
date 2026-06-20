@@ -148,8 +148,8 @@
   je_num: "3549"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -5295620.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  64940.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  5230680.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  64940.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  5230680.00 CLP
 
 2024-05-08 * "F#408944 Acevedo - Combustible Abril EAG"
   id: "3568"
@@ -224,9 +224,9 @@
   Assets:EAG:ControlYLiquidacin-115099  22990.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  4338887.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  1882119.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  50801.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  277787.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  501508.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  50801.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  277787.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  501508.00 CLP
 
 2024-05-09 * "USD100.000 a Cta Cte BCI Miami EAG"
   id: "3571"
@@ -264,7 +264,7 @@
   je_num: "3557"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -1866322.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  1866322.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  1866322.00 CLP
 
 2024-05-13 * "Richard Simons F#80 Saldo trab. Red Mesh"
   id: "3577"
@@ -299,14 +299,14 @@
   Assets:EAG:ControlYLiquidacin-115099  124050.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  7210.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  61418.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  12011716.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  12011716.00 CLP
 
 2024-05-14 * "Visa Banco de Chile 1168 Eduardo Avayu"
   id: "3632"
   je_num: "3615"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -65113.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  65113.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  65113.00 CLP
 
 2024-05-14 * "Devol Isapre B#5486 Psiquiatra EAG"
   id: "3635"

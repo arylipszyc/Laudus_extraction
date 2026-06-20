@@ -169,8 +169,8 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -47947.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -116313.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  47947.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  116313.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  47947.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  116313.00 CLP
 
 2024-03-07 * "Visa Santander 4412 Febrero 2024 EAG"
   id: "3423"
@@ -183,14 +183,14 @@
   Assets:EAG:ControlYLiquidacin-115099  23139.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  4116453.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2103877.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  532170.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  532170.00 CLP
 
 2024-03-07 * "Santander Visa 1066 Raquel Ventura"
   id: "3426"
   je_num: "3410"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2758429.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  2758429.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  2758429.00 CLP
 
 2024-03-08 * "Leontina Mendez - Devol comrpras casa"
   id: "3348"
@@ -254,7 +254,7 @@
   je_num: "3361"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -894910.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  894910.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  894910.00 CLP
 
 2024-03-12 * "Seguro proteccion bancaria Banco Chile"
   id: "3432"
@@ -321,7 +321,7 @@
   je_num: "3338"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -45879.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  45879.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  45879.00 CLP
 
 2024-03-14 * "Visa BCI 1027 EAG Febrero 2024"
   id: "3375"
@@ -334,7 +334,7 @@
   Assets:EAG:ControlYLiquidacin-115099  6800.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  49970.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  152350.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  9972786.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  9972786.00 CLP
 
 2024-03-14 * "Inversion FM Competitito BCI a 10160175"
   id: "3388"

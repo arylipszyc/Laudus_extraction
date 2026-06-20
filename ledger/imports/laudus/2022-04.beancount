@@ -128,8 +128,8 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -547381.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -5238676.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  5238676.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  547381.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  5238676.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  547381.00 CLP
 
 2022-04-07 * "Esteban Mendez - Prestamo"
   id: "1264"
@@ -143,9 +143,9 @@
   je_num: "1262"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1010697.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  865516.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  126820.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  18361.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  865516.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  126820.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  18361.00 CLP
 
 2022-04-07 * "Wizo libro cocina regalo Carlos Schaerer"
   id: "1266"
@@ -173,7 +173,7 @@
   je_num: "1334"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -234903.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  234903.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  234903.00 CLP
 
 2022-04-08 * "BH#1203 Catalina Alvarez - Consultas EAG"
   id: "1269"
@@ -273,7 +273,7 @@
   je_num: "1276"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -214124.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  214124.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  214124.00 CLP
 
 2022-04-12 * "F#2876 Connect Chile Internet EAG"
   id: "1280"
@@ -352,14 +352,14 @@
   Assets:EAG:ControlYLiquidacin-115099  7630.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  92620.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  36290.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  9594306.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  9594306.00 CLP
 
 2022-04-18 * "Visa Banco de Chile 1168 Marzo 2022"
   id: "1336"
   je_num: "1333"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -99062.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  99062.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  99062.00 CLP
 
 2022-04-19 * "PAC BCI Seguros generales Abril 2022"
   id: "1286"
@@ -397,7 +397,7 @@
   je_num: "1335"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -70387.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  70387.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  70387.00 CLP
 
 2022-04-20 * "Psiquiatra Marcela Larraguibel B#1505"
   id: "1289"

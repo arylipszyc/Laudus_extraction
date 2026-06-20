@@ -187,17 +187,17 @@
   Assets:EAG:Bancos:BancoSantander63188824-111009  2510925.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1993303.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -517622.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  1993303.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  517622.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  1993303.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  517622.00 CLP
 
 2021-12-07 * "Cancela tarjetas santander Nov Sra Coca"
   id: "928"
   je_num: "927"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -897199.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  8510.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  862944.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  25745.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  8510.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  862944.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  25745.00 CLP
 
 2021-12-07 * "EAG - Isapre Cruz Blanca Noviembre 2021"
   id: "930"
@@ -272,8 +272,8 @@
   je_num: "936"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -59190.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  52643.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  6547.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  52643.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  6547.00 CLP
 
 2021-12-09 * "Alberto Bitran - Abono prestamo mutuo"
   id: "941"
@@ -388,7 +388,7 @@
   je_num: "950"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -40393862.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  40393862.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  40393862.00 CLP
 
 2021-12-15 * "Traspaso de Fondos a Otro Banco en Linea"
   id: "960"
@@ -485,7 +485,7 @@
   Assets:EAG:ControlYLiquidacin-115099  397137.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  45870.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  79490.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  5499996.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  5499996.00 CLP
 
 2021-12-20 * "B#163 Lorena Ross - Saldo sesiones EAG"
   id: "965"
@@ -506,14 +506,14 @@
   je_num: "973"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -77385.00 CLP
-  Liabilities:EAG:TC:Tc8083AmericanExpress-430011  77385.00 CLP
+  Expenses:EAG:TC:Tc8083AmericanExpress-430011  77385.00 CLP
 
 2021-12-20 * "Visa Banco de Chile 1168 Noviembre 2021"
   id: "979"
   je_num: "978"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -60548.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  60548.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  60548.00 CLP
 
 2021-12-21 * "UF14,62 ASPOR - 2 Motos de agua año 2020"
   id: "963"

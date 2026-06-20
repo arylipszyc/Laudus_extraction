@@ -144,7 +144,7 @@
   je_num: "2080"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -21109.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  21109.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  21109.00 CLP
 
 2023-01-09 * "Eliot - Imposiciones Mariela Mendez"
   id: "2086"
@@ -158,7 +158,7 @@
   je_num: "2082"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -189559.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  189559.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  189559.00 CLP
 
 2023-01-09 * "EAG - Isapre Cruz Blanca Diciembre 2022"
   id: "2089"
@@ -181,10 +181,10 @@
   Assets:EAG:ControlYLiquidacin-115099  53538.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  1536612.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  63768.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpass-430007  7341611.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  251892.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  626400.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpassUs-430010  666121.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  7341611.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  251892.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  626400.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  666121.00 CLP
 
 2023-01-10 * "Leyes soc empl sur/stgo EAG Dic. 2022"
   id: "2088"
@@ -393,14 +393,14 @@
   Assets:EAG:ControlYLiquidacin-115099  140770.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  74450.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  58045.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  17830396.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  17830396.00 CLP
 
 2023-01-16 * "Visa Banco de Chile 1168 Diciembre 2022"
   id: "2149"
   je_num: "2144"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -68001.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  68001.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  68001.00 CLP
 
 2023-01-17 * "Devol de EAG Gotas ojos/Pilas"
   id: "2108"

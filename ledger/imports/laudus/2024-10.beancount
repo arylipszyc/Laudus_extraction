@@ -122,7 +122,7 @@
   je_num: "3992"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2000000.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  2000000.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  2000000.00 CLP
 
 2024-10-04 * "MBI Saldo compensación contrato forward"
   id: "4013"
@@ -303,15 +303,15 @@
   Assets:EAG:ControlYLiquidacin-115099  1345635.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  759376.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  2651223.00 CLP
-  Liabilities:EAG:TC:Tc8996MastercardLanpassUs-430008  22038.00 CLP
-  Liabilities:EAG:TC:Tc0858VisaLatanpass-430009  487581.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  22038.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  487581.00 CLP
 
 2024-10-11 * "USD1.009,54 Visa BCI 1027 Septiembre-24"
   id: "3998"
   je_num: "3978"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -945636.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  945636.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  945636.00 CLP
 
 2024-10-11 * "Victoria Svilgilsky - Seguro"
   id: "4000"
@@ -395,14 +395,14 @@
   Assets:EAG:ControlYLiquidacin-115099  47870.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  153190.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  7500.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinity-430005  4709776.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinity-430005  4709776.00 CLP
 
 2024-10-15 * "Visa Banco de Chile 1168 Eduardo Avayu"
   id: "4121"
   je_num: "4101"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -57949.00 CLP
-  Liabilities:EAG:TC:TcVariasEag-430017  57949.00 CLP
+  Expenses:EAG:TC:TcVariasEag-430017  57949.00 CLP
 
 2024-10-16 * "Ronald Bendov - 2do Abono estadio"
   id: "4028"

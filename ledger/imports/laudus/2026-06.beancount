@@ -77,10 +77,10 @@
   je_num: "5967"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -9580000.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  5235476.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  3344254.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  224299.00 CLP
-  Liabilities:EAG:TC:TcRaquelVentura-430019  775971.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  5235476.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  3344254.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  224299.00 CLP
+  Expenses:EAG:TC:TcRaquelVentura-430019  775971.00 CLP
 
 2026-06-05 * "Efectivo Eduardo Avayu"
   id: "6009"
@@ -105,6 +105,25 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -203100.00 CLP
   Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  203100.00 CLP
 
+2026-06-05 * "Mariela Mendez - Leyes soc Mayo 2026"
+  id: "6014"
+  je_num: "5974"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -282615.00 CLP
+  Expenses:EAG:SueldosRopaRegalas-411001  282615.00 CLP
+
+2026-06-05 * "Leyes soc empl sur/stgo EAG Mayo 2026"
+  id: "6015"
+  je_num: "5975"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoEdwards0162338082-111007  -1283228.00 CLP
+  Expenses:EAG:SueldosRopaRegalas-411001  264179.00 CLP
+  Expenses:EAG:SueldosRopaRegalias-413001  223147.00 CLP
+  Expenses:EAG:SueldosRopaRegalias-413001  256138.00 CLP
+  Expenses:EAG:SueldosRopaRegalias-413001  182843.00 CLP
+  Expenses:EAG:SueldosRopaRegalias-413001  266535.00 CLP
+  Expenses:EAG:SueldosRopaRegalias-413001  90386.00 CLP
+
 2026-06-08 * "USD603,75 Levine y Partners - Asesoria"
   id: "6008"
   je_num: "5968"
@@ -114,6 +133,101 @@
   Expenses:EAG:GastosBancarios-430003  10649.00 CLP
   Expenses:EAG:GastosLegalesNotara-430071  558650.00 CLP
 
+2026-06-08 * "USD1.217,42 Master Santander EAG 8996"
+  id: "6016"
+  je_num: "5976"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoSantander63188824-111009  -1124166.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  1124166.00 CLP
+
+2026-06-08 * "Via Gris - El Bosque TC EAG"
+  id: "6019"
+  je_num: "5979"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoSantander63188824-111009  6956984.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  -97503.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  -18402.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  -14990.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  -23990.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  -1777352.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  -2351528.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  -2590969.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  -82250.00 CLP
+
+2026-06-08 * "Full Plagas B#5898 Desratizacion EAG"
+  id: "6020"
+  je_num: "5980"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -98532.00 CLP
+  Expenses:EAG:FumigacionesDesratizacin-413059  98532.00 CLP
+
+2026-06-08 * "Moises Moncada - Ropa trabajo/botas"
+  id: "6021"
+  je_num: "5981"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -301820.00 CLP
+  Expenses:EAG:SueldosRopaRegalias-413001  301820.00 CLP
+
+2026-06-08 * "Eliot Avendaño - Medicamento EAG"
+  id: "6022"
+  je_num: "5982"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -55000.00 CLP
+  Expenses:EAG:Remedios-430051  55000.00 CLP
+
+2026-06-08 * "EAG - Isapre Cruz Blanca Mayo 2026"
+  id: "6023"
+  je_num: "5983"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -481074.00 CLP
+  Expenses:EAG:CotizacinIsapre-430055  481074.00 CLP
+
+2026-06-09 * "Mastercard Santander 8996 Eduardo Avayu"
+  id: "6017"
+  je_num: "5977"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoSantander63188824-111009  -17600483.00 CLP
+  Expenses:EAG:TC:Tc8996MastercardLanpass-430007  17600483.00 CLP
+
+2026-06-09 * "Visa Santander 0858 Eduardo Avayu"
+  id: "6018"
+  je_num: "5978"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoSantander63188824-111009  -7466345.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  97503.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  18402.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  14990.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  23990.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  1777352.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  2351528.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  2590969.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  82250.00 CLP
+  Expenses:EAG:TC:Tc0858VisaLatanpass-430009  509361.00 CLP
+
+2026-06-10 * "Victoria Svigilisky Previred Mayo 2026"
+  id: "6024"
+  je_num: "5984"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -139170.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  139170.00 CLP
+
+2026-06-10 * "F#16524/16511/16864/16863 Neltume EAG"
+  id: "6026"
+  je_num: "5986"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -409714.00 CLP
+  Expenses:EAG:CombustibleVehculos-413044  130035.00 CLP
+  Expenses:EAG:CombustibleVehculos-413044  112620.00 CLP
+  Expenses:EAG:CombustibleVehculos-413044  142059.00 CLP
+  Expenses:EAG:CombustibleVehculos-413044  25000.00 CLP
+
+2026-06-11 * "Mundo Tour devol seguro Jael Avayu"
+  id: "6030"
+  je_num: "5990"
+  source: "laudus-erp"
+  Assets:Jael:Bancos:BancoBci28980981Jael-910005  -259259.00 CLP
+  Assets:Jael:ControlYLiquidacin-910099  259259.00 CLP
+
 2026-06-12 * "Eliot - Remedios Sra Raquel/Plastif. USA"
   id: "6000"
   je_num: "5960"
@@ -122,12 +236,33 @@
   Expenses:EAG:SraRaquelVentura-430021  49000.00 CLP
   Expenses:EAG:OtrosGastosPersonales-430099  3980.00 CLP
 
+2026-06-12 * "Moises Moncada - Comida perritos"
+  id: "6027"
+  je_num: "5987"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -39000.00 CLP
+  Expenses:EAG:ComprasCasaEfectivo-413049  39000.00 CLP
+
+2026-06-12 * "Zita Miranda - Compras Jumbo"
+  id: "6028"
+  je_num: "5988"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -428607.00 CLP
+  Expenses:EAG:ComprasCasaEfectivo-411049  428607.00 CLP
+
 2026-06-14 * "Efectivo Eduardo Avayu"
   id: "6013"
   je_num: "5973"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -600000.00 CLP
   Expenses:EAG:Efectivo-430001  600000.00 CLP
+
+2026-06-15 * "Edgardo Hidalgo Reparacion cortinas Max"
+  id: "6031"
+  je_num: "5991"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -90000.00 CLP
+  Expenses:EAG:OtrosGastosPersonales-430099  90000.00 CLP
 
 2026-06-16 * "Pedro Leon Pozo - Examenes EAG"
   id: "6005"
@@ -141,4 +276,39 @@
   je_num: "5972"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -9994897.00 CLP
-  Liabilities:EAG:TC:Tc1027VisaInfinityUs-430006  9994897.00 CLP
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  9994897.00 CLP
+
+2026-06-16 * "Sra Jacqueline Deutsch Junio 2026"
+  id: "6032"
+  je_num: "5992"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -650000.00 CLP
+  Expenses:EAG:SraJacquelineDeutsch-430023  650000.00 CLP
+
+2026-06-16 * "F#495423 Acevedo Ltda - Jael a Temuco"
+  id: "6033"
+  je_num: "5993"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -91003.00 CLP
+  Expenses:EAG:CombustibleVehculos-413044  91003.00 CLP
+
+2026-06-18 * "F#494585 Acevedo Ltda - Combustible"
+  id: "6025"
+  je_num: "5985"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -79684.00 CLP
+  Expenses:EAG:CombustibleVehculos-413044  79684.00 CLP
+
+2026-06-18 * "Moises Moncada - Ant. sueldo Junio 2026"
+  id: "6034"
+  je_num: "5994"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -23000.00 CLP
+  Expenses:EAG:SueldosRopaRegalias-413001  23000.00 CLP
+
+2026-06-18 * "B#17193 Agua Choshuenco EAG Mayo 2026"
+  id: "6035"
+  je_num: "5995"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -82060.00 CLP
+  Expenses:EAG:Agua-413013  82060.00 CLP
