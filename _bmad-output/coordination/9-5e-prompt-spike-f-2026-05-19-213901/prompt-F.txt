@@ -1,0 +1,31 @@
+Por favor extraé de esta cartola/estado de cuenta:
+- Período (fechas inicio y fin)
+- Moneda
+- Monto Facturado Anterior
+- Monto Facturado del Periodo
+- Todas las transacciones del período
+
+Devolvé EXACTAMENTE este formato y nada más:
+
+<header JSON en una línea>
+---
+<CSV con delimitador `|`>
+
+Header JSON:
+{"period_start": "YYYY-MM-DD", "period_end": "YYYY-MM-DD", "currency": "CLP|USD|EUR", "opening_balance": <Monto Facturado Anterior como número>, "closing_balance": <Monto Facturado del Periodo como número>}
+
+CSV — primera línea exactamente: date|description|amount|currency
+Luego una fila por transacción.
+
+Reglas para amount:
+- Signo TAL CUAL aparece en el PDF.
+- Para CLP, los amounts son SIEMPRE enteros sin decimales (sin punto, sin coma): "1234567" no "1.234.567" ni "1234.567".
+- Para USD/EUR, punto como decimal si lo necesita (ej "12.50").
+
+Otras reglas:
+- date: YYYY-MM-DD.
+- description: texto crudo del PDF; reemplazá `|` interno por espacio.
+- Incluí cuotas pre-existentes X/N con X≥1 (description + " (cuota X/N)", amount = valor de la cuota mensual con su signo).
+- NO incluyas subtotales/totales ni cuotas futuras (00/N).
+
+Sin markdown, sin explicaciones, sin texto fuera del formato.

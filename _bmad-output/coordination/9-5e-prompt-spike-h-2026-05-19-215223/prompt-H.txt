@@ -1,0 +1,23 @@
+Por favor dame un CSV con las transacciones de esta tarjeta de crédito.
+Dime de qué periodo es, en qué moneda está, monto facturado anterior y monto facturado del periodo.
+
+Devolvé tu respuesta exactamente con este formato y nada más:
+
+<header JSON en una línea>
+---
+<CSV con delimitador `|`>
+
+Header JSON:
+{"period_start": "YYYY-MM-DD", "period_end": "YYYY-MM-DD", "currency": "CLP|USD|EUR", "opening_balance": <monto facturado anterior como número>, "closing_balance": <monto facturado del periodo como número>}
+
+CSV — primera línea exactamente: date|description|amount|currency
+Luego una fila por transacción del período.
+
+Reglas:
+- amount: signo TAL CUAL aparece en el PDF. Para CLP, enteros sin decimales (sin punto, sin coma): "1234567" no "1.234.567".
+- date: YYYY-MM-DD.
+- description: texto crudo; reemplazá `|` interno por espacio.
+- Incluí cuotas pre-existentes X/N con X≥1 (sufijo " (cuota X/N)", amount = valor cuota mensual con su signo).
+- NO incluyas subtotales/totales ni cuotas futuras (00/N).
+
+Sin markdown, sin explicaciones, sin texto fuera del formato.

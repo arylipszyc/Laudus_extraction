@@ -45,3 +45,10 @@ ledger/_meta/import-log.jsonl
 
 # Prototipos de reportes — outputs Excel generados localmente
 _reportes-prototipo/*.xlsx
+
+# Creds temporales del handoff Epic 9 (NUNCA commitear)
+.handoff-creds.local
+_handoff/
+
+# Screenshots/artefactos efímeros del Playwright MCP
+.playwright-mcp/
