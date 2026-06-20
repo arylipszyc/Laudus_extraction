@@ -8,7 +8,6 @@ from backend.app.api.v1.health import router as health_router
 from backend.app.api.v1.reportes.router import router as reportes_router
 from backend.app.api.v1.sync.router import router as sync_router
 from backend.app.auth.router import router as auth_router
-from backend.app.api.v1.plan_de_cuentas.router import router as plan_de_cuentas_router
 from backend.app.api.v1.bank_accounts.router import router as bank_accounts_router
 from backend.app.api.v1.cuentas_pendientes.router import router as cuentas_pendientes_router
 from backend.app.api.v1.transactions.router import router as transactions_router
@@ -20,7 +19,6 @@ router.include_router(health_router)
 router.include_router(auth_router)
 router.include_router(sync_router)
 router.include_router(dashboard_router)
-router.include_router(plan_de_cuentas_router, prefix="/plan-de-cuentas")
 router.include_router(bank_accounts_router, prefix="/bank-accounts")
 router.include_router(cuentas_pendientes_router)
 router.include_router(transactions_router)

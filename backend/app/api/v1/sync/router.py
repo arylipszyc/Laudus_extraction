@@ -11,8 +11,7 @@ from backend.app.api.v1.sync.schemas import (
 )
 from backend.app.api.v1.sync.service import get_sync_status, trigger_sync
 from backend.app.auth.schemas import UserSession
-from backend.app.dependencies import get_current_user, get_repository, require_role
-from backend.app.repositories.base import DataRepository
+from backend.app.dependencies import get_current_user, require_role
 
 router = APIRouter(prefix="/sync", tags=["sync"])
 
@@ -20,10 +19,9 @@ router = APIRouter(prefix="/sync", tags=["sync"])
 @router.get("/status", response_model=SyncStatusResponse)
 def sync_status(
     user: UserSession = Depends(get_current_user),
-    repo: DataRepository = Depends(get_repository),
 ) -> SyncStatusResponse:
     """Return last sync timestamp per data type and current job status."""
-    state = get_sync_status(repo)
+    state = get_sync_status()
     raw_stats = state["stats"]
     return SyncStatusResponse(
         balance_sheet=DataTypeSyncStatus(last_sync=state["balance_sheet"]["last_sync"]),
@@ -39,7 +37,6 @@ def sync_status(
 def sync_trigger(
     request: TriggerRequest = Body(default=TriggerRequest()),
     user: UserSession = Depends(require_role(["contador", "admin"])),
-    repo: DataRepository = Depends(get_repository),
 ) -> TriggerResponse:
     """Trigger async sync (normal) or backfill. Returns job_id immediately."""
     if request.mode == "backfill":
@@ -50,7 +47,7 @@ def sync_trigger(
         except ValueError:
             raise HTTPException(status_code=422, detail="from_date must be a valid ISO date YYYY-MM-DD")
     try:
-        job_id = trigger_sync(repo, mode=request.mode, from_date=request.from_date)
+        job_id = trigger_sync(mode=request.mode, from_date=request.from_date)
     except ValueError:
         raise HTTPException(status_code=409, detail="Sync already running")
     return TriggerResponse(status="triggered", job_id=job_id)

@@ -3,13 +3,11 @@
 GET  /cuentas-pendientes/                  → lista cuentas en cuarentena + sugerencia
 POST /cuentas-pendientes/{code}/promover   → escribe el open final al plan (helper reusable)
 
-Ambos gated por `USE_BEANCOUNT_ENGINE_LEDGER` (Beancount es la fuente; con el flag off
-no hay fuente → lista vacía / 404) y por RBAC contador/admin (Story 9.13).
+Gated por RBAC contador/admin (Story 9.13). Beancount es la fuente única (cleanup c4, 9.16).
 """
 from __future__ import annotations
 
 import logging
-import os
 from pathlib import Path
 from subprocess import CalledProcessError
 
@@ -32,18 +30,12 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/cuentas-pendientes", tags=["cuentas-pendientes"])
 
 
-def _use_beancount() -> bool:
-    return os.getenv("USE_BEANCOUNT_ENGINE_LEDGER", "false").strip().lower() in {"1", "true", "yes", "on"}
-
-
 @router.get("/", response_model=list[PendingAccount])
 def get_pending(
     _user: UserSession = Depends(require_role(["contador", "admin"])),
     ledger: LedgerService = Depends(get_ledger_service),
 ) -> list[PendingAccount]:
     """Lista las cuentas que el importer dejó en cuarentena, con monto + sugerencia."""
-    if not _use_beancount():
-        return []  # Beancount no es la fuente → no hay cuentas pendientes que mostrar
     try:
         entries = ledger.entries()
     except LedgerUnavailableError as exc:
@@ -59,8 +51,6 @@ def promover(
     ledger: LedgerService = Depends(get_ledger_service),
 ) -> PromoteResponse:
     """Escribe el `open` final + metadata al plan (lock + bean-check + git), refresca el ledger."""
-    if not _use_beancount():
-        raise HTTPException(status_code=404, detail="Beancount engine no habilitado")
     if not request.categoria3 or not request.categoria3.strip():
         raise HTTPException(
             status_code=422,

@@ -14,15 +14,8 @@ google-cloud-secret-manager>=2.20.0
 
 # Existing pipeline dependencies (shared)
 requests>=2.31.0
-gspread>=6.0.0
 python-dotenv>=1.0.0
 python-dateutil>=2.9.0
-
-# Supabase (Story 4.0) — standby (no configurado en Render).
-# Pin EXACTO. El viejo tope <2.8.0 fijaba httpx<0.28 (incompatible con google-genai httpx>=0.28.1 -> ResolutionImpossible),
-# y dejarlo abierto (>=2.7.0) hacía a pip backtrackear todo el rango (build colgado en Render).
-# 2.31.0 va con httpx 0.28.1, storage3 2.31 (SIN pyiceberg en py3.12); superficie create_client/Client estable.
-supabase==2.31.0
 
 # Beancount engine (Story 9.0+)
 beancount>=3.2.0

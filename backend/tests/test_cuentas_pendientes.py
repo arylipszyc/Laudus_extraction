@@ -119,14 +119,6 @@ def test_lista_pendientes_con_monto(tmp_path, monkeypatch):
     assert pa["monto_acumulado"] == 150000.0
 
 
-def test_flag_off_lista_vacia(tmp_path, monkeypatch):
-    monkeypatch.delenv("USE_BEANCOUNT_ENGINE_LEDGER", raising=False)
-    client = _make_app(_make_ledger(tmp_path))
-    resp = client.get("/api/v1/cuentas-pendientes/", cookies={"access_token": _contador()})
-    assert resp.status_code == 200
-    assert resp.json() == []
-
-
 # ── AC2: sugerencia por prefijo ─────────────────────────────────────────────
 
 

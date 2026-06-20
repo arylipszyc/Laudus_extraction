@@ -13,8 +13,7 @@ from backend.app.api.v1.dashboard.schemas import (
 )
 from backend.app.api.v1.dashboard.service import get_balance_sheets, get_ledger_entries
 from backend.app.auth.schemas import UserSession
-from backend.app.dependencies import get_current_user, get_ledger_service, get_repository
-from backend.app.repositories.base import DataRepository
+from backend.app.dependencies import get_current_user, get_ledger_service
 from backend.app.services.ledger_service import LedgerService
 
 router = APIRouter(tags=["dashboard"])
@@ -53,13 +52,12 @@ def list_balance_sheets(
     date_from: str | None = Query(default=None, description="ISO date YYYY-MM-DD (inclusive)"),
     date_to: str | None = Query(default=None, description="ISO date YYYY-MM-DD (inclusive)"),
     user: UserSession = Depends(get_current_user),
-    repo: DataRepository = Depends(get_repository),
     ledger: LedgerService = Depends(get_ledger_service),
 ) -> BalanceSheetResponse:
     """Return balance sheet records for an entity, optionally filtered by date range."""
     _validate_entity(entity)
     _validate_dates(date_from, date_to)
-    result = get_balance_sheets(repo, entity, date_from, date_to, ledger=ledger)
+    result = get_balance_sheets(entity, date_from, date_to, ledger=ledger)
     return BalanceSheetResponse(
         data=[BalanceSheetRecord(**r) for r in result["data"]],
         meta=DashboardMeta(last_sync=result["meta"]["last_sync"]),
@@ -76,13 +74,12 @@ def list_ledger_entries(
         description="Filter by accountnumber (for drill-down, Story 3.5)",
     ),
     user: UserSession = Depends(get_current_user),
-    repo: DataRepository = Depends(get_repository),
     ledger: LedgerService = Depends(get_ledger_service),
 ) -> LedgerEntriesResponse:
     """Return ledger entries for an entity, optionally filtered by date range and account."""
     _validate_entity(entity)
     _validate_dates(date_from, date_to)
-    result = get_ledger_entries(repo, entity, date_from, date_to, account_number, ledger=ledger)
+    result = get_ledger_entries(entity, date_from, date_to, account_number, ledger=ledger)
     return LedgerEntriesResponse(
         data=[LedgerEntryRecord(**r) for r in result["data"]],
         meta=DashboardMeta(last_sync=result["meta"]["last_sync"]),

@@ -10,19 +10,8 @@ from jose import JWTError
 
 from backend.app.auth.schemas import UserSession
 from backend.app.auth.service import decode_jwt
-from backend.app.repositories.sheets_repository import SheetsRepository
 
 logger = logging.getLogger(__name__)
-
-
-@lru_cache(maxsize=1)
-def get_repository() -> SheetsRepository:
-    """Returns the singleton SheetsRepository instance.
-
-    Override in tests via app.dependency_overrides[get_repository].
-    """
-    from pipeline.config.gspread_config import get_spreadsheet
-    return SheetsRepository(spreadsheet=get_spreadsheet())
 
 
 @lru_cache(maxsize=1)

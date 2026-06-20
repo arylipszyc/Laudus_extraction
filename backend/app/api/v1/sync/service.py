@@ -1,4 +1,8 @@
-"""Sync orchestration service — job tracking + background runner."""
+"""Sync orchestration service — job tracking + background runner.
+
+Story 9.16 (cleanup c4): se removió el path Sheets. El sync es el importer
+Laudus→Beancount (Story 9.4); el status deriva del import-log de ese importer.
+"""
 import json
 import logging
 import os
@@ -7,14 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
-from backend.app.repositories.base import DataRepository
-
 logger = logging.getLogger(__name__)
-
-
-def _flag(name: str) -> bool:
-    """True if the env var is set to a truthy value (default false)."""
-    return os.getenv(name, "false").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _import_log_path() -> Path:
@@ -72,19 +69,16 @@ _current_job: dict = {
 _job_lock = threading.Lock()
 
 
-def get_sync_status(repo: DataRepository) -> dict:
-    """Return current sync status: per-type last sync dates + current job state."""
-    if _flag("USE_BEANCOUNT_ENGINE_SYNC_STATUS"):
-        # c4 path: both data types derive from the same Laudus importer run (AC7).
-        run_ts = _read_import_log_last_sync()
-        bs_last_sync = ledger_last_sync = run_ts
-    else:
-        bs_last_sync = _read_balance_sheet_last_sync(repo)
-        ledger_last_sync = _read_last_sync_date(repo)
+def get_sync_status() -> dict:
+    """Return current sync status: last Laudus importer run + current job state.
+
+    Ambos tipos de dato derivan de la misma corrida del importer Laudus (AC7).
+    """
+    run_ts = _read_import_log_last_sync()
     with _job_lock:
         return {
-            "balance_sheet": {"last_sync": bs_last_sync},
-            "ledger": {"last_sync": ledger_last_sync},
+            "balance_sheet": {"last_sync": run_ts},
+            "ledger": {"last_sync": run_ts},
             "job_status": _current_job["status"],
             "job_id": _current_job["job_id"],
             "error": _current_job["error"],
@@ -93,13 +87,11 @@ def get_sync_status(repo: DataRepository) -> dict:
 
 
 def trigger_sync(
-    repo: DataRepository,
     mode: str = "normal",
     from_date: str | None = None,
 ) -> str:
-    """Start sync or backfill in a background thread. Returns job_id.
-
-    Raises ValueError if a sync is already running.
+    """Start the Laudus→Beancount import (incremental or backfill) in a background
+    thread. Returns job_id. Raises ValueError if a sync is already running.
     """
     with _job_lock:
         if _current_job["status"] == "running":
@@ -114,10 +106,10 @@ def trigger_sync(
             "stats": None,
         })
 
-    if mode == "backfill":
-        thread = threading.Thread(target=_run_backfill, args=(job_id, repo, from_date), daemon=True)
-    else:
-        thread = threading.Thread(target=_run_sync, args=(job_id, repo), daemon=True)
+    import_mode = "backfill" if mode == "backfill" else "incremental"
+    thread = threading.Thread(
+        target=_run_laudus_import, args=(job_id, import_mode, from_date), daemon=True
+    )
     thread.start()
     return job_id
 
@@ -147,10 +139,7 @@ def _refresh_ledger_clone() -> None:
 
 
 def _run_laudus_import(job_id: str, mode: str, from_date: str | None = None) -> None:
-    """Story 9.4: run the Beancount Laudus importer in this background thread.
-
-    Used instead of the Sheets path when `USE_BEANCOUNT_ENGINE_LEDGER=true`.
-    """
+    """Story 9.4: run the Beancount Laudus importer in this background thread."""
     try:
         from pipeline.importers.laudus_run import run_import
         _refresh_ledger_clone()
@@ -181,111 +170,3 @@ def _run_laudus_import(job_id: str, mode: str, from_date: str | None = None) -> 
                     "error": str(exc),
                     "stats": None,
                 })
-
-
-def _run_sync(job_id: str, repo: DataRepository) -> None:
-    """Execute sync_api() in background thread. Counts records before/after for stats."""
-    if _flag("USE_BEANCOUNT_ENGINE_LEDGER"):
-        _run_laudus_import(job_id, mode="incremental")
-        return
-    try:
-        # Snapshot counts before sync (best-effort — silent on error)
-        try:
-            bs_before = len(repo.get_records("balance_sheet") or [])
-            ledger_before = len(repo.get_records("ledger") or [])
-        except Exception:
-            bs_before = ledger_before = None
-
-        from pipeline.sync import sync_api
-        sync_api()
-
-        # Snapshot counts after sync and compute delta
-        stats = None
-        if bs_before is not None:
-            try:
-                bs_after = len(repo.get_records("balance_sheet") or [])
-                ledger_after = len(repo.get_records("ledger") or [])
-                stats = {
-                    "balance_sheet_added": max(0, bs_after - bs_before),
-                    "ledger_added": max(0, ledger_after - ledger_before),
-                }
-            except Exception:
-                pass  # stats unavailable — sync itself succeeded
-
-        with _job_lock:
-            if _current_job["job_id"] == job_id:
-                _current_job.update({
-                    "status": "done",
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                    "stats": stats,
-                })
-    except Exception as exc:
-        logger.error("Background sync failed: %s", exc, exc_info=True)
-        with _job_lock:
-            if _current_job["job_id"] == job_id:
-                _current_job.update({
-                    "status": "failed",
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                    "error": str(exc),
-                    "stats": None,
-                })
-
-
-def _run_backfill(job_id: str, repo: DataRepository, from_date: str | None) -> None:
-    """Execute run_backfill() in background thread. Updates _current_job on completion/failure."""
-    if _flag("USE_BEANCOUNT_ENGINE_LEDGER"):
-        _run_laudus_import(job_id, mode="backfill", from_date=from_date)
-        return
-    try:
-        from backend.app.api.v1.sync.backfill import run_backfill
-        result = run_backfill(from_date, repo)
-        stats = {
-            "balance_sheet_added": result["balance_sheet_upserted"],
-            "ledger_added": result["ledger_upserted"],
-        }
-        with _job_lock:
-            if _current_job["job_id"] == job_id:
-                _current_job.update({
-                    "status": "done",
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                    "stats": stats,
-                })
-    except Exception as exc:
-        logger.error("Background backfill failed: %s", exc, exc_info=True)
-        with _job_lock:
-            if _current_job["job_id"] == job_id:
-                _current_job.update({
-                    "status": "failed",
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                    "error": str(exc),
-                    "stats": None,
-                })
-
-
-def _read_balance_sheet_last_sync(repo: DataRepository) -> datetime | None:
-    """Read balance sheet last sync from balance_sheet tab: max query_date."""
-    try:
-        records = repo.get_records("balance_sheet")
-        if not records:
-            return None
-        dates = [str(r.get("query_date", "")) for r in records if r.get("query_date")]
-        if not dates:
-            return None
-        return datetime.fromisoformat(max(dates)).replace(tzinfo=timezone.utc)
-    except Exception:
-        return None
-
-
-def _read_last_sync_date(repo: DataRepository) -> datetime | None:
-    """Read ledger last sync from date_range sheet: max dateTo."""
-    try:
-        records = repo.get_records("date_range")
-        if not records:
-            return None
-        latest = max(records, key=lambda r: str(r.get("dateTo", "")))
-        date_str = str(latest.get("dateTo", ""))
-        if not date_str:
-            return None
-        return datetime.fromisoformat(date_str).replace(tzinfo=timezone.utc)
-    except Exception:
-        return None

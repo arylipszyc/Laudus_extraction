@@ -34,8 +34,9 @@ contables base) + Supabase one-time read (taxonomía + metadata bancaria).
 # 1. Esqueleto del directorio ledger/ (idempotente, OK re-correr)
 python -m bootstrap.init_ledger_dir
 
-# 2. Plan de cuentas (genera ledger/accounts.beancount)
-python -m bootstrap.generate_accounts
+# 2. Plan de cuentas — generate_accounts.py REMOVIDO (cleanup c4, Story 9.16).
+#    accounts.beancount es ahora la fuente única mantenida a mano (ADR-001); ya no se regenera
+#    desde Supabase/Laudus (re-correrlo pisaría las ediciones autoritativas).
 
 # 3. Saldos iniciales 2021-01-01 (genera ledger/opening-2021.beancount)
 python -m bootstrap.generate_opening_balances
@@ -58,15 +59,11 @@ Exit codes:
 
 ## Outputs por script
 
-### `generate_accounts.py`
+### `generate_accounts.py` — REMOVIDO (cleanup c4, Story 9.16)
 
-| Archivo | Contenido |
-|---|---|
-| `ledger/accounts.beancount` | 255 cuentas hoja con metadata Laudus + bank_account_* |
-| `bootstrap/report-mismatch-accounts.csv` | Estructurales: cuentas presentes en Laudus pero no en Supabase (o viceversa). **Bloquean exit ≠ 0.** |
-| `bootstrap/report-name-divergences.csv` | Info — Laudus y Supabase tienen `name` distinto para la misma cuenta. **Laudus manda en el render**, divergence se reporta para que Ary actualice Supabase si quiere sincronía. NO bloquea. |
-| `bootstrap/report-hierarchy-nodes.csv` | Las 38 cuentas raíz/categoría (`accountNumber` len 1-3 en Laudus). NO se renderizan al ledger — Beancount infiere los grupos jerárquicos automáticamente al abrir hojas. |
-| `bootstrap/report-unmapped-accounts.csv` | Cuentas hoja con `Categoria1` no mapeable o `bank_account_type` desconocido. **Bloquean exit ≠ 0.** Resolución: agregar entrada a `bootstrap/account_mapping.py` o reclasificar en Supabase. |
+Generaba `ledger/accounts.beancount` desde Laudus + Supabase durante el bootstrap. **Removido**:
+`accounts.beancount` es ahora la fuente única de verdad mantenida a mano (ADR-001) — se edita y se
+agrega in-place (Stories 10.3 / 9.14), no se regenera. La génesis histórica queda en el historial de git.
 
 ### `generate_opening_balances.py`
 

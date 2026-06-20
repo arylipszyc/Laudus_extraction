@@ -1,469 +1,173 @@
-"""Tests for dashboard API endpoints — Story 3.1."""
-import pytest
-from unittest.mock import MagicMock
+"""Tests del dashboard — GET /balance-sheets y /ledger-entries.
 
+Servidos desde el ledger Beancount (BQL). Story 9.2 (path Beancount) + 9.16
+(cleanup c4: el path Sheets fue removido; este archivo absorbe la cobertura de
+auth/validación de la antigua suite de Story 3.1). Cubre: data-path, 503 ledger
+roto, auth, RBAC y validación de entity/fechas.
+"""
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from backend.app.auth.service import create_jwt
-from backend.app.dependencies import get_repository
+from backend.app.dependencies import get_ledger_service
 from backend.app.middleware import add_middleware
+from backend.app.services.ledger_service import LedgerService
+from backend.tests.test_bql_queries import MINI_LEDGER
 
 
-# ── Sample data ───────────────────────────────────────────────────────────────
-
-SAMPLE_BALANCE_RECORD = {
-    "account_id": 273,
-    "account_number": "111005",
-    "account_name": "Caja Pesos",
-    "debit": 100000.0,
-    "credit": 0.0,
-    "debit_balance": 100000.0,
-    "credit_balance": 0.0,
-    "query_date": "2026-03-31",
-    "is_latest": "TRUE",
-}
-
-SAMPLE_BALANCE_RECORD_OLD = {
-    "account_id": 274,
-    "account_number": "111006",
-    "account_name": "Caja Dólares",
-    "debit": 5000.0,
-    "credit": 0.0,
-    "debit_balance": 5000.0,
-    "credit_balance": 0.0,
-    "query_date": "2025-12-31",
-    "is_latest": "FALSE",
-}
-
-SAMPLE_LEDGER_RECORD = {
-    "journalentryid": 12345,
-    "journalentrynumber": 1001,
-    "date": "2026-03-15",
-    "accountnumber": "111005",
-    "lineid": 1,
-    "description": "Pago proveedor",
-    "debit": 50000.0,
-    "credit": 0.0,
-    "currencycode": "CLP",
-    "paritytomaincurrency": 1.0,
-    "periodo": "2026-03-31",
-}
-
-SAMPLE_LEDGER_RECORD_OLD = {
-    "journalentryid": 12344,
-    "journalentrynumber": 1000,
-    "date": "2025-11-20",
-    "accountnumber": "211001",
-    "lineid": 2,
-    "description": "Ingreso arriendo",
-    "debit": 0.0,
-    "credit": 200000.0,
-    "currencycode": "CLP",
-    "paritytomaincurrency": 1.0,
-    "periodo": "2025-11-30",
-}
+BROKEN_LEDGER = """\
+option "operating_currency" "CLP"
+1900-01-01 commodity CLP
+2020-01-01 open Assets:EAG:Bancos:TestBank-111005 CLP
+2024-03-15 * "Unbalanced"
+  Assets:EAG:Bancos:TestBank-111005   100000 CLP
+"""
 
 
-# ── Test app factory ──────────────────────────────────────────────────────────
-
-
-def make_dashboard_test_app(mock_repo=None) -> TestClient:
-    """Mini FastAPI app with dashboard router and mocked repository."""
+def _make_app(tmp_path, ledger_content=MINI_LEDGER) -> TestClient:
     from backend.app.api.v1.dashboard.router import router as dashboard_router
+
+    main = tmp_path / "main.beancount"
+    main.write_text(ledger_content, encoding="utf-8")
+    svc = LedgerService(str(main))
 
     app = FastAPI()
     add_middleware(app)
     app.include_router(dashboard_router, prefix="/api/v1")
-
-    if mock_repo is not None:
-        app.dependency_overrides[get_repository] = lambda: mock_repo
-
+    app.dependency_overrides[get_ledger_service] = lambda: svc
     return TestClient(app, raise_server_exceptions=False)
 
 
-def make_mock_repo(entity: str = "EAG", balance_records=None, ledger_records=None):
-    """Return a MagicMock repository routing get_records by entity-specific sheet names."""
-    repo = MagicMock()
-    _bs = balance_records if balance_records is not None else []
-    _ledger = ledger_records if ledger_records is not None else []
-
-    def _get_records(sheet_name):
-        if sheet_name == f"balance_sheet_{entity.lower()}":
-            return _bs
-        if sheet_name == f"ledger_{entity.lower()}":
-            return _ledger
-        return []
-
-    repo.get_records.side_effect = _get_records
-    return repo
-
-
-def family_token():
+def _family():
     return create_jwt(email="family@test.com", role="family")
 
 
-def contador_token():
+def _contador():
     return create_jwt(email="contador@test.com", role="contador")
 
 
-# ── GET /api/v1/balance-sheets ────────────────────────────────────────────────
+# ── data path ─────────────────────────────────────────────────────────────────
 
 
-def test_balance_sheets_unauthenticated():
-    """AC4: no auth cookie → 401."""
-    client = make_dashboard_test_app(mock_repo=make_mock_repo())
-    response = client.get("/api/v1/balance-sheets", params={"entity": "EAG"})
-    assert response.status_code == 401
+def test_balance_sheets_beancount_path(tmp_path):
+    """El endpoint sirve el balance-sheet derivado por BQL con el shape esperado."""
+    client = _make_app(tmp_path)
+    resp = client.get("/api/v1/balance-sheets", params={"entity": "EAG"},
+                      cookies={"access_token": _family()})
+    assert resp.status_code == 200
+    body = resp.json()
+    bank = next(r for r in body["data"] if r["account_number"] == "111005")
+    assert bank["debit_balance"] == 70000.0
+    # El response_model expone `account` (cuenta Beancount) para agrupar por raíz contable;
+    # sin esto las cuentas de hijas/T/C caen en "Otros".
+    assert bank["account"] == "Assets:EAG:Bancos:TestBank-111005"
+    assert body["meta"]["last_sync"] is not None
 
 
-def test_balance_sheets_family_can_read():
-    """AC4 + Story 9.13 AC6: family role → 200 on dashboard reads."""
-    client = make_dashboard_test_app(mock_repo=make_mock_repo(balance_records=[SAMPLE_BALANCE_RECORD]))
-    response = client.get(
-        "/api/v1/balance-sheets",
-        params={"entity": "EAG"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 200
+def test_ledger_entries_beancount_path(tmp_path):
+    """El endpoint sirve los asientos derivados por BQL, filtrables por cuenta."""
+    client = _make_app(tmp_path)
+    resp = client.get("/api/v1/ledger-entries", params={"entity": "EAG", "account_number": "111005"},
+                      cookies={"access_token": _family()})
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["data"]
+    assert all(r["accountnumber"] == "111005" for r in body["data"])
 
 
-def test_balance_sheets_contador_can_read():
-    """AC4: contador role → 200."""
-    client = make_dashboard_test_app(mock_repo=make_mock_repo(balance_records=[SAMPLE_BALANCE_RECORD]))
-    response = client.get(
-        "/api/v1/balance-sheets",
-        params={"entity": "EAG"},
-        cookies={"access_token": contador_token()},
-    )
-    assert response.status_code == 200
+# ── 503 cuando el ledger está roto ──────────────────────────────────────────────
 
 
-def test_balance_sheets_returns_data_and_meta():
-    """AC2: response has data list and meta.last_sync."""
-    client = make_dashboard_test_app(mock_repo=make_mock_repo(balance_records=[SAMPLE_BALANCE_RECORD]))
-    response = client.get(
-        "/api/v1/balance-sheets",
-        params={"entity": "EAG"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 200
-    body = response.json()
-    assert "data" in body
-    assert "meta" in body
-    assert "last_sync" in body["meta"]
-    assert len(body["data"]) == 1
-    assert body["meta"]["last_sync"] == "2026-03-31"
+def test_broken_ledger_returns_503(tmp_path):
+    """Ledger con errores de parseo → 503 con body LEDGER_UNAVAILABLE."""
+    client = _make_app(tmp_path, ledger_content=BROKEN_LEDGER)
+    resp = client.get("/api/v1/balance-sheets", params={"entity": "EAG"},
+                      cookies={"access_token": _family()})
+    assert resp.status_code == 503
+    body = resp.json()
+    assert body["error"]["code"] == "LEDGER_UNAVAILABLE"
+    assert body["error"]["detail"]
 
 
-def test_balance_sheets_filters_by_date_range():
-    """AC2: records outside date_from/date_to are excluded."""
-    records = [SAMPLE_BALANCE_RECORD, SAMPLE_BALANCE_RECORD_OLD]
-    client = make_dashboard_test_app(mock_repo=make_mock_repo(balance_records=records))
-    response = client.get(
-        "/api/v1/balance-sheets",
-        params={"entity": "EAG", "date_from": "2026-01-01", "date_to": "2026-12-31"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 200
-    body = response.json()
-    assert len(body["data"]) == 1
-    assert body["data"][0]["query_date"] == "2026-03-31"
+# ── auth ────────────────────────────────────────────────────────────────────────
 
 
-def test_balance_sheets_no_date_filter_returns_all():
-    """AC8: no date params → all records returned."""
-    records = [SAMPLE_BALANCE_RECORD, SAMPLE_BALANCE_RECORD_OLD]
-    client = make_dashboard_test_app(mock_repo=make_mock_repo(balance_records=records))
-    response = client.get(
-        "/api/v1/balance-sheets",
-        params={"entity": "EAG"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 200
-    assert len(response.json()["data"]) == 2
+def test_balance_sheets_unauthenticated(tmp_path):
+    client = _make_app(tmp_path)
+    resp = client.get("/api/v1/balance-sheets", params={"entity": "EAG"})
+    assert resp.status_code == 401
 
 
-def test_balance_sheets_invalid_entity_returns_422():
-    """AC5: invalid entity → 422."""
-    client = make_dashboard_test_app(mock_repo=make_mock_repo())
-    response = client.get(
-        "/api/v1/balance-sheets",
-        params={"entity": "INVALID"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 422
+def test_ledger_entries_unauthenticated(tmp_path):
+    client = _make_app(tmp_path)
+    resp = client.get("/api/v1/ledger-entries", params={"entity": "EAG"})
+    assert resp.status_code == 401
 
 
-@pytest.mark.parametrize("entity", ["EAG", "Jocelyn", "Jeannette", "Johanna", "Jael"])
-def test_balance_sheets_valid_entities_accepted(entity):
-    """AC5: all 5 valid entities are accepted → 200."""
-    client = make_dashboard_test_app(mock_repo=make_mock_repo(entity=entity))
-    response = client.get(
-        "/api/v1/balance-sheets",
-        params={"entity": entity},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 200
+# ── RBAC: family y contador leen (Story 9.13 AC6) ───────────────────────────────
 
 
-def test_balance_sheets_empty_entity_returns_empty_list():
-    """AC9: entity tab doesn't exist → data=[], meta.last_sync=null (not 500)."""
-    # make_mock_repo with no records and entity mismatch → get_records returns []
-    repo = MagicMock()
-    repo.get_records.return_value = []
-    client = make_dashboard_test_app(mock_repo=repo)
-    response = client.get(
-        "/api/v1/balance-sheets",
-        params={"entity": "EAG"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 200
-    body = response.json()
-    assert body["data"] == []
-    assert body["meta"]["last_sync"] is None
+def test_balance_sheets_contador_can_read(tmp_path):
+    client = _make_app(tmp_path)
+    resp = client.get("/api/v1/balance-sheets", params={"entity": "EAG"},
+                      cookies={"access_token": _contador()})
+    assert resp.status_code == 200
 
 
-def test_balance_sheets_amounts_are_float():
-    """AC6: monetary fields are float (Pydantic coerces int → float)."""
-    # Simulate Sheets returning ints for numeric cells
-    record_with_ints = {**SAMPLE_BALANCE_RECORD, "debit": 100000, "credit": 0, "debit_balance": 100000, "credit_balance": 0}
-    client = make_dashboard_test_app(mock_repo=make_mock_repo(balance_records=[record_with_ints]))
-    response = client.get(
-        "/api/v1/balance-sheets",
-        params={"entity": "EAG"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 200
-    record = response.json()["data"][0]
-    assert isinstance(record["debit"], float)
-    assert isinstance(record["credit"], float)
-    assert isinstance(record["debit_balance"], float)
-    assert isinstance(record["credit_balance"], float)
+def test_ledger_entries_contador_can_read(tmp_path):
+    client = _make_app(tmp_path)
+    resp = client.get("/api/v1/ledger-entries", params={"entity": "EAG"},
+                      cookies={"access_token": _contador()})
+    assert resp.status_code == 200
 
 
-def test_balance_sheets_only_date_from_applied():
-    """AC8: only date_from → records on or after date_from returned."""
-    records = [SAMPLE_BALANCE_RECORD, SAMPLE_BALANCE_RECORD_OLD]
-    client = make_dashboard_test_app(mock_repo=make_mock_repo(balance_records=records))
-    response = client.get(
-        "/api/v1/balance-sheets",
-        params={"entity": "EAG", "date_from": "2026-01-01"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 200
-    body = response.json()
-    assert len(body["data"]) == 1
-    assert body["data"][0]["query_date"] == "2026-03-31"
+# ── validación de entity ────────────────────────────────────────────────────────
 
 
-# ── GET /api/v1/ledger-entries ────────────────────────────────────────────────
+def test_balance_sheets_invalid_entity_returns_422(tmp_path):
+    client = _make_app(tmp_path)
+    resp = client.get("/api/v1/balance-sheets", params={"entity": "INVALID"},
+                      cookies={"access_token": _family()})
+    assert resp.status_code == 422
 
 
-def test_ledger_entries_unauthenticated():
-    """AC4: no auth cookie → 401."""
-    client = make_dashboard_test_app(mock_repo=make_mock_repo())
-    response = client.get("/api/v1/ledger-entries", params={"entity": "EAG"})
-    assert response.status_code == 401
-
-
-def test_ledger_entries_returns_data_and_meta():
-    """AC3: response has data list and meta.last_sync."""
-    client = make_dashboard_test_app(mock_repo=make_mock_repo(ledger_records=[SAMPLE_LEDGER_RECORD]))
-    response = client.get(
-        "/api/v1/ledger-entries",
-        params={"entity": "EAG"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 200
-    body = response.json()
-    assert "data" in body
-    assert "meta" in body
-    assert "last_sync" in body["meta"]
-    assert len(body["data"]) == 1
-    assert body["meta"]["last_sync"] == "2026-03-15"
-
-
-def test_ledger_entries_filters_by_date_range():
-    """AC3: date range filter works on ledger date field."""
-    records = [SAMPLE_LEDGER_RECORD, SAMPLE_LEDGER_RECORD_OLD]
-    client = make_dashboard_test_app(mock_repo=make_mock_repo(ledger_records=records))
-    response = client.get(
-        "/api/v1/ledger-entries",
-        params={"entity": "EAG", "date_from": "2026-01-01", "date_to": "2026-12-31"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 200
-    body = response.json()
-    assert len(body["data"]) == 1
-    assert body["data"][0]["date"] == "2026-03-15"
-
-
-def test_ledger_entries_account_number_filter():
-    """AC7: account_number param filters ledger entries by accountnumber."""
-    records = [SAMPLE_LEDGER_RECORD, SAMPLE_LEDGER_RECORD_OLD]
-    client = make_dashboard_test_app(mock_repo=make_mock_repo(ledger_records=records))
-    response = client.get(
-        "/api/v1/ledger-entries",
-        params={"entity": "EAG", "account_number": "111005"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 200
-    body = response.json()
-    assert len(body["data"]) == 1
-    # response_model_by_alias=True → alias "accountnumber" is used in JSON
-    assert body["data"][0]["accountnumber"] == "111005"
-
-
-def test_ledger_entries_amounts_are_float():
-    """AC6: monetary fields in ledger are float."""
-    record_with_ints = {**SAMPLE_LEDGER_RECORD, "debit": 50000, "credit": 0, "paritytomaincurrency": 1}
-    client = make_dashboard_test_app(mock_repo=make_mock_repo(ledger_records=[record_with_ints]))
-    response = client.get(
-        "/api/v1/ledger-entries",
-        params={"entity": "EAG"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 200
-    record = response.json()["data"][0]
-    assert isinstance(record["debit"], float)
-    assert isinstance(record["credit"], float)
-    # response_model_by_alias=True → alias "paritytomaincurrency" is used in JSON
-    assert isinstance(record["paritytomaincurrency"], float)
-
-
-def test_ledger_entries_invalid_entity_returns_422():
-    """AC5: invalid entity on ledger endpoint → 422."""
-    client = make_dashboard_test_app(mock_repo=make_mock_repo())
-    response = client.get(
-        "/api/v1/ledger-entries",
-        params={"entity": "UNKNOWN"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 422
-
-
-def test_ledger_entries_no_date_filter_returns_all():
-    """AC8: no date params on ledger → all records."""
-    records = [SAMPLE_LEDGER_RECORD, SAMPLE_LEDGER_RECORD_OLD]
-    client = make_dashboard_test_app(mock_repo=make_mock_repo(ledger_records=records))
-    response = client.get(
-        "/api/v1/ledger-entries",
-        params={"entity": "EAG"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 200
-    assert len(response.json()["data"]) == 2
-
-
-def test_ledger_entries_empty_returns_null_last_sync():
-    """AC9: no ledger data → data=[], meta.last_sync=null."""
-    repo = MagicMock()
-    repo.get_records.return_value = []
-    client = make_dashboard_test_app(mock_repo=repo)
-    response = client.get(
-        "/api/v1/ledger-entries",
-        params={"entity": "EAG"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 200
-    body = response.json()
-    assert body["data"] == []
-    assert body["meta"]["last_sync"] is None
-
-
-# ── Service unit tests ────────────────────────────────────────────────────────
-
-
-def test_service_in_date_range_inclusive():
-    """_in_date_range: both bounds are inclusive."""
-    from backend.app.api.v1.dashboard.service import _in_date_range
-    assert _in_date_range("2026-01-01", "2026-01-01", "2026-12-31") is True
-    assert _in_date_range("2026-12-31", "2026-01-01", "2026-12-31") is True
-    assert _in_date_range("2025-12-31", "2026-01-01", "2026-12-31") is False
-    assert _in_date_range("2027-01-01", "2026-01-01", "2026-12-31") is False
-
-
-def test_service_in_date_range_empty_date_excluded():
-    """_in_date_range: empty or None record_date → False."""
-    from backend.app.api.v1.dashboard.service import _in_date_range
-    assert _in_date_range("", "2026-01-01", "2026-12-31") is False
-    assert _in_date_range("None", "2026-01-01", "2026-12-31") is False
-
-
-def test_service_max_date_returns_max():
-    """_max_date: returns the lexicographic max ISO date string."""
-    from backend.app.api.v1.dashboard.service import _max_date
-    records = [{"query_date": "2026-03-31"}, {"query_date": "2025-12-31"}, {"query_date": "2026-01-01"}]
-    assert _max_date(records, "query_date") == "2026-03-31"
-
-
-def test_service_max_date_empty_returns_none():
-    """_max_date: empty records → None."""
-    from backend.app.api.v1.dashboard.service import _max_date
-    assert _max_date([], "query_date") is None
-
-
-# ── Patch 5: contador role on /ledger-entries (AC4) ──────────────────────────
-
-
-def test_ledger_entries_contador_can_read():
-    """AC4: contador role → 200 on /ledger-entries."""
-    client = make_dashboard_test_app(mock_repo=make_mock_repo(ledger_records=[SAMPLE_LEDGER_RECORD]))
-    response = client.get(
-        "/api/v1/ledger-entries",
-        params={"entity": "EAG"},
-        cookies={"access_token": contador_token()},
-    )
-    assert response.status_code == 200
-
-
-# ── Patch 6: parametrized entity test for /ledger-entries (AC5 + AC10) ───────
+def test_ledger_entries_invalid_entity_returns_422(tmp_path):
+    client = _make_app(tmp_path)
+    resp = client.get("/api/v1/ledger-entries", params={"entity": "UNKNOWN"},
+                      cookies={"access_token": _family()})
+    assert resp.status_code == 422
 
 
 @pytest.mark.parametrize("entity", ["EAG", "Jocelyn", "Jeannette", "Johanna", "Jael"])
-def test_ledger_entries_valid_entities_accepted(entity):
-    """AC5: all 5 valid entities accepted on /ledger-entries → 200."""
-    client = make_dashboard_test_app(mock_repo=make_mock_repo(entity=entity))
-    response = client.get(
-        "/api/v1/ledger-entries",
-        params={"entity": entity},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 200
+def test_valid_entities_accepted(tmp_path, entity):
+    """Las 5 entidades válidas → 200 (data vacía es válida)."""
+    client = _make_app(tmp_path)
+    resp = client.get("/api/v1/balance-sheets", params={"entity": entity},
+                      cookies={"access_token": _family()})
+    assert resp.status_code == 200
 
 
-# ── Patch 3: ISO date format validation ──────────────────────────────────────
+# ── validación de fechas ISO ────────────────────────────────────────────────────
 
 
-def test_balance_sheets_malformed_date_returns_422():
-    """Patch 3: non-ISO date_from → 422."""
-    client = make_dashboard_test_app(mock_repo=make_mock_repo())
-    response = client.get(
-        "/api/v1/balance-sheets",
-        params={"entity": "EAG", "date_from": "not-a-date"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 422
+def test_balance_sheets_malformed_date_returns_422(tmp_path):
+    client = _make_app(tmp_path)
+    resp = client.get("/api/v1/balance-sheets", params={"entity": "EAG", "date_from": "not-a-date"},
+                      cookies={"access_token": _family()})
+    assert resp.status_code == 422
 
 
-def test_balance_sheets_inverted_range_returns_422():
-    """Patch 3: date_from > date_to → 422."""
-    client = make_dashboard_test_app(mock_repo=make_mock_repo())
-    response = client.get(
-        "/api/v1/balance-sheets",
-        params={"entity": "EAG", "date_from": "2026-12-31", "date_to": "2026-01-01"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 422
+def test_balance_sheets_inverted_range_returns_422(tmp_path):
+    client = _make_app(tmp_path)
+    resp = client.get("/api/v1/balance-sheets",
+                      params={"entity": "EAG", "date_from": "2026-12-31", "date_to": "2026-01-01"},
+                      cookies={"access_token": _family()})
+    assert resp.status_code == 422
 
 
-def test_ledger_entries_malformed_date_returns_422():
-    """Patch 3: non-ISO date_to on ledger → 422."""
-    client = make_dashboard_test_app(mock_repo=make_mock_repo())
-    response = client.get(
-        "/api/v1/ledger-entries",
-        params={"entity": "EAG", "date_to": "31-03-2026"},
-        cookies={"access_token": family_token()},
-    )
-    assert response.status_code == 422
+def test_ledger_entries_malformed_date_returns_422(tmp_path):
+    client = _make_app(tmp_path)
+    resp = client.get("/api/v1/ledger-entries", params={"entity": "EAG", "date_to": "31-03-2026"},
+                      cookies={"access_token": _family()})
+    assert resp.status_code == 422

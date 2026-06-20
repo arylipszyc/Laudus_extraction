@@ -1,11 +1,9 @@
 """Router de categorización — panel de revisión (Story 9.7 AC9).
 
 GET /api/v1/categorization/pending — tx con category_status ∈ (suggested, pending).
-RBAC: contador/admin. Gated por USE_BEANCOUNT_ENGINE_LEDGER.
+RBAC: contador/admin. Beancount es la fuente única (cleanup c4, 9.16).
 """
 from __future__ import annotations
-
-import os
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -18,17 +16,11 @@ from backend.app.services.ledger_service import LedgerService, LedgerUnavailable
 router = APIRouter(prefix="/categorization", tags=["categorization"])
 
 
-def _use_beancount() -> bool:
-    return os.getenv("USE_BEANCOUNT_ENGINE_LEDGER", "false").strip().lower() in {"1", "true", "yes", "on"}
-
-
 @router.get("/pending", response_model=list[PendingTx])
 def get_pending(
     _user: UserSession = Depends(require_role(["contador", "admin"])),
     ledger: LedgerService = Depends(get_ledger_service),
 ):
-    if not _use_beancount():
-        return []
     try:
         entries = ledger.entries()
     except LedgerUnavailableError as exc:
