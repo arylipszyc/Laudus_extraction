@@ -1,0 +1,20 @@
+Extrae las transacciones de esta tarjeta de crédito chilena y devolvé EXACTAMENTE este formato:
+
+<header JSON en una línea>
+---
+<CSV con delimitador `|`>
+
+Header JSON con estos campos:
+{"period_start": "YYYY-MM-DD", "period_end": "YYYY-MM-DD", "currency": "CLP|USD|EUR", "opening_balance": <Monto Facturado Anterior como número>, "closing_balance": <Monto Facturado del Periodo como número>}
+
+CSV — primera línea exactamente: date|description|amount|currency
+Luego una fila por transacción del período.
+
+Reglas:
+- date: YYYY-MM-DD.
+- amount: número con el signo TAL CUAL aparece en el PDF, punto decimal, sin separador de miles (1234567 no 1.234.567).
+- description: texto crudo del PDF; reemplazá `|` interno por espacio.
+- Incluí cuotas pre-existentes X/N con X≥1 (description + " (cuota X/N)", amount = valor de la cuota mensual con su signo).
+- NO incluyas subtotales/totales ni cuotas futuras (00/N).
+
+Devolvé SOLO el formato indicado, sin markdown ni explicaciones.
