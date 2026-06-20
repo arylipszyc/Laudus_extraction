@@ -46,7 +46,7 @@ option "operating_currency" "CLP"
 """
 
 BALANCE_SHEET_KEYS = {
-    "account_id", "account_number", "account_name", "debit", "credit",
+    "account_id", "account_number", "account", "account_name", "debit", "credit",
     "debit_balance", "credit_balance", "query_date", "is_latest",
 }
 LEDGER_KEYS = {
@@ -72,6 +72,14 @@ def test_balance_sheet_shape(tmp_path):
     assert "last_sync" in result["meta"]
     for record in result["data"]:
         assert set(record.keys()) == BALANCE_SHEET_KEYS
+
+
+def test_balance_sheet_exposes_account_root(tmp_path):
+    """El frontend agrupa por la raíz contable → `account` (path beancount) debe venir en cada fila."""
+    result = balance_sheet_via_beancount(_ledger(tmp_path), "EAG")
+    by_code = {r["account_number"]: r["account"] for r in result["data"]}
+    assert by_code["111005"].startswith("Assets:")  # banco → raíz Assets (Activos)
+    assert all(r["account"] for r in result["data"])  # toda fila trae el path
 
 
 def test_balance_sheet_excludes_income_and_expenses(tmp_path):

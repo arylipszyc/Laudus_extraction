@@ -96,6 +96,11 @@ def balance_sheet_via_beancount(
         data.append({
             "account_id": None,
             "account_number": str(m.get("code", "")),
+            # Path beancount completo (ej. "Assets:Jocelyn:Bancos:..."). El frontend agrupa por la
+            # raíz contable (Assets/Liabilities/Equity) en vez del primer dígito del código — así las
+            # cuentas de las hijas (consolidadas en EAG, códigos 6/7/8/9) caen en Activos/Pasivos y no
+            # en "Otros". El path legacy de Sheets no trae este campo → el frontend cae al código.
+            "account": account,
             "account_name": str(m.get("laudus_account_name", account)),
             "debit": 0.0,
             "credit": 0.0,

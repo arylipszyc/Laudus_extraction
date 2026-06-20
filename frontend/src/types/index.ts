@@ -37,6 +37,9 @@ export interface DashboardMeta {
 export interface BalanceSheetRecord {
   account_id: number | string
   account_number: string
+  /** Path beancount completo (ej. "Assets:Jocelyn:..."). Presente con el engine Beancount;
+   *  ausente en el path legacy de Sheets. Se usa para agrupar por raíz contable. */
+  account?: string
   account_name: string
   debit: number
   credit: number

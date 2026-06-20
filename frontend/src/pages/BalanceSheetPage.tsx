@@ -2,8 +2,15 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useBalanceSheet } from '@/hooks/useBalanceSheet'
 import type { BalanceSheetRecord } from '@/types'
 
-function getCategory(accountNumber: unknown): 'assets' | 'liabilities' | 'equity' | 'other' {
-  const s = String(accountNumber ?? '')
+function getCategory(record: BalanceSheetRecord): 'assets' | 'liabilities' | 'equity' | 'other' {
+  // Preferir la raíz contable del path beancount (ej. "Assets:Jocelyn:..."): así las cuentas de
+  // las hijas consolidadas en EAG (códigos 6/7/8/9) caen en Activos/Pasivos y no en "Otros".
+  const root = (record.account ?? '').split(':')[0]
+  if (root === 'Assets') return 'assets'
+  if (root === 'Liabilities') return 'liabilities'
+  if (root === 'Equity') return 'equity'
+  // Fallback al primer dígito del código (path legacy de Sheets, sin `account`).
+  const s = String(record.account_number ?? '')
   if (s.startsWith('1')) return 'assets'
   if (s.startsWith('2')) return 'liabilities'
   if (s.startsWith('3')) return 'equity'
@@ -24,7 +31,7 @@ interface GroupedRecords {
 function groupRecords(records: BalanceSheetRecord[]): GroupedRecords {
   const groups: GroupedRecords = { assets: [], liabilities: [], equity: [], other: [] }
   for (const r of records) {
-    groups[getCategory(r.account_number)].push(r)
+    groups[getCategory(r)].push(r)
   }
   return groups
 }
