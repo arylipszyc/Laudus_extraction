@@ -204,8 +204,8 @@ El owner puede explorar de forma independiente todos los datos financieros — f
 ### Epic 5: Categorización Inteligente de Transacciones *(Fase 2)*
 **FRs cubiertos:** FR28–FR31
 
-### Epic 6: Reconciliación Mensual *(Fase 2)*
-**FRs cubiertos:** FR32–FR35 | **NFRs:** NFR4
+### Epic 6: Reconciliación Mensual *(Fase 2 — reformulado bajo c4, activo 2026-06-20)*
+**FRs cubiertos:** FR32–FR35 | **NFRs:** NFR4 · Sección detallada al final del doc (post-Epic 9).
 
 ### Epic 7: Colaboración Owner-Contador *(Fase 2)*
 **FRs cubiertos:** FR36–FR41
@@ -1014,3 +1014,87 @@ Cada story tiene su propio archivo con AC + tasks + dev notes en `_bmad-output/i
 - [9.15 — Flip del balance-sheet a Beancount](../implementation-artifacts/9-15-flip-balance-sheet-beancount.md) *(NUEVA 2026-06-17 — último paso del cutover de dashboards; desbloqueada por 9.11. Diseño: [design-note](design-note-balance-sheet-flip-2026-06-17.md).)*
 
 > **Nota de actualización (2026-06-17):** el encabezado "12 stories" y el listado de scope arriba quedaron desactualizados respecto de `sprint-status.yaml` (no reflejan 9.12, 9.13 ni 9.14, agregadas después del plan original). El índice autoritativo por-story es esta lista de links + `sprint-status.yaml`.
+
+---
+
+## Epic 6: Reconciliación Mensual *(Phase 2 — reformulado bajo c4)*
+
+> **Status:** reformulado y activo desde 2026-06-20. La definición original (FR32–FR35, escrita pre-pivot c4) asumía "reconciliación contra los totales de Google Sheets / ERP". Bajo c4 eso está obsoleto: Beancount es la fuente única (Sheets/Supabase apagados en 9.11/9.16) y el motor de reconciliación ya se construyó dentro de Epic 9. Este epic deja de ser "construir la reconciliación" y pasa a ser **wirear el motor existente al flujo de upload real + cerrar el lazo de resolución**.
+
+### Goal
+
+Que subir una cartola bancaria dispare la **reconciliación real** cartola ↔ Laudus/Beancount (no solo la extracción): cada línea de la cartola se cruza contra el asiento Laudus del mismo período/cuenta, se clasifica en uno de los 7 estados de matching, las líneas limpias se contabilizan en el ledger y las discrepancias se emiten al JSONL append-only que el dashboard 9.12 ya consume. El contador resuelve las discrepancias desde el dashboard y el sistema marca el período como reconciliado cuando no quedan discrepancias abiertas.
+
+### Justificación — qué cambió con c4
+
+El motor completo **ya existe y está testeado** (se construyó como parte de Epic 9, Stories 9.6b + 9.10 + 9.12). Verificado contra el código 2026-06-20:
+
+| Pieza | Ubicación | Estado |
+|---|---|---|
+| Motor de matching (7 estados, tolerancias) | `pipeline/importers/matching_engine.py` — `match()` | ✅ testeado |
+| Loader de asientos Laudus del período | `pipeline/importers/matching_engine.py` — `load_laudus_entries()` | ✅ testeado |
+| FX implícita USD + validación BCCh 5% | `pipeline/importers/fx_calculator.py` | ✅ testeado |
+| Orquestador matching→FX→behavior→entries | `pipeline/importers/reconcile.py` — `reconcile_and_build()` | ✅ testeado (integración) |
+| JSONL append-only + dedup + resolución | `pipeline/importers/discrepancy_writer.py` | ✅ testeado |
+| Re-emit del `.beancount` post-resolución | `pipeline/importers/reconcile.py` — `commit_reconciliation()` | ✅ testeado |
+| Dashboard de reconciliación + badge | `frontend` — `ReconciliationPage` (9.12) | ✅ DONE, lee el JSONL |
+
+**El gap es el SEAM del promote, no el motor.** El flujo de upload real termina en `validate_balance()` → `cartola_pdf_importer.promote()`, que llama `importer.extract()` — la ruta "match perfecto" de 9.6a, **sin reconciliación**. Ningún código de producción invoca `reconcile_and_build` (confirmado por grep: solo aparece en tests). Wirear ese seam = activar la reconciliación en vivo.
+
+### ✅ Decisión de diseño D1 — CERRADA 2026-06-20 (Ary): Opción A, gate estricto, mismo flujo para todas las cartolas
+
+**Decisión:** una cartola con **cualquier** discrepancia bloqueante (`value-mismatch` / `missing-in-cartola`) **NO se promueve** al ledger hasta que el contador resuelva todas vía el dashboard 9.12. El comportamiento es **"todo o nada"**: o no se contabiliza nada (cartola bloqueada) o se contabiliza todo (cartola limpia). **Mismo flujo para TC y cuenta corriente** — sin diferenciar por tipo de cuenta.
+
+**Por qué cierra el conflicto del cuadre limpiamente:** como nunca se postea un subconjunto parcial, `Σtx emitidas = closing − opening` se cumple siempre que la cartola se promueve → la directiva `Balance` de cierre de 9.6a queda válida **tal cual**, sin tocarla. El override pad+balance de 9.9 sigue existiendo solo para su caso original (un descuadre real de extracción `closing ≠ opening + Σ`), que es distinto de una discrepancia de reconciliación.
+
+**El conflicto que resolvía (contexto):** `reconcile_and_build` no emite `value-mismatch` ni `missing-in-cartola` (decisiones Ary 2026-06-17: la cartola es la fuente de verdad; un asiento solo-en-Laudus no se re-contabiliza para evitar doble conteo vs `imports/laudus/*`). Si se posteara el subconjunto + se mantuviera el `Balance` estricto, bean-check se pondría rojo. Opción A lo evita posteando todo-o-nada.
+
+**Implicancia operativa (aceptada):** el contador debe resolver todas las discrepancias bloqueantes de una cartola antes de que entre algo de esa cartola al ledger. A volumen family-office es manejable.
+
+**Flujo resultante para 6.1:**
+1. Al promover, correr `reconcile_and_build` → entries + discrepancias.
+2. Appendear las discrepancias al JSONL **siempre** (para que el dashboard 9.12 las muestre, haya o no bloqueo).
+3. Si hay ≥1 discrepancia bloqueante → **no** escribir/commitear el `.beancount`; devolver estado "bloqueada, N discrepancias por resolver".
+4. El contador resuelve cada una en 9.12 (`commit_reconciliation` re-emite).
+5. Cuando no quedan bloqueantes → la cartola se promueve limpia (todo postea, `Balance` cuadra).
+
+> **Considerado y descartado (2026-06-20):** flujo distinto para cuenta corriente vs. TC. Ary lo evaluó y decidió unificar — mismo flujo para todas las cartolas. No re-litigar sin una necesidad nueva concreta.
+
+### Scope incluido — stories
+
+- **Story 6.1 — Wiring del promote a `reconcile_and_build` (el SEAM)** *(core)*
+  Reemplazar el `extract()` perfect-path por la construcción reconciliadora en el flujo de upload: armar `CartolaLine[]` desde el canónico staged, cargar `load_laudus_entries()` para el período/cuenta, llamar `reconcile_and_build()` (con `category_predictor` para `category_for` + `fx-bcch-eom.jsonl` para FX), renderizar las entries → `.beancount`, appendear las discrepancias retornadas a `_meta/cartola-discrepancies.jsonl`, bean-check + git commit. Implementa la decisión **D1**. Cubre FR32 (el trigger = el upload+promote por cuenta/período) + FR33 (cross-check) por construcción.
+
+- **Story 6.2 — Completar el dashboard de reconciliación (FR34)** *(polish de 9.12, deferido)*
+  Cerrar los defers de frontend de 9.12 que hacen al reporte usable end-to-end: historial del drill-down (`getHistory` ya existe, nunca se llama), filtros `year_month`/`bank_account_id` en la UI (backend ya los soporta), badge que no desaparece en error de `/count`, moneda correcta en la celda Laudus (hoy hardcodea CLP), y action-sets/semántica blocking para los estados FX (`fx-bcch-missing`/`fx-implausible`). Ver `deferred-work.md` → review de 9.12.
+
+- **Story 6.3 — Cierre de período de reconciliación (FR35)** *(small)*
+  Marcar un período (cuenta + mes) como "reconciliado completo" cuando no quedan discrepancias abiertas (todas tienen línea de resolución en el JSONL). Probablemente derivable como vista sobre el JSONL existente (estado = discrepancias_abiertas == 0) + indicador en el dashboard; evaluar si requiere un marcador explícito persistido o basta con la derivación. Definir alcance al crear la story.
+
+### Scope excluido (explícito)
+
+- **Cron de reconciliación programada / "trigger por entidad+período" como acción standalone** — bajo c4 el trigger es el upload de la cartola (por cuenta/mes), no una corrida batch separada. FR32 se satisface por el flujo de upload; no se construye un runner aparte salvo que aparezca una necesidad real.
+- **Reconciliación de cartolas de inversión / custodios** — invariantes no-aritméticos (qty×precio, Σholdings), schema canónico distinto. Fuera de scope (ver `deferred-work.md` → technical research 2026-06-10).
+- **Corrección plena de TC estado 2 (desglose de cartola de TC)** — diseño de Valentina; necesita una cartola de TC de muestra. Diferido (ver memoria `project_tc_pasivo_dos_estados`).
+- **Saldo corrido por línea / continuidad inter-cartola** — extensiones de validación deferidas (ver `deferred-work.md` → technical research 2026-06-10); no bloquean la reconciliación core.
+
+### Dependencias
+
+| Bloqueador | Afecta a | Estado |
+|---|---|---|
+| **D1 — decisión del cuadre** (Balance/override vs. líneas bloqueantes) | 6.1 (ejecución) | ✅ cerrada 2026-06-20 — Opción A (gate estricto, todo-o-nada, mismo flujo todas las cartolas) |
+| Motor 9.6b + dashboard 9.12 + FX 9.10 | todo Epic 6 | ✅ done (Epic 9) |
+| `_meta/fx-bcch-eom.jsonl` poblado para meses USD (9.10 on-demand manual) | 6.1 en cuentas USD | ⚠️ manual hoy — degrada a discrepancia `fx-bcch-missing` si falta |
+| Cartolas reales subidas por el contador | validación end-to-end de 6.1 | acción de Ary/contador |
+
+### FR mapping (reformulado bajo c4)
+
+- **FR32** (trigger monthly reconciliation run, entity+period) → el trigger es el **upload+promote** de la cartola, por `bank_account_id` y período. Cubierto por 6.1.
+- **FR33** (cross-check ERP totals vs. bank statement totals) → el motor de matching cruza línea-por-línea (más fuerte que totales). Cubierto por 6.1 (motor 9.6b).
+- **FR34** (reconciliation report: matched / unmatched ERP / unmatched bank) → los 7 estados en el dashboard 9.12. Cubierto por 6.2 (polish).
+- **FR35** (mark period complete when all resolved) → 6.3.
+- **NFR4** (reconciliación asíncrona, UI responsive) → el upload ya es async (BackgroundTasks + polling de 9.5); el promote/reconcile corre dentro de ese flujo. Verificar latencia al wirear.
+
+### Nota sobre el SEAM (Completion Notes de 9.6b)
+
+El dev de 9.6b dejó el seam explícito y por qué no lo flipeó: *"No flipeé el `promote` de 9.6a para no cambiar su comportamiento ni romper sus tests — el cuándo corre la reconciliación es decisión del flujo de upload. Engine + loader + orquestador ya listos y testeados para wirear."* Epic 6 es exactamente esa decisión + el wiring.

@@ -1,4 +1,5 @@
-"""Tests de validación de balance + promote — Story 9.9 AC1/AC4/AC5/AC6/AC8."""
+"""Tests de validación de extracción + conciliación — Story 9.9 (cuadre de extracción) + Story 6.1
+(modelo A: la cartola se concilia contra Laudus y reporta diferencias; NO se postea al ledger)."""
 import json
 from decimal import Decimal
 
@@ -8,7 +9,6 @@ from fastapi.testclient import TestClient
 
 from backend.app.api.v1.cartolas.service import (
     BalanceDiscrepancy,
-    BeanCheckFailed,
     OverrideJustificationTooShort,
     StagingNotFound,
     validate_balance,
@@ -68,7 +68,7 @@ def _clean_env(monkeypatch):
     monkeypatch.delenv("IMPORTER_GIT_ENABLED", raising=False)
 
 
-# ── AC1/AC8: happy path (cuadra) ──────────────────────────────────────────────
+# ── Cuadre de extracción OK → concilia (modelo A: no postea) ──────────────────
 
 
 def test_validate_balance_cuadra(tmp_path):
@@ -76,10 +76,12 @@ def test_validate_balance_cuadra(tmp_path):
     _staging(root, "0", "852689", [("ENEL", 852689)])
     res = validate_balance("b1", "0", "852689", None, user_email="c@test.com",
                            ledger_root=root, importer=_importer(root))
-    assert res["status"] == "validated" and res["override"] is False
-    # archivo final creado, staging removido
-    assert list((root / "imports" / "cartolas").glob("*2026-03.beancount"))
+    assert res["status"] == "reconciled" and res["override"] is False
+    # modelo A: la cartola NO se postea → no hay archivo final; el staging se consume.
+    assert not list((root / "imports" / "cartolas").glob("*2026-03.beancount"))
     assert not (root / "imports" / "cartolas" / "_staging" / "b1.cartola.json").exists()
+    # sin asientos Laudus para la cuenta → la línea es una diferencia (missing-in-laudus, no bloqueante).
+    assert res["differences"] == 1 and res["blocking"] == 0
 
 
 # ── AC5/AC8: discrepancia sin override → BalanceDiscrepancy ───────────────────
@@ -98,7 +100,7 @@ def test_validate_balance_discrepancia_sin_override(tmp_path):
     assert (root / "imports" / "cartolas" / "_staging" / "b1.cartola.json").exists()
 
 
-# ── AC4/AC6/AC8: override con justificación → pad+balance ─────────────────────
+# ── Override de cuadre de extracción → procede a conciliar (modelo A: sin pad) ─
 
 
 def test_validate_balance_override(tmp_path):
@@ -110,9 +112,9 @@ def test_validate_balance_override(tmp_path):
         user_email="c@test.com", ledger_root=root, importer=_importer(root),
         now_iso="2026-05-01T10:30:00Z",
     )
-    assert res["status"] == "validated" and res["override"] is True
-    written = next((root / "imports" / "cartolas").glob("*2026-03.beancount")).read_text(encoding="utf-8")
-    assert "pad" in written and "override_justification" in written
+    # El override permite proceder pese al descuadre de extracción; modelo A no escribe pad ni archivo.
+    assert res["status"] == "reconciled" and res["override"] is True
+    assert not list((root / "imports" / "cartolas").glob("*2026-03.beancount"))
 
 
 def test_override_corto_se_rechaza_server_side(tmp_path):
@@ -128,29 +130,14 @@ def test_override_corto_se_rechaza_server_side(tmp_path):
 
 
 def test_override_innecesario_cuando_cuadra_no_genera_pad(tmp_path):
-    # diff==0 + justificación → NO se inyecta pad espurio; override False.
+    # diff==0 + justificación → override False (no había descuadre que forzar).
     root = _root(tmp_path)
     _staging(root, "0", "852689", [("ENEL", 852689)])
     res = validate_balance(
         "b1", "0", "852689",
         "Justificación larga e innecesaria porque el balance ya cuadra perfectamente",
         user_email="c@test.com", ledger_root=root, importer=_importer(root))
-    assert res["status"] == "validated" and res["override"] is False
-    written = next((root / "imports" / "cartolas").glob("*2026-03.beancount")).read_text(encoding="utf-8")
-    assert "pad" not in written
-
-
-def test_fallo_no_balance_no_se_misclasifica(tmp_path):
-    # Un archivo hermano roto hace fallar bean-check por una causa que NO es el balance enviado
-    # (que cuadra). Debe dar BeanCheckFailed, no BalanceDiscrepancy.
-    root = _root(tmp_path)
-    (root / "imports" / "cartolas" / "zzz-broken.beancount").write_text(
-        '2026-03-20 * "roto"\n  Assets:DoesNotExist 10 CLP\n  Assets:AlsoMissing -10 CLP\n',
-        encoding="utf-8")
-    _staging(root, "0", "852689", [("ENEL", 852689)])  # cuadra (diff==0)
-    with pytest.raises(BeanCheckFailed):
-        validate_balance("b1", "0", "852689", None, user_email="c@test.com",
-                         ledger_root=root, importer=_importer(root))
+    assert res["status"] == "reconciled" and res["override"] is False
 
 
 def test_staging_no_encontrado(tmp_path):

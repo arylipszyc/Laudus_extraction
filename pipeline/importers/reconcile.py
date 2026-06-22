@@ -7,6 +7,7 @@ decide QUÉ hacer.
 """
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal
@@ -207,4 +208,110 @@ def commit_reconciliation(file_path, new_content: str, discrepancy_id: str, acti
         result["git_commit_sha"] = git_commit_push(
             root, [str(rel)], f"[reconciliation] resolve {discrepancy_id}: {action}")
         result["success"] = True
+        return result
+
+
+# ── Conciliación en el promote: el SEAM del upload (Story 6.1, modelo A) ──────
+
+
+def _discrepancies_path(ledger_root):
+    """Ruta del JSONL de discrepancias — misma resolución que el dashboard 9.12
+    (`reconciliation.service._jsonl_path`): `LEDGER_DISCREPANCIES` override → si no,
+    `<ledger_root>/_meta/cartola-discrepancies.jsonl`. Se replica acá (en vez de importar
+    la capa API) para no invertir la dependencia pipeline→backend."""
+    from pathlib import Path
+
+    override = os.getenv("LEDGER_DISCREPANCIES")
+    if override:
+        return Path(override)
+    return Path(ledger_root) / "_meta" / "cartola-discrepancies.jsonl"
+
+
+def reconcile_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict:
+    """Concilia una cartola staged contra Laudus y registra las DIFERENCIAS (Story 6.1, modelo A).
+
+    **No postea nada al ledger.** Laudus (`imports/laudus/*`) sigue siendo la fuente contabilizada y
+    validada peso-por-peso vs el contador; la cartola es la lupa que detecta diferencias. Postear las
+    líneas de cartola encima duplicaría las cuentas de banco/TC (Laudus ya las tiene) y rompería el
+    cuadre. La anotación en Beancount de una diferencia *aprobada* vive en el flujo de resolución del
+    dashboard (próxima story), no acá.
+
+    Flujo:
+    1. Arma `CartolaLine[]` desde el canónico staged + carga `load_laudus_entries()` del período.
+    2. Corre el matching (`reconcile_and_build`) y queda con las discrepancias (las entries que
+       construye se DESCARTAN — no se contabilizan).
+    3. Appendea todas las discrepancias al JSONL (dedup) y commitea el JSONL (gateado por
+       `IMPORTER_GIT_ENABLED`) para que sobrevivan al `git reset --hard` del refresh del backend.
+    4. Consume el staging y devuelve el resumen: total de diferencias + cuántas son bloqueantes.
+
+    `perfect` no genera diferencia (la cartola coincide con Laudus, nada que revisar).
+    """
+    from pathlib import Path
+
+    from bootstrap.account_mapping import slugify
+    from backend.app.integrations.cartola_schema import CartolaCanonicalV1
+    from pipeline.importers.cartola_pdf_importer import _LIABILITY_ROOT
+    from pipeline.importers.category_predictor import SUSPENSE_ACCOUNT
+    from pipeline.importers.discrepancy_writer import append_discrepancy
+    from pipeline.importers.laudus_run import acquire_lock, git_commit_push
+    from pipeline.importers.matching_engine import load_laudus_entries
+
+    root = Path(ledger_root)
+    staging = root / "imports" / "cartolas" / "_staging" / f"{batch_id}.cartola.json"
+    lock_path = root / ".import.lock"
+    laudus_dir = root / "imports" / "laudus"
+    fx_path = root / "_meta" / "fx-bcch-eom.jsonl"
+    disc_path = _discrepancies_path(root)
+
+    model = CartolaCanonicalV1.model_validate_json(staging.read_text(encoding="utf-8"))
+    bank_account_id = model.source.bank_account_id
+    account_target = importer.resolver.resolve(bank_account_id)
+    is_liability = account_target.startswith(_LIABILITY_ROOT)
+    bank_slug = slugify(model.source.bank_name) or "Banco"
+    year_month = model.period.end.strftime("%Y-%m")
+
+    result = {"batch_id": batch_id, "status": "reconciled", "matched": 0,
+              "differences": 0, "blocking": 0, "new": 0, "git_commit_sha": None}
+
+    def _rel(p: Path) -> str:
+        return str(p.relative_to(root.parent)) if root.parent in p.parents else p.name
+
+    with acquire_lock(lock_path):
+        cartola_lines = [
+            CartolaLine(line_no=tx.line_no, date=tx.date, amount=tx.amount,
+                        currency=tx.currency, description=tx.description, suggested_category="")
+            for tx in model.transactions
+        ]
+        laudus_entries = load_laudus_entries(laudus_dir, account_target, model.period.start, model.period.end)
+
+        # reconcile_and_build hace el matching + arma discrepancias (mismas reglas/estados/FX que el
+        # dashboard ya consume). Las entries beancount que produce se descartan (modelo A: no posteamos).
+        _entries, discrepancies = reconcile_and_build(
+            cartola_lines=cartola_lines, laudus_entries=laudus_entries,
+            period_start=model.period.start, account_target=account_target, is_liability=is_liability,
+            category_for=lambda cl: SUSPENSE_ACCOUNT, fx_jsonl_path=fx_path, bank_slug=bank_slug,
+            year_month=year_month, batch_id=batch_id, bank_account_id=bank_account_id, ts=ts,
+        )
+
+        new = 0
+        for d in discrepancies:
+            if append_discrepancy(d, disc_path):
+                new += 1
+        result["differences"] = len(discrepancies)
+        result["new"] = new
+        result["blocking"] = len([d for d in discrepancies if d.get("state") in _BLOCKING])
+        # Líneas de cartola sin diferencia = total − líneas distintas que generaron ≥1 discrepancia.
+        # Dedup por line_no: una línea puede emitir 2 discrepancias (soft-mismatch + FX) y no debe
+        # restarse dos veces (matched quedaría subestimado / negativo).
+        diff_lines = {ln for d in discrepancies
+                      if (ln := (d.get("cartola") or {}).get("line_no")) is not None}
+        result["matched"] = len(model.transactions) - len(diff_lines)
+
+        if new:
+            result["git_commit_sha"] = git_commit_push(
+                root, [_rel(disc_path)],
+                f"[reconcile-cartola] {bank_slug} {year_month}: {len(discrepancies)} diferencia(s)")
+
+        # El canónico ya se consumió (extraído + reconciliado); el staging se limpia.
+        staging.unlink(missing_ok=True)
         return result

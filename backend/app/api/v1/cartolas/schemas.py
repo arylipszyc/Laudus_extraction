@@ -15,10 +15,16 @@ class ValidateBalanceRequest(BaseModel):
 
 
 class ValidateBalanceResponse(BaseModel):
-    status: Literal["validated"]
-    file: str
+    """Resultado de conciliar una cartola (Story 6.1, modelo A). `reconciled` = el matching corrió.
+    La cartola NO se postea al ledger; solo se reportan las diferencias cartola↔Laudus, que el
+    dashboard 9.12 muestra para que el contador las revise (`blocking` = bloqueantes, chip rojo)."""
+    status: Literal["reconciled"]
+    differences: int
+    blocking: int
+    matched: int
     git_sha: str | None = None
     override: bool = False
+    batch_id: str | None = None
 
 
 class UploadAcceptedResponse(BaseModel):

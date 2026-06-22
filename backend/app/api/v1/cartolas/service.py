@@ -415,16 +415,21 @@ def validate_balance(
     importer=None,
     now_iso: str | None = None,
 ) -> dict:
-    """Promueve el staging a archivo final con validación de balance (Story 9.9 AC1/AC4/AC5).
+    """Concilia la cartola staged contra Laudus y reporta las diferencias (Story 6.1, modelo A).
 
     - Actualiza opening/closing del staging si difieren del JSON canónico.
-    - Corre `promote()` (bean-check). OK → validated. bean-check rojo sin override → discrepancia.
-    - Con `override_justification` → re-promote con `pad`+`balance` (la pad absorbe; bean-check pasa).
+    - Chequea el cuadre de EXTRACCIÓN (closing == opening + Σtx) como QA de la extracción de Gemini;
+      discrepancia sin `override_justification` → 400 (la cartola no suma → reconciliar daría ruido).
+      Con `override_justification` (≥20 chars) → procede igual (la cartola genuinamente no cuadra).
+    - Corre `reconcile_cartola()`: matching cartola↔Laudus, appendea las diferencias al JSONL que el
+      dashboard 9.12 consume. **NO postea nada al ledger** — Laudus sigue siendo lo contabilizado y
+      validado; la cartola solo detecta diferencias (la anotación de una diferencia aprobada es el
+      flujo de resolución del dashboard, próxima story).
     """
     from decimal import Decimal
 
-    from pipeline.importers.cartola_pdf_importer import promote
     from pipeline.importers.laudus_run import _ledger_root
+    from pipeline.importers.reconcile import reconcile_cartola
 
     root = Path(ledger_root) if ledger_root else _ledger_root()
     staging = root / "imports" / "cartolas" / "_staging" / f"{batch_id}.cartola.json"
@@ -457,10 +462,8 @@ def validate_balance(
                     "at": now_iso or datetime.now(timezone.utc).isoformat()}
 
     importer = importer or _build_importer(root)
-    res = promote(batch_id, importer, root, override=override)
-    if not res["success"]:
-        # El balance enviado cuadra (o el pad lo absorbió) pero bean-check igual falló → la causa
-        # NO es el balance (cuenta sin abrir, archivo hermano roto). Override no ayuda; se surfacea.
-        raise BeanCheckFailed(res["error_msg"] or "bean-check falló")
-    return {"status": "validated", "file": res["file"], "git_sha": res["git_commit_sha"],
-            "override": override is not None}
+    ts = now_iso or datetime.now(timezone.utc).isoformat()
+    res = reconcile_cartola(batch_id, importer, root, ts=ts)
+    return {"status": res["status"], "differences": res["differences"], "blocking": res["blocking"],
+            "matched": res["matched"], "git_sha": res["git_commit_sha"],
+            "override": override is not None, "batch_id": batch_id}

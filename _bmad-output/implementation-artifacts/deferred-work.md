@@ -1,5 +1,12 @@
 # Deferred Work
 
+## Deferred from: code review of 6-1-wiring-promote-reconcile (2026-06-22)
+
+- TOCTOU: `reconcile_cartola` lee el staging fuera del lock ([pipeline/importers/reconcile.py:266]) — dos `validate_balance` concurrentes del mismo batch: el 2º pasó el `staging.exists()` de validate_balance pero el 1º ya hizo `unlink` antes del `read_text` → `FileNotFoundError` no mapeado → 500 en vez de 404. Concurrencia poco probable (un contador, un batch); fix = envolver el read en try/except → StagingNotFound.
+- Lock retenido durante el `git push` ([pipeline/importers/reconcile.py:285-313]) — patrón pre-existente (idéntico a `promote`/`commit_reconciliation`). Un push lento/colgado bloquea otros importers hasta el timeout (60s) o stale (300s) del lock. El lock se libera en `finally`. Fix durable (cross-cutting): mover la red fuera del lock en los 3 sitios.
+- `_rel` + `LEDGER_DISCREPANCIES` fuera del repo ([pipeline/importers/reconcile.py:276]) — si el override apunta a un path que no está bajo `root.parent`, `_rel` cae al basename y `git add <basename>` no stagea el archivo real → las discrepancias no se commitean y se pierden en el `git reset --hard` del refresh. Latente: el override no se usa en prod (default cae bajo el repo). Fix = pasar el path absoluto a `git_commit_push` o validar que esté bajo el repo.
+- Cartola con `transactions=[]` + Laudus con asientos → muro de `missing-in-cartola` bloqueantes ([pipeline/importers/reconcile.py]) — una extracción vacía produce una pared de discrepancias bloqueantes en vez de rechazarse upfront. Comportamiento de diseño bajo modelo A; considerar un guard "cartola vacía → 400/aviso" si aparece en la práctica.
+
 ## Deferred from: code review of 9-8-frontend-thin-api-badge-pendiente (2026-06-17)
 
 Nota: 9.8 es frontend parcial-por-diseño; el scope entregado (chip + página /categorizacion) está limpio y RBAC correcto. Defers de UX (pase a Sally) + el seam grande.
