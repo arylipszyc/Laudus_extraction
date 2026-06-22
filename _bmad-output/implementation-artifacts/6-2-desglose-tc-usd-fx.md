@@ -198,8 +198,28 @@ Las 5 preguntas abiertas quedaron cerradas. Detalle contable en `valentina-corre
 
 ### Agent Model Used
 
+claude-opus-4-8[1m]
+
 ### Debug Log References
+
+- 2026-06-22: backbone de asientos implementado (`tc_correction.build_tc_correction_entries`) + 6 tests verde (bean-check real). HALT en la derivación del FX USD (Task 2) — ver Completion Notes.
 
 ### Completion Notes List
 
+- **Backbone (Task 3 núcleo) DONE:** `pipeline/importers/tc_correction.py` — builder PURO que emite
+  los asientos (a) compra/cuota, abono (espejo vía amount firmado), (b) pago (reclasifica el lump
+  fuera de `Expenses:EAG:TC:<code>` sin tocar el banco), (c) apertura → `Equity:Apertura:TarjetasSinDetalle`
+  una vez. `fx` + `lump_for` + `category_for` inyectables (FX=1 para CLP). 6 tests
+  (`backend/tests/test_tc_correction.py`) verdes con bean-check real, incl. prueba de no-doble-conteo
+  §7 (Expenses:TC neteado a 0, gasto = compras − abonos).
+- **⏸️ HALT en Task 2 (derivación del FX USD) — requiere confirmar el algoritmo de matching con Ary.**
+  El backbone toma `fx` y `lump_for` ya resueltos. Falta la pieza que, para una cartola USD,
+  identifica en Laudus la **liquidación que salda ese estado** (pago directo a `...Us` o traspaso
+  USD→CLP) para calcular `FX = CLP_que_salda / total_USD` y los lumps de (b). Es lo que la story
+  marca como "lo más delicado": el desfase de ~1 mes + el caso traspaso tienen ambigüedad de
+  algoritmo que, mal resuelta, corrompe el cuadre validado vs el contador. Pendiente de decisión.
+
 ### File List
+
+- `pipeline/importers/tc_correction.py` (NUEVO — builder de asientos de corrección TC)
+- `backend/tests/test_tc_correction.py` (NUEVO — 6 tests, bean-check real)
