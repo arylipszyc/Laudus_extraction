@@ -159,10 +159,56 @@ Cuenta de pasivo "real" bien categorizada, **por tarjeta**:
 
 - **Categorización real de las compras** (asiento a): hoy `NoopCategoryPredictor` manda todo a
   `Expenses:EAG:Suspense`. Story 9.7 lo reemplaza. La calidad del reporte de gastos depende de esto.
-- **Convención de nombre** de las cuentas `TC:Real` (confirmar con Ary).
-- **USD / FX**: cartolas en USD usan la FX implícita derivada (Story 9.6b). Aplica igual al modelo,
-  con `build_usd_postings`.
-- **Reconciliación pago cartola ↔ pago Laudus**: el matching engine (9.6b) debe garantizar que el
-  pago se cuente una sola vez (estado `perfect`/`missing-in-cartola`), no emitir el pago dos veces.
 - Verificar el diagnóstico contra el estado **corregido** del importer de Laudus (no contra el
   estado actual, que aún no es confiable).
+
+## 12. Decisiones contables para Story 6.2 (Valentina, 2026-06-22)
+
+Resueltas para cerrar el diseño de la story de import. Reemplazan las notas tentativas de USD/FX y
+nombre del §11.
+
+### 12.1 — FX de cartolas USD y matching pago↔estado
+
+- **Principio:** `FX = CLP que SALDA el estado USD / total_USD_facturado_del_estado`. Fuerza
+  `Σ(compras × FX) = CLP_que_salda` → cuadre exacto por construcción. NO usar BCCh (descuadra).
+- **El CLP que salda el estado puede venir de dos lados** (Ary 2026-06-22):
+  - **(i) Pago directo de la TC USD:** lump de Laudus `Banco → Expenses:EAG:TC:...Us` que paga el
+    estado (normalmente el mes siguiente al cierre).
+  - **(ii) Traspaso USD→CLP:** si el contador NO pagó la TC USD directamente y el monto facturado se
+    pasó a la TC en pesos, en Laudus hay un **movimiento entre la TC USD y la TC CLP**. El FX sale de
+    ese movimiento: `CLP que entra a la TC CLP / USD que sale de la TC USD`.
+- **NO del `MONTO CANCELADO` interno de la cartola** (ese paga el período anterior).
+- **Unidad de matching:** (estado USD) ↔ (la liquidación que lo salda, sea pago directo o traspaso).
+  Esa liquidación es denominador del FX **y** el evento que reclasifica el asiento (b) — un solo
+  evento, sin doble conteo.
+- **Timing:** proceso continuo/retrospectivo → la liquidación suele estar en Laudus al itemizar. Si
+  aún no existe → **bloqueante, NO estimar el FX**; esperar al próximo import.
+- CLP nacional: sin FX (montos ya en CLP).
+
+### 12.2 — Líneas `abono` (devoluciones / notas de crédito)
+
+Espejo invertido de la compra (asiento a):
+```beancount
+Liabilities:EAG:TC:Real:<tarjeta>   +<monto> CLP   ; ↓ deuda
+Expenses:EAG:<categoría>            -<monto> CLP   ; revierte el gasto
+```
+USD: mismo FX del estado. Categoría: la del comercio si el categorizador la pesca, si no Suspense.
+**No** distinguir devolución-de-comercio vs nota-de-crédito-de-impuesto — para finanzas personales
+ambos son "plata que volvió" = gasto negativo. Mantener simple.
+
+### 12.3 — Convención de cuentas `TC:Real`: una por TARJETA-MONEDA
+
+> **CORRECCIÓN de Ary (2026-06-22), supersede mi propuesta de unificar nacional+USD.** CLP y USD se
+> tratan como **dos TC distintas, cada una con su propio pago** — tal como Laudus ya las separa
+> (`-43000X` nacional vs `...Us-43000X` internacional). NO unificar.
+
+- **Una `Liabilities:EAG:TC:Real:<Producto>` por tarjeta nacional CLP** y **una
+  `Liabilities:EAG:TC:Real:<Producto>Us` por tarjeta internacional USD**. Cada una con su pago.
+  Ej: `TC:Real:VisaInfinity1027` (CLP) + `TC:Real:VisaInfinity1027Us` (USD).
+- Cada cuenta-gasto Laudus reclasifica (asiento b) contra **su** `TC:Real`: `-430005` → `...1027`;
+  `-430006` (Us) → `...1027Us`.
+- **Tarjetas adicionales / `card_suffix`:** dentro de una misma tarjeta-moneda, las adicionales
+  ruedan a la misma `TC:Real` (comparten cupo en esa moneda) → NO se necesita cuenta por suffix;
+  suffix = metadata opcional, no bloquea ni toca el prompt 9.5. (Este punto sigue válido; lo que
+  cambia es que CLP y USD NO se unifican.)
+- Metadata `laudus_categoria1: "PASIVO"`, creada vía flujo de cuentas pendientes (Story 10.3).

@@ -1069,14 +1069,17 @@ El motor completo **ya existe y está testeado** (se construyó como parte de Ep
 - **Story 6.1 — Wiring del promote a `reconcile_and_build` (el SEAM)** *(core)*
   Reemplazar el `extract()` perfect-path por la construcción reconciliadora en el flujo de upload: armar `CartolaLine[]` desde el canónico staged, cargar `load_laudus_entries()` para el período/cuenta, llamar `reconcile_and_build()` (con `category_predictor` para `category_for` + `fx-bcch-eom.jsonl` para FX), renderizar las entries → `.beancount`, appendear las discrepancias retornadas a `_meta/cartola-discrepancies.jsonl`, bean-check + git commit. Implementa la decisión **D1**. Cubre FR32 (el trigger = el upload+promote por cuenta/período) + FR33 (cross-check) por construcción.
 
-- **Story 6.2 — Aprobar una diferencia → anotarla en Beancount** *(core, modelo A — la 2da mitad)* — `ready-for-dev`
+- **Story 6.2 — Desglose de cartola TC en USD + FX-por-cartola** *(core, priorizada 2026-06-22)* — `ready-for-dev`
+  Disparada por revisar `samples/`: **~50% de las cartolas reales son estados de cuenta INTERNACIONALES en USD** (el companion del nacional CLP, con las compras en el exterior: eBay/Amazon/etc.). Hoy **no se pueden reconciliar**: el FX per-línea de 9.6b necesita un asiento Laudus por línea, pero Laudus solo tiene el **lump CLP** del pago (bank → `Expenses:EAG:TC:...Us-43000X`). **Regla FX (Ary):** FX único por cartola = (lump CLP en Laudus para esa cuenta `...Us` + período) ÷ (total USD facturado, excl. `MONTO CANCELADO`); cada línea USD × FX = su CLP; la suma itemizada = el lump → lo **supersede** (desglose "estado 2", `project_tc_pasivo_dos_estados`). Modelo de cuentas ya existe (cada tarjeta tiene su `Tc{n}{Nombre}Us-43000X`). Toca el reconcile (6.1) + el modelo FX. Ver `6-2-desglose-tc-usd-fx.md`.
+
+- **Story 6.3 — Aprobar una diferencia → anotarla en Beancount** *(core, modelo A — la 2da mitad; ex-6.2, renumerada al priorizar USD)* — `ready-for-dev`
   La continuación directa de 6.1: bajo modelo A nada de la cartola se postea, así que **aprobar** una diferencia debe escribirla explícitamente al ledger. Scope núcleo = `missing-in-laudus` + acción `confirm-cartola-only` (el contador confirma que esa línea de cartola es un gasto real que Laudus no tiene) → renderizar la transacción y escribirla a la zona `manual/` con bean-check + git, **antes** de cerrar la discrepancia (atomicidad). Reusa `commit_reconciliation` (write-and-replace + bean-check + rollback + git, ya testeado) + `_build_postings` (convención de signo Liabilities/Assets). Wirea `resolve()` (hoy solo appendea la línea de resolución al JSONL — el re-emit al ledger era el seam pendiente de 9.6b/9.12). Cubre lo que Ary pidió como *"que muestre solo las diferencias y pida aprobación para anotarlas"*. Ver `6-2-aprobar-diferencia-anotar-beancount.md`.
   *Diferido a story aparte: las acciones que **editan un asiento Laudus existente** (`value-mismatch`/`accept-cartola`, soft-mismatch `accept-cartola-*`) — mecanismo distinto y más riesgoso (mutar `imports/laudus/*`).*
 
-- **Story 6.3 — Completar el dashboard de reconciliación (FR34)** *(ex-6.2, polish de 9.12, deferido)*
-  Cerrar los defers de frontend de 9.12 que hacen al reporte usable end-to-end: historial del drill-down (`getHistory` ya existe, nunca se llama), filtros `year_month`/`bank_account_id` en la UI (backend ya los soporta), badge que no desaparece en error de `/count`, moneda correcta en la celda Laudus (hoy hardcodea CLP), y action-sets/semántica blocking para los estados FX (`fx-bcch-missing`/`fx-implausible`). Ver `deferred-work.md` → review de 9.12.
+- **Story 6.4 — Completar el dashboard de reconciliación (FR34)** *(ex-6.2/6.3, polish de 9.12, deferido)*
+  Cerrar los defers de frontend de 9.12 que hacen al reporte usable end-to-end: historial del drill-down (`getHistory` ya existe, nunca se llama), filtros `year_month`/`bank_account_id` en la UI (backend ya los soporta), badge que no desaparece en error de `/count`, moneda correcta en la celda Laudus (hoy hardcodea CLP), y action-sets/semántica blocking para los estados FX (`fx-bcch-missing`/`fx-implausible`). **+ input de categoría para `confirm-cartola-only` (movido desde 6.3).** Ver `deferred-work.md` → review de 9.12.
 
-- **Story 6.4 — Cierre de período de reconciliación (FR35)** *(ex-6.3, small)*
+- **Story 6.5 — Cierre de período de reconciliación (FR35)** *(ex-6.3/6.4, small)*
   Marcar un período (cuenta + mes) como "reconciliado completo" cuando no quedan discrepancias abiertas (todas tienen línea de resolución en el JSONL). Probablemente derivable como vista sobre el JSONL existente (estado = discrepancias_abiertas == 0) + indicador en el dashboard; evaluar si requiere un marcador explícito persistido o basta con la derivación. Definir alcance al crear la story.
 
 ### Scope excluido (explícito)
@@ -1099,9 +1102,10 @@ El motor completo **ya existe y está testeado** (se construyó como parte de Ep
 
 - **FR32** (trigger monthly reconciliation run, entity+period) → el trigger es el **upload+promote** de la cartola, por `bank_account_id` y período. Cubierto por 6.1.
 - **FR33** (cross-check ERP totals vs. bank statement totals) → el motor de matching cruza línea-por-línea (más fuerte que totales). Cubierto por 6.1 (motor 9.6b).
-- **FR34** (reconciliation report: matched / unmatched ERP / unmatched bank) → los 7 estados en el dashboard 9.12. Cubierto por 6.3 (polish, ex-6.2).
-- **FR35** (mark period complete when all resolved) → 6.4 (ex-6.3).
-- **Anotación-on-aprobación** (modelo A — no estaba en los FR originales porque asumían auto-posteo) → 6.2: aprobar un `missing-in-laudus` escribe la tx al ledger.
+- **FR34** (reconciliation report: matched / unmatched ERP / unmatched bank) → los 7 estados en el dashboard 9.12. Cubierto por 6.4 (polish).
+- **FR35** (mark period complete when all resolved) → 6.5.
+- **Anotación-on-aprobación** (modelo A — no estaba en los FR originales porque asumían auto-posteo) → 6.3: aprobar un `missing-in-laudus` escribe la tx al ledger.
+- **Desglose TC USD** (no estaba en los FR — c4 lo destapa: ~50% de cartolas son estados USD internacionales) → 6.2: importar/reconciliar cartolas USD con FX-por-cartola, superseding el lump Laudus.
 - **NFR4** (reconciliación asíncrona, UI responsive) → el upload ya es async (BackgroundTasks + polling de 9.5); el promote/reconcile corre dentro de ese flujo. Verificar latencia al wirear.
 
 ### Nota sobre el SEAM (Completion Notes de 9.6b)

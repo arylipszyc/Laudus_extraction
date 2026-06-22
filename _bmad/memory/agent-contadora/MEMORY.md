@@ -70,3 +70,11 @@ _Decisiones arquitecturales tomadas. Para no re-litigar._
   arregla solo porque el import es continuo.
 - Tarjeta/período sin cartola → queda tal cual (gasto en cuenta TC original). Corrección es por
   tarjeta y por período.
+
+**Decisiones para Story 6.2 (2026-06-22)** — ver §12 del doc. Tres cierres clave:
+- **FX USD** = lump CLP del pago que SALDA el estado (mes siguiente) ÷ total USD facturado. Fuerza
+  Σ(compras×FX)=lump (cuadre exacto, no BCCh). Lump = FX-denominador Y asiento(b), un solo evento.
+  Sin lump aún → bloqueante, no estimar.
+- **Abono** = compra invertida (no distinguir impuesto vs devolución).
+- **`TC:Real` una por LÍNEA DE CRÉDITO** (unifica nacional+USD; la deuda es una). Adicionales ruedan
+  ahí → `card_suffix` deja de bloquear (metadata opcional, no toca el prompt 9.5).

@@ -1,4 +1,8 @@
-# Story 6.2: Aprobar una diferencia → anotarla en Beancount
+# Story 6.3: Aprobar una diferencia → anotarla en Beancount
+
+<!-- Renumerada de 6.2 → 6.3 (2026-06-22): la story de desglose TC USD pasó a 6.2 (prioridad) porque
+     ~50% de las cartolas reales son estados internacionales en USD que hoy no se reconcilian. Esta
+     story (anotación CLP) sigue válida, una posición después. -->
 
 Status: ready-for-dev
 
