@@ -1023,7 +1023,11 @@ Cada story tiene su propio archivo con AC + tasks + dev notes en `_bmad-output/i
 
 ### Goal
 
-Que subir una cartola bancaria dispare la **reconciliación real** cartola ↔ Laudus/Beancount (no solo la extracción): cada línea de la cartola se cruza contra el asiento Laudus del mismo período/cuenta, se clasifica en uno de los 7 estados de matching, las líneas limpias se contabilizan en el ledger y las discrepancias se emiten al JSONL append-only que el dashboard 9.12 ya consume. El contador resuelve las discrepancias desde el dashboard y el sistema marca el período como reconciliado cuando no quedan discrepancias abiertas.
+> **⚠️ Goal reformulado 2026-06-22 (modelo A, decisión Ary durante el dev de 6.1).** El goal original (abajo, tachado) asumía que las líneas limpias de la cartola **se contabilizan** en el ledger. El dev de 6.1 destapó que eso produce **doble conteo** vs `imports/laudus/*` (Laudus YA postea a las cuentas de banco/TC; `main.beancount` incluye ambos). Ary decidió **modelo A: la cartola reconcilia SIN postear** — detecta diferencias, no re-contabiliza. Ver `6-1-wiring-promote-reconcile.md` → "BLOCKER RESUELTO".
+
+**Goal (modelo A): detección + anotación-on-aprobación.** Que subir una cartola bancaria dispare la **reconciliación real** cartola ↔ Laudus/Beancount: cada línea se cruza contra el asiento Laudus del mismo período/cuenta, se clasifica en uno de los 7 estados de matching, y **las diferencias** (no las coincidencias) se emiten al JSONL append-only que el dashboard 9.12 consume. La cartola **NO re-contabiliza** — Laudus sigue siendo la fuente contabilizada y validada peso-por-peso vs el contador. El contador revisa las diferencias en el dashboard y, al **aprobar** una (ej. un `missing-in-laudus` que confirma como gasto real), el sistema **anota esa transacción en Beancount** (bean-check + git). El período se marca reconciliado cuando no quedan discrepancias abiertas.
+
+> ~~**Goal original (pre-modelo-A, OBSOLETO):** ...las líneas limpias se contabilizan en el ledger y las discrepancias se emiten al JSONL... El contador resuelve las discrepancias desde el dashboard y el sistema marca el período como reconciliado cuando no quedan discrepancias abiertas.~~
 
 ### Justificación — qué cambió con c4
 
@@ -1065,10 +1069,14 @@ El motor completo **ya existe y está testeado** (se construyó como parte de Ep
 - **Story 6.1 — Wiring del promote a `reconcile_and_build` (el SEAM)** *(core)*
   Reemplazar el `extract()` perfect-path por la construcción reconciliadora en el flujo de upload: armar `CartolaLine[]` desde el canónico staged, cargar `load_laudus_entries()` para el período/cuenta, llamar `reconcile_and_build()` (con `category_predictor` para `category_for` + `fx-bcch-eom.jsonl` para FX), renderizar las entries → `.beancount`, appendear las discrepancias retornadas a `_meta/cartola-discrepancies.jsonl`, bean-check + git commit. Implementa la decisión **D1**. Cubre FR32 (el trigger = el upload+promote por cuenta/período) + FR33 (cross-check) por construcción.
 
-- **Story 6.2 — Completar el dashboard de reconciliación (FR34)** *(polish de 9.12, deferido)*
+- **Story 6.2 — Aprobar una diferencia → anotarla en Beancount** *(core, modelo A — la 2da mitad)* — `ready-for-dev`
+  La continuación directa de 6.1: bajo modelo A nada de la cartola se postea, así que **aprobar** una diferencia debe escribirla explícitamente al ledger. Scope núcleo = `missing-in-laudus` + acción `confirm-cartola-only` (el contador confirma que esa línea de cartola es un gasto real que Laudus no tiene) → renderizar la transacción y escribirla a la zona `manual/` con bean-check + git, **antes** de cerrar la discrepancia (atomicidad). Reusa `commit_reconciliation` (write-and-replace + bean-check + rollback + git, ya testeado) + `_build_postings` (convención de signo Liabilities/Assets). Wirea `resolve()` (hoy solo appendea la línea de resolución al JSONL — el re-emit al ledger era el seam pendiente de 9.6b/9.12). Cubre lo que Ary pidió como *"que muestre solo las diferencias y pida aprobación para anotarlas"*. Ver `6-2-aprobar-diferencia-anotar-beancount.md`.
+  *Diferido a story aparte: las acciones que **editan un asiento Laudus existente** (`value-mismatch`/`accept-cartola`, soft-mismatch `accept-cartola-*`) — mecanismo distinto y más riesgoso (mutar `imports/laudus/*`).*
+
+- **Story 6.3 — Completar el dashboard de reconciliación (FR34)** *(ex-6.2, polish de 9.12, deferido)*
   Cerrar los defers de frontend de 9.12 que hacen al reporte usable end-to-end: historial del drill-down (`getHistory` ya existe, nunca se llama), filtros `year_month`/`bank_account_id` en la UI (backend ya los soporta), badge que no desaparece en error de `/count`, moneda correcta en la celda Laudus (hoy hardcodea CLP), y action-sets/semántica blocking para los estados FX (`fx-bcch-missing`/`fx-implausible`). Ver `deferred-work.md` → review de 9.12.
 
-- **Story 6.3 — Cierre de período de reconciliación (FR35)** *(small)*
+- **Story 6.4 — Cierre de período de reconciliación (FR35)** *(ex-6.3, small)*
   Marcar un período (cuenta + mes) como "reconciliado completo" cuando no quedan discrepancias abiertas (todas tienen línea de resolución en el JSONL). Probablemente derivable como vista sobre el JSONL existente (estado = discrepancias_abiertas == 0) + indicador en el dashboard; evaluar si requiere un marcador explícito persistido o basta con la derivación. Definir alcance al crear la story.
 
 ### Scope excluido (explícito)
@@ -1091,8 +1099,9 @@ El motor completo **ya existe y está testeado** (se construyó como parte de Ep
 
 - **FR32** (trigger monthly reconciliation run, entity+period) → el trigger es el **upload+promote** de la cartola, por `bank_account_id` y período. Cubierto por 6.1.
 - **FR33** (cross-check ERP totals vs. bank statement totals) → el motor de matching cruza línea-por-línea (más fuerte que totales). Cubierto por 6.1 (motor 9.6b).
-- **FR34** (reconciliation report: matched / unmatched ERP / unmatched bank) → los 7 estados en el dashboard 9.12. Cubierto por 6.2 (polish).
-- **FR35** (mark period complete when all resolved) → 6.3.
+- **FR34** (reconciliation report: matched / unmatched ERP / unmatched bank) → los 7 estados en el dashboard 9.12. Cubierto por 6.3 (polish, ex-6.2).
+- **FR35** (mark period complete when all resolved) → 6.4 (ex-6.3).
+- **Anotación-on-aprobación** (modelo A — no estaba en los FR originales porque asumían auto-posteo) → 6.2: aprobar un `missing-in-laudus` escribe la tx al ledger.
 - **NFR4** (reconciliación asíncrona, UI responsive) → el upload ya es async (BackgroundTasks + polling de 9.5); el promote/reconcile corre dentro de ese flujo. Verificar latencia al wirear.
 
 ### Nota sobre el SEAM (Completion Notes de 9.6b)
