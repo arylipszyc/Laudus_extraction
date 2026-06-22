@@ -202,7 +202,8 @@ claude-opus-4-8[1m]
 
 ### Debug Log References
 
-- 2026-06-22: backbone de asientos implementado (`tc_correction.build_tc_correction_entries`) + 6 tests verde (bean-check real). HALT en la derivación del FX USD (Task 2) — ver Completion Notes.
+- 2026-06-22: backbone de asientos implementado (`tc_correction.build_tc_correction_entries`) + 6 tests verde (bean-check real).
+- 2026-06-22: HALT del FX resuelto consultando datos reales — la glosa del pago Laudus trae el USD + período (ej. "USD26.188,93 Visa BCI 1027 Abril" = 23.543.848 CLP, y ese USD == closing de la cartola). Ary confirmó: FX de la glosa + validar cuadre, si no cuadra → bloqueante (falta movimiento/error). `derive_statement_fx` + `parse_glosa_usd` implementados + 4 tests (10 total verde).
 
 ### Completion Notes List
 
@@ -212,14 +213,25 @@ claude-opus-4-8[1m]
   una vez. `fx` + `lump_for` + `category_for` inyectables (FX=1 para CLP). 6 tests
   (`backend/tests/test_tc_correction.py`) verdes con bean-check real, incl. prueba de no-doble-conteo
   §7 (Expenses:TC neteado a 0, gasto = compras − abonos).
-- **⏸️ HALT en Task 2 (derivación del FX USD) — requiere confirmar el algoritmo de matching con Ary.**
-  El backbone toma `fx` y `lump_for` ya resueltos. Falta la pieza que, para una cartola USD,
-  identifica en Laudus la **liquidación que salda ese estado** (pago directo a `...Us` o traspaso
-  USD→CLP) para calcular `FX = CLP_que_salda / total_USD` y los lumps de (b). Es lo que la story
-  marca como "lo más delicado": el desfase de ~1 mes + el caso traspaso tienen ambigüedad de
-  algoritmo que, mal resuelta, corrompe el cuadre validado vs el contador. Pendiente de decisión.
+- **FX USD (Task 2) DONE:** `derive_statement_fx` busca en Laudus el pago de la cuenta `...Us`
+  (ventana 75d tras el cierre) cuya **glosa codifica el mismo USD que el `closing`** del estado;
+  `FX = CLP_pago / USD_glosa`. Si ningún pago cuadra → bloqueante (falta movimiento/error, NO estima
+  FX — decisión Ary). `parse_glosa_usd` parsea el formato chileno "USD26.188,93". 4 tests.
+- **HALLAZGO durante el FX (subtleza cross-período):** la línea `MONTO CANCELADO` de un estado paga el
+  período ANTERIOR; su lump (para el asiento b) es el pago Laudus que matchea **el USD de esa línea**,
+  no el del closing. Es la misma regla de glosa aplicada al pago. A wirear en el orquestador.
+- **⏸️ PENDIENTE — orquestador + wiring (Tasks 1, 3-final, 4):**
+  - `correct_tc_cartola(batch_id, importer, root, *, ts)`: ramifica por `account_type=="tarjeta_credito"`,
+    resuelve `expense_tc` (resolver) → deriva `TC:Real:<Producto>[Us]`, calcula FX (USD) o 1 (CLP),
+    resuelve el lump de cada pago por glosa, llama al builder, valida cuadre (Σ compras×fx ≈ lump,
+    residuo→ajuste / >$1000→bloqueante), escribe vía `commit_reconciliation` (lock+bean-check+git).
+  - Idempotencia de la apertura (asiento c una sola vez por tarjeta).
+  - Ramificación en `validate_balance` (cta_corriente→modelo A 6.1; tarjeta_credito→corrección TC).
+  - **Setup de prod (handoff):** las cuentas `...Us` necesitan su `bank_account_id` para que el
+    resolver mapee la cartola USD; crear `TC:Real:*` + `Equity:Apertura:TarjetasSinDetalle` vía flujo
+    de cuentas pendientes (10.3).
 
 ### File List
 
-- `pipeline/importers/tc_correction.py` (NUEVO — builder de asientos de corrección TC)
-- `backend/tests/test_tc_correction.py` (NUEVO — 6 tests, bean-check real)
+- `pipeline/importers/tc_correction.py` (NUEVO — builder de asientos + derivación FX desde glosa)
+- `backend/tests/test_tc_correction.py` (NUEVO — 10 tests, bean-check real)

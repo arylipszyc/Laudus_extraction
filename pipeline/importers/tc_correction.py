@@ -17,6 +17,7 @@ resueltos. La derivación del FX/lump desde Laudus (matching de la liquidación)
 """
 from __future__ import annotations
 
+import re
 from decimal import Decimal
 from typing import Callable
 
@@ -28,6 +29,53 @@ from backend.app.integrations.cartola_schema import CartolaCanonicalV1, CartolaT
 OPENING_EQUITY = "Equity:Apertura:TarjetasSinDetalle"
 _CLP = "CLP"
 _CENT = Decimal("0.01")
+
+# Ventana (días tras el cierre del estado) para buscar el pago que lo salda en Laudus.
+_FX_WINDOW_DAYS = 75
+# El estado USD se considera "saldado por la glosa" si el USD de la glosa == closing del estado.
+_USD_MATCH_TOLERANCE = Decimal("0.01")
+
+# Glosa del pago Laudus, formato chileno: "USD26.188,93 Visa BCI 1027 Abril" → 26188.93.
+_GLOSA_USD_RE = re.compile(r"USD\s*([\d.]*\d,\d{2})")
+
+
+def parse_glosa_usd(text: str) -> Decimal | None:
+    """Extrae el monto USD de la glosa del pago Laudus (formato chileno). None si no aparece."""
+    m = _GLOSA_USD_RE.search(text or "")
+    if not m:
+        return None
+    return Decimal(m.group(1).replace(".", "").replace(",", "."))
+
+
+def derive_statement_fx(
+    model: CartolaCanonicalV1,
+    laudus_us_entries: list,
+    *,
+    window_days: int = _FX_WINDOW_DAYS,
+) -> dict:
+    """FX único del estado USD desde el pago de Laudus que lo salda (Story 6.2 §FX, regla Ary).
+
+    Busca en `laudus_us_entries` (asientos de la cuenta `...Us`, de `load_laudus_entries`) el pago
+    fechado tras el cierre del estado cuya **glosa codifica el mismo USD que el `closing`** del estado.
+    `FX = CLP_del_pago / USD_de_la_glosa`. Valida el cuadre: si ningún pago matchea el USD del estado
+    → bloqueante (falta un movimiento o hay un error en la extracción), NO se estima FX.
+
+    Devuelve `{status, fx, lump_clp, glosa_usd, payment_date, reason}`. `status ∈ {ok, blocked}`.
+    """
+    total_usd = abs(model.balances.closing)
+    end = model.period.end
+    candidates = sorted(
+        (le for le in laudus_us_entries if le.date >= end and (le.date - end).days <= window_days),
+        key=lambda le: le.date,
+    )
+    for le in candidates:
+        glosa = parse_glosa_usd(le.description)
+        if glosa is not None and glosa != 0 and abs(glosa - total_usd) <= _USD_MATCH_TOLERANCE:
+            return {"status": "ok", "fx": (le.amount / glosa), "lump_clp": le.amount,
+                    "glosa_usd": glosa, "payment_date": le.date, "reason": None}
+    return {"status": "blocked", "fx": None, "lump_clp": None, "glosa_usd": None, "payment_date": None,
+            "reason": (f"sin pago Laudus que salde el estado (USD {total_usd}) en {window_days}d tras "
+                       f"el cierre {end} — ¿falta un movimiento o el estado aún no se pagó?")}
 
 # operation_types que son consumo/devolución (asiento a, signo según amount)
 _PURCHASE_OPS = {"compra", "cuota", "abono"}

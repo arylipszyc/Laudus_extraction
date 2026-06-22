@@ -13,9 +13,17 @@ from decimal import Decimal
 from beancount import loader
 from beancount.core import data
 
+from datetime import date
+
 from backend.app.integrations.cartola_schema import CartolaCanonicalV1
 from pipeline.importers.cartola_pdf_importer import render_entries
-from pipeline.importers.tc_correction import OPENING_EQUITY, build_tc_correction_entries
+from pipeline.importers.matching_engine import LaudusEntry
+from pipeline.importers.tc_correction import (
+    OPENING_EQUITY,
+    build_tc_correction_entries,
+    derive_statement_fx,
+    parse_glosa_usd,
+)
 
 TC_REAL = "Liabilities:EAG:TC:Real:VisaTest"
 EXP_TC = "Expenses:EAG:TC:TcTest-430099"
@@ -30,7 +38,7 @@ ACCOUNTS = f"""\
 """
 
 
-def _model(txs, *, opening="0", closing=None, currency="CLP"):
+def _model(txs, *, opening="0", closing=None, currency="CLP", start="2026-03-01", end="2026-03-31"):
     """txs = list of (date, desc, amount_int, operation_type)."""
     if closing is None:
         closing = str(int(opening) + sum(a for _, _, a, _ in txs))
@@ -38,7 +46,7 @@ def _model(txs, *, opening="0", closing=None, currency="CLP"):
         "schema_version": "1.0",
         "source": {"bank_account_id": "tc-test", "bank_name": "Banco Test",
                    "account_label": "Visa Test 1234", "account_type": "tarjeta_credito", "entity": "EAG"},
-        "period": {"start": "2026-03-01", "end": "2026-03-31"},
+        "period": {"start": start, "end": end},
         "currency": currency,
         "balances": {"opening": opening, "closing": closing},
         "transactions": [
@@ -163,3 +171,51 @@ def test_no_doble_conteo_suma_anual(tmp_path):
                     bal_cat.add_amount(p.units)
     assert bal_exp_tc.get_currency_units("CLP").number == Decimal("0")        # lump neteado
     assert bal_cat.get_currency_units("CLP").number == Decimal("40000.00")     # 45k − 5k
+
+
+# ── FX USD: glosa del pago Laudus ─────────────────────────────────────────────
+
+
+def test_parse_glosa_usd():
+    assert parse_glosa_usd("USD26.188,93 Visa BCI 1027 Abril") == Decimal("26188.93")
+    assert parse_glosa_usd("USD838,48 Visa BCI 1027 Diciembre") == Decimal("838.48")
+    assert parse_glosa_usd("USD1.448,79 Visa BCI 1027 Enero") == Decimal("1448.79")
+    assert parse_glosa_usd("Pago en pesos sin USD") is None
+
+
+def _us_payment(d, clp, glosa):
+    return LaudusEntry(je_id="x", date=d, amount=Decimal(clp), description=glosa,
+                       category_account="Assets:EAG:Bancos:BancoBci10160175-111005")
+
+
+# datos reales: estado 28/03→28/04 closing USD26.188,93, pagado 14/05 con 23.543.848 CLP.
+
+
+def test_derive_fx_desde_glosa_real(tmp_path):
+    m = _model([("2026-04-10", "EBAY", 100, "compra")], opening="0", closing="26188.93",
+               currency="USD", start="2026-03-28", end="2026-04-28")
+    us = [_us_payment(date(2026, 5, 14), "23543848.00", "USD26.188,93 Visa BCI 1027 Abril")]
+    res = derive_statement_fx(m, us)
+    assert res["status"] == "ok"
+    assert res["lump_clp"] == Decimal("23543848.00")
+    assert res["glosa_usd"] == Decimal("26188.93")
+    # 23543848 / 26188.93 ≈ 898.99 CLP/USD
+    assert Decimal("898") < res["fx"] < Decimal("900")
+
+
+def test_derive_fx_bloqueante_si_no_hay_pago_que_cuadre(tmp_path):
+    # El pago que existe tiene OTRO USD (no salda este estado) → falta movimiento / error.
+    m = _model([("2026-04-10", "EBAY", 100, "compra")], opening="0", closing="26188.93",
+               currency="USD", start="2026-03-28", end="2026-04-28")
+    us = [_us_payment(date(2026, 5, 14), "9994897.00", "USD10.843,04 Visa BCI 1027 Mayo")]
+    res = derive_statement_fx(m, us)
+    assert res["status"] == "blocked" and res["fx"] is None
+
+
+def test_derive_fx_bloqueante_si_pago_fuera_de_ventana(tmp_path):
+    m = _model([("2026-04-10", "EBAY", 100, "compra")], opening="0", closing="26188.93",
+               currency="USD", start="2026-03-28", end="2026-04-28")
+    # pago con el USD correcto pero 6 meses después → fuera de ventana
+    us = [_us_payment(date(2026, 11, 14), "23543848.00", "USD26.188,93 Visa BCI 1027 Abril")]
+    res = derive_statement_fx(m, us)
+    assert res["status"] == "blocked"
