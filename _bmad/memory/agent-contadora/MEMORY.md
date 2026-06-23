@@ -51,6 +51,26 @@ CONFIRMADO). Detalle en `_bmad-output/planning-artifacts/valentina-auditoria-ing
 - Hijas (Jocelyn/Jeannette/Johanna/Jael) FUERA de alcance: no se sabe si retiran de fondos propios.
 - Herramientas: `_forense_inversiones.py`, `_forense_recon_vehiculo.py` (planning-artifacts).
 
+## ⏳ Pendiente de revisar — Story 6.2 (desglose TC, en dev)
+
+El dev (Moishe) implementó el núcleo de la Story 6.2 (corrección TC vía cartola, mi flujo §12) y dejó
+**3 cosas contables esperando mi revisión** antes de cablear el orquestador. Cuando Ary abra sesión,
+ofrecer revisarlas:
+
+1. **Listado exacto de cuentas a crear** — una `Liabilities:EAG:TC:Real:<tarjeta>` por **tarjeta-moneda**
+   (CLP y USD son TC distintas, corrección Ary §12.3) + `Equity:Apertura:TarjetasSinDetalle`. Revisar
+   cuántas tarjetas-moneda hay realmente en `accounts.beancount` (cuentas `Expenses:EAG:TC:*` y `...Us`)
+   y confirmar la lista para no crear de más/menos. OJO: estas cuentas NO vienen de Laudus → se crean
+   a mano (no por el flujo automático de cuentas-pendientes 10.3).
+2. **Categorización PASIVO** de cada `TC:Real` (que el reporte no las cuente como gasto). Ya decidido
+   en §12.3; validar la lista final.
+3. **Lógica cross-período del `MONTO CANCELADO`** (lo más delicado) — el pago que figura en un estado
+   salda el período ANTERIOR; su lump (asiento b) debe matchear el pago Laudus del mes anterior (por la
+   glosa USD de esa línea), no el del closing del estado importado. Confirmar que ese cruce está bien
+   planteado antes de que se cablee (toca el cuadre validado vs el contador). Detalle del dev en
+   `_bmad-output/implementation-artifacts/6-2-desglose-tc-usd-fx.md` (Dev Agent Record) y
+   `sprint-status.yaml` (entrada 6-2).
+
 ## Reportes Aprobados
 _Reportes que el dueño ha aprobado desarrollar. Actualizar a medida que se aprueban._
 
