@@ -7,8 +7,29 @@ export interface Discrepancy {
   bank_account_id: string | null
   year_month: string
   cartola: { line_no: number; date: string; amount: number; currency: string; description: string } | null
-  laudus: { journal_entry_id: string; date: string; amount: number; description: string } | null
+  laudus: { journal_entry_id: string; date: string; amount: number; currency?: string; description: string } | null
   fx: { implied: number | null; bcch: number | null; deviation_pct: number | null }
+}
+
+export interface HistoryEntry {
+  discrepancy_id?: string
+  ref_discrepancy_id?: string
+  ts?: string
+  state?: string
+  resolution?: {
+    action: string; resolved_by?: string; resolved_at?: string
+    justification?: string; escalated_at?: string
+  } | null
+}
+
+/** Error de resolución que conserva el status HTTP (422 = anotación falló → discrepancia abierta). */
+export class ResolveHttpError extends Error {
+  status: number
+  constructor(status: number, detail: string) {
+    super(detail)
+    this.status = status
+    this.name = 'ResolveHttpError'
+  }
 }
 
 export interface DiscrepanciesResponse {
@@ -44,7 +65,7 @@ export async function getReconciliationCount(): Promise<{ total: number; blockin
   return res.json()
 }
 
-export async function getHistory(id: string): Promise<{ discrepancy_id: string; entries: unknown[] }> {
+export async function getHistory(id: string): Promise<{ discrepancy_id: string; entries: HistoryEntry[] }> {
   const res = await fetch(`${base}/history/${id}`, { credentials: 'include' })
   if (!res.ok) throw new Error(`Error (${res.status})`)
   return res.json()
@@ -52,8 +73,8 @@ export async function getHistory(id: string): Promise<{ discrepancy_id: string; 
 
 export async function resolveDiscrepancy(
   id: string,
-  body: { action: string; justification: string | null },
-): Promise<{ status: string }> {
+  body: { action: string; justification: string | null; category_account?: string | null },
+): Promise<{ status: string; git_commit_sha?: string | null }> {
   const res = await fetch(`${base}/discrepancies/${id}/resolve`, {
     method: 'POST',
     credentials: 'include',
@@ -62,7 +83,7 @@ export async function resolveDiscrepancy(
   })
   if (!res.ok) {
     const d = await res.json().catch(() => null)
-    throw new Error(d?.detail ?? `Error resolviendo (${res.status})`)
+    throw new ResolveHttpError(res.status, d?.detail ?? `Error resolviendo (${res.status})`)
   }
   return res.json()
 }

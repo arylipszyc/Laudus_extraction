@@ -45,6 +45,7 @@ class LaudusEntry:
     amount: Decimal       # firmado, CLP, sobre el account del banco/TC
     description: str
     category_account: str = ""   # cuenta de contrapartida (gasto/ingreso), para category-mismatch
+    currency: str = "CLP"        # moneda de la posting (para mostrarla bien en el dashboard, 6.4 AC7)
 
 
 @dataclass
@@ -90,6 +91,7 @@ def load_laudus_entries(target_dir, account: str, period_start: date, period_end
                 amount=mine[0].units.number,
                 description=e.narration or "",
                 category_account=category,
+                currency=mine[0].units.currency or "CLP",
             ))
     return out
 

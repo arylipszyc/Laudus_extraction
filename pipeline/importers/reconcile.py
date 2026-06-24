@@ -49,7 +49,7 @@ def _laudus_dict(mr: MatchResult) -> dict | None:
     if le is None:
         return None
     return {"journal_entry_id": le.je_id, "date": le.date.isoformat(),
-            "amount": _num(le.amount), "description": le.description}
+            "amount": _num(le.amount), "currency": le.currency, "description": le.description}
 
 
 def _fx_dict(fx: FXResult | None) -> dict:

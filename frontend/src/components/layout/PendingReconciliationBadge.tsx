@@ -11,14 +11,30 @@ import { getReconciliationCount } from '@/services/reconciliation'
 export function PendingReconciliationBadge() {
   const navigate = useNavigate()
   const canSee = useHasRole(['contador', 'admin'])
-  const { data } = useQuery({
+  const { data, isError } = useQuery({
     queryKey: ['reconciliation-count'],
     queryFn: getReconciliationCount,
     refetchInterval: 5 * 60 * 1000,
     enabled: canSee,
   })
 
-  if (!canSee || !data || data.total === 0) return null
+  if (!canSee) return null
+
+  // Error de carga SIN dato previo: NO ocultar (sería indistinguible de "0 pendientes" → silenciaría
+  // la alerta bloqueante hasta el próximo poll). Chip neutro de "no se pudo cargar" (6.4 AC5).
+  if (isError && !data) {
+    return (
+      <button
+        onClick={() => navigate('/reconciliation')}
+        title="No se pudo cargar el conteo de reconciliaciones — reintentando."
+        className="px-2 py-1 rounded-full text-xs font-medium text-muted-foreground bg-muted"
+      >
+        ⚠ reconciliaciones —
+      </button>
+    )
+  }
+
+  if (!data || data.total === 0) return null
 
   const red = data.blocking > 0
   const tooltip = red
