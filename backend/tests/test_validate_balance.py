@@ -20,10 +20,12 @@ from pipeline.importers.cartola_pdf_importer import CartolaPdfImporter
 
 TC_ID = "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
 
+# Modelo A (Story 6.1) = cuenta corriente. La TC tiene su propio flujo (corrección, Story 6.2);
+# estos tests ejercen el cuadre de extracción + reconcile-sin-postear → cuenta corriente.
 ACCOUNTS = """\
-2020-12-31 open Liabilities:EAG:TC:VisaInfinity-430005 CLP
+2020-12-31 open Assets:EAG:Bancos:BancoBciCtaCte-111005 CLP
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
-  bank_account_type: "tarjeta_credito"
+  bank_account_type: "cta_corriente"
   bank_account_currency: "CLP"
   bank_account_last4: "1027"
   bank_name: "Banco BCI"
@@ -46,7 +48,7 @@ def _staging(root, opening, closing, txs, batch_id="b1"):
     payload = {
         "schema_version": "1.0",
         "source": {"bank_account_id": TC_ID, "bank_name": "Banco BCI", "account_label": "x",
-                   "account_type": "tarjeta_credito", "entity": "EAG"},
+                   "account_type": "cta_corriente", "entity": "EAG"},
         "period": {"start": "2026-03-01", "end": "2026-03-31"},
         "currency": "CLP",
         "balances": {"opening": opening, "closing": closing},

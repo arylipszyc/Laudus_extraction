@@ -51,25 +51,32 @@ CONFIRMADO). Detalle en `_bmad-output/planning-artifacts/valentina-auditoria-ing
 - Hijas (Jocelyn/Jeannette/Johanna/Jael) FUERA de alcance: no se sabe si retiran de fondos propios.
 - Herramientas: `_forense_inversiones.py`, `_forense_recon_vehiculo.py` (planning-artifacts).
 
-## ⏳ Pendiente de revisar — Story 6.2 (desglose TC, en dev)
+## ✅ Revisado — Story 6.2 (desglose TC): 3 pendientes cerrados (2026-06-22)
 
-El dev (Moishe) implementó el núcleo de la Story 6.2 (corrección TC vía cartola, mi flujo §12) y dejó
-**3 cosas contables esperando mi revisión** antes de cablear el orquestador. Cuando Ary abra sesión,
-ofrecer revisarlas:
+Revisé los 3 pendientes contables con Ary antes de cablear el orquestador. Detalle en el
+planning-artifact (§9 y §12.1 reescritos) y session log `sessions/2026-06-22.md`.
 
-1. **Listado exacto de cuentas a crear** — una `Liabilities:EAG:TC:Real:<tarjeta>` por **tarjeta-moneda**
-   (CLP y USD son TC distintas, corrección Ary §12.3) + `Equity:Apertura:TarjetasSinDetalle`. Revisar
-   cuántas tarjetas-moneda hay realmente en `accounts.beancount` (cuentas `Expenses:EAG:TC:*` y `...Us`)
-   y confirmar la lista para no crear de más/menos. OJO: estas cuentas NO vienen de Laudus → se crean
-   a mano (no por el flujo automático de cuentas-pendientes 10.3).
-2. **Categorización PASIVO** de cada `TC:Real` (que el reporte no las cuente como gasto). Ya decidido
-   en §12.3; validar la lista final.
-3. **Lógica cross-período del `MONTO CANCELADO`** (lo más delicado) — el pago que figura en un estado
-   salda el período ANTERIOR; su lump (asiento b) debe matchear el pago Laudus del mes anterior (por la
-   glosa USD de esa línea), no el del closing del estado importado. Confirmar que ese cruce está bien
-   planteado antes de que se cablee (toca el cuadre validado vs el contador). Detalle del dev en
-   `_bmad-output/implementation-artifacts/6-2-desglose-tc-usd-fx.md` (Dev Agent Record) y
-   `sprint-status.yaml` (entrada 6-2).
+1. **Cruce cross-período (`MONTO CANCELADO`) — lo más delicado, OK con corrección.** El asiento (b) se
+   maneja por el modelo **MONTO CANCELADO** (la línea interna del estado, que salda el período
+   ANTERIOR y matchea un pago Laudus del MISMO mes), NO por la liquidación que salda el estado actual.
+   Un mismo pago Laudus juega dos roles en estados ADYACENTES: denominador del FX del estado M−1 y
+   asiento (b) del estado M. **El lump del asiento (b) = CLP REAL del pago Laudus (glosa-match), NUNCA
+   `MONTO_CANCELADO_USD × FX_del_estado`** (se pagó a otro TC → dejaría residual de gasto falso). Mi
+   §12.1 original ("una liquidación, dos roles del MISMO estado") estaba MAL y rompía el cuadre anual
+   §7; corregido. El `derive_statement_fx` del dev ya usa bien `closing` + pago posterior.
+2. **Lista de cuentas (8 `TC:Real` + Equity).** Una por tarjeta-moneda con actividad 2026: las 3
+   productos (1027 Visa Infinity, 8996 Mastercard Lanpass, 0858 Visa Latanpass) × CLP/USD = 6, +
+   `TcVariasEag` + `TcRaquelVentura` (CLP-only) + `Equity:Apertura:TarjetasSinDetalle`. **Skip Amex
+   8083 (430011): cero actividad 2026.** Nombre = stem EXACTO del Laudus (decisión Ary). Raquel SÍ se
+   itemiza (tarjeta que le paga EAG). Varias se crea pero queda en lump (cajón de varias físicas).
+3. **Categorización PASIVO — el mecanismo real NO es el label.** El reporte agrupa el gasto por
+   **`Categoria2`** (buckets DEPTO STGO / Casa Sur / Depto Miami / Gastos Personales), no por
+   `Categoria1`. Lo que saca la cuenta del gasto es **`Categoria2`/`Categoria3` VACÍOS**. TRAP: las TC
+   originales son `categoria2:"GASTOS PERSONALES"` — si se copia su metadata y solo se cambia
+   Categoria1 a PASIVO, **igual suma al gasto**. Cada cuenta nueva necesita: `Categoria1` no-vacío
+   (PASIVO / PATRIMONIO, evita el guard "sin categorizar" 10.2) + `Categoria2`/`Categoria3` vacíos +
+   un `code` sintético (sin code, los postings colisionan en `accountnumber=""` y afloran como línea
+   fantasma en el reporte). Verificado: asiento (b) reduce bien el bucket GASTOS PERSONALES.
 
 ## Reportes Aprobados
 _Reportes que el dueño ha aprobado desarrollar. Actualizar a medida que se aprueban._

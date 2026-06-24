@@ -21,8 +21,10 @@ from pipeline.importers.matching_engine import LaudusEntry
 from pipeline.importers.tc_correction import (
     OPENING_EQUITY,
     build_tc_correction_entries,
+    correct_tc_cartola,
     derive_statement_fx,
     parse_glosa_usd,
+    tc_real_account,
 )
 
 TC_REAL = "Liabilities:EAG:TC:Real:VisaTest"
@@ -219,3 +221,289 @@ def test_derive_fx_bloqueante_si_pago_fuera_de_ventana(tmp_path):
     us = [_us_payment(date(2026, 11, 14), "23543848.00", "USD26.188,93 Visa BCI 1027 Abril")]
     res = derive_statement_fx(m, us)
     assert res["status"] == "blocked"
+
+
+# ── Orquestador correct_tc_cartola (end-to-end: staging → ledger) ──────────────
+
+EXPENSE_TC = "Expenses:EAG:TC:TcTest-430099"
+TC_REAL_ORCH = "Liabilities:EAG:TC:Real:TcTest"
+CAT_SUPER = "Expenses:EAG:Super"
+
+_ORCH_ACCOUNTS = f"""\
+2020-12-31 open {EXPENSE_TC} CLP
+2020-12-31 open {TC_REAL_ORCH} CLP
+2020-12-31 open Expenses:EAG:TC:TcTest2-430100 CLP
+2020-12-31 open Liabilities:EAG:TC:Real:TcTest2 CLP
+2020-12-31 open {CAT_SUPER} CLP
+2020-12-31 open {OPENING_EQUITY} CLP
+2020-12-31 open Expenses:EAG:Suspense CLP
+2020-12-31 open Assets:EAG:Bancos:Test CLP
+"""
+
+
+class _FakeResolved:
+    def __init__(self, account, last4):
+        self.account, self.last4 = account, last4
+
+
+class _FakeResolver:
+    def __init__(self, account=EXPENSE_TC, last4="1027"):
+        self._a, self._l = account, last4
+
+    def resolve(self, bank_account_id):
+        return self._a
+
+    def get(self, bank_account_id):
+        return _FakeResolved(self._a, self._l)
+
+
+class _FakePredictor:
+    def __init__(self, category=CAT_SUPER):
+        self._c = category
+
+    def predict(self, description, amount, bank_account_id):
+        return self._c, "test", "*"
+
+
+class _FakeImporter:
+    def __init__(self, resolver=None, predictor=None):
+        self.resolver = resolver or _FakeResolver()
+        self.category_predictor = predictor or _FakePredictor()
+
+
+def _make_ledger(tmp_path, *, laudus="", bcch=None):
+    """Ledger mínimo (accounts + main con globs) para que bean-check vea las correcciones TC.
+
+    `bcch`: dict {year_month: rate_clp_per_usd} → siembra `_meta/fx-bcch-eom.jsonl` (Story 9.10).
+    """
+    root = tmp_path / "ledger"
+    (root / "imports" / "cartolas" / "_staging").mkdir(parents=True)
+    (root / "imports" / "laudus").mkdir(parents=True)
+    if bcch is not None:
+        import json as _json
+        (root / "_meta").mkdir(parents=True)
+        (root / "_meta" / "fx-bcch-eom.jsonl").write_text(
+            "".join(_json.dumps({"year_month": ym, "rate_clp_per_usd": str(r)}) + "\n"
+                    for ym, r in bcch.items()),
+            encoding="utf-8")
+    (root / "accounts.beancount").write_text(_ORCH_ACCOUNTS, encoding="utf-8")
+    (root / "main.beancount").write_text(
+        'include "accounts.beancount"\n'
+        'include "imports/laudus/*.beancount"\n'
+        'include "imports/cartolas/*.beancount"\n', encoding="utf-8")
+    # Siempre un archivo laudus (el glob del include exige ≥1 match, como en prod).
+    (root / "imports" / "laudus" / "laudus.beancount").write_text(
+        laudus or ";; (sin asientos Laudus en este fixture)\n", encoding="utf-8")
+    return root
+
+
+def _stage(root, model, batch_id="b1"):
+    path = root / "imports" / "cartolas" / "_staging" / f"{batch_id}.cartola.json"
+    path.write_text(model.model_dump_json(indent=2, by_alias=False), encoding="utf-8")
+    return path
+
+
+_TS = "2026-05-20T00:00:00Z"
+
+
+def test_tc_real_account_deriva_stem_exacto():
+    assert tc_real_account("Expenses:EAG:TC:Tc1027VisaInfinity-430005") == \
+        "Liabilities:EAG:TC:Real:Tc1027VisaInfinity"
+    assert tc_real_account("Expenses:EAG:TC:Tc1027VisaInfinityUs-430006") == \
+        "Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs"
+
+
+def test_correct_clp_end_to_end(tmp_path):
+    root = _make_ledger(tmp_path)
+    m = _model([
+        ("2026-03-10", "JUMBO", 45000, "compra"),
+        ("2026-03-12", "DEVOLUCION", -5000, "abono"),
+        ("2026-03-20", "MONTO CANCELADO", -100000, "pago"),
+    ], opening="500000")
+    _stage(root, m)
+    res = correct_tc_cartola("b1", _FakeImporter(), root, ts=_TS)
+
+    assert res["status"] == "corrected"
+    assert res["purchases"] == 2 and res["payments"] == 1
+    assert res["opening_emitted"] is True
+    out = root / "imports" / "cartolas"
+    files = list(out.glob("*-tc.beancount"))
+    assert len(files) == 1                                   # el archivo de corrección se escribió
+    assert not (root / "imports" / "cartolas" / "_staging" / "b1.cartola.json").exists()  # staging consumido
+    # bean-check del ledger completo pasa
+    from beancount import loader
+    _e, errors, _o = loader.load_file(str(root / "main.beancount"))
+    assert errors == []
+
+
+def test_correct_clp_apertura_idempotente(tmp_path):
+    root = _make_ledger(tmp_path)
+    # 1ra cartola → emite apertura
+    m1 = _model([("2026-03-10", "JUMBO", 45000, "compra")], opening="500000",
+                start="2026-03-01", end="2026-03-31")
+    _stage(root, m1, "b1")
+    r1 = correct_tc_cartola("b1", _FakeImporter(), root, ts=_TS)
+    assert r1["opening_emitted"] is True
+    # 2da cartola de la MISMA tarjeta → NO repite apertura
+    m2 = _model([("2026-04-10", "LIDER", 30000, "compra")], opening="545000",
+                start="2026-04-01", end="2026-04-30")
+    _stage(root, m2, "b2")
+    r2 = correct_tc_cartola("b2", _FakeImporter(), root, ts=_TS)
+    assert r2["status"] == "corrected"
+    assert r2["opening_emitted"] is False
+    # solo una apertura en todo el ledger
+    from beancount import loader
+    entries, errors, _o = loader.load_file(str(root / "main.beancount"))
+    assert errors == []
+    aperturas = [e for e in entries if isinstance(e, data.Transaction)
+                 and (e.meta or {}).get("operation_type") == "apertura"]
+    assert len(aperturas) == 1
+
+
+# datos reales: estado 28/03→28/04 closing USD26.188,93, saldado 14/05 con 23.543.848 CLP;
+# el MONTO CANCELADO interno (paga el período anterior, USD5.000) se saldó con 4.500.000 CLP.
+_USD_LAUDUS = (
+    '2026-04-10 * "USD5.000,00 Visa Test 1234 Marzo"\n'
+    '  Assets:EAG:Bancos:Test  -4500000.00 CLP\n'
+    f'  {EXPENSE_TC}  4500000.00 CLP\n'
+    '\n'
+    '2026-05-14 * "USD26.188,93 Visa Test 1234 Abril"\n'
+    '  Assets:EAG:Bancos:Test  -23543848.00 CLP\n'
+    f'  {EXPENSE_TC}  23543848.00 CLP\n'
+)
+
+
+def _usd_model(closing="26188.93"):
+    return _model([
+        ("2026-04-05", "EBAY", 13094.46, "compra"),
+        ("2026-04-15", "AMAZON", 13094.47, "compra"),
+        ("2026-04-20", "MONTO CANCELADO", -5000, "pago"),
+    ], opening="5000", closing=closing, currency="USD", start="2026-03-28", end="2026-04-28")
+
+
+def test_correct_usd_end_to_end(tmp_path):
+    # FX derivado ≈ 898.99; BCCh del mes ≈ 899 → dentro de tolerancia → corrected.
+    root = _make_ledger(tmp_path, laudus=_USD_LAUDUS, bcch={"2026-04": 899})
+    _stage(root, _usd_model())
+    res = correct_tc_cartola("b1", _FakeImporter(), root, ts=_TS)
+
+    assert res["status"] == "corrected", res["reason"]
+    assert res["fx"] is not None and Decimal("898") < Decimal(res["fx"]) < Decimal("900")
+    assert res["fx_deviation_pct"] is not None and res["fx_deviation_pct"] < 5.0  # cuadra vs BCCh
+    from beancount import loader
+    _e, errors, _o = loader.load_file(str(root / "main.beancount"))
+    assert errors == []
+
+
+def test_correct_usd_bloqueante_sin_pago_que_salde(tmp_path):
+    # Laudus solo tiene el pago del MONTO CANCELADO, NO el que salda el closing → FX bloqueante.
+    laudus = ('2026-04-10 * "USD5.000,00 Visa Test 1234 Marzo"\n'
+              '  Assets:EAG:Bancos:Test  -4500000.00 CLP\n'
+              f'  {EXPENSE_TC}  4500000.00 CLP\n')
+    root = _make_ledger(tmp_path, laudus=laudus)
+    _stage(root, _usd_model())
+    res = correct_tc_cartola("b1", _FakeImporter(), root, ts=_TS)
+    assert res["status"] == "blocked"
+    assert not list((root / "imports" / "cartolas").glob("*-tc.beancount"))  # no escribió nada
+
+
+def test_correct_usd_saldo_arrastrado_no_bloquea(tmp_path):
+    # Regresión del fix de cuadre: estado que arrastra saldo (opening 5000, MONTO CANCELADO paga solo
+    # 3000 → revolving, closing=28188.93). El viejo check `residuo` lo bloqueaba como "descuadre"; pero
+    # es un estado CORRECTO (la apertura captura el saldo arrastrado). Con FX derivado ≈ 898.97 dentro
+    # de tolerancia BCCh → NO debe bloquear.
+    laudus = (
+        '2026-04-10 * "USD3.000,00 Visa Test 1234 Marzo"\n'
+        '  Assets:EAG:Bancos:Test  -2700000.00 CLP\n'
+        f'  {EXPENSE_TC}  2700000.00 CLP\n'
+        '\n'
+        '2026-05-14 * "USD28.188,93 Visa Test 1234 Abril"\n'
+        '  Assets:EAG:Bancos:Test  -25341000.00 CLP\n'
+        f'  {EXPENSE_TC}  25341000.00 CLP\n'
+    )
+    root = _make_ledger(tmp_path, laudus=laudus, bcch={"2026-04": 899})
+    m = _model([
+        ("2026-04-05", "EBAY", 13094.46, "compra"),
+        ("2026-04-15", "AMAZON", 13094.47, "compra"),
+        ("2026-04-20", "MONTO CANCELADO", -3000, "pago"),
+    ], opening="5000", closing="28188.93", currency="USD", start="2026-03-28", end="2026-04-28")
+    _stage(root, m)
+    res = correct_tc_cartola("b1", _FakeImporter(), root, ts=_TS)
+    assert res["status"] == "corrected", res["reason"]
+
+
+def test_correct_usd_bloqueante_si_fx_fuera_de_tolerancia(tmp_path):
+    # FX derivado del pago ≈ 898.99, pero el BCCh del mes está en 700 → desviación ~28% > 5% →
+    # señal de que el lump o el total USD no corresponden → bloqueante.
+    root = _make_ledger(tmp_path, laudus=_USD_LAUDUS, bcch={"2026-04": 700})
+    _stage(root, _usd_model())
+    res = correct_tc_cartola("b1", _FakeImporter(), root, ts=_TS)
+    assert res["status"] == "blocked"
+    assert "BCCh" in res["reason"] and "fx-out-of-tolerance" in res["reason"]
+    assert not list((root / "imports" / "cartolas").glob("*-tc.beancount"))  # no escribió nada
+
+
+def test_correct_usd_sin_bcch_no_bloquea(tmp_path):
+    # Sin dólar BCCh ese mes (Story 9.10 no corrió) → no se puede validar, pero NO se bloquea
+    # (mismo criterio que 9.6b: fx-bcch-missing procede).
+    root = _make_ledger(tmp_path, laudus=_USD_LAUDUS)  # sin bcch
+    _stage(root, _usd_model())
+    res = correct_tc_cartola("b1", _FakeImporter(), root, ts=_TS)
+    assert res["status"] == "corrected", res["reason"]
+    assert res["fx_deviation_pct"] is None
+
+
+def test_validate_balance_rutea_tc_a_correccion(tmp_path, monkeypatch):
+    # AC1: una cartola con account_type tarjeta_credito entra al modo corrección TC (postea),
+    # NO al modelo A de reconciliación-sin-postear.
+    from backend.app.api.v1.cartolas import service
+
+    root = _make_ledger(tmp_path)
+    m = _model([("2026-03-10", "JUMBO", 45000, "compra"),
+                ("2026-03-20", "MONTO CANCELADO", -45000, "pago")], opening="0")
+    _stage(root, m)
+    out = service.validate_balance(
+        "b1", opening=0, closing=0, override_justification=None,
+        user_email="t@t.cl", ledger_root=root, importer=_FakeImporter(), now_iso=_TS)
+    assert out["status"] == "corrected"
+    assert out["currency"] == "CLP"
+    assert list((root / "imports" / "cartolas").glob("*-tc.beancount"))
+
+
+def test_correct_re_import_preserva_apertura(tmp_path):
+    # Re-importar la MISMA cartola (mismo slug → se sobrescribe su archivo) NO debe perder la apertura:
+    # `_opening_exists` se salta el archivo destino de ESTA corrida, así re-emite en vez de borrarla.
+    root = _make_ledger(tmp_path)
+    m = _model([("2026-03-10", "JUMBO", 45000, "compra")], opening="500000",
+               start="2026-03-01", end="2026-03-31")
+    _stage(root, m, "b1")
+    r1 = correct_tc_cartola("b1", _FakeImporter(), root, ts=_TS)
+    assert r1["opening_emitted"] is True
+    # re-stage idéntico y re-correr (mismo slug → mismo archivo)
+    _stage(root, m, "b1")
+    r2 = correct_tc_cartola("b1", _FakeImporter(), root, ts=_TS)
+    assert r2["opening_emitted"] is True                      # NO se perdió la apertura al re-importar
+    from beancount import loader
+    entries, errors, _o = loader.load_file(str(root / "main.beancount"))
+    assert errors == []
+    aperturas = [e for e in entries if isinstance(e, data.Transaction)
+                 and (e.meta or {}).get("operation_type") == "apertura"]
+    assert len(aperturas) == 1                                # exactamente una (sobrescribió, no duplicó)
+
+
+def test_slug_desambigua_tarjetas_mismo_last4(tmp_path):
+    # Dos tarjetas distintas (mismo banco + last4 + mes) pero distinto stem de cuenta NO deben colisionar
+    # en el mismo `{slug}-tc.beancount`. Antes el slug = banco-last4-mes → la 2da sobrescribía a la 1ra.
+    root = _make_ledger(tmp_path)
+    m1 = _model([("2026-03-10", "JUMBO", 45000, "compra")], opening="0",
+                start="2026-03-01", end="2026-03-31")
+    _stage(root, m1, "b1")
+    r1 = correct_tc_cartola("b1", _FakeImporter(_FakeResolver(EXPENSE_TC, "1027")), root, ts=_TS)
+    m2 = _model([("2026-03-12", "LIDER", 30000, "compra")], opening="0",
+                start="2026-03-01", end="2026-03-31")
+    _stage(root, m2, "b2")
+    r2 = correct_tc_cartola(
+        "b2", _FakeImporter(_FakeResolver("Expenses:EAG:TC:TcTest2-430100", "1027")), root, ts=_TS)
+    assert r1["status"] == "corrected" and r2["status"] == "corrected", (r1["reason"], r2["reason"])
+    files = sorted(p.name for p in (root / "imports" / "cartolas").glob("*-tc.beancount"))
+    assert len(files) == 2, files                             # dos archivos distintos, sin sobrescritura

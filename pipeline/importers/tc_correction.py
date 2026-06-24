@@ -18,7 +18,9 @@ resueltos. La derivación del FX/lump desde Laudus (matching de la liquidación)
 from __future__ import annotations
 
 import re
+from datetime import timedelta
 from decimal import Decimal
+from pathlib import Path
 from typing import Callable
 
 from beancount.core import data
@@ -28,7 +30,11 @@ from backend.app.integrations.cartola_schema import CartolaCanonicalV1, CartolaT
 
 OPENING_EQUITY = "Equity:Apertura:TarjetasSinDetalle"
 _CLP = "CLP"
-_CENT = Decimal("0.01")
+
+# Derivación de la cuenta de pasivo real desde la cuenta-gasto Laudus (AC6, transformación de
+# string pura): `Expenses:EAG:TC:<stem>-<code>` → `Liabilities:EAG:TC:Real:<stem>`.
+_EXPENSE_TC_PREFIX = "Expenses:EAG:TC:"
+_TC_REAL_PREFIX = "Liabilities:EAG:TC:Real:"
 
 # Ventana (días tras el cierre del estado) para buscar el pago que lo salda en Laudus.
 _FX_WINDOW_DAYS = 75
@@ -125,14 +131,15 @@ def build_tc_correction_entries(
         op = (tx.raw or {}).get("operation_type") or ""
         if op in _PURCHASE_OPS:
             # (a) / abono: signed amount → abono (amount<0) invierte el asiento solo.
-            clp = (tx.amount * fx).quantize(_CENT)
+            # Sin redondear (precisión completa): evita el residuo de redondeo per-línea.
+            clp = tx.amount * fx
             if clp == 0:
                 continue
             category = category_for(tx)
             postings = [_posting(tc_real_account, -clp), _posting(category, clp)]
         elif op in _PAYMENT_OPS:
             # (b) reclasificación del pago: saca el gasto falso de la cuenta-gasto Laudus.
-            lump = Decimal(lump_for(tx)).quantize(_CENT)
+            lump = Decimal(lump_for(tx))
             if lump == 0:
                 continue
             postings = [_posting(expense_tc_account, -lump), _posting(tc_real_account, lump)]
@@ -149,7 +156,7 @@ def build_tc_correction_entries(
 
     # (c) apertura — una sola vez por tarjeta. La deuda arrastrada va a Equity (no gasto).
     if emit_opening and model.balances.opening != 0:
-        opening_clp = (model.balances.opening * fx).quantize(_CENT)
+        opening_clp = model.balances.opening * fx
         meta = _meta(line_no=0, bank_account_id=bank_account_id, batch_id=batch_id, op="apertura", fx=fx)
         entries.append(data.Transaction(
             meta=meta, date=model.period.start, flag="*", payee=None,
@@ -159,3 +166,190 @@ def build_tc_correction_entries(
         ))
 
     return entries
+
+
+# ── Orquestador: cartola TC staged → asientos de corrección escritos al ledger (AC1-AC7) ──
+
+
+class TcCorrectionBlocked(Exception):
+    """La corrección no se puede emitir aún (falta el pago que da el FX/lump, o descuadre real)."""
+
+
+def tc_real_account(expense_tc_account: str) -> str:
+    """`Expenses:EAG:TC:<stem>-<code>` → `Liabilities:EAG:TC:Real:<stem>` (AC6, string puro).
+
+    El stem copia EXACTO el de la cuenta-gasto Laudus (`...1027` CLP, `...1027Us` USD → cada una su
+    propia `TC:Real`). Quita el sufijo `-<code>` del code sintético/Laudus.
+    """
+    if not expense_tc_account.startswith(_EXPENSE_TC_PREFIX):
+        raise TcCorrectionBlocked(
+            f"cuenta TC inesperada {expense_tc_account!r} (se esperaba prefijo {_EXPENSE_TC_PREFIX!r})")
+    stem = expense_tc_account[len(_EXPENSE_TC_PREFIX):].rsplit("-", 1)[0]
+    return _TC_REAL_PREFIX + stem
+
+
+def _opening_exists(out_dir: Path, tc_real_account: str, *, exclude: Path | None = None) -> bool:
+    """¿Ya hay un asiento de apertura para esta `TC:Real` en una cartola previa? (AC4 idempotencia).
+
+    Escanea los `*-tc.beancount` ya escritos y busca una Transaction con `operation_type=apertura`
+    que toque la cuenta. Evita repetir la apertura en cartolas siguientes de la misma tarjeta.
+
+    `exclude`: archivo de salida de ESTA corrida — se salta para que re-importar la misma cartola
+    (mismo slug → se sobrescribe ese archivo) no detecte su propia apertura previa y la pierda.
+    """
+    from beancount.core.data import Transaction
+    from beancount.parser import parser
+
+    out_dir = Path(out_dir)
+    if not out_dir.is_dir():
+        return False
+    exclude = Path(exclude).resolve() if exclude is not None else None
+    for path in sorted(out_dir.glob("*-tc.beancount")):
+        if exclude is not None and path.resolve() == exclude:
+            continue
+        entries, _err, _opt = parser.parse_file(str(path))
+        for e in entries:
+            if (isinstance(e, Transaction) and (e.meta or {}).get("operation_type") == "apertura"
+                    and any(p.account == tc_real_account for p in e.postings)):
+                return True
+    return False
+
+
+def _resolve_usd_lump(monto_cancelado_usd: Decimal, laudus_payments: list) -> Decimal | None:
+    """CLP real del pago Laudus que matchea (por glosa USD) el `MONTO CANCELADO` de la cartola.
+
+    El asiento (b) usa el lump REAL (no `USD × FX_del_estado`): el MONTO CANCELADO se liquidó al FX
+    del estado anterior. None si ningún pago Laudus codifica ese USD → bloqueante (AC3, §12.1).
+    """
+    for le in laudus_payments:
+        glosa = parse_glosa_usd(le.description)
+        if glosa is not None and glosa != 0 and abs(glosa - monto_cancelado_usd) <= _USD_MATCH_TOLERANCE:
+            return le.amount
+    return None
+
+
+def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict:
+    """Corrige la contabilidad de una TC desde su cartola staged (Story 6.2, flujo Valentina).
+
+    A diferencia de la cuenta corriente (modelo A 6.1, reconcilia-sin-postear), la TC **SÍ postea**:
+    Laudus solo tiene el pago lump, no las compras. Emite los asientos (a)/(b)/(c), valida el cuadre y
+    los escribe a `imports/cartolas/{slug}-tc.beancount` (lock + bean-check + git, patrón `promote`).
+
+    USD: deriva el FX único del estado desde el pago Laudus que lo salda (glosa USD == closing) y el
+    lump de cada `MONTO CANCELADO` por glosa; sin pago que cuadre → bloqueante (no estima). CLP: fx=1,
+    lump = magnitud de la línea. Devuelve `{status: corrected|blocked, ...}`.
+    """
+    from bootstrap.account_mapping import slugify
+    from pipeline.importers.cartola_pdf_importer import render_entries
+    from pipeline.importers.laudus_run import acquire_lock, bean_check, git_commit_push
+    from pipeline.importers.matching_engine import load_laudus_entries
+
+    root = Path(ledger_root)
+    staging = root / "imports" / "cartolas" / "_staging" / f"{batch_id}.cartola.json"
+    out_dir = root / "imports" / "cartolas"
+    laudus_dir = root / "imports" / "laudus"
+    main_path = root / "main.beancount"
+    lock_path = root / ".import.lock"
+
+    model = CartolaCanonicalV1.model_validate_json(staging.read_text(encoding="utf-8"))
+    bank_account_id = model.source.bank_account_id
+    expense_tc = importer.resolver.resolve(bank_account_id)
+    tc_real = tc_real_account(expense_tc)
+    is_usd = model.currency != _CLP
+
+    result = {"batch_id": batch_id, "status": "blocked", "currency": model.currency, "fx": None,
+              "purchases": 0, "payments": 0, "opening_emitted": False,
+              "fx_bcch": None, "fx_deviation_pct": None,
+              "git_commit_sha": None, "reason": None}
+
+    # Archivo de salida — incluye el stem de la `TC:Real` para que CLP (`<x>`) y USD (`<x>Us`) de la
+    # misma tarjeta/mes (mismo banco + last4) no colisionen en el mismo `{slug}-tc.beancount`.
+    last4 = importer.resolver.get(bank_account_id).last4 or "xxxx"
+    stem = tc_real.rsplit(":", 1)[-1]
+    slug = (f"{slugify(model.source.bank_name) or 'Banco'}-{last4}-{stem}-"
+            f"{model.period.end.strftime('%Y-%m')}")
+    out_file = out_dir / f"{slug}-tc.beancount"
+
+    # FX + lump por pago.
+    if is_usd:
+        window = timedelta(days=_FX_WINDOW_DAYS)
+        laudus_payments = load_laudus_entries(
+            laudus_dir, expense_tc, model.period.start - window, model.period.end + window)
+        fx_res = derive_statement_fx(model, laudus_payments)
+        if fx_res["status"] != "ok":
+            result["reason"] = fx_res["reason"]
+            return result
+        fx = fx_res["fx"]
+        settling_lump = fx_res["lump_clp"]
+        # Pre-resuelve el lump de cada MONTO CANCELADO (asiento b) por glosa, antes de construir.
+        lumps: dict[int, Decimal] = {}
+        for tx in model.transactions:
+            if (tx.raw or {}).get("operation_type") in _PAYMENT_OPS:
+                lump = _resolve_usd_lump(abs(tx.amount), laudus_payments)
+                if lump is None:
+                    result["reason"] = (f"sin pago Laudus que matchee el MONTO CANCELADO "
+                                        f"USD {abs(tx.amount)} (línea {tx.line_no})")
+                    return result
+                lumps[tx.line_no] = lump
+        def lump_for(tx: CartolaTransaction) -> Decimal:
+            return lumps[tx.line_no]
+    else:
+        fx = Decimal(1)
+        settling_lump = None
+        def lump_for(tx: CartolaTransaction) -> Decimal:
+            return abs(tx.amount)
+
+    def category_for(tx: CartolaTransaction) -> str:
+        return importer.category_predictor.predict(tx.description, tx.amount, bank_account_id)[0]
+
+    emit_opening = not _opening_exists(out_dir, tc_real, exclude=out_file)
+
+    entries = build_tc_correction_entries(
+        model=model, tc_real_account=tc_real, expense_tc_account=expense_tc, fx=fx,
+        lump_for=lump_for, category_for=category_for, batch_id=batch_id,
+        bank_account_id=bank_account_id, emit_opening=emit_opening)
+
+    # Validación de cordura del FX (solo USD). El FX se deriva del pago que salda el estado
+    # (`lump/closing` — regla §12.1: NO se usa BCCh como tasa, eso descuadraría `Σ(compras × fx)`). Acá
+    # el dólar observado de cierre (Story 9.10, `_meta/fx-bcch-eom.jsonl`) solo valida que el FX derivado
+    # sea plausible: desviación > 5% del BCCh = el lump o el total USD no corresponden → bloqueante. Sin
+    # BCCh ese mes → no bloquea (mismo criterio que 9.6b). Supuesto: la TC se paga al contado; un saldo
+    # arrastrado se captura aparte en el asiento (c) de apertura y NO descuadra este check (a diferencia
+    # del viejo `residuo`, que se prendía con cualquier saldo arrastrado sin validar el lump real).
+    if is_usd:
+        from pipeline.importers.fx_calculator import calculate_fx, lookup_bcch
+        ym = model.period.end.strftime("%Y-%m")
+        bcch = lookup_bcch(root / "_meta" / "fx-bcch-eom.jsonl", ym)
+        fx_check = calculate_fx(model.balances.closing, settling_lump, bcch)
+        result["fx_bcch"] = str(fx_check.bcch) if fx_check.bcch is not None else None
+        result["fx_deviation_pct"] = (float(fx_check.deviation_pct)
+                                      if fx_check.deviation_pct is not None else None)
+        if fx_check.state in ("fx-out-of-tolerance", "fx-implausible"):
+            result["reason"] = (
+                f"FX derivado {fx} CLP/USD no cuadra vs BCCh {ym} (bcch={fx_check.bcch}, "
+                f"desviación={fx_check.deviation_pct}%, {fx_check.state}) — ¿el lump o el total USD "
+                f"no corresponden?")
+            return result
+
+    result["fx"] = str(fx)
+    result["purchases"] = sum(1 for tx in model.transactions
+                              if (tx.raw or {}).get("operation_type") in _PURCHASE_OPS)
+    result["payments"] = sum(1 for tx in model.transactions
+                             if (tx.raw or {}).get("operation_type") in _PAYMENT_OPS)
+    result["opening_emitted"] = emit_opening and model.balances.opening != 0
+
+    with acquire_lock(lock_path):
+        out_file.write_text(render_entries(entries), encoding="utf-8")
+        ok, detail = bean_check(main_path)
+        if not ok:
+            out_file.unlink(missing_ok=True)
+            result["reason"] = f"bean-check failed: {detail}"
+            return result
+        staging.unlink(missing_ok=True)
+        result["git_commit_sha"] = git_commit_push(
+            root, [f"ledger/imports/cartolas/{out_file.name}"],
+            f"[tc-correction] {slugify(model.source.bank_name)} {model.period.end.strftime('%Y-%m')}: "
+            f"{result['purchases']} compra(s), {result['payments']} pago(s)")
+        result["status"] = "corrected"
+        result["file"] = str(out_file)
+        return result

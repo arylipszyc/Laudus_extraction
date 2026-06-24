@@ -463,6 +463,18 @@ def validate_balance(
 
     importer = importer or _build_importer(root)
     ts = now_iso or datetime.now(timezone.utc).isoformat()
+
+    # Ramificación TC vs cuenta corriente (AC1). La TARJETA DE CRÉDITO postea la corrección (Laudus
+    # solo tiene el pago lump, no las compras); la cuenta corriente reconcilia-sin-postear (modelo A).
+    if model.source.account_type == "tarjeta_credito":
+        from pipeline.importers.tc_correction import correct_tc_cartola
+        res = correct_tc_cartola(batch_id, importer, root, ts=ts)
+        return {"status": res["status"], "currency": res["currency"], "fx": res["fx"],
+                "purchases": res["purchases"], "payments": res["payments"],
+                "opening_emitted": res["opening_emitted"], "fx_bcch": res["fx_bcch"],
+                "fx_deviation_pct": res["fx_deviation_pct"],
+                "reason": res["reason"], "git_sha": res["git_commit_sha"], "batch_id": batch_id}
+
     res = reconcile_cartola(batch_id, importer, root, ts=ts)
     return {"status": res["status"], "differences": res["differences"], "blocking": res["blocking"],
             "matched": res["matched"], "git_sha": res["git_commit_sha"],

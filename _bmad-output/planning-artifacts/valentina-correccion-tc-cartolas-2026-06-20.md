@@ -136,14 +136,62 @@ balancea por construcción).
 
 ## 9. Estructura de cuentas requerida
 
-Cuenta de pasivo "real" bien categorizada, **por tarjeta**:
-- Nombre: `Liabilities:EAG:TC:Real:<tarjeta>` (convención a confirmar).
-- Metadata: `laudus_categoria1: "PASIVO"` (NO "GASTOS - EGRESOS"), para que el reporte no la cuente
-  como gasto.
-- Se crea por el **flujo sancionado** de cuentas (`_new-accounts-pending.beancount` →
-  `POST /cuentas-pendientes/{code}/promover`, Story 10.3). No se edita metadata de cuentas existentes.
+> **CORRECCIÓN 2026-06-22 (Valentina, tras leer `report_builder.py`).** La versión previa decía
+> "`laudus_categoria1: "PASIVO"` para que el reporte no la cuente como gasto". **Eso es impreciso y
+> peligroso.** El reporte de gastos agrupa el egreso por **`Categoria2`**, no por `Categoria1`: una
+> fila entra al TOTAL EGRESOS solo si su `Categoria2` ∈ {`DEPARTAMENTO SANTIAGO`, `Casa Sur`,
+> `DEPARTAMENTO MIAMI`, `GASTOS PERSONALES`} (EAG) o su `Categoria1` ∈ las cat de hijas. Lo que saca
+> la cuenta del gasto es tener **`Categoria2` (y `Categoria3`) VACÍOS** — NO el label `PASIVO`.
+> **Trap:** las cuentas TC originales son `categoria2: "GASTOS PERSONALES"` / `categoria3:
+> "Tarjetas Credito"`. Si al crear la `TC:Real` se copia su metadata y solo se cambia `Categoria1`,
+> **la cuenta seguiría sumando al gasto**.
 
-`Equity:Apertura:TarjetasSinDetalle` también debe abrirse (open directive).
+### Lista exacta de cuentas (confirmada 2026-06-22 contra `accounts.beancount` + actividad 2026)
+
+**8 `Liabilities:EAG:TC:Real:*`** — una por tarjeta-moneda con actividad 2026 (regla Ary §12.3, CLP y
+USD separadas). El stem copia EXACTO el de la cuenta-gasto Laudus (decisión Ary: el asiento (b) deriva
+el destino con transformación de string pura `Expenses:EAG:TC:<X>-<code>` → `Liabilities:EAG:TC:Real:<X>`):
+
+| Cuenta-gasto Laudus | Code | `TC:Real:` |
+|---|---|---|
+| Tc1027VisaInfinity | 430005 | `Tc1027VisaInfinity` |
+| Tc1027VisaInfinityUs | 430006 | `Tc1027VisaInfinityUs` |
+| Tc8996MastercardLanpass | 430007 | `Tc8996MastercardLanpass` |
+| Tc8996MastercardLanpassUs | 430008 | `Tc8996MastercardLanpassUs` |
+| Tc0858VisaLatanpass | 430009 | `Tc0858VisaLatanpass` |
+| Tc0858VisaLatanpassUs | 430010 | `Tc0858VisaLatanpassUs` |
+| TcVariasEag | 430017 | `TcVariasEag` |
+| TcRaquelVentura | 430019 | `TcRaquelVentura` |
+
++ **`Equity:Apertura:TarjetasSinDetalle`** (1).
+
+**Skip: Amex 8083 (430011)** — cero actividad 2026, no hay cartola. Si aparece, decisión aparte (es
+`CLP, USD` en UNA sola cuenta, a diferencia de las demás).
+
+**Caveats:** `TcVariasEag` es un cajón de varias tarjetas físicas → se crea la cuenta pero se queda en
+lump hasta que haya un estado de cuenta real que mapear. `Latanpass 0858` y la USD de Raquel: cuentas
+creadas, la corrección espera la cartola. Raquel SÍ se itemiza (es tarjeta que le paga EAG — decisión
+Ary 2026-06-22).
+
+### Metadata requerida en cada cuenta nueva (lo que de verdad importa)
+
+| Cuenta | `laudus_categoria1` | `laudus_categoria2` | `laudus_categoria3` | `code` |
+|---|---|---|---|---|
+| `TC:Real:*` (8) | `"PASIVO"` | **vacío** | **vacío** | sintético, rango pasivo `2xxxxx` |
+| `Equity:Apertura:TarjetasSinDetalle` | `"PATRIMONIO"` (no-vacío) | **vacío** | **vacío** | sintético, rango patrimonio `3xxxxx` |
+
+- **`Categoria2`/`Categoria3` vacíos** = caen en `cat2[""]`, bucket que el resumen nunca lee → fuera
+  del gasto. Es el mecanismo real de exclusión.
+- **`Categoria1` no-vacío** = evita que el guard "cuentas sin categorizar" (Story 10.2) las marque.
+  `PASIVO` es correcto y mapea a Liabilities si se re-bootstrappea.
+- **`code` (importante):** estas cuentas se postean por NOMBRE, no por código. Sin `code`, todos sus
+  postings caen en `accountnumber=""`, colisionan, y el balance del pasivo aflora como una línea
+  fantasma "Total prefijo desconocido" al final del reporte. Con un `code` en rango no-gasto el guard
+  las saltea limpio. (Cosmético, no rompe el total, pero hay que hacerlo.)
+
+- Se crean por el **flujo sancionado** de cuentas (`_new-accounts-pending.beancount` →
+  `POST /cuentas-pendientes/{code}/promover`, Story 10.3). No se edita metadata de cuentas existentes.
+  OJO: NO vienen de Laudus → se siembran a mano en el pending (no las descubre el flujo automático).
 
 ## 10. Mapeo cartola → asientos
 
@@ -169,21 +217,61 @@ nombre del §11.
 
 ### 12.1 — FX de cartolas USD y matching pago↔estado
 
+> **CORRECCIÓN 2026-06-22 (Valentina, tras el hallazgo del dev en el FX).** La versión previa de este
+> §12.1 decía que "una liquidación juega dos roles (denominador del FX **y** asiento (b)) **del mismo
+> estado**". **Eso era un error y rompía el cuadre anual (§7).** Lo correcto: un estado tiene DOS
+> pagos distintos, y son DOS pagos Laudus diferentes. Ver abajo.
+
+**Cada estado USD tiene dos eventos de pago distintos:**
+
+| Evento | Qué es | Para qué | Cuándo |
+|---|---|---|---|
+| Liquidación del estado | El pago del **mes siguiente** que salda ESTE estado (glosa USD == `closing`) | **denominador del FX** del estado | mes M+1 |
+| `MONTO CANCELADO` (línea interna) | El pago hecho en el ciclo M — **salda el estado ANTERIOR** (M−1) | **asiento (b)** del estado M | mes M |
+
+Un mismo pago Laudus `Pay_M` juega dos roles, pero en **estados ADYACENTES**: denominador del FX del
+estado **M−1** (lo salda) y lump del asiento (b) del estado **M** (es su `MONTO CANCELADO`).
+
+**FX (denominador):**
+
 - **Principio:** `FX = CLP que SALDA el estado USD / total_USD_facturado_del_estado`. Fuerza
   `Σ(compras × FX) = CLP_que_salda` → cuadre exacto por construcción. NO usar BCCh (descuadra).
 - **El CLP que salda el estado puede venir de dos lados** (Ary 2026-06-22):
   - **(i) Pago directo de la TC USD:** lump de Laudus `Banco → Expenses:EAG:TC:...Us` que paga el
-    estado (normalmente el mes siguiente al cierre).
+    estado (normalmente el mes siguiente al cierre; glosa USD == `closing`).
   - **(ii) Traspaso USD→CLP:** si el contador NO pagó la TC USD directamente y el monto facturado se
     pasó a la TC en pesos, en Laudus hay un **movimiento entre la TC USD y la TC CLP**. El FX sale de
     ese movimiento: `CLP que entra a la TC CLP / USD que sale de la TC USD`.
-- **NO del `MONTO CANCELADO` interno de la cartola** (ese paga el período anterior).
-- **Unidad de matching:** (estado USD) ↔ (la liquidación que lo salda, sea pago directo o traspaso).
-  Esa liquidación es denominador del FX **y** el evento que reclasifica el asiento (b) — un solo
-  evento, sin doble conteo.
+- **NO del `MONTO CANCELADO` interno de la cartola** (ese paga el período anterior, no este estado).
+
+**Asiento (b) — lump del `MONTO CANCELADO`:**
+
+- El lump del asiento (b) es el **CLP real del pago Laudus** que matchea (por glosa USD) el USD de la
+  **línea `MONTO CANCELADO`** — NO `MONTO_CANCELADO_USD × FX_del_estado`. El `MONTO CANCELADO` se
+  pagó al tipo de cambio del estado **anterior** (que es el que liquidó); aplicar el FX del estado
+  actual dejaría el asiento (b) sin igualar el lump real → `Expenses:EAG:TC:<code>` no netea a cero →
+  residual de gasto falso (bug silencioso que descuadra). Mismo mecanismo glosa-matching que el FX,
+  pero sobre el USD de esa línea.
+
+**Por qué este modelo (MONTO CANCELADO) y no el del estado-propio:** la prueba de la suma anual (§7)
+solo se sostiene si el asiento (b) remueve **exactamente los lumps Laudus de 2026, una vez cada uno**.
+Procesar los estados Ene…Dic 2026 con el modelo MONTO CANCELADO cancela `Pay_Ene…Pay_Dic` 2026 = los
+12 lumps que Laudus posteó en 2026 ✓. El modelo "liquidación del propio estado" cancelaría
+`Pay_Feb…Pay_Ene2027` → dejaría `Pay_Ene2026` sin cancelar (gasto falso vivo en 2026) y cancelaría un
+pago de 2027 → rompe la paridad peso-por-peso vs el contador. Por eso es el MONTO CANCELADO.
+
+- **Unidad de matching:** dos matchings por estado, contra Laudus por glosa USD —
+  (closing) ↔ (liquidación del mes siguiente, para el FX) y (`MONTO CANCELADO`) ↔ (su pago Laudus del
+  mismo mes, para el asiento (b)). Cada pago Laudus se cancela una sola vez (por el asiento (b) del
+  estado cuyo `MONTO CANCELADO` es) → sin doble conteo.
 - **Timing:** proceso continuo/retrospectivo → la liquidación suele estar en Laudus al itemizar. Si
   aún no existe → **bloqueante, NO estimar el FX**; esperar al próximo import.
 - CLP nacional: sin FX (montos ya en CLP).
+
+**Flag menor (apertura USD):** el asiento (c) usa `opening × FX_actual` contra Equity, pero la deuda
+de apertura se liquidó a otro tipo de cambio → queda un pequeño residual FX **en `TC:Real` (pasivo),
+nunca en Expenses**. No toca el cuadre de gasto; es revalorización esperable de un pasivo en USD. Una
+sola vez por tarjeta.
 
 ### 12.2 — Líneas `abono` (devoluciones / notas de crédito)
 
