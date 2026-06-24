@@ -1,5 +1,10 @@
 # Deferred Work
 
+## Deferred from: code review of 6-3-aprobar-diferencia-anotar-beancount (2026-06-24)
+
+- git push falla tras bean-check verde en `annotate_discrepancy` → estado parcial + doble conteo ([pipeline/importers/reconcile.py:196-211]) — `commit_reconciliation` escribe el archivo `manual/`, pasa bean-check, y recién entonces hace `git_commit_push` SIN try/except. Si el push lanza (deploy-key rechazada, red), la excepción escapa con el archivo YA escrito (rollback sólo cubre bean-check rojo), la discrepancia queda abierta (no se appendea resolución) y el caller recibe 500. Un retry pasa el guard `_resolved_ids` (no hubo resolución) y appendea una SEGUNDA copia de la tx → gasto duplicado, justo la clase de fuga silenciosa que 10.2 tapó. Pre-existing: boundary write/git de `commit_reconciliation` (mismo class deferido en 6.1). Fix durable = commit+resolution atómico, o dedup por `ref_discrepancy_id` ya presente en el archivo antes de appendear.
+- read-modify-write fuera del lock → lost update concurrente ([pipeline/importers/reconcile.py:269]) — `annotate_discrepancy` hace `existing = out_file.read_text()` y concatena ANTES de llamar a `commit_reconciliation`, que es quien toma el lock. Dos `confirm-cartola-only` concurrentes sobre la misma cuenta+mes leen el mismo `existing`, cada uno computa `existing + su_entry`, serializan en el lock y el 2º write pisa al 1º → se pierde una entry (bean-check pasa igual). Baja probabilidad (un contador) pero es clase silent-loss. Fix = mover el read dentro del lock (requiere extender la API de `commit_reconciliation` a modo append).
+
 ## Deferred from: code review of 6-1-wiring-promote-reconcile (2026-06-22)
 
 - TOCTOU: `reconcile_cartola` lee el staging fuera del lock ([pipeline/importers/reconcile.py:266]) — dos `validate_balance` concurrentes del mismo batch: el 2º pasó el `staging.exists()` de validate_balance pero el 1º ya hizo `unlink` antes del `read_text` → `FileNotFoundError` no mapeado → 500 en vez de 404. Concurrencia poco probable (un contador, un batch); fix = envolver el read en try/except → StagingNotFound.

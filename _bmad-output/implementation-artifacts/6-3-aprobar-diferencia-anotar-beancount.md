@@ -4,7 +4,7 @@
      ~50% de las cartolas reales son estados internacionales en USD que hoy no se reconcilian. Esta
      story (anotación CLP) sigue válida, una posición después. -->
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -79,31 +79,29 @@ Tests que cubren: `missing-in-laudus`+`confirm-cartola-only` → tx en `manual/`
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1 — Writer de anotación (renderizar tx + escribir vía `commit_reconciliation`)** (AC1, AC2, AC4)
-  - [ ] Nueva función en `pipeline/importers/reconcile.py` (cohesión con `commit_reconciliation`/`reconcile_cartola`), p.ej. `annotate_discrepancy(discrepancy, *, category_account, importer, ledger_root, user_email, ts)`.
-  - [ ] Resolver `account_target` desde `discrepancy["bank_account_id"]` (`importer.resolver.resolve(...)`), `is_liability = account_target.startswith(_LIABILITY_ROOT)`. Construir las postings con `_build_postings(account_target, category_account, amount, currency, is_liability)` (reusar — NO reimplementar el signo). Para USD, ver AC6 de 6.1 / `build_usd_postings` (decidir si USD entra en scope o se difiere — la mayoría de `missing-in-laudus` serán CLP).
-  - [ ] Renderizar la `Transaction` con `render_entries`/el mismo formato que `cartola_pdf_importer`. `meta`: `source="reconciliation"`, `bank_account_id`, `ref_discrepancy_id=discrepancy_id`, `line`. Narration = `discrepancy["cartola"]["description"]`; fecha = `cartola.date`.
-  - [ ] Destino = archivo en la zona `manual/` (incluida por `main.beancount:37` → `manual/*.beancount`). Nombre estable por cuenta+mes, p.ej. `manual/reconciliation-{bank_slug}-{year_month}.beancount`. **Append, no replace:** leer el contenido existente (si el archivo existe), concatenar la nueva entry, pasar el contenido COMPLETO como `new_content` a `commit_reconciliation` (que hace write-and-replace + bean-check + rollback + git). Verificar que el glob `manual/*.beancount` es plano (no recursivo) → archivos directos en `manual/`, no subcarpetas.
-  - [ ] Devolver `{success, git_commit_sha, error_msg, file}` (mismo shape que `commit_reconciliation`).
+- [x] **Task 1 — Writer de anotación (renderizar tx + escribir vía `commit_reconciliation`)** (AC1, AC2, AC4)
+  - [x] `annotate_discrepancy(discrepancy, *, category_account, importer, ledger_root, ts)` en `pipeline/importers/reconcile.py` (junto a `commit_reconciliation`/`reconcile_cartola`).
+  - [x] Resuelve `account_target` desde `discrepancy["bank_account_id"]`; `is_liability` vía `_LIABILITY_ROOT`. Postings: CLP → `_build_postings` (reusa el signo); USD → `build_usd_postings` con `fx_implied = discrepancy["fx"]["implied"]` (el FX que 9.6b ya dejó en la discrepancia; si falta → no anota, error). **USD EN scope (decisión Ary Q4).**
+  - [x] Renderiza la `Transaction` con `render_entries`. `meta`: `source="reconciliation"`, `bank_account_id`, `ref_discrepancy_id`, `line`, `match_source`, `category_status`. Narration = `cartola.description`; fecha = `cartola.date`. `amount` casteado a `Decimal(str(...))` (el JSONL lo guardó float).
+  - [x] Destino `manual/reconciliation-{cuenta-leaf}-{YYYY-MM}.beancount` (incluido por `main.beancount`). **Decisión Ary Q1 = `manual/`.** Append (lee existente + concatena) → `new_content` completo a `commit_reconciliation` (write-and-replace + bean-check + rollback + git). Slug por leaf de la cuenta (el `bank_name` no viaja en la discrepancia; el leaf es determinístico por cuenta).
+  - [x] Devuelve el shape de `commit_reconciliation` (`{success, git_commit_sha, error_msg, file, ...}`).
 
-- [ ] **Task 2 — Wirear `resolve()` para anotar antes de cerrar** (AC1, AC2, AC3, AC6)
-  - [ ] En `reconciliation/service.py:resolve()`: detectar la acción anotadora (`state=="missing-in-laudus"` y `action=="confirm-cartola-only"`). Para ese caso, **después** del guard de "ya resuelta" (AC6) y la validación de acción/justificación, llamar `annotate_discrepancy(...)` **antes** de `append_resolution`.
-  - [ ] Si `annotate_discrepancy` falla (`success==False`) → `raise` un error nuevo (mapear a 422 en el router) con `error_msg`; **no** appendear resolución. Si OK → `append_resolution` + incluir `git_commit_sha` en la respuesta.
-  - [ ] Todas las demás acciones: ruta actual intacta (solo `append_resolution`, sin tocar el ledger).
-  - [ ] `resolve()` necesita el `ledger_root` + `importer` + `category_account`. Inyectables para tests (igual que 6.1: `path`, `now_iso`; agregar `ledger_root=None`, `importer=None`, default a `_ledger_root()` / `_build_importer`). OJO: `reconciliation/service.py` no construye importer hoy — ver cómo lo arma `cartolas/service.py` (`_build_importer(root)`), reusar.
+- [x] **Task 2 — Wirear `resolve()` para anotar antes de cerrar** (AC1, AC2, AC3, AC6)
+  - [x] En `reconciliation/service.py:resolve()`: si `state=="missing-in-laudus"` y `action=="confirm-cartola-only"`, **después** del guard "ya resuelta" (AC6) y la validación, llama `annotate_discrepancy(...)` **antes** de `append_resolution`.
+  - [x] Si la anotación falla → `raise AnnotationFailed` (→ 422 en el router); **no** appendea resolución. Si OK → `append_resolution` + `git_commit_sha` en la respuesta.
+  - [x] Las demás acciones: ruta actual intacta (solo `append_resolution`, sin tocar el ledger). Cero regresión en `test_reconciliation.py`.
+  - [x] `resolve()` acepta `ledger_root=None`, `importer=None`, `category_account=None` (default a `_ledger_root()` / `_build_importer(root)`), además de `path`/`now_iso`.
 
-- [ ] **Task 3 — Endpoint + schema** (AC5)
-  - [ ] `ResolveRequest` (`reconciliation/models.py`): agregar `category_account: str | None = None`. Validar que es obligatorio cuando `action=="confirm-cartola-only"` (400 si falta).
-  - [ ] `ResolveResponse`: agregar `git_commit_sha: str | None = None` (None para acciones que no escriben).
-  - [ ] Router `resolve_discrepancy`: pasar `category_account`; mapear el error de anotación a 422 (distinto del 400 de `ResolveError` de validación).
+- [x] **Task 3 — Endpoint + schema** (AC5)
+  - [x] `ResolveRequest`: `category_account: str | None = None`. **Decisión Ary Q2 = NO obligatorio** — sin él, la tx entra a `Suspense` (`category_status="pending"`) y la levanta `/categorizacion` (9.7).
+  - [x] `ResolveResponse`: `git_commit_sha: str | None = None`.
+  - [x] Router: pasa `category_account`; mapea `AnnotationFailed` → 422 (distinto del 400 de `ResolveError`).
 
-- [ ] **Task 4 — Frontend (input de categoría para confirm-cartola-only)** (AC5)
-  - [ ] `ReconciliationPage`: cuando la acción seleccionada es `confirm-cartola-only`, mostrar un input/dropdown de cuenta de categoría (`Expenses:...`). Reusar el patrón de `CuentasPendientesPage`/`CategorizacionPage` (que ya cargan cuentas del plan). Enviar `category_account` en el body del resolve.
-  - [ ] Mostrar el resultado (commit sha / éxito) y refrescar la lista + el badge.
+- [ ] **Task 4 — Frontend (input de categoría para confirm-cartola-only)** — ⏭️ **DIFERIDA a Story 6.4 (decisión Ary Q5):** 6.3 = backend end-to-end; el input visual de categoría se junta con el polish del dashboard. Con Q2 (Suspense default) el contador puede aprobar sin elegir categoría y clasificar luego en `/categorizacion`, así que el backend ya es usable sin UI nueva.
 
-- [ ] **Task 5 — Tests** (AC7)
-  - [ ] `backend/tests/test_reconciliation_annotate.py` (o extender `test_reconciliation.py`): los 5 casos de AC7. Reusar el patrón de ledger fixture + bean-check real de `test_reconcile_integration.py` / `test_reconcile_cartola.py` (ledger root mínimo con `accounts.beancount`, `manual/`, `main.beancount`).
-  - [ ] `monkeypatch.delenv("IMPORTER_GIT_ENABLED")` para no-op git en local.
+- [x] **Task 5 — Tests** (AC7)
+  - [x] `backend/tests/test_reconciliation_annotate.py` (8 tests, bean-check real): confirm-cartola-only CLP → tx en `manual/` + cierra; atomicidad bean-check rojo → `AnnotationFailed` + discrepancia abierta + sin resolución; confirm-laudus-only → cierra sin write; escalate → no cierra/no write; doble aprobación → rechazada (AC6); sin categoría → Suspense+pending (Q2); USD → postings price-per-unit (Q4); USD sin FX → no anota.
+  - [x] `monkeypatch.delenv("IMPORTER_GIT_ENABLED")` → git no-op local.
 
 ## Dev Notes
 
@@ -214,8 +212,48 @@ Una discrepancia `missing-in-laudus` tiene (de `build_discrepancy`):
 
 ### Agent Model Used
 
+claude-opus-4-8 (dev-story, 2026-06-24).
+
 ### Debug Log References
+
+- Suite: `PYTHONUTF8=1 venv/Scripts/python.exe -m pytest backend/tests -q` → **567 passed, 1 xfailed, 2 failed**. Los 2 rojos (`test_fava_edit_validator::test_invalid_edit_is_reverted_and_logged`, `::test_atomic_restore_uses_snapshot_bytes`) son **PRE-EXISTENTES** (ajenos a esta story, fallan en HEAD limpio). 0 regresiones nuevas (antes de la story: 559 passed; +8 tests nuevos de anotación).
 
 ### Completion Notes List
 
+**Implementado (modelo A — aprobar una diferencia la anota):**
+- `annotate_discrepancy()` en `reconcile.py`: renderiza la tx de la cartola (CLP vía `_build_postings`, USD vía `build_usd_postings` con el FX que 9.6b dejó en `discrepancy["fx"]["implied"]`) y la escribe a `manual/reconciliation-{cuenta-leaf}-{YYYY-MM}.beancount` vía `commit_reconciliation` (write-and-replace + bean-check + rollback + git). Append puro: lee el contenido existente y concatena.
+- `resolve()` wireado: solo `missing-in-laudus` + `confirm-cartola-only` anota; orden = guard "ya resuelta" (AC6) → validar → anotar → si OK `append_resolution`. `AnnotationFailed` → 422 (atomicidad AC2: si bean-check rojo, la discrepancia queda abierta y sin línea de resolución). Inyectables `ledger_root`/`importer`/`category_account`.
+- Schema: `ResolveRequest.category_account` (opcional) + `ResolveResponse.git_commit_sha`. Router mapea `AnnotationFailed`→422.
+
+**Decisiones de diseño de Ary (resueltas al arrancar el dev):**
+- **Q1 zona** = `manual/` (ya incluida por `main.beancount`, sin tocar includes).
+- **Q2 categoría** = **default Suspense + categorizar luego** → `category_account` NO obligatorio; sin él la tx entra a `Suspense` con `category_status="pending"`/`match_source="pending"`/flag `!` → la levanta `/categorizacion` (9.7). Con categoría real → `confirmed`/`*`. **Esto supersede la versión original de AC5** ("obligatorio, no queda en Suspense silenciosamente"): no es silencioso porque entra al flujo de categorización pendiente, y respeta `list_pending` (anti-regresión verificada: la tx Suspense aparece como pendiente, no se cuela como confirmada).
+- **Q3** = solo `missing-in-laudus`/`confirm-cartola-only` anota (editar asientos Laudus existentes = story aparte).
+- **Q4 USD** = EN scope (postings price-per-unit reusando `build_usd_postings`; el FX sale de `discrepancy["fx"]["implied"]`, que para un `missing-in-laudus` USD = el BCCh del mes que 9.6b ya guardó; sin FX → no anota).
+- **Q5 frontend** = backend en 6.3, input de categoría difiere a 6.4 (Task 4).
+
+**Desviaciones menores anotadas:**
+- Slug del archivo `manual/` por **leaf de la cuenta** (no `bank_slug`): la discrepancia no carga `bank_name`, y el leaf es determinístico por cuenta+mes. Equivalente al intent de Task 1.
+- `category_account` opcional en vez de obligatorio (Q2).
+
+### Change Log
+
+- 2026-06-24: Story 6.3 implementada (Tasks 1-3, 5). `annotate_discrepancy` + wiring de `resolve()` + schema/router + 8 tests. Task 4 (frontend) diferida a 6.4 (decisión Ary Q5). 567 passed, 0 regresiones nuevas.
+
 ### File List
+
+- `pipeline/importers/reconcile.py` (M) — nueva `annotate_discrepancy()`.
+- `backend/app/api/v1/reconciliation/service.py` (M) — `resolve()` wireado + `AnnotationFailed`.
+- `backend/app/api/v1/reconciliation/models.py` (M) — `category_account` + `git_commit_sha`.
+- `backend/app/api/v1/reconciliation/router.py` (M) — pasa `category_account`, mapea 422.
+- `backend/tests/test_reconciliation_annotate.py` (A) — 8 tests.
+
+### Review Findings
+
+<!-- Code review 2026-06-24 (3 capas: Blind Hunter + Edge Case Hunter + Acceptance Auditor). Auditor: 7/7 ACs PASS. 0 decision-needed, 3 patch, 2 defer, 10 dismiss. -->
+
+- [x] [Review][Patch] `resolver.resolve` lanza `UnknownBankAccount` (KeyError) ante id desconocido o `None` → excepción NO capturada escapa a 500 (no al 422 limpio que pide AC2), con la discrepancia abierta. **FIXED:** try/except `UnknownBankAccount` → `{success: False}` → `AnnotationFailed` → 422 (test `test_bank_account_desconocido_no_anota`) [pipeline/importers/reconcile.py:258]
+- [x] [Review][Patch] FX no-positivo en USD (`fx.implied == 0` o negativo) pasa el guard que sólo chequea `is None` → escribe un asiento `@ 0 CLP` / peso negativo sin sentido y lo commitea. **FIXED:** guard `is None or Decimal(...) <= 0` (test `test_usd_fx_no_positivo_no_anota`) [pipeline/importers/reconcile.py:274]
+- [x] [Review][Patch] Moneda ≠ CLP/USD (p.ej. EUR) cae en la rama `currency != "CLP"` → `build_usd_postings` hardcodea commodity `USD` y precio `CLP` → escribe el commodity equivocado al ledger canónico en silencio. **FIXED:** guard `currency != "USD"` → fail-closed (test `test_moneda_no_soportada_no_anota`) [pipeline/importers/reconcile.py:271]
+- [x] [Review][Defer] git push falla tras un bean-check verde → el archivo `manual/` ya quedó escrito (sin rollback; el rollback sólo cubre bean-check rojo), la discrepancia queda abierta, el caller recibe 500, y un retry appendea una SEGUNDA copia de la tx (doble conteo) [pipeline/importers/reconcile.py:196-211] — deferred, pre-existing (boundary write/git de `commit_reconciliation`, mismo class deferido en 6.1 "lock retenido en git push"). Fix durable = commit+resolution atómico o dedup por `ref_discrepancy_id` en el archivo.
+- [x] [Review][Defer] read-modify-write del archivo `manual/` (`read_text` + concat) ocurre FUERA del lock que toma `commit_reconciliation` → dos `confirm-cartola-only` concurrentes sobre la misma cuenta+mes leen el mismo `existing` y el 2º writer pisa la entry del 1º (last-writer-wins, entry perdida) [pipeline/importers/reconcile.py:269] — deferred, baja probabilidad (single-contador) pero es la clase silent-loss; fix = leer dentro del lock.

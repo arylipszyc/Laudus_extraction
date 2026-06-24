@@ -30,6 +30,10 @@ class ResolveError(Exception):
     """Acción inválida o justificación faltante (HTTP 400)."""
 
 
+class AnnotationFailed(Exception):
+    """La anotación al ledger falló (p.ej. bean-check rojo) → no se cierra la discrepancia (HTTP 422)."""
+
+
 def _jsonl_path() -> Path:
     override = os.getenv("LEDGER_DISCREPANCIES")
     if override:
@@ -122,12 +126,16 @@ def pending_count(path: Path | None = None) -> dict:
 
 
 def resolve(discrepancy_id: str, action: str, justification: str | None,
-            *, user_email: str, now_iso: str, path: Path | None = None) -> dict:
-    """Valida la acción vs el estado, appendea la resolución al JSONL (AC3/AC4).
+            *, user_email: str, now_iso: str, path: Path | None = None,
+            category_account: str | None = None, ledger_root=None, importer=None) -> dict:
+    """Valida la acción vs el estado y appendea la resolución al JSONL (AC3/AC4).
 
-    El re-emit del `.beancount` por acción se apoya en el seam de 9.6b (`commit_reconciliation`),
-    que se activa con el wiring del upload de cartolas (ver 9.6b Completion Notes). Acá se registra
-    la resolución (audit trail) y la discrepancia desaparece del dashboard.
+    **Story 6.3 (modelo A):** si la acción es `confirm-cartola-only` sobre un `missing-in-laudus`
+    (un gasto real que está en la cartola pero no en Laudus), ANTES de cerrar la discrepancia se
+    anota la transacción al ledger (`annotate_discrepancy` → zona `manual/`, bean-check + git).
+    Orden = anotar → si OK → `append_resolution` (atomicidad AC2: nunca una discrepancia "resuelta"
+    sin su tx, ni una tx sin cerrar la discrepancia). Las demás acciones se comportan como antes
+    (solo audit trail, sin tocar el ledger).
     """
     from pipeline.importers.discrepancy_writer import append_resolution
 
@@ -137,7 +145,7 @@ def resolve(discrepancy_id: str, action: str, justification: str | None,
                      if _is_original(e) and e["discrepancy_id"] == discrepancy_id), None)
     if original is None:
         raise ResolveError(f"discrepancy_id {discrepancy_id} no existe")
-    if discrepancy_id in _resolved_ids(path):
+    if discrepancy_id in _resolved_ids(path):  # AC6: guard ANTES de escribir al ledger
         raise ResolveError(f"discrepancy_id {discrepancy_id} ya fue resuelta")
     state = original.get("state")
     # `escalate` no cierra y sirve para cualquier estado (incl. fx-bcch-missing/fx-implausible que
@@ -147,10 +155,27 @@ def resolve(discrepancy_id: str, action: str, justification: str | None,
     if action != "escalate" and (not justification or len(justification.strip()) < 10):
         raise ResolveError("justification ≥ 10 caracteres requerida (excepto escalate)")
 
+    # AC1/AC2: la única acción que ESCRIBE al ledger es confirmar una línea de cartola ausente de
+    # Laudus. Se anota antes de cerrar; si la anotación falla, la discrepancia queda abierta.
+    git_commit_sha = None
+    if state == "missing-in-laudus" and action == "confirm-cartola-only":
+        from pipeline.importers.laudus_run import _ledger_root
+        from pipeline.importers.reconcile import annotate_discrepancy
+
+        root = ledger_root or _ledger_root()
+        if importer is None:
+            from backend.app.api.v1.cartolas.service import _build_importer
+            importer = _build_importer(root)
+        res = annotate_discrepancy(original, category_account=category_account,
+                                   importer=importer, ledger_root=root, ts=now_iso)
+        if not res.get("success"):
+            raise AnnotationFailed(res.get("error_msg") or "no se pudo anotar la transacción")
+        git_commit_sha = res.get("git_commit_sha")
+
     resolution = {"action": action, "resolved_by": user_email, "resolved_at": now_iso,
                   "justification": (justification or "").strip()}
     if action == "escalate":
         resolution["escalated_at"] = now_iso  # no cierra la discrepancia
     append_resolution(discrepancy_id, resolution, path)
     return {"status": "escalated" if action == "escalate" else "resolved",
-            "discrepancy_id": discrepancy_id, "action": action}
+            "discrepancy_id": discrepancy_id, "action": action, "git_commit_sha": git_commit_sha}

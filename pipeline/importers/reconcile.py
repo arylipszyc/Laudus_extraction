@@ -211,6 +211,106 @@ def commit_reconciliation(file_path, new_content: str, discrepancy_id: str, acti
         return result
 
 
+# ── Anotación de una diferencia aprobada → tx al ledger (Story 6.3, modelo A) ──
+
+
+def annotate_discrepancy(
+    discrepancy: dict,
+    *,
+    category_account: str | None,
+    importer,
+    ledger_root,
+    ts: str,
+) -> dict:
+    """Anota una diferencia `missing-in-laudus` aprobada: renderiza la tx de la cartola y la escribe
+    a la zona `manual/` (Story 6.3, modelo A — cierra el lazo "aprobar → contabilizar").
+
+    Append puro (la línea existe en la cartola, no en Laudus → es un gasto real que falta), por eso
+    NO toca `imports/laudus/*`. Escribe a `manual/reconciliation-<cuenta>-<YYYY-MM>.beancount` (incluido
+    por `main.beancount`), vía `commit_reconciliation` (write-and-replace + bean-check + rollback + git).
+
+    Categoría (decisión Ary Q2): si el contador no fija una cuenta destino → `Suspense` + `category_status
+    "pending"` (lo levanta `/categorizacion` 9.7); si fija una `Expenses:...` real → `confirmed`.
+
+    Devuelve el mismo shape que `commit_reconciliation`: `{success, git_commit_sha, error_msg, file, ...}`.
+    """
+    from datetime import date as _date
+    from pathlib import Path
+
+    from beancount.core import data
+
+    from pipeline.importers.bank_account_resolver import UnknownBankAccount
+    from pipeline.importers.category_predictor import SUSPENSE_ACCOUNT
+    from pipeline.importers.cartola_pdf_importer import (
+        _LIABILITY_ROOT, _build_postings, build_usd_postings, render_entries,
+    )
+
+    root = Path(ledger_root)
+    disc_id = discrepancy.get("discrepancy_id")
+    cartola = discrepancy.get("cartola") or {}
+    bank_account_id = discrepancy.get("bank_account_id")
+
+    fail = {"discrepancy_id": disc_id, "action": "confirm-cartola-only", "file": None,
+            "success": False, "error_msg": None, "git_commit_sha": None}
+    if not cartola or cartola.get("amount") is None or not cartola.get("date"):
+        fail["error_msg"] = "la discrepancia no tiene datos de cartola para anotar"
+        return fail
+
+    try:  # fail-closed: id desconocido/None → 422 limpio (AC2), no 500 con la discrepancia abierta
+        account_target = importer.resolver.resolve(bank_account_id)
+    except UnknownBankAccount as exc:
+        fail["error_msg"] = f"no se puede anotar: {exc}"
+        return fail
+    is_liability = account_target.startswith(_LIABILITY_ROOT)
+    category = category_account or SUSPENSE_ACCOUNT
+    is_suspense = category == SUSPENSE_ACCOUNT
+
+    amount = Decimal(str(cartola["amount"]))  # el JSONL guardó float vía _num → castear a Decimal
+    currency = cartola.get("currency") or "CLP"
+    when = _date.fromisoformat(cartola["date"])
+    line_no = cartola.get("line_no")
+
+    meta_extra: dict = {}
+    if currency != "CLP":
+        if currency != "USD":  # fail-closed: build_usd_postings hardcodea USD/CLP → no rutear EUR etc.
+            fail["error_msg"] = f"moneda {currency!r} no soportada para anotar (sólo CLP/USD)"
+            return fail
+        fx_implied = (discrepancy.get("fx") or {}).get("implied")
+        if fx_implied is None or Decimal(str(fx_implied)) <= 0:
+            fail["error_msg"] = "no se puede anotar la línea USD: FX ausente o no-positivo (BCCh)"
+            return fail
+        fx_implied = Decimal(str(fx_implied))
+        postings = build_usd_postings(account_target, category, amount, fx_implied, is_liability)
+        meta_extra["fx_implied"] = str(fx_implied)
+    else:
+        postings = _build_postings(account_target, category, amount, currency, is_liability)
+
+    bmeta = data.new_metadata("<reconcile-annotate>", line_no or 0)
+    bmeta.update({
+        "source": "reconciliation",
+        "bank_account_id": bank_account_id,
+        "ref_discrepancy_id": disc_id,
+        "line": str(line_no),
+        "match_source": "pending" if is_suspense else "reconciliation",
+        # Suspense → pending (lo levanta /categorizacion); categoría real → confirmed.
+        "category_status": "pending" if is_suspense else "confirmed",
+    })
+    bmeta.update(meta_extra)
+    entry = data.Transaction(
+        meta=bmeta, date=when, flag="!" if is_suspense else "*", payee=None,
+        narration=cartola.get("description") or f"line {line_no}",
+        tags=frozenset(), links=frozenset(), postings=postings,
+    )
+
+    acct_leaf = account_target.rsplit(":", 1)[-1]
+    out_dir = root / "manual"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_file = out_dir / f"reconciliation-{acct_leaf}-{when.strftime('%Y-%m')}.beancount"
+    existing = out_file.read_text(encoding="utf-8") if out_file.exists() else ""
+    new_content = existing + render_entries([entry])
+    return commit_reconciliation(out_file, new_content, disc_id, "confirm-cartola-only", root)
+
+
 # ── Conciliación en el promote: el SEAM del upload (Story 6.1, modelo A) ──────
 
 

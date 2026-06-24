@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from backend.app.api.v1.reconciliation.models import CountResponse, ResolveRequest, ResolveResponse
 from backend.app.api.v1.reconciliation.service import (
+    AnnotationFailed,
     ResolveError,
     history,
     pending_count,
@@ -61,7 +62,10 @@ def resolve_discrepancy(
 ) -> ResolveResponse:
     try:
         result = resolve(discrepancy_id, request.action, request.justification,
-                         user_email=user.email, now_iso=datetime.now(timezone.utc).isoformat())
+                         user_email=user.email, now_iso=datetime.now(timezone.utc).isoformat(),
+                         category_account=request.category_account)
     except ResolveError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+    except AnnotationFailed as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
     return ResolveResponse(**result)
