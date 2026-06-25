@@ -1,5 +1,18 @@
 # Deferred Work
 
+## Deferred from: code review of 6-5-cierre-periodo-reconciliacion (2026-06-25)
+
+- `reconciled_at` se compara lexicográficamente como string en `list_periods` ([backend/app/api/v1/reconciliation/service.py:161]) — `str(r.get("reconciled_at") or "") >= str(prev...)` deriva el "último run gana" (AC4) de la comparación textual del timestamp. Hoy es CORRECTO: `ts` sale de un único code path en formato ISO consistente, y en empate exacto el `>=` toma el último appendeado (= orden cronológico de archivo). Frágil solo si el formato de `ts` alguna vez se diversifica (con/sin `Z`, offset, distinta precisión) → el orden lexicográfico divergiría del cronológico. Fix de hardening = parsear a datetime antes de comparar, o validar/normalizar el formato de `reconciled_at` en `build_run`.
+- runs JSONL append-only sin compactación + lectura O(n) por request ([pipeline/importers/reconcile.py:459], [backend/app/api/v1/reconciliation/service.py:155]) — `append_run` deja un run-record por cada reconciliación sin dedup; `list_periods` escanea TODO el archivo en cada GET `/periods` para derivar el último por (cuenta, mes). Mismo patrón pre-existente que `cartola-discrepancies.jsonl`. Sin daño en el volumen actual (pocas cuentas × meses). Si el archivo crece (re-subidas frecuentes), considerar compactación/snapshot del último-por-clave o un índice.
+
+## Deferred from: code review of 6-5b-reconciliacion-period-aware (2026-06-24)
+
+- Statement multi-mes colapsa a un solo `year_month = period.end` ([reconcile.py:384](pipeline/importers/reconcile.py#L384), [tc_correction.py:166](pipeline/importers/tc_correction.py#L166)) — si `period.start` y `period.end` cayeran en meses/años distintos, `_in_core` honra el rango completo `[start, end]` pero la etiqueta de período (y la meta `period` de TC) usa solo `period.end` → las discrepancias del mes de inicio quedarían bucketeadas bajo el mes de cierre. Latente: las cartolas del family office son mensuales (start/end mismo mes), así que hoy no se dispara. Si alguna vez entra una cartola multi-mes, derivar el `year_month` por discrepancia (de su propia fecha core) en vez de un label único del estado.
+
+## Deferred from: code review of 6-4-completar-dashboard-reconciliacion (2026-06-24)
+
+- `list_accounts` usa `startswith(root)` no segmentado + `root` sin allow-list ([backend/app/api/v1/accounts/service.py:20]) — `?root=` vacío devuelve TODO el plan de cuentas; un prefijo parcial (ej. `root=Exp`) podría matchear cuentas no deseadas. Detrás de RBAC (contador/admin) y solo expone nombres de cuenta (read-only); el frontend siempre manda `root=Expenses`. Sin daño actual. Fix de hardening = match por segmento (`== root or startswith(root + ":")`) + validar `root` contra el set fijo {Expenses, Assets, Income, Liabilities, Equity}.
+
 ## Deferred from: code review of 6-3-aprobar-diferencia-anotar-beancount (2026-06-24)
 
 - git push falla tras bean-check verde en `annotate_discrepancy` → estado parcial + doble conteo ([pipeline/importers/reconcile.py:196-211]) — `commit_reconciliation` escribe el archivo `manual/`, pasa bean-check, y recién entonces hace `git_commit_push` SIN try/except. Si el push lanza (deploy-key rechazada, red), la excepción escapa con el archivo YA escrito (rollback sólo cubre bean-check rojo), la discrepancia queda abierta (no se appendea resolución) y el caller recibe 500. Un retry pasa el guard `_resolved_ids` (no hubo resolución) y appendea una SEGUNDA copia de la tx → gasto duplicado, justo la clase de fuga silenciosa que 10.2 tapó. Pre-existing: boundary write/git de `commit_reconciliation` (mismo class deferido en 6.1). Fix durable = commit+resolution atómico, o dedup por `ref_discrepancy_id` ya presente en el archivo antes de appendear.

@@ -1,6 +1,6 @@
 # Story 6.4: Completar el dashboard de reconciliación (FR34)
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -107,6 +107,18 @@ Backend: si se implementa AC7, test de que `build_discrepancy`/el reconcile emit
 - [x] **Task 8 — Tests + verificación** (AC9)
   - [x] Backend: test de `laudus.currency` si se hizo Task 6. Correr `PYTHONUTF8=1 venv/Scripts/python.exe -m pytest backend/tests -q` → 0 regresiones nuevas.
   - [x] Frontend: si hay harness (vitest, ver `Sidebar.test.tsx`), component tests de los flujos clave. Si no, documentar verificación manual (build + recorrido del flujo) en Completion Notes.
+
+### Review Findings (code-review 2026-06-24)
+
+Capas: Blind Hunter + Edge Case Hunter + Acceptance Auditor. Auditor: **8/8 ACs PASS** (AC8 diferido limpio, sin código huérfano). Sin findings CRITICAL/HIGH reales tras triage.
+
+- [x] [Review][Patch] Deep-link se descarta de más al cerrar una fila abierta manualmente [frontend/src/pages/ReconciliationPage.tsx:59] — APLICADO: `closeSelected` ahora solo descarta el deep-link si lo que se cierra/resuelve ES el item del deep-link (`selected.discrepancy_id === deepLinkId`); cerrar otra fila solo limpia `manualSelected`. Sigue cumpliendo AC4 (no reabre el resuelto).
+- [x] [Review][Patch] `fmt()` puede romper el render con una moneda inválida/vacía [frontend/src/pages/ReconciliationPage.tsx:19-20] — APLICADO: `fmt` valida que la moneda sea código de 3 letras (`/^[A-Z]{3}$/`); si no, cae a CLP. Sin más `RangeError` por moneda vacía/no-ISO.
+- [x] [Review][Defer] `list_accounts` usa `startswith(root)` no segmentado + `root` sin allow-list [backend/app/api/v1/accounts/service.py:20] — deferred. `?root=` vacío devuelve TODO el plan de cuentas; un prefijo parcial podría colisionar. Detrás de RBAC y solo nombres de cuenta (read-only); el front siempre manda "Expenses". Hardening de validación = decisión de diseño, no daño actual.
+
+**Descartados como ruido (10):** category "stale" entre acciones (el guard `annotates` solo manda `category_account` cuando el campo está visible; preservar el input es correcto); query `bank-accounts` sin surface de error (degrada a UUID, aceptable); `accounts.ts` "salta el wrapper de api" (falso positivo — todo el service layer usa `fetch` crudo); `listAccounts` asume array (lo cubre el default `= []`); teclado del autocomplete `active=-1`/desync (guardado por `&& matches[active]`, se resetea a 0 al tipear); `known` case-sensitive (las cuentas Beancount SON case-sensitive, exacto es correcto); `git_commit_sha.slice` (backend devuelve SHA real o null); index como React key en historial (lista read-only append-only); badge muestra dato stale tras fallo de poll (tradeoff explícito de AC5); fecha de escalación vacía (el backend siempre escribe `resolved_at`).
+
+**Nota (no patch):** `setTimeout(onResolved, 1500)` en `onSuccess` no se cancela; si el usuario cierra y abre OTRA discrepancia dentro de 1.5s, el timer viejo cerraría la nueva. Escenario muy estrecho; el fix limpio (mover a `useEffect` con cleanup) agrega complejidad de deps. Anotado por si molesta en uso real.
 
 ## Dev Notes
 

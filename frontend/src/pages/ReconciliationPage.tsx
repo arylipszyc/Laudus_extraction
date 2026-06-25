@@ -8,16 +8,21 @@ import {
   ACTIONS_BY_STATE,
   getDiscrepancies,
   getHistory,
+  getPeriods,
   resolveDiscrepancy,
   ResolveHttpError,
   type Discrepancy,
   type HistoryEntry,
+  type PeriodStatus,
 } from '@/services/reconciliation'
 import { listBankAccounts, type BankAccount } from '@/services/bankAccounts'
 import { listAccounts } from '@/services/accounts'
 
-const fmt = (n: number | null | undefined, c = 'CLP') =>
-  n == null ? '—' : new Intl.NumberFormat('es-CL', { style: 'currency', currency: c }).format(n)
+const fmt = (n: number | null | undefined, c?: string | null) => {
+  if (n == null) return '—'
+  const cur = c && /^[A-Z]{3}$/.test(c) ? c : 'CLP'
+  return new Intl.NumberFormat('es-CL', { style: 'currency', currency: cur }).format(n)
+}
 
 const bankLabel = (b: BankAccount) => b.account_name || b.bank_name || b.account_number || b.id
 
@@ -56,7 +61,12 @@ export function ReconciliationPage() {
     ? data?.discrepancies.find((d) => d.discrepancy_id === deepLinkId) ?? null
     : null
   const selected = manualSelected ?? deepLinkMatch
-  const closeSelected = () => { setManualSelected(null); setDeepLinkDismissed(true) }
+  // Cierra lo que está abierto. Solo descarta el deep-link si lo que se cierra/resuelve ES el item
+  // del deep-link (así no se reabre, AC4) — cerrar OTRA fila no debe matar un deep-link no tocado.
+  const closeSelected = () => {
+    if (selected && selected.discrepancy_id === deepLinkId) setDeepLinkDismissed(true)
+    setManualSelected(null)
+  }
 
   const hasFilters = stateFilter !== null || monthFilter !== '' || bankFilter !== ''
   const clearFilters = () => { setStateFilter(null); setMonthFilter(''); setBankFilter('') }
@@ -67,6 +77,12 @@ export function ReconciliationPage() {
       <p className="text-sm text-muted-foreground">
         Diferencias entre lo extraído de la cartola y lo registrado en Laudus, para revisar y resolver.
       </p>
+
+      {/* Períodos reconciliados (Story 6.5 AC6) */}
+      <PeriodsCard
+        bankNameById={bankNameById}
+        onPick={(bankId, month) => { setBankFilter(bankId); setMonthFilter(month) }}
+      />
 
       {/* Filtros (AC3) */}
       <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -152,6 +168,60 @@ export function ReconciliationPage() {
         />
       )}
     </div>
+  )
+}
+
+/** Story 6.5 — indicador de períodos reconciliados (cuenta, mes, fecha, estado). */
+function PeriodsCard({ bankNameById, onPick }: {
+  bankNameById: Record<string, string>
+  onPick: (bankId: string, month: string) => void
+}) {
+  const { data: periods = [], isLoading } = useQuery({
+    queryKey: ['reconciliation-periods'],
+    queryFn: getPeriods,
+  })
+
+  if (isLoading) return <Skeleton className="h-20 w-full" />
+  if (periods.length === 0) return null
+
+  return (
+    <Card className="p-4 space-y-2">
+      <p className="text-sm font-medium">Períodos reconciliados</p>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b text-left text-xs text-muted-foreground">
+            <th className="p-1.5">Cuenta</th><th className="p-1.5">Mes</th>
+            <th className="p-1.5">Reconciliado</th><th className="p-1.5">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {periods.map((p: PeriodStatus) => {
+            const pickable = p.status === 'pending' && p.bank_account_id != null
+            return (
+              <tr key={`${p.bank_account_id}-${p.year_month}`}
+                className={`border-b last:border-0 ${pickable ? 'cursor-pointer hover:bg-accent/40' : ''}`}
+                onClick={pickable ? () => onPick(p.bank_account_id!, p.year_month) : undefined}>
+                <td className="p-1.5">{p.bank_account_id ? (bankNameById[p.bank_account_id] ?? p.bank_account_id) : '—'}</td>
+                <td className="p-1.5">{p.year_month}</td>
+                <td className="p-1.5 text-muted-foreground">{p.reconciled_at ? p.reconciled_at.slice(0, 10) : '—'}</td>
+                <td className="p-1.5"><PeriodBadge status={p.status} open={p.open} /></td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </Card>
+  )
+}
+
+function PeriodBadge({ status, open }: { status: string; open: number }) {
+  if (status === 'complete') {
+    return <span className="px-2 py-0.5 rounded-sm text-xs bg-green-50 text-green-700">✓ Completo</span>
+  }
+  return (
+    <span className="px-2 py-0.5 rounded-sm text-xs bg-amber-50 text-amber-600">
+      {open} pendiente{open === 1 ? '' : 's'}
+    </span>
   )
 }
 

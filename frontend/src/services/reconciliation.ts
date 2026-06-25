@@ -37,6 +37,17 @@ export interface DiscrepanciesResponse {
   summary: { total: number; by_state: Record<string, number> }
 }
 
+/** Estado de un período de reconciliación (Story 6.5). */
+export interface PeriodStatus {
+  bank_account_id: string | null
+  year_month: string
+  reconciled_at: string | null
+  matched: number
+  differences: number
+  open: number
+  status: 'complete' | 'pending'
+}
+
 // Acciones permitidas por estado (espeja backend ACTIONS_BY_STATE, Story 9.12 AC4).
 export const ACTIONS_BY_STATE: Record<string, string[]> = {
   'value-mismatch': ['accept-cartola', 'accept-laudus', 'escalate'],
@@ -62,6 +73,12 @@ export async function getDiscrepancies(params: {
 export async function getReconciliationCount(): Promise<{ total: number; blocking: number }> {
   const res = await fetch(`${base}/count`, { credentials: 'include' })
   if (!res.ok) throw new Error(`Error (${res.status})`)
+  return res.json()
+}
+
+export async function getPeriods(): Promise<PeriodStatus[]> {
+  const res = await fetch(`${base}/periods`, { credentials: 'include' })
+  if (!res.ok) throw new Error(`Error cargando períodos (${res.status})`)
   return res.json()
 }
 

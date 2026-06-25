@@ -43,6 +43,16 @@ def _jsonl_path() -> Path:
     return root / "_meta" / "cartola-discrepancies.jsonl"
 
 
+def _runs_path() -> Path:
+    """Ruta del JSONL de run-records (Story 6.5) — espejo de `_jsonl_path`."""
+    override = os.getenv("LEDGER_RECONCILIATION_RUNS")
+    if override:
+        return Path(override)
+    ledger_dir = os.getenv("LEDGER_DIR")
+    root = Path(ledger_dir) if ledger_dir else Path(__file__).resolve().parents[5] / "ledger"
+    return root / "_meta" / "reconciliation-runs.jsonl"
+
+
 def _iter_lines(path: Path):
     if not path.exists():
         return
@@ -57,6 +67,11 @@ def _iter_lines(path: Path):
 
 
 def _year_month(entry: dict) -> str:
+    # Story 6.5b: el período del ESTADO DE CUENTA es un campo persistido (distinto de la fecha de
+    # la tx). Se prefiere; las discrepancias viejas sin el campo caen al derivado de la fecha.
+    persisted = entry.get("year_month")
+    if persisted:
+        return str(persisted)
     for side in ("cartola", "laudus"):
         d = (entry.get(side) or {}).get("date")
         if d:
@@ -123,6 +138,45 @@ def pending_count(path: Path | None = None) -> dict:
     total = data["summary"]["total"]
     blocking = sum(n for st, n in data["summary"]["by_state"].items() if st in BLOCKING_STATES)
     return {"total": total, "blocking": blocking}
+
+
+def list_periods(path: Path | None = None, runs_path: Path | None = None) -> list[dict]:
+    """Estado por (cuenta, mes): cruza el último run-record con las discrepancias abiertas (Story 6.5).
+
+    AC3/AC4/AC5: agrupa los run-records por (bank_account_id, year_month) tomando el más reciente por
+    `reconciled_at` (append-only, último gana en el lector). `open` se deriva en vivo del JSONL de
+    discrepancias reusando `read_discrepancies(...).summary.total` — que ya excluye resueltas/escaladas
+    y filtra por el `year_month` PERSISTIDO (6.5b), no por la fecha de la tx → cuadra con el run-record.
+    `status` = "complete" si `open == 0`, "pending" si `open > 0`. Orden: mes desc, cuenta asc.
+    """
+    runs_path = runs_path or _runs_path()
+    disc_path = path or _jsonl_path()
+    latest: dict[tuple, dict] = {}
+    for r in _iter_lines(runs_path):
+        ym = r.get("year_month")
+        if not ym:
+            continue
+        key = (r.get("bank_account_id"), ym)
+        prev = latest.get(key)
+        if prev is None or str(r.get("reconciled_at") or "") >= str(prev.get("reconciled_at") or ""):
+            latest[key] = r
+
+    periods = []
+    for (bank_account_id, ym), r in latest.items():
+        open_count = read_discrepancies(
+            bank_account_id=bank_account_id, year_month=ym, path=disc_path)["summary"]["total"]
+        periods.append({
+            "bank_account_id": bank_account_id,
+            "year_month": ym,
+            "reconciled_at": r.get("reconciled_at"),
+            "matched": r.get("matched", 0),
+            "differences": r.get("differences", 0),
+            "open": open_count,
+            "status": "complete" if open_count == 0 else "pending",
+        })
+    periods.sort(key=lambda p: str(p["bank_account_id"] or ""))      # cuenta asc (secundario)
+    periods.sort(key=lambda p: p["year_month"], reverse=True)        # mes desc (primario, estable)
+    return periods
 
 
 def resolve(discrepancy_id: str, action: str, justification: str | None,

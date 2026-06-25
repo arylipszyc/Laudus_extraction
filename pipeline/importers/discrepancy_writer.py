@@ -30,10 +30,14 @@ def build_discrepancy(
     laudus: dict | None,
     fx: dict | None = None,
     source: str | None = None,
+    year_month: str | None = None,
 ) -> dict:
     """Construye la entrada de discrepancia con el shape de AC5 (sin escribirla).
 
     `source` (AC4): "cartola" (missing-in-laudus) / "laudus" (missing-in-cartola) / None.
+    `year_month` (Story 6.5b): período del ESTADO DE CUENTA (`model.period.end`, `YYYY-MM`),
+    distinto de la fecha de la transacción. El servicio agrupa/filtra por él (fallback a la fecha
+    para discrepancias viejas sin el campo).
     """
     return {
         "schema_version": SCHEMA_VERSION,
@@ -41,6 +45,7 @@ def build_discrepancy(
         "ts": ts,
         "batch_id": batch_id,
         "bank_account_id": bank_account_id,
+        "year_month": year_month,
         "state": state,
         "source": source,
         "cartola": cartola,
@@ -105,3 +110,31 @@ def append_resolution(
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
+def build_run(*, bank_account_id: str, year_month: str, reconciled_at: str,
+              matched: int, differences: int, blocking: int, batch_id: str) -> dict:
+    """Run-record de una reconciliación (Story 6.5 AC1) — registra que el período corrió.
+
+    Distingue 'cartola perfecta (0 diferencias)' y 'todas resueltas' de 'nunca subida' (las tres
+    se ven idénticas en el JSONL de discrepancias). El lector (`list_periods`) toma el último por
+    (cuenta, mes); por eso no hay dedup ni id."""
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "bank_account_id": bank_account_id,
+        "year_month": year_month,
+        "reconciled_at": reconciled_at,
+        "matched": matched,
+        "differences": differences,
+        "blocking": blocking,
+        "batch_id": batch_id,
+    }
+
+
+def append_run(run: dict, jsonl_path: str | Path) -> None:
+    """Appendea un run-record (Story 6.5 AC1). Append-only, sin dedup: cada reconciliación deja su
+    run y el lector toma el más reciente por (cuenta, mes) — AC4."""
+    path = Path(jsonl_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(run, ensure_ascii=False) + "\n")

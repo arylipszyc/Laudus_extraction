@@ -21,3 +21,14 @@ class ResolveResponse(BaseModel):
 class CountResponse(BaseModel):
     total: int
     blocking: int
+
+
+class PeriodStatus(BaseModel):
+    """Estado de un período de reconciliación (Story 6.5 AC3)."""
+    bank_account_id: str | None = None
+    year_month: str
+    reconciled_at: str | None = None
+    matched: int = 0
+    differences: int = 0
+    open: int
+    status: str

@@ -5,13 +5,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 vi.mock('@/services/reconciliation', async (orig) => {
   const actual = await orig<typeof import('@/services/reconciliation')>()
-  return { ...actual, getDiscrepancies: vi.fn(), getHistory: vi.fn(), resolveDiscrepancy: vi.fn() }
+  return { ...actual, getDiscrepancies: vi.fn(), getHistory: vi.fn(), resolveDiscrepancy: vi.fn(), getPeriods: vi.fn() }
 })
 vi.mock('@/services/bankAccounts', () => ({ listBankAccounts: vi.fn() }))
 vi.mock('@/services/accounts', () => ({ listAccounts: vi.fn() }))
 
 import { ReconciliationPage } from './ReconciliationPage'
-import { getDiscrepancies, getHistory, resolveDiscrepancy } from '@/services/reconciliation'
+import { getDiscrepancies, getHistory, getPeriods, resolveDiscrepancy } from '@/services/reconciliation'
 import { listBankAccounts } from '@/services/bankAccounts'
 import { listAccounts } from '@/services/accounts'
 
@@ -43,6 +43,7 @@ describe('<ReconciliationPage /> (Story 6.4)', () => {
     ])
     vi.mocked(listAccounts).mockResolvedValue(['Expenses:EAG:Super', 'Expenses:EAG:Luz'])
     vi.mocked(resolveDiscrepancy).mockResolvedValue({ status: 'resolved', git_commit_sha: 'abc1234567' })
+    vi.mocked(getPeriods).mockResolvedValue([])
   })
 
   it('AC3: muestra los filtros de mes y cuenta', async () => {
@@ -90,5 +91,23 @@ describe('<ReconciliationPage /> (Story 6.4)', () => {
     await waitFor(() => expect(resolveDiscrepancy).toHaveBeenCalledWith('d1', expect.objectContaining({
       action: 'confirm-cartola-only', category_account: null,
     })))
+  })
+
+  it('Story 6.5 AC6: el indicador muestra períodos complete y pending (cuenta como nombre)', async () => {
+    vi.mocked(getPeriods).mockResolvedValue([
+      { bank_account_id: 'b1', year_month: '2026-04', reconciled_at: '2026-05-02T10:00:00Z',
+        matched: 12, differences: 0, open: 0, status: 'complete' },
+      { bank_account_id: 'b1', year_month: '2026-03', reconciled_at: '2026-04-03T10:00:00Z',
+        matched: 8, differences: 3, open: 2, status: 'pending' },
+    ])
+    renderPage()
+    expect(await screen.findByText('Períodos reconciliados')).toBeInTheDocument()
+    expect(screen.getByText('✓ Completo')).toBeInTheDocument()
+    expect(screen.getByText('2 pendientes')).toBeInTheDocument()
+    // cuenta por nombre (no UUID) en el indicador
+    expect(screen.getAllByText('BCI Cuenta Corriente').length).toBeGreaterThan(0)
+    // mes + fecha (recortada a YYYY-MM-DD) visibles
+    expect(screen.getByText('2026-04')).toBeInTheDocument()
+    expect(screen.getByText('2026-05-02')).toBeInTheDocument()
   })
 })

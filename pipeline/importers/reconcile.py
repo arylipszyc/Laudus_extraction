@@ -9,13 +9,20 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from typing import Callable
 
 from pipeline.importers.discrepancy_writer import build_discrepancy
 from pipeline.importers.fx_calculator import FXResult, calculate_fx, lookup_bcch
-from pipeline.importers.matching_engine import USD_FX_EPOCH, CartolaLine, LaudusEntry, MatchResult, match
+from pipeline.importers.matching_engine import (
+    DATE_TOLERANCE_DAYS,
+    USD_FX_EPOCH,
+    CartolaLine,
+    LaudusEntry,
+    MatchResult,
+    match,
+)
 
 # Estados que NO emiten Transaction (bloqueantes hasta resolución manual via 9.12).
 # missing-in-cartola: la cartola es la fuente de verdad → el asiento que solo está en Laudus
@@ -65,14 +72,19 @@ def process_match_result(
     batch_id: str,
     bank_account_id: str,
     ts: str,
+    year_month: str | None = None,
 ) -> ProcessDecision:
-    """Decisión de emisión + discrepancias para un MatchResult (AC4) + overlay FX (AC3)."""
+    """Decisión de emisión + discrepancias para un MatchResult (AC4) + overlay FX (AC3).
+
+    `year_month` (6.5b): período del estado de cuenta, se persiste en cada discrepancia.
+    """
     def _disc(state: str) -> dict:
         # AC4: source = lado que tiene el dato cuando el otro falta.
         source = "cartola" if mr.laudus_entry is None else ("laudus" if mr.cartola_line is None else None)
         return build_discrepancy(
             batch_id=batch_id, bank_account_id=bank_account_id, state=state, ts=ts,
             cartola=_cartola_dict(mr), laudus=_laudus_dict(mr), fx=_fx_dict(fx), source=source,
+            year_month=year_month,
         )
 
     discrepancies: list[dict] = []
@@ -142,7 +154,8 @@ def reconcile_and_build(
             else:
                 fx = FXResult(implied=None, bcch=None, deviation_pct=None, state="fx-bcch-missing")
 
-        decision = process_match_result(mr, fx, batch_id=batch_id, bank_account_id=bank_account_id, ts=ts)
+        decision = process_match_result(mr, fx, batch_id=batch_id, bank_account_id=bank_account_id, ts=ts,
+                                        year_month=year_month)
         discrepancies.extend(decision.discrepancies)
         if not decision.emit:
             continue
@@ -327,6 +340,18 @@ def _discrepancies_path(ledger_root):
     return Path(ledger_root) / "_meta" / "cartola-discrepancies.jsonl"
 
 
+def _runs_path(ledger_root):
+    """Ruta del JSONL de run-records (Story 6.5) — espejo de `_discrepancies_path` y de
+    `reconciliation.service._runs_path`: override `LEDGER_RECONCILIATION_RUNS` → si no,
+    `<ledger_root>/_meta/reconciliation-runs.jsonl`."""
+    from pathlib import Path
+
+    override = os.getenv("LEDGER_RECONCILIATION_RUNS")
+    if override:
+        return Path(override)
+    return Path(ledger_root) / "_meta" / "reconciliation-runs.jsonl"
+
+
 def reconcile_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict:
     """Concilia una cartola staged contra Laudus y registra las DIFERENCIAS (Story 6.1, modelo A).
 
@@ -352,7 +377,7 @@ def reconcile_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict:
     from backend.app.integrations.cartola_schema import CartolaCanonicalV1
     from pipeline.importers.cartola_pdf_importer import _LIABILITY_ROOT
     from pipeline.importers.category_predictor import SUSPENSE_ACCOUNT
-    from pipeline.importers.discrepancy_writer import append_discrepancy
+    from pipeline.importers.discrepancy_writer import append_discrepancy, append_run, build_run
     from pipeline.importers.laudus_run import acquire_lock, git_commit_push
     from pipeline.importers.matching_engine import load_laudus_entries
 
@@ -362,6 +387,7 @@ def reconcile_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict:
     laudus_dir = root / "imports" / "laudus"
     fx_path = root / "_meta" / "fx-bcch-eom.jsonl"
     disc_path = _discrepancies_path(root)
+    runs_path = _runs_path(root)
 
     model = CartolaCanonicalV1.model_validate_json(staging.read_text(encoding="utf-8"))
     bank_account_id = model.source.bank_account_id
@@ -382,7 +408,13 @@ def reconcile_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict:
                         currency=tx.currency, description=tx.description, suggested_category="")
             for tx in model.transactions
         ]
-        laudus_entries = load_laudus_entries(laudus_dir, account_target, model.period.start, model.period.end)
+        # Story 6.5b: la ventana de carga se padea ±DATE_TOLERANCE_DAYS para que la tolerancia de
+        # fecha del matcher (±3d) alcance asientos Laudus fechados 1-2d fuera del período (value-date
+        # vs fecha del estado) → sin esto, la línea del borde quedaba `missing-in-laudus` falso. El
+        # padding solo es para MATCHEAR; `missing-in-cartola` se acota al período core más abajo.
+        tol = timedelta(days=DATE_TOLERANCE_DAYS)
+        laudus_entries = load_laudus_entries(
+            laudus_dir, account_target, model.period.start - tol, model.period.end + tol)
 
         # reconcile_and_build hace el matching + arma discrepancias (mismas reglas/estados/FX que el
         # dashboard ya consume). Las entries beancount que produce se descartan (modelo A: no posteamos).
@@ -392,6 +424,20 @@ def reconcile_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict:
             category_for=lambda cl: SUSPENSE_ACCOUNT, fx_jsonl_path=fx_path, bank_slug=bank_slug,
             year_month=year_month, batch_id=batch_id, bank_account_id=bank_account_id, ts=ts,
         )
+
+        # Story 6.5b: el padding de la ventana puede traer asientos Laudus de estados ADYACENTES
+        # (fuera del período core). Sin línea de cartola, el matcher los marca `missing-in-cartola`;
+        # se descartan para no emitir diferencias falsas del mes vecino (el padding es solo para que
+        # el match del borde alcance su contraparte, no para flaggear asientos de otros estados).
+        core_start, core_end = model.period.start, model.period.end
+
+        def _in_core(d: dict) -> bool:
+            if d.get("state") != "missing-in-cartola":
+                return True
+            ld = (d.get("laudus") or {}).get("date")
+            return not ld or core_start <= date.fromisoformat(str(ld)) <= core_end
+
+        discrepancies = [d for d in discrepancies if _in_core(d)]
 
         new = 0
         for d in discrepancies:
@@ -407,10 +453,21 @@ def reconcile_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict:
                       if (ln := (d.get("cartola") or {}).get("line_no")) is not None}
         result["matched"] = len(model.transactions) - len(diff_lines)
 
-        if new:
-            result["git_commit_sha"] = git_commit_push(
-                root, [_rel(disc_path)],
-                f"[reconcile-cartola] {bank_slug} {year_month}: {len(discrepancies)} diferencia(s)")
+        # Story 6.5 AC1: dejar un run-record del período (sobrevive el git reset del refresh y
+        # distingue 'cartola perfecta'/'todas resueltas' de 'nunca subida'). Append-only; el lector
+        # (`list_periods`) toma el más reciente por (cuenta, mes).
+        append_run(build_run(
+            bank_account_id=bank_account_id, year_month=year_month, reconciled_at=ts,
+            matched=result["matched"], differences=result["differences"],
+            blocking=result["blocking"], batch_id=batch_id), runs_path)
+
+        # Story 6.5 AC2: el run-record se commitea SIEMPRE (incluso cartola perfecta con new==0), si
+        # no el `git reset --hard` del refresh lo perdería. El JSONL de discrepancias se incluye solo
+        # si hubo nuevas (semántica de 6.1). `git_commit_push` es no-op idempotente sin git habilitado.
+        commit_paths = [_rel(runs_path)] + ([_rel(disc_path)] if new else [])
+        result["git_commit_sha"] = git_commit_push(
+            root, commit_paths,
+            f"[reconcile-cartola] {bank_slug} {year_month}: {len(discrepancies)} diferencia(s) + run")
 
         # El canónico ya se consumió (extraído + reconciliado); el staging se limpia.
         staging.unlink(missing_ok=True)

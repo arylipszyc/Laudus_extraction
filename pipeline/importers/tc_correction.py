@@ -92,7 +92,8 @@ def _posting(account: str, number: Decimal) -> data.Posting:
     return data.Posting(account, Amount(number, _CLP), None, None, None, None)
 
 
-def _meta(*, line_no: int, bank_account_id: str, batch_id: str, op: str, fx: Decimal) -> dict:
+def _meta(*, line_no: int, bank_account_id: str, batch_id: str, op: str, fx: Decimal,
+          year_month: str) -> dict:
     m = data.new_metadata("<tc-correction>", line_no)
     m.update({
         "source": "cartola-tc",
@@ -100,6 +101,9 @@ def _meta(*, line_no: int, bank_account_id: str, batch_id: str, op: str, fx: Dec
         "batch_id": batch_id,
         "line": str(line_no),
         "operation_type": op,
+        # Story 6.5b: período del ESTADO DE CUENTA (distinto de `date`, que es la fecha de la compra).
+        # Una compra del 28-abr puede pertenecer al estado de mayo por la fecha de cierre/facturación.
+        "period": year_month,
     })
     if fx != Decimal(1):
         m["fx"] = str(fx)
@@ -125,6 +129,7 @@ def build_tc_correction_entries(
     cuenta de gasto de una compra. `emit_opening`: True solo en la primera cartola de la tarjeta.
     """
     fx = Decimal(fx)
+    year_month = model.period.end.strftime("%Y-%m")  # Story 6.5b: período del estado de cuenta
     entries: list = []
 
     for tx in model.transactions:
@@ -148,7 +153,7 @@ def build_tc_correction_entries(
             continue
         entries.append(data.Transaction(
             meta=_meta(line_no=tx.line_no, bank_account_id=bank_account_id, batch_id=batch_id,
-                       op=op, fx=fx),
+                       op=op, fx=fx, year_month=year_month),
             date=tx.date, flag="*", payee=None,
             narration=tx.description or f"line {tx.line_no}",
             tags=frozenset(), links=frozenset(), postings=postings,
@@ -157,7 +162,8 @@ def build_tc_correction_entries(
     # (c) apertura — una sola vez por tarjeta. La deuda arrastrada va a Equity (no gasto).
     if emit_opening and model.balances.opening != 0:
         opening_clp = model.balances.opening * fx
-        meta = _meta(line_no=0, bank_account_id=bank_account_id, batch_id=batch_id, op="apertura", fx=fx)
+        meta = _meta(line_no=0, bank_account_id=bank_account_id, batch_id=batch_id, op="apertura", fx=fx,
+                     year_month=year_month)
         entries.append(data.Transaction(
             meta=meta, date=model.period.start, flag="*", payee=None,
             narration=f"Apertura TC {model.source.account_label}",
