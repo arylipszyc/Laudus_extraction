@@ -56,6 +56,13 @@ def _copy_template_ledger(dst: Path) -> Path:
     snap_dir = dst / "_meta" / ".snapshots"
     if snap_dir.exists():
         shutil.rmtree(snap_dir)
+    # Beancount's loader pickle-cache (.{main}.picklecache) stores the ORIGINAL
+    # ledger's absolute paths; copied into the temp ledger it shadows the temp
+    # files (the cache stays "valid" because the real paths it points at are
+    # untouched), so bean-check would validate the original and never see the
+    # edit under test. Strip it so every load re-parses the temp copy.
+    for cache in dst.glob(".*.picklecache"):
+        cache.unlink(missing_ok=True)
     # Inyecta el fixture en la copia temporal (el prod manual/2026-04.beancount no lo trae).
     (dst / "manual" / "2026-04.beancount").write_text(_SMOKE_FIXTURE, encoding="utf-8")
     return dst / "main.beancount"
