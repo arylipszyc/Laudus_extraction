@@ -78,6 +78,26 @@ planning-artifact (§9 y §12.1 reescritos) y session log `sessions/2026-06-22.m
    un `code` sintético (sin code, los postings colisionan en `accountnumber=""` y afloran como línea
    fantasma en el reporte). Verificado: asiento (b) reduce bien el bucket GASTOS PERSONALES.
 
+## ✅ Cuentas TC:Real creadas (2026-06-25) — desbloqueo del desglose TC
+
+Las 9 cuentas sintéticas del diseño §9 quedaron **declaradas en `accounts.beancount`** (commit
+`1d6323b`, bean-check exit 0, 589 tests/0 regresiones):
+- 8 `Liabilities:EAG:TC:Real:<stem>` (codes 230005/06/07/08/09/10/17/19 = espejo 2-prefix del code
+  de gasto) + `Equity:Apertura:TarjetasSinDetalle` (311005). Amex 8083 omitida (cero actividad 2026).
+- Metadata: `laudus_categoria1` no-vacía (PASIVO/PATRIMONIO), `categoria2`/`categoria3` **vacías**
+  (mecanismo real de exclusión del reporte, que agrupa por cat2), `code` sintético (evita línea
+  fantasma). Sin `bank_account_id` (la TC:Real se deriva por nombre, no se resuelve de la cartola).
+
+**CORRECCIÓN importante de mi diseño §9:** el flujo 10.3 (`/cuentas-pendientes/promover`) **NO sirve**
+para cuentas sintéticas — exige cuenta en cuarentena (404) + categoria3 obligatoria (choca con cat2/3
+vacías). Las cuentas inventadas por nosotros se declaran **directo en el plan** (decisión Ary). El
+flujo 10.3 es solo para promover cuentas que Laudus descubre.
+
+**Item bank_account_id en las `...Us`: ya estaba resuelto** (las 9 cuentas-gasto TC ya lo tienen).
+
+**Falta para que el desglose corra end-to-end** (dev/Ary, no contable): wirear el categorizador 9.7 en
+`_build_importer` (hoy Noop→Suspense) + importar una cartola 2026 real por tarjeta. Ver [[BOND]].
+
 ## Reportes Aprobados
 _Reportes que el dueño ha aprobado desarrollar. Actualizar a medida que se aprueban._
 
