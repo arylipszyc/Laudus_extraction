@@ -189,9 +189,21 @@ Ary 2026-06-22).
   fantasma "Total prefijo desconocido" al final del reporte. Con un `code` en rango no-gasto el guard
   las saltea limpio. (Cosmético, no rompe el total, pero hay que hacerlo.)
 
-- Se crean por el **flujo sancionado** de cuentas (`_new-accounts-pending.beancount` →
-  `POST /cuentas-pendientes/{code}/promover`, Story 10.3). No se edita metadata de cuentas existentes.
-  OJO: NO vienen de Laudus → se siembran a mano en el pending (no las descubre el flujo automático).
+- **CORRECCIÓN 2026-06-25 (Valentina) — el flujo 10.3 NO sirve para estas cuentas.** El plan previo
+  decía crearlas vía `POST /cuentas-pendientes/{code}/promover`. Al verificarlo contra el código:
+  (1) `promover` exige que la cuenta esté **en cuarentena** (`Assets:EAG:PendingReview:Cuenta-{code}`,
+  descubierta por el importer en Laudus) → las `TC:Real` son sintéticas, daría **404**; y (2) el
+  endpoint **obliga `categoria3` no-vacía** (router línea 54), justo lo contrario de lo que estas
+  cuentas necesitan (cat2/cat3 vacías). Además `_new-accounts-pending.beancount` se **regenera** en
+  cada corrida del importer → sembrar ahí no sobrevive.
+- **Mecanismo real (decisión Ary 2026-06-25): declaradas directo en `accounts.beancount`** como `open`
+  nuevos + bean-check + git. No viola la regla de oro: son **declaraciones de cuentas nuevas**, no se
+  toca metadata de cuentas existentes, ni el motor, ni el importer. **HECHO 2026-06-25** (bean-check
+  exit 0, 589 tests passed/0 regresiones). Codes sintéticos asignados (verificados libres): `TC:Real`
+  = espejo 2-prefix del code de gasto (230005/230006/230007/230008/230009/230010/230017/230019);
+  `Equity:Apertura:TarjetasSinDetalle` = 311005.
+- **Item bank_account_id en las `...Us`: ya estaba resuelto.** Las 9 cuentas-gasto TC (incl. las 3 USD
+  430006/430008/430010) ya tienen su `bank_account_id` distinto en `accounts.beancount`. Nada que hacer.
 
 ## 10. Mapeo cartola → asientos
 
