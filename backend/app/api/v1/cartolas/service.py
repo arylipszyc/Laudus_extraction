@@ -398,10 +398,24 @@ def new_batch_id() -> str:
 
 
 def _build_importer(ledger_root: Path):
-    """CartolaPdfImporter con resolver sobre accounts.beancount del ledger root."""
+    """CartolaPdfImporter con resolver + categorizador real 9.7 (reemplaza el Noop→Suspense).
+
+    El `CategorizationService` corre el pipeline de 9.7 sobre el histórico de correcciones
+    (`_meta/categorization-history.jsonl`): regla supra ≥30 / historical 1-29 / Suspense. Los seams
+    `smart_importer` y `gemini` quedan sin inyectar (no hay adapter real todavía → esos stages se
+    saltean); cuando existan, se pasan acá sin tocar el resto.
+    """
     from pipeline.importers.bank_account_resolver import BankAccountResolver
     from pipeline.importers.cartola_pdf_importer import CartolaPdfImporter
-    return CartolaPdfImporter(BankAccountResolver(ledger_root / "accounts.beancount"))
+    from pipeline.importers.categorization.history import CategorizationHistory
+    from pipeline.importers.categorization.service import CategorizationService
+
+    history = CategorizationHistory(ledger_root / "_meta" / "categorization-history.jsonl")
+    categorizer = CategorizationService(history)
+    return CartolaPdfImporter(
+        BankAccountResolver(ledger_root / "accounts.beancount"),
+        category_predictor=categorizer,
+    )
 
 
 def validate_balance(
