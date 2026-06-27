@@ -83,9 +83,41 @@ def derive_statement_fx(
             "reason": (f"sin pago Laudus que salde el estado (USD {total_usd}) en {window_days}d tras "
                        f"el cierre {end} — ¿falta un movimiento o el estado aún no se pagó?")}
 
-# operation_types que son consumo/devolución (asiento a, signo según amount)
-_PURCHASE_OPS = {"compra", "cuota", "abono"}
-_PAYMENT_OPS = {"pago"}
+# ── Clasificación de operation_type (§10.1, cierra el drop silencioso) ──
+# Toda línea emite asiento (a) contra TC:Real; la contrapartida depende del tipo canónico.
+_CONSUMO_OPS = {"compra", "cuota", "abono"}        # → Expenses:<cat> vía categorizador 9.7
+_BANK_CHARGE_OPS = {"impuesto", "comision", "interes", "seguro", "mantencion"}  # → cuenta fija
+_ADVANCE_OPS = {"avance"}                          # → Caja (NO es gasto)
+_PAYMENT_OPS = {"pago"}                            # → asiento (b) reclasificación
+
+BANK_CHARGES_ACCOUNT = "Expenses:EAG:GastosBancarios-430003"
+CAJA_CLP = "Assets:EAG:Caja-111001"
+CAJA_USD = "Assets:EAG:CajaUs-111003"
+SUSPENSE_ACCOUNT = "Expenses:EAG:Suspense"
+
+# Sinónimos sucios de Gemini → tipo canónico (barrido de 304 cartolas, §10.1).
+_OP_SYNONYMS = {
+    "compras p.a.t.": "compra", "pat": "compra", "compra_automatica": "compra",
+    "cargo_automatico": "compra", "nota_credito": "abono",
+}
+_KNOWN_OPS = _CONSUMO_OPS | _BANK_CHARGE_OPS | _ADVANCE_OPS | _PAYMENT_OPS
+
+
+def _normalize_op(raw_op: str | None, amount: Decimal) -> str:
+    """Normaliza el `operation_type` sucio de Gemini a un tipo canónico (§10.1).
+
+    `None`/vacío → `compra` si el monto es +, `abono` si es − (compras sin taggear; el signo decide).
+    Sinónimos PAT/automática → `compra`; `nota_credito` → `abono`. Tipo canónico → pasa igual.
+    Cualquier otra cosa → `""` (no reconocido → Suspense + reporte, nunca se descarta).
+    """
+    key = str(raw_op or "").strip().lower()  # `raw` es dict[str, Any]: un op no-str no debe crashear
+    if not key:
+        return "compra" if amount > 0 else "abono"
+    if key in _OP_SYNONYMS:
+        return _OP_SYNONYMS[key]
+    if key in _KNOWN_OPS:
+        return key
+    return ""
 
 
 def _posting(account: str, number: Decimal) -> data.Posting:
@@ -121,6 +153,7 @@ def build_tc_correction_entries(
     batch_id: str,
     bank_account_id: str,
     emit_opening: bool,
+    unmapped: list | None = None,
 ) -> list:
     """Asientos de corrección de una cartola de TC (flujo Valentina §6). Lista de `data.Transaction`.
 
@@ -133,27 +166,38 @@ def build_tc_correction_entries(
     entries: list = []
 
     for tx in model.transactions:
-        op = (tx.raw or {}).get("operation_type") or ""
-        if op in _PURCHASE_OPS:
-            # (a) / abono: signed amount → abono (amount<0) invierte el asiento solo.
-            # Sin redondear (precisión completa): evita el residuo de redondeo per-línea.
-            clp = tx.amount * fx
-            if clp == 0:
-                continue
-            category = category_for(tx)
-            postings = [_posting(tc_real_account, -clp), _posting(category, clp)]
-        elif op in _PAYMENT_OPS:
+        raw_op = (tx.raw or {}).get("operation_type")
+        op = _normalize_op(raw_op, tx.amount)
+        if op in _PAYMENT_OPS:
             # (b) reclasificación del pago: saca el gasto falso de la cuenta-gasto Laudus.
             lump = Decimal(lump_for(tx))
             if lump == 0:
                 continue
             postings = [_posting(expense_tc_account, -lump), _posting(tc_real_account, lump)]
+            meta_op = op
         else:
-            # operation_type desconocido → no se contabiliza acá (queda para revisión/discrepancia).
-            continue
+            # asiento (a): TODA línea (consumo/cargo/avance/abono/desconocido) toca TC:Real por
+            # -monto×fx → el pasivo cuadra con el closing SIEMPRE. La contrapartida depende del tipo.
+            # Sin redondear (precisión completa): evita el residuo de redondeo per-línea.
+            clp = tx.amount * fx
+            if clp == 0:
+                continue
+            if op in _CONSUMO_OPS:
+                counterpart = category_for(tx)        # abono = compra invertida por el signo del amount
+            elif op in _BANK_CHARGE_OPS:
+                counterpart = BANK_CHARGES_ACCOUNT     # FIJO, no pasa por el categorizador 9.7
+            elif op in _ADVANCE_OPS:
+                counterpart = CAJA_USD if tx.currency != _CLP else CAJA_CLP  # avance = plata, no gasto
+            else:
+                # No reconocido: red de seguridad (§10.1) — Suspense + reportar, NUNCA descartar.
+                counterpart = SUSPENSE_ACCOUNT
+                if unmapped is not None:
+                    unmapped.append({"line": tx.line_no, "op": raw_op, "monto": tx.amount})
+            postings = [_posting(tc_real_account, -clp), _posting(counterpart, clp)]
+            meta_op = op or (raw_op or "desconocido")
         entries.append(data.Transaction(
             meta=_meta(line_no=tx.line_no, bank_account_id=bank_account_id, batch_id=batch_id,
-                       op=op, fx=fx, year_month=year_month),
+                       op=meta_op, fx=fx, year_month=year_month),
             date=tx.date, flag="*", payee=None,
             narration=tx.description or f"line {tx.line_no}",
             tags=frozenset(), links=frozenset(), postings=postings,
@@ -264,7 +308,7 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
     is_usd = model.currency != _CLP
 
     result = {"batch_id": batch_id, "status": "blocked", "currency": model.currency, "fx": None,
-              "purchases": 0, "payments": 0, "opening_emitted": False,
+              "purchases": 0, "payments": 0, "opening_emitted": False, "unmapped": [],
               "fx_bcch": None, "fx_deviation_pct": None,
               "git_commit_sha": None, "reason": None}
 
@@ -290,7 +334,9 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
         # Pre-resuelve el lump de cada MONTO CANCELADO (asiento b) por glosa, antes de construir.
         lumps: dict[int, Decimal] = {}
         for tx in model.transactions:
-            if (tx.raw or {}).get("operation_type") in _PAYMENT_OPS:
+            # Mismo `_normalize_op` que el builder: si no, un `pago` con mayúsculas/espacios se
+            # normaliza a pago al construir pero acá no se pre-resuelve → KeyError en `lump_for`.
+            if _normalize_op((tx.raw or {}).get("operation_type"), tx.amount) in _PAYMENT_OPS:
                 lump = _resolve_usd_lump(abs(tx.amount), laudus_payments)
                 if lump is None:
                     result["reason"] = (f"sin pago Laudus que matchee el MONTO CANCELADO "
@@ -313,7 +359,7 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
     entries = build_tc_correction_entries(
         model=model, tc_real_account=tc_real, expense_tc_account=expense_tc, fx=fx,
         lump_for=lump_for, category_for=category_for, batch_id=batch_id,
-        bank_account_id=bank_account_id, emit_opening=emit_opening)
+        bank_account_id=bank_account_id, emit_opening=emit_opening, unmapped=result["unmapped"])
 
     # Validación de cordura del FX (solo USD). El FX se deriva del pago que salda el estado
     # (`lump/closing` — regla §12.1: NO se usa BCCh como tasa, eso descuadraría `Σ(compras × fx)`). Acá
@@ -339,9 +385,9 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
 
     result["fx"] = str(fx)
     result["purchases"] = sum(1 for tx in model.transactions
-                              if (tx.raw or {}).get("operation_type") in _PURCHASE_OPS)
+                              if _normalize_op((tx.raw or {}).get("operation_type"), tx.amount) in _CONSUMO_OPS)
     result["payments"] = sum(1 for tx in model.transactions
-                             if (tx.raw or {}).get("operation_type") in _PAYMENT_OPS)
+                             if _normalize_op((tx.raw or {}).get("operation_type"), tx.amount) in _PAYMENT_OPS)
     result["opening_emitted"] = emit_opening and model.balances.opening != 0
 
     with acquire_lock(lock_path):

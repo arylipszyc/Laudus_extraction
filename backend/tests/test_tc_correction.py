@@ -19,13 +19,18 @@ from backend.app.integrations.cartola_schema import CartolaCanonicalV1
 from pipeline.importers.cartola_pdf_importer import render_entries
 from pipeline.importers.matching_engine import LaudusEntry
 from pipeline.importers.tc_correction import (
+    BANK_CHARGES_ACCOUNT,
+    CAJA_CLP,
+    CAJA_USD,
     OPENING_EQUITY,
+    SUSPENSE_ACCOUNT,
     build_tc_correction_entries,
     correct_tc_cartola,
     derive_statement_fx,
     parse_glosa_usd,
     tc_real_account,
 )
+from pipeline.importers.tc_correction import _normalize_op
 
 TC_REAL = "Liabilities:EAG:TC:Real:VisaTest"
 EXP_TC = "Expenses:EAG:TC:TcTest-430099"
@@ -37,6 +42,10 @@ ACCOUNTS = f"""\
 2020-12-31 open {CAT} CLP
 2020-12-31 open {OPENING_EQUITY} CLP
 2020-12-31 open Assets:EAG:Bancos:Test CLP
+2020-12-31 open {BANK_CHARGES_ACCOUNT} CLP
+2020-12-31 open {CAJA_CLP} CLP
+2020-12-31 open {CAJA_USD} CLP
+2020-12-31 open {SUSPENSE_ACCOUNT} CLP
 """
 
 
@@ -175,6 +184,105 @@ def test_no_doble_conteo_suma_anual(tmp_path):
     assert bal_cat.get_currency_units("CLP").number == Decimal("40000.00")     # 45k − 5k
 
 
+# ── Mapeo COMPLETO de operation_type (§10.1 — cierra el drop silencioso) ──────
+
+
+def test_normalize_op_robusto():
+    # Sign-routing del vacío/None; sinónimos; case/espacios; no reconocido → "".
+    assert _normalize_op(None, Decimal(100)) == "compra"
+    assert _normalize_op(None, Decimal(-100)) == "abono"
+    assert _normalize_op("", Decimal(50)) == "compra"
+    assert _normalize_op("COMPRAS P.A.T.", Decimal(1)) == "compra"
+    assert _normalize_op("  Pago ", Decimal(-1)) == "pago"      # case + espacios (sino crashea el USD)
+    assert _normalize_op("nota_credito", Decimal(-1)) == "abono"
+    assert _normalize_op("impuesto", Decimal(1)) == "impuesto"
+    assert _normalize_op("xyz", Decimal(1)) == ""              # no reconocido → Suspense
+    assert _normalize_op(5, Decimal(1)) == ""                  # op no-str (raw es Any) → no crashea
+
+
+def test_none_positivo_normaliza_a_compra(tmp_path):
+    m = _model([("2026-03-10", "UBER EATS", 12000, None)])
+    net = _net_by_account(_build(m))
+    assert net[TC_REAL] == Decimal("-12000.00")    # ↑ deuda
+    assert net[CAT] == Decimal("12000.00")          # el signo + → compra categorizada
+    assert _bean_check(tmp_path, _build(m)) == []
+
+
+def test_none_negativo_normaliza_a_abono(tmp_path):
+    m = _model([("2026-03-12", "REVERSO", -8000, None)])
+    net = _net_by_account(_build(m))
+    assert net[TC_REAL] == Decimal("8000.00")       # ↓ deuda (el signo − → abono)
+    assert net[CAT] == Decimal("-8000.00")
+
+
+def test_sinonimos_pat_y_cargo_son_compra(tmp_path):
+    m = _model([("2026-03-10", "AGUAS ANDINAS", 30000, "COMPRAS P.A.T."),
+                ("2026-03-11", "NETFLIX", 9000, "cargo_automatico")])
+    net = _net_by_account(_build(m))
+    assert net[CAT] == Decimal("39000.00")          # ambos sinónimos → compra
+    assert net[TC_REAL] == Decimal("-39000.00")
+
+
+def test_cargo_bancario_va_a_gastos_bancarios(tmp_path):
+    # La fuga real de la BCI 2026-04: impuesto $781 + comisión $6.014 = $6.795 que se dropeaban.
+    m = _model([("2026-03-10", "TIMBRE DL 3475", 781, "impuesto"),
+                ("2026-03-10", "COBRO ADM MENSUAL", 6014, "comision")])
+    entries = _build(m)
+    net = _net_by_account(entries)
+    assert net[BANK_CHARGES_ACCOUNT] == Decimal("6795.00")  # cuenta FIJA, no el categorizador 9.7
+    assert net[TC_REAL] == Decimal("-6795.00")              # el pasivo ya no queda corto
+    assert CAT not in net                                    # NO pasó por el 9.7
+    assert _bean_check(tmp_path, entries) == []
+
+
+def test_avance_va_a_caja_no_gasto(tmp_path):
+    m = _model([("2026-03-10", "AVANCE EFECTIVO", 100000, "avance")])
+    net = _net_by_account(_build(m))
+    assert net[CAJA_CLP] == Decimal("100000.00")    # plata que entró, NO consumo
+    assert net[TC_REAL] == Decimal("-100000.00")
+    assert CAT not in net and BANK_CHARGES_ACCOUNT not in net
+
+
+def test_avance_usd_va_a_caja_us(tmp_path):
+    m = _model([("2026-03-10", "AVANCE USD", 200, "avance")], currency="USD")
+    entries = build_tc_correction_entries(
+        model=m, tc_real_account=TC_REAL, expense_tc_account=EXP_TC, fx=Decimal(900),
+        lump_for=lambda tx: abs(tx.amount), category_for=lambda tx: CAT,
+        batch_id="b1", bank_account_id="tc-test", emit_opening=False)
+    net = _net_by_account(entries)
+    assert net[CAJA_USD] == Decimal("180000.00")    # 200 × fx 900, a la Caja USD
+    assert CAJA_CLP not in net
+
+
+def test_op_no_reconocido_va_a_suspense_y_se_reporta(tmp_path):
+    m = _model([("2026-03-10", "GLOSA RARA", 5000, "xyz_desconocido")])
+    unmapped: list = []
+    entries = build_tc_correction_entries(
+        model=m, tc_real_account=TC_REAL, expense_tc_account=EXP_TC, fx=Decimal(1),
+        lump_for=lambda tx: abs(tx.amount), category_for=lambda tx: CAT,
+        batch_id="b1", bank_account_id="tc-test", emit_opening=False, unmapped=unmapped)
+    net = _net_by_account(entries)
+    assert net[SUSPENSE_ACCOUNT] == Decimal("5000.00")     # nada se descarta
+    assert net[TC_REAL] == Decimal("-5000.00")
+    assert unmapped == [{"line": 1, "op": "xyz_desconocido", "monto": Decimal("5000")}]
+    assert _bean_check(tmp_path, entries) == []
+
+
+def test_invariante_tc_real_igual_menos_closing(tmp_path):
+    # CLP totalmente mapeada con TODOS los tipos: cada línea toca TC:Real → cierra exacto en -closing.
+    m = _model([
+        ("2026-03-05", "JUMBO", 45000, "compra"),
+        ("2026-03-06", "UBER EATS", 12000, None),           # → compra
+        ("2026-03-07", "TIMBRE", 781, "impuesto"),          # → GastosBancarios
+        ("2026-03-08", "AVANCE", 50000, "avance"),          # → Caja
+        ("2026-03-12", "DEVOLUCION", -5000, "abono"),
+        ("2026-03-20", "MONTO CANCELADO", -100000, "pago"),
+    ], opening="500000")
+    net = _net_by_account(_build(m, emit_opening=True))
+    assert net[TC_REAL] == -m.balances.closing             # invariante §7: pasivo == -closing
+    assert _bean_check(tmp_path, _build(m, emit_opening=True)) == []
+
+
 # ── FX USD: glosa del pago Laudus ─────────────────────────────────────────────
 
 
@@ -238,6 +346,9 @@ _ORCH_ACCOUNTS = f"""\
 2020-12-31 open {OPENING_EQUITY} CLP
 2020-12-31 open Expenses:EAG:Suspense CLP
 2020-12-31 open Assets:EAG:Bancos:Test CLP
+2020-12-31 open {BANK_CHARGES_ACCOUNT} CLP
+2020-12-31 open {CAJA_CLP} CLP
+2020-12-31 open {CAJA_USD} CLP
 """
 
 
@@ -326,6 +437,7 @@ def test_correct_clp_end_to_end(tmp_path):
     assert res["status"] == "corrected"
     assert res["purchases"] == 2 and res["payments"] == 1
     assert res["opening_emitted"] is True
+    assert res["unmapped"] == []                             # todo mapeó, nada en silencio
     out = root / "imports" / "cartolas"
     files = list(out.glob("*-tc.beancount"))
     assert len(files) == 1                                   # el archivo de corrección se escribió
@@ -334,6 +446,21 @@ def test_correct_clp_end_to_end(tmp_path):
     from beancount import loader
     _e, errors, _o = loader.load_file(str(root / "main.beancount"))
     assert errors == []
+
+
+def test_correct_clp_reporta_unmapped_sin_bloquear(tmp_path):
+    # Una línea con op no reconocido cae a Suspense, se reporta en result["unmapped"], y NO bloquea.
+    root = _make_ledger(tmp_path)
+    m = _model([("2026-03-10", "JUMBO", 45000, "compra"),
+                ("2026-03-11", "GLOSA RARA", 5000, "xyz_desconocido"),
+                ("2026-03-20", "MONTO CANCELADO", -50000, "pago")], opening="0")
+    _stage(root, m)
+    res = correct_tc_cartola("b1", _FakeImporter(), root, ts=_TS)
+    assert res["status"] == "corrected"
+    assert res["unmapped"] == [{"line": 2, "op": "xyz_desconocido", "monto": Decimal("5000")}]
+    from beancount import loader
+    _e, errors, _o = loader.load_file(str(root / "main.beancount"))
+    assert errors == []                                      # Suspense absorbe; ledger válido
 
 
 def test_correct_clp_apertura_idempotente(tmp_path):
