@@ -312,3 +312,129 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -82060.00 CLP
   Expenses:EAG:Agua-413013  82060.00 CLP
+
+2026-06-19 * "Victoria Uscuvilca de Sra Raquel Ventura"
+  id: "6040"
+  je_num: "6000"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -790000.00 CLP
+  Expenses:EAG:SraRaquelVentura-430021  790000.00 CLP
+
+2026-06-22 * "Arte y Dec Floral Ltda Mant Junio 2026"
+  id: "6037"
+  je_num: "5997"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -226100.00 CLP
+  Expenses:EAG:MantencinJardinBonsai-411053  226100.00 CLP
+
+2026-06-22 * "Mirador Santa Anita GGCC Mayo 2026"
+  id: "6038"
+  je_num: "5998"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -2888177.00 CLP
+  Expenses:EAG:GastosComunes-411067  2888177.00 CLP
+
+2026-06-22 * "Traspaso a Cuenta Edwards EAG 162338082"
+  id: "6039"
+  je_num: "5999"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -5000000.00 CLP
+  Assets:EAG:Bancos:BancoEdwards0162338082-111007  5000000.00 CLP
+
+2026-06-23 * "Raquel Ventura - Efectivo de EAG"
+  id: "6036"
+  je_num: "5996"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -1000000.00 CLP
+  Expenses:EAG:SraRaquelVentura-430021  1000000.00 CLP
+
+2026-06-23 * "Fuga sur SPA - Ubicacion filtracion casa"
+  id: "6047"
+  je_num: "6007"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -600000.00 CLP
+  Expenses:EAG:MantencinGeneralInstalaciones-413065  600000.00 CLP
+
+2026-06-24 * "Luis Salazar - Mantencion piscina"
+  id: "6041"
+  je_num: "6001"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -88000.00 CLP
+  Expenses:EAG:MantencinPiscina-411051  88000.00 CLP
+
+2026-06-24 * "Raquel Ventura Traspaso Banco Santander"
+  id: "6042"
+  je_num: "6002"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoEdwards0162338082-111007  -2000000.00 CLP
+  Expenses:EAG:SraRaquelVentura-430021  2000000.00 CLP
+
+2026-06-24 * "Inv. Tecnion Ltda abono mandato Johanna"
+  id: "6043"
+  je_num: "6003"
+  source: "laudus-erp"
+  Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  3000000.00 CLP
+  Income:Johanna:RetirosTecnin-870011  -3000000.00 CLP
+
+2026-06-24 * "UF3.000 Mandato mutuo Inv. Tecnion"
+  id: "6044"
+  je_num: "6004"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  122412000.00 CLP
+  Assets:EAG:InvTecnionLimitada-113018  -122412000.00 CLP
+
+2026-06-24 * "UF3.000 Budhaus anticipo trabajo cabañas"
+  id: "6045"
+  je_num: "6005"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -122412000.00 CLP
+  Expenses:EAG:ObrasDeInfraestructuraMb-413900  122412000.00 CLP
+
+2026-06-24 * "Moises Moncada - Utiles de aseo casa"
+  id: "6046"
+  je_num: "6006"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -79829.00 CLP
+  Expenses:EAG:ComprasCasaEfectivo-413049  79829.00 CLP
+
+2026-06-24 * "Fuga sur SPA Saldo ubicacion filtracion"
+  id: "6048"
+  je_num: "6008"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -340100.00 CLP
+  Expenses:EAG:MantencinGeneralInstalaciones-413065  340100.00 CLP
+
+2026-06-24 * "USD2.182 Johanna - Dif Remesa Mayo 2026"
+  id: "6049"
+  je_num: "6009"
+  source: "laudus-erp"
+  Assets:EAG:ControlYLiquidacin-115099  4557.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  -11099.00 CLP
+  Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -10896.00 CLP
+  Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -1820742.00 CLP
+  Expenses:Johanna:RetirosDelMes-890001  2758000.00 CLP
+  Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  -45000.00 CLP
+  Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  -18594.00 CLP
+  Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  -203100.00 CLP
+  Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  -653126.00 CLP
+
+2026-06-25 * "Costanera Norte - Sportage VTFG45 VG"
+  id: "6050"
+  je_num: "6010"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  110447.00 CLP
+  Income:EAG:OtrosIngresos-310099  -110447.00 CLP
+
+2026-06-25 * "Victoria Celia U. - Sueldo Junio 2026"
+  id: "6051"
+  je_num: "6011"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoEdwards0162338082-111007  -945115.00 CLP
+  Expenses:EAG:SueldosRopaRegalas-411001  945115.00 CLP
+
+2026-06-25 * "Victoria Svigilisky - Contribuciones"
+  id: "6052"
+  je_num: "6012"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -623129.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  623129.00 CLP
