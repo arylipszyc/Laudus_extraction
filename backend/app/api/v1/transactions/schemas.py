@@ -32,3 +32,5 @@ class PendingTx(BaseModel):
     current_flag: str | None = None
     current_match_source: str | None = None
     current_category_status: str | None = None
+    current_color: str | None = None        # Goal B (§10.2): green | yellow | red
+    current_confidence: float | None = None

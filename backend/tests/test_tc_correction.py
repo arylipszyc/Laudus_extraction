@@ -331,6 +331,80 @@ def test_derive_fx_bloqueante_si_pago_fuera_de_ventana(tmp_path):
     assert res["status"] == "blocked"
 
 
+# ── FX USD: fallback por monto (pagos consolidados Santander, glosa no codifica el USD) ────────
+
+
+def test_derive_fx_consolidado_elige_posting_por_monto(tmp_path):
+    # Santander paga consolidado: la glosa nombra OTRA tarjeta/USD aunque el asiento paga esta cuenta.
+    # `load_laudus_entries(expense_tc, ...)` devuelve SOLO el posting a ESTA cuenta-gasto (su CLP). Dos
+    # postings (uno por cada tarjeta USD): el matcher debe elegir el de ESTA cuenta por monto (FX ~931),
+    # NO el de la otra tarjeta. La glosa no trae 1387.63 → el path de glosa falla, cae al fallback.
+    m = _model([("2026-02-10", "AMAZON", 1387.63, "compra")], opening="0", closing="1387.63",
+               currency="USD", start="2026-01-28", end="2026-02-28")
+    # candidato correcto: 1.291.675 / 1387.63 ≈ 930.8 ; el otro posting (Latanpass) daría FX absurdo aquí.
+    us = [
+        _us_payment(date(2026, 3, 6), "1291675.00", "USD3.217,07 Visa Santander 0858 Febrero"),
+        _us_payment(date(2026, 3, 6), "3000722.00", "USD3.217,07 Visa Santander 0858 Febrero"),
+    ]
+    res = derive_statement_fx(m, us, bcch=Decimal("931"))
+    assert res["status"] == "ok"
+    assert res["glosa_usd"] is None                       # eligió por monto, no por glosa
+    assert res["lump_clp"] == Decimal("1291675.00")       # el posting de ESTA cuenta
+    assert Decimal("930") < res["fx"] < Decimal("932")    # ~930.8, no el del otro posting (3000722/1387.63≈2162)
+
+
+def test_derive_fx_fallback_bcch_elige_dentro_de_tolerancia(tmp_path):
+    # Dos candidatos por monto; con BCCh presente se elige el que cae dentro de tolerancia (5%).
+    m = _model([("2026-02-10", "AMAZON", 1000, "compra")], opening="0", closing="1000",
+               currency="USD", start="2026-01-28", end="2026-02-28")
+    us = [
+        _us_payment(date(2026, 3, 5), "1300000.00", "pago consolidado sin USD"),   # FX 1300 ✗ (>tol)
+        _us_payment(date(2026, 3, 6), "931000.00", "pago consolidado sin USD"),    # FX 931 ✓
+    ]
+    res = derive_statement_fx(m, us, bcch=Decimal("931"))
+    assert res["status"] == "ok"
+    assert res["fx"] == Decimal("931")
+    assert res["payment_date"] == date(2026, 3, 6)
+
+
+def test_derive_fx_fallback_banda_sin_bcch(tmp_path):
+    # Sin BCCh ese mes → banda de plausibilidad [850, 1000]; elige el más temprano que cumpla.
+    m = _model([("2026-02-10", "AMAZON", 1000, "compra")], opening="0", closing="1000",
+               currency="USD", start="2026-01-28", end="2026-02-28")
+    us = [
+        _us_payment(date(2026, 3, 4), "2000000.00", "pago consolidado"),   # FX 2000 ✗ (fuera banda)
+        _us_payment(date(2026, 3, 5), "899000.00", "pago consolidado"),    # FX 899 ✓ (más temprano)
+        _us_payment(date(2026, 3, 6), "920000.00", "pago consolidado"),    # FX 920 ✓ pero posterior
+    ]
+    res = derive_statement_fx(m, us, bcch=None)
+    assert res["status"] == "ok"
+    assert res["fx"] == Decimal("899")
+    assert res["payment_date"] == date(2026, 3, 5)
+
+
+def test_derive_fx_fallback_sin_candidato_en_banda_sigue_blocked(tmp_path):
+    # Ningún posting da FX en banda (ej. Mastercard USD marzo: saldo rodó a abril sin pago propio).
+    m = _model([("2026-02-10", "AMAZON", 1000, "compra")], opening="0", closing="1000",
+               currency="USD", start="2026-01-28", end="2026-02-28")
+    us = [
+        _us_payment(date(2026, 3, 5), "578000.00", "pago consolidado"),    # FX 578 ✗
+        _us_payment(date(2026, 3, 6), "22955000.00", "pago consolidado"),  # FX 22955 ✗
+    ]
+    res = derive_statement_fx(m, us, bcch=None)
+    assert res["status"] == "blocked" and res["fx"] is None
+
+
+def test_derive_fx_glosa_bci_sin_cambios_con_bcch(tmp_path):
+    # El path de glosa (BCI) sigue ganando aunque se pase bcch: glosa-USD == closing → FX exacto.
+    m = _model([("2026-04-10", "EBAY", 100, "compra")], opening="0", closing="26188.93",
+               currency="USD", start="2026-03-28", end="2026-04-28")
+    us = [_us_payment(date(2026, 5, 14), "23543848.00", "USD26.188,93 Visa BCI 1027 Abril")]
+    res = derive_statement_fx(m, us, bcch=Decimal("899"))
+    assert res["status"] == "ok"
+    assert res["glosa_usd"] == Decimal("26188.93")        # ganó la glosa, no el fallback
+    assert Decimal("898") < res["fx"] < Decimal("900")
+
+
 # ── Orquestador correct_tc_cartola (end-to-end: staging → ledger) ──────────────
 
 EXPENSE_TC = "Expenses:EAG:TC:TcTest-430099"

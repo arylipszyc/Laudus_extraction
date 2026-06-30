@@ -10,6 +10,8 @@ export interface PendingTx {
   current_flag: string | null
   current_match_source: string | null
   current_category_status: string | null
+  current_color: 'green' | 'yellow' | 'red' | null
+  current_confidence: number | null
 }
 
 /** GET /api/v1/categorization/pending — tx con category_status ∈ (suggested, pending) (Story 9.7 AC9). */

@@ -65,6 +65,11 @@ def list_pending(entries: list) -> list[dict]:
             "current_flag": e.flag,
             "current_match_source": meta.get("match_source"),
             "current_category_status": meta.get("category_status"),
+            # Goal B (§10.2): color advisory + confianza, para que el contador vea de un vistazo
+            # qué revisar (los rojos arriba). El TC builder los estampa en la meta del asiento (a).
+            "current_color": meta.get("color"),
+            "current_confidence": (float(meta["confidence"])
+                                   if meta.get("confidence") is not None else None),
         })
     out.sort(key=lambda r: (r["bank_account_id"] or "", r["date"]))
     return out

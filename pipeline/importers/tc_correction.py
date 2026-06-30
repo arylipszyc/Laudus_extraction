@@ -27,6 +27,8 @@ from beancount.core import data
 from beancount.core.amount import Amount
 
 from backend.app.integrations.cartola_schema import CartolaCanonicalV1, CartolaTransaction
+from pipeline.importers.categorization.service import CategorizationResult
+from pipeline.importers.fx_calculator import TOLERANCE_PCT
 
 OPENING_EQUITY = "Equity:Apertura:TarjetasSinDetalle"
 _CLP = "CLP"
@@ -41,6 +43,13 @@ _FX_WINDOW_DAYS = 75
 # El estado USD se considera "saldado por la glosa" si el USD de la glosa == closing del estado.
 _USD_MATCH_TOLERANCE = Decimal("0.01")
 
+# Fallback por monto (pagos consolidados Santander: un asiento paga varias tarjetas, la glosa
+# nombra UNA y su USD ≠ el de ESTA tarjeta). El CLP posteado a la cuenta-gasto de cada tarjeta SÍ
+# es correcto → `fx = le.amount / total_usd` da el FX sano; BCCh (o banda) solo ELIGE cuál posting,
+# nunca se vuelve la tasa (regla §12.1). Banda CLP/USD de plausibilidad cuando no hay BCCh ese mes.
+_FX_BAND_LO = Decimal("850")
+_FX_BAND_HI = Decimal("1000")
+
 # Glosa del pago Laudus, formato chileno: "USD26.188,93 Visa BCI 1027 Abril" → 26188.93.
 _GLOSA_USD_RE = re.compile(r"USD\s*([\d.]*\d,\d{2})")
 
@@ -53,18 +62,51 @@ def parse_glosa_usd(text: str) -> Decimal | None:
     return Decimal(m.group(1).replace(".", "").replace(",", "."))
 
 
+def _fx_in_gate(fx: Decimal, bcch: Decimal | None) -> bool:
+    """¿El FX candidato pasa el gate de selección? (BCCh ±tolerancia si existe, banda si no).
+
+    BCCh/banda NO son la tasa — solo deciden si este posting es el pago plausible de la tarjeta
+    (regla §12.1: la tasa siempre es CLP real / USD). `fx` debe ser > 0.
+    """
+    if fx <= 0:
+        return False
+    if bcch is not None and bcch != 0:
+        return abs(fx - bcch) / bcch * Decimal("100") <= TOLERANCE_PCT
+    return _FX_BAND_LO <= fx <= _FX_BAND_HI
+
+
+def _select_by_amount(candidates: list, total_usd: Decimal, bcch: Decimal | None):
+    """Elige el `LaudusEntry` cuyo `amount / total_usd` pasa el gate (pago consolidado, sin glosa).
+
+    Con BCCh: el más cercano al BCCh dentro de tolerancia. Sin BCCh: el más temprano dentro de la
+    banda (los `candidates` ya vienen ordenados por fecha). None si ninguno pasa → bloqueante.
+    """
+    if total_usd == 0:
+        return None
+    passing = [(le, le.amount / total_usd) for le in candidates]
+    passing = [(le, fx) for le, fx in passing if _fx_in_gate(fx, bcch)]
+    if not passing:
+        return None
+    if bcch is not None and bcch != 0:
+        return min(passing, key=lambda lf: abs(lf[1] - bcch))[0]
+    return passing[0][0]  # más temprano (candidates ordenados por fecha)
+
+
 def derive_statement_fx(
     model: CartolaCanonicalV1,
     laudus_us_entries: list,
     *,
     window_days: int = _FX_WINDOW_DAYS,
+    bcch: Decimal | None = None,
 ) -> dict:
     """FX único del estado USD desde el pago de Laudus que lo salda (Story 6.2 §FX, regla Ary).
 
     Busca en `laudus_us_entries` (asientos de la cuenta `...Us`, de `load_laudus_entries`) el pago
     fechado tras el cierre del estado cuya **glosa codifica el mismo USD que el `closing`** del estado.
-    `FX = CLP_del_pago / USD_de_la_glosa`. Valida el cuadre: si ningún pago matchea el USD del estado
-    → bloqueante (falta un movimiento o hay un error en la extracción), NO se estima FX.
+    `FX = CLP_del_pago / USD_de_la_glosa`. Si ningún pago tiene la glosa (pago consolidado Santander),
+    cae al **fallback por monto**: elige el posting a esta cuenta-gasto cuyo `amount / closing` pasa el
+    gate BCCh (o banda de plausibilidad si no hay BCCh ese mes) — el CLP real, no una tasa estimada.
+    Si ninguno pasa → bloqueante (falta un movimiento o el saldo rodó sin pago), NO se estima FX.
 
     Devuelve `{status, fx, lump_clp, glosa_usd, payment_date, reason}`. `status ∈ {ok, blocked}`.
     """
@@ -79,6 +121,11 @@ def derive_statement_fx(
         if glosa is not None and glosa != 0 and abs(glosa - total_usd) <= _USD_MATCH_TOLERANCE:
             return {"status": "ok", "fx": (le.amount / glosa), "lump_clp": le.amount,
                     "glosa_usd": glosa, "payment_date": le.date, "reason": None}
+    # Fallback consolidado: la glosa no codifica este USD → elige el posting por monto (gate BCCh/banda).
+    le = _select_by_amount(candidates, total_usd, bcch)
+    if le is not None:
+        return {"status": "ok", "fx": (le.amount / total_usd), "lump_clp": le.amount,
+                "glosa_usd": None, "payment_date": le.date, "reason": None}
     return {"status": "blocked", "fx": None, "lump_clp": None, "glosa_usd": None, "payment_date": None,
             "reason": (f"sin pago Laudus que salde el estado (USD {total_usd}) en {window_days}d tras "
                        f"el cierre {end} — ¿falta un movimiento o el estado aún no se pagó?")}
@@ -94,6 +141,40 @@ BANK_CHARGES_ACCOUNT = "Expenses:EAG:GastosBancarios-430003"
 CAJA_CLP = "Assets:EAG:Caja-111001"
 CAJA_USD = "Assets:EAG:CajaUs-111003"
 SUSPENSE_ACCOUNT = "Expenses:EAG:Suspense"
+
+# ── Recomendación con colores (§10.2, Goal B) ──────────────────────────────────
+# 3 colores, sin naranja. El color es advisory: el contador confirma SIEMPRE.
+COLOR_GREEN = "green"
+COLOR_YELLOW = "yellow"
+COLOR_RED = "red"
+
+# Sobre `historical` (confianza = #confirmaciones/30): ≥0.5 (≥15 conf) ya es señal sólida → verde.
+_GREEN_CONFIDENCE = 0.5
+
+
+def color_for(confidence: float, match_source: str) -> str:
+    """Mapea (confianza, fuente) → color de la recomendación (§10.2). Función pura.
+
+    🟢 verde    = `historical-30+`, o confianza alta (la glosa ya está muy confirmada).
+    🟡 amarillo = `smart_importer` / `historical` con pocas confirmaciones / cargo bancario por
+                  keyword (confianza media).
+    🔴 rojo     = `pending`/Suspense, adivinanza de Gemini, o tipo no reconocido (confianza baja/nula).
+    """
+    src = match_source or ""
+    if src in ("pending", "gemini"):
+        return COLOR_RED
+    if src == "historical-30+":
+        return COLOR_GREEN
+    try:
+        conf = float(confidence)
+    except (TypeError, ValueError):
+        conf = 0.0
+    if conf >= _GREEN_CONFIDENCE:
+        return COLOR_GREEN
+    if conf > 0.0:
+        return COLOR_YELLOW
+    return COLOR_RED
+
 
 # Sinónimos sucios de Gemini → tipo canónico (barrido de 304 cartolas, §10.1).
 _OP_SYNONYMS = {
@@ -125,7 +206,7 @@ def _posting(account: str, number: Decimal) -> data.Posting:
 
 
 def _meta(*, line_no: int, bank_account_id: str, batch_id: str, op: str, fx: Decimal,
-          year_month: str) -> dict:
+          year_month: str, category: "CategorizationResult | None" = None) -> dict:
     m = data.new_metadata("<tc-correction>", line_no)
     m.update({
         "source": "cartola-tc",
@@ -139,6 +220,16 @@ def _meta(*, line_no: int, bank_account_id: str, batch_id: str, op: str, fx: Dec
     })
     if fx != Decimal(1):
         m["fx"] = str(fx)
+    # Goal B (§10.2): preserva la confianza+fuente del categorizador y su color advisory en el
+    # asiento (a). El contador confirma SIEMPRE; el color solo le dice de un vistazo dónde fijarse.
+    if category is not None:
+        m["match_source"] = category.match_source
+        m["confidence"] = str(category.confidence)
+        m["color"] = color_for(category.confidence, category.match_source)
+        # El contador confirma SIEMPRE — nada se auto-confirma. Por eso `suggested`/`pending`, NUNCA
+        # `confirmed` (a diferencia del cartola_pdf_importer, que sí cierra en `*`): el color es la
+        # señal de revisión, no una compuerta a auto.
+        m["category_status"] = "pending" if category.match_source == "pending" else "suggested"
     return m
 
 
@@ -149,7 +240,7 @@ def build_tc_correction_entries(
     expense_tc_account: str,
     fx: Decimal,
     lump_for: Callable[[CartolaTransaction], Decimal],
-    category_for: Callable[[CartolaTransaction], str],
+    category_for: Callable[[CartolaTransaction], "str | CategorizationResult"],
     batch_id: str,
     bank_account_id: str,
     emit_opening: bool,
@@ -168,6 +259,7 @@ def build_tc_correction_entries(
     for tx in model.transactions:
         raw_op = (tx.raw or {}).get("operation_type")
         op = _normalize_op(raw_op, tx.amount)
+        category: CategorizationResult | None = None
         if op in _PAYMENT_OPS:
             # (b) reclasificación del pago: saca el gasto falso de la cuenta-gasto Laudus.
             lump = Decimal(lump_for(tx))
@@ -183,7 +275,15 @@ def build_tc_correction_entries(
             if clp == 0:
                 continue
             if op in _CONSUMO_OPS:
-                counterpart = category_for(tx)        # abono = compra invertida por el signo del amount
+                # abono = compra invertida por el signo del amount. `category_for` puede devolver un
+                # `CategorizationResult` (preserva confianza+fuente+color en la meta, Goal B §10.2) o
+                # un `str` (compat: solo la cuenta, sin meta de color).
+                cat = category_for(tx)
+                if isinstance(cat, CategorizationResult):
+                    category = cat
+                    counterpart = cat.category_account
+                else:
+                    counterpart = cat
             elif op in _BANK_CHARGE_OPS:
                 counterpart = BANK_CHARGES_ACCOUNT     # FIJO, no pasa por el categorizador 9.7
             elif op in _ADVANCE_OPS:
@@ -197,7 +297,7 @@ def build_tc_correction_entries(
             meta_op = op or (raw_op or "desconocido")
         entries.append(data.Transaction(
             meta=_meta(line_no=tx.line_no, bank_account_id=bank_account_id, batch_id=batch_id,
-                       op=meta_op, fx=fx, year_month=year_month),
+                       op=meta_op, fx=fx, year_month=year_month, category=category),
             date=tx.date, flag="*", payee=None,
             narration=tx.description or f"line {tx.line_no}",
             tags=frozenset(), links=frozenset(), postings=postings,
@@ -265,17 +365,20 @@ def _opening_exists(out_dir: Path, tc_real_account: str, *, exclude: Path | None
     return False
 
 
-def _resolve_usd_lump(monto_cancelado_usd: Decimal, laudus_payments: list) -> Decimal | None:
-    """CLP real del pago Laudus que matchea (por glosa USD) el `MONTO CANCELADO` de la cartola.
+def _resolve_usd_lump(monto_cancelado_usd: Decimal, laudus_payments: list,
+                      *, bcch: Decimal | None = None) -> Decimal | None:
+    """CLP real del pago Laudus que salda el `MONTO CANCELADO` de la cartola (glosa, luego monto).
 
     El asiento (b) usa el lump REAL (no `USD × FX_del_estado`): el MONTO CANCELADO se liquidó al FX
-    del estado anterior. None si ningún pago Laudus codifica ese USD → bloqueante (AC3, §12.1).
+    del estado anterior. Glosa primero; si ninguna codifica ese USD (pago consolidado Santander), cae
+    al match por monto con el mismo gate BCCh/banda que el FX del estado. None si ninguno → bloqueante.
     """
     for le in laudus_payments:
         glosa = parse_glosa_usd(le.description)
         if glosa is not None and glosa != 0 and abs(glosa - monto_cancelado_usd) <= _USD_MATCH_TOLERANCE:
             return le.amount
-    return None
+    le = _select_by_amount(laudus_payments, monto_cancelado_usd, bcch)
+    return le.amount if le is not None else None
 
 
 def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict:
@@ -322,10 +425,13 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
 
     # FX + lump por pago.
     if is_usd:
+        from pipeline.importers.fx_calculator import lookup_bcch
+        ym = model.period.end.strftime("%Y-%m")
+        bcch = lookup_bcch(root / "_meta" / "fx-bcch-eom.jsonl", ym)
         window = timedelta(days=_FX_WINDOW_DAYS)
         laudus_payments = load_laudus_entries(
             laudus_dir, expense_tc, model.period.start - window, model.period.end + window)
-        fx_res = derive_statement_fx(model, laudus_payments)
+        fx_res = derive_statement_fx(model, laudus_payments, bcch=bcch)
         if fx_res["status"] != "ok":
             result["reason"] = fx_res["reason"]
             return result
@@ -337,7 +443,7 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
             # Mismo `_normalize_op` que el builder: si no, un `pago` con mayúsculas/espacios se
             # normaliza a pago al construir pero acá no se pre-resuelve → KeyError en `lump_for`.
             if _normalize_op((tx.raw or {}).get("operation_type"), tx.amount) in _PAYMENT_OPS:
-                lump = _resolve_usd_lump(abs(tx.amount), laudus_payments)
+                lump = _resolve_usd_lump(abs(tx.amount), laudus_payments, bcch=bcch)
                 if lump is None:
                     result["reason"] = (f"sin pago Laudus que matchee el MONTO CANCELADO "
                                         f"USD {abs(tx.amount)} (línea {tx.line_no})")
@@ -351,8 +457,18 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
         def lump_for(tx: CartolaTransaction) -> Decimal:
             return abs(tx.amount)
 
-    def category_for(tx: CartolaTransaction) -> str:
-        return importer.category_predictor.predict(tx.description, tx.amount, bank_account_id)[0]
+    predictor = importer.category_predictor
+
+    def category_for(tx: CartolaTransaction) -> CategorizationResult:
+        # Goal B (§10.2): preserva confianza+fuente (no solo `[0]`). El `CategorizationService` real
+        # expone `categorize()` → `CategorizationResult`; el `NoopCategoryPredictor` solo `predict()`
+        # (sin confianza) → se reconstruye un result con confidence=0 (cae a rojo, que es lo correcto:
+        # Noop manda todo a Suspense/pending).
+        categorize = getattr(predictor, "categorize", None)
+        if categorize is not None:
+            return categorize(tx.description, tx.amount, bank_account_id)
+        account, match_source, _flag = predictor.predict(tx.description, tx.amount, bank_account_id)
+        return CategorizationResult(account, match_source, 0.0, _flag)
 
     emit_opening = not _opening_exists(out_dir, tc_real, exclude=out_file)
 
@@ -369,9 +485,7 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
     # arrastrado se captura aparte en el asiento (c) de apertura y NO descuadra este check (a diferencia
     # del viejo `residuo`, que se prendía con cualquier saldo arrastrado sin validar el lump real).
     if is_usd:
-        from pipeline.importers.fx_calculator import calculate_fx, lookup_bcch
-        ym = model.period.end.strftime("%Y-%m")
-        bcch = lookup_bcch(root / "_meta" / "fx-bcch-eom.jsonl", ym)
+        from pipeline.importers.fx_calculator import calculate_fx
         fx_check = calculate_fx(model.balances.closing, settling_lump, bcch)
         result["fx_bcch"] = str(fx_check.bcch) if fx_check.bcch is not None else None
         result["fx_deviation_pct"] = (float(fx_check.deviation_pct)
