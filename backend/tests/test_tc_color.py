@@ -63,11 +63,13 @@ def test_color_historical_30plus_es_verde():
 
 
 def test_color_smart_importer_alta_confianza_es_verde():
-    # confianza alta (≥0.5) aunque la fuente sea smart_importer → verde.
+    # confianza alta (≥0.85, el bar del flag `*` del pipeline) aunque la fuente sea smart_importer → verde.
     assert color_for(0.95, "smart_importer") == COLOR_GREEN
 
 
 def test_color_smart_importer_confianza_media_es_amarillo():
+    # Veredicto D2 (Valentina 2026-06-30): 0.5-0.85 = el pipeline lo flaggea `!` → amarillo, NO verde.
+    assert color_for(0.7, "smart_importer") == COLOR_YELLOW
     assert color_for(0.4, "smart_importer") == COLOR_YELLOW
 
 
@@ -77,8 +79,9 @@ def test_color_historical_pocas_confirmaciones_es_amarillo():
 
 
 def test_color_historical_muchas_confirmaciones_es_verde():
-    # ≥15 confirmaciones (≥0.5) ya es verde; el color se pone más verde con cada pasada (§12.5).
-    assert color_for(20 / 30, "historical") == COLOR_GREEN
+    # ≥26 confirmaciones (≥0.85, corte alineado al pipeline) → verde; se pone más verde con cada pasada.
+    assert color_for(26 / 30, "historical") == COLOR_GREEN
+    assert color_for(20 / 30, "historical") == COLOR_YELLOW   # 0.67 < 0.85 → amarillo (D2)
 
 
 def test_color_pending_suspense_es_rojo():

@@ -157,7 +157,9 @@ COLOR_YELLOW = "yellow"
 COLOR_RED = "red"
 
 # Sobre `historical` (confianza = #confirmaciones/30): ≥0.5 (≥15 conf) ya es señal sólida → verde.
-_GREEN_CONFIDENCE = 0.5
+# Corte verde alineado al umbral de confianza del pipeline 9.7 (CONFIDENCE_THRESHOLD=0.85, el bar de
+# flag `*`): el color no pinta verde nada que el pipeline marque `!` (veredicto Valentina 2026-06-30, D2).
+_GREEN_CONFIDENCE = 0.85
 
 
 def color_for(confidence: float, match_source: str) -> str:
