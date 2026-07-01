@@ -45,10 +45,9 @@ _USD_MATCH_TOLERANCE = Decimal("0.01")
 
 # Fallback por monto (pagos consolidados Santander: un asiento paga varias tarjetas, la glosa
 # nombra UNA y su USD ≠ el de ESTA tarjeta). El CLP posteado a la cuenta-gasto de cada tarjeta SÍ
-# es correcto → `fx = le.amount / total_usd` da el FX sano; BCCh (o banda) solo ELIGE cuál posting,
-# nunca se vuelve la tasa (regla §12.1). Banda CLP/USD de plausibilidad cuando no hay BCCh ese mes.
-_FX_BAND_LO = Decimal("850")
-_FX_BAND_HI = Decimal("1000")
+# es correcto → `fx = le.amount / total_usd` da el FX sano; el BCCh (mes exacto o, si falta, el
+# último disponible) solo ELIGE cuál posting cae en plausibilidad, nunca se vuelve la tasa (§12.1).
+# Sin ningún BCCh de referencia → no se puede filtrar → bloquea (falla segura, decisión Ary 2026-06-30).
 
 # Glosa del pago Laudus, formato chileno: "USD26.188,93 Visa BCI 1027 Abril" → 26188.93.
 _GLOSA_USD_RE = re.compile(r"USD\s*([\d.]*\d,\d{2})")
@@ -63,33 +62,42 @@ def parse_glosa_usd(text: str) -> Decimal | None:
 
 
 def _fx_in_gate(fx: Decimal, bcch: Decimal | None) -> bool:
-    """¿El FX candidato pasa el gate de selección? (BCCh ±tolerancia si existe, banda si no).
+    """¿El FX candidato pasa el gate de selección? (BCCh de referencia ±tolerancia).
 
-    BCCh/banda NO son la tasa — solo deciden si este posting es el pago plausible de la tarjeta
-    (regla §12.1: la tasa siempre es CLP real / USD). `fx` debe ser > 0.
+    El BCCh (mes exacto o el último disponible) NO es la tasa — solo decide si este posting es el
+    pago plausible de la tarjeta (regla §12.1: la tasa siempre es CLP real / USD). `fx` debe ser > 0.
+    Sin BCCh de referencia → no hay ancla → no pasa nada (falla segura: el matcher bloquea).
     """
     if fx <= 0:
         return False
-    if bcch is not None and bcch != 0:
-        return abs(fx - bcch) / bcch * Decimal("100") <= TOLERANCE_PCT
-    return _FX_BAND_LO <= fx <= _FX_BAND_HI
+    if bcch is None or bcch == 0:
+        return False
+    return abs(fx - bcch) / bcch * Decimal("100") <= TOLERANCE_PCT
 
 
-def _select_by_amount(candidates: list, total_usd: Decimal, bcch: Decimal | None):
+def _anchor_for(bcch, d):
+    """Resuelve el BCCh de referencia para un pago fechado `d`.
+
+    `bcch` puede ser un `Decimal` (ancla única para todos los candidatos, usado por los tests) o un
+    callable `date -> Decimal | None` (prod: el dólar del MES EN QUE SE PAGÓ cada candidato). El FX
+    se deriva del pago, así que su plausibilidad se juzga contra el dólar de su propia fecha, NO del
+    cierre del estado (el pago que salda febrero ocurre en marzo, a la tasa de marzo).
+    """
+    return bcch(d) if callable(bcch) else bcch
+
+
+def _select_by_amount(candidates: list, total_usd: Decimal, bcch):
     """Elige el `LaudusEntry` cuyo `amount / total_usd` pasa el gate (pago consolidado, sin glosa).
 
-    Con BCCh: el más cercano al BCCh dentro de tolerancia. Sin BCCh: el más temprano dentro de la
-    banda (los `candidates` ya vienen ordenados por fecha). None si ninguno pasa → bloqueante.
+    Entre los que caen en `BCCh ±tolerancia` (el BCCh del mes de CADA pago, ver `_anchor_for`), elige
+    el de **fecha más temprana tras el cierre** (§diseño valentina-fix: "preferir el de fecha más
+    cercana al cierre"; los consolidados llegan ~1 ciclo después). None si ninguno pasa → bloqueante.
     """
     if total_usd == 0:
         return None
-    passing = [(le, le.amount / total_usd) for le in candidates]
-    passing = [(le, fx) for le, fx in passing if _fx_in_gate(fx, bcch)]
-    if not passing:
-        return None
-    if bcch is not None and bcch != 0:
-        return min(passing, key=lambda lf: abs(lf[1] - bcch))[0]
-    return passing[0][0]  # más temprano (candidates ordenados por fecha)
+    ordered = sorted(candidates, key=lambda le: le.date)  # desempate determinista por fecha
+    passing = [le for le in ordered if _fx_in_gate(le.amount / total_usd, _anchor_for(bcch, le.date))]
+    return passing[0] if passing else None
 
 
 def derive_statement_fx(
@@ -97,16 +105,16 @@ def derive_statement_fx(
     laudus_us_entries: list,
     *,
     window_days: int = _FX_WINDOW_DAYS,
-    bcch: Decimal | None = None,
+    bcch=None,   # Decimal (ancla única) o callable date->Decimal|None (BCCh del mes de cada pago)
 ) -> dict:
     """FX único del estado USD desde el pago de Laudus que lo salda (Story 6.2 §FX, regla Ary).
 
     Busca en `laudus_us_entries` (asientos de la cuenta `...Us`, de `load_laudus_entries`) el pago
     fechado tras el cierre del estado cuya **glosa codifica el mismo USD que el `closing`** del estado.
     `FX = CLP_del_pago / USD_de_la_glosa`. Si ningún pago tiene la glosa (pago consolidado Santander),
-    cae al **fallback por monto**: elige el posting a esta cuenta-gasto cuyo `amount / closing` pasa el
-    gate BCCh (o banda de plausibilidad si no hay BCCh ese mes) — el CLP real, no una tasa estimada.
-    Si ninguno pasa → bloqueante (falta un movimiento o el saldo rodó sin pago), NO se estima FX.
+    cae al **fallback por monto**: elige el posting a esta cuenta-gasto cuyo `amount / closing` cae en
+    `bcch ±tolerancia` (BCCh del mes exacto o el último disponible) — el CLP real, no una tasa estimada.
+    Sin BCCh de referencia, o si ninguno pasa → bloqueante (falla segura), NO se estima FX.
 
     Devuelve `{status, fx, lump_clp, glosa_usd, payment_date, reason}`. `status ∈ {ok, blocked}`.
     """
@@ -366,12 +374,12 @@ def _opening_exists(out_dir: Path, tc_real_account: str, *, exclude: Path | None
 
 
 def _resolve_usd_lump(monto_cancelado_usd: Decimal, laudus_payments: list,
-                      *, bcch: Decimal | None = None) -> Decimal | None:
+                      *, bcch=None) -> Decimal | None:
     """CLP real del pago Laudus que salda el `MONTO CANCELADO` de la cartola (glosa, luego monto).
 
     El asiento (b) usa el lump REAL (no `USD × FX_del_estado`): el MONTO CANCELADO se liquidó al FX
     del estado anterior. Glosa primero; si ninguna codifica ese USD (pago consolidado Santander), cae
-    al match por monto con el mismo gate BCCh/banda que el FX del estado. None si ninguno → bloqueante.
+    al match por monto con el mismo gate BCCh (mes exacto o último) que el FX. None si ninguno → bloqueante.
     """
     for le in laudus_payments:
         glosa = parse_glosa_usd(le.description)
@@ -425,13 +433,18 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
 
     # FX + lump por pago.
     if is_usd:
-        from pipeline.importers.fx_calculator import lookup_bcch
+        from pipeline.importers.fx_calculator import latest_bcch, lookup_bcch
+        bcch_path = root / "_meta" / "fx-bcch-eom.jsonl"
         ym = model.period.end.strftime("%Y-%m")
-        bcch = lookup_bcch(root / "_meta" / "fx-bcch-eom.jsonl", ym)
+        # Ancla del gate: el BCCh del MES EN QUE SE PAGÓ cada candidato (el FX sale del pago, no del
+        # cierre — el estado de feb se paga en mar a la tasa de mar). Mes exacto o, si falta, el último
+        # disponible. Sin ningún BCCh → None → el matcher bloquea (falla segura, decisión Ary 2026-06-30).
+        def bcch_at(d):
+            return lookup_bcch(bcch_path, d.strftime("%Y-%m")) or latest_bcch(bcch_path)
         window = timedelta(days=_FX_WINDOW_DAYS)
         laudus_payments = load_laudus_entries(
             laudus_dir, expense_tc, model.period.start - window, model.period.end + window)
-        fx_res = derive_statement_fx(model, laudus_payments, bcch=bcch)
+        fx_res = derive_statement_fx(model, laudus_payments, bcch=bcch_at)
         if fx_res["status"] != "ok":
             result["reason"] = fx_res["reason"]
             return result
@@ -443,7 +456,7 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
             # Mismo `_normalize_op` que el builder: si no, un `pago` con mayúsculas/espacios se
             # normaliza a pago al construir pero acá no se pre-resuelve → KeyError en `lump_for`.
             if _normalize_op((tx.raw or {}).get("operation_type"), tx.amount) in _PAYMENT_OPS:
-                lump = _resolve_usd_lump(abs(tx.amount), laudus_payments, bcch=bcch)
+                lump = _resolve_usd_lump(abs(tx.amount), laudus_payments, bcch=bcch_at)
                 if lump is None:
                     result["reason"] = (f"sin pago Laudus que matchee el MONTO CANCELADO "
                                         f"USD {abs(tx.amount)} (línea {tx.line_no})")
@@ -479,20 +492,20 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
 
     # Validación de cordura del FX (solo USD). El FX se deriva del pago que salda el estado
     # (`lump/closing` — regla §12.1: NO se usa BCCh como tasa, eso descuadraría `Σ(compras × fx)`). Acá
-    # el dólar observado de cierre (Story 9.10, `_meta/fx-bcch-eom.jsonl`) solo valida que el FX derivado
-    # sea plausible: desviación > 5% del BCCh = el lump o el total USD no corresponden → bloqueante. Sin
-    # BCCh ese mes → no bloquea (mismo criterio que 9.6b). Supuesto: la TC se paga al contado; un saldo
-    # arrastrado se captura aparte en el asiento (c) de apertura y NO descuadra este check (a diferencia
-    # del viejo `residuo`, que se prendía con cualquier saldo arrastrado sin validar el lump real).
+    # el dólar observado se compara contra el FX derivado: desviación > 5% = el lump o el total USD no
+    # corresponden → bloqueante. Se valida contra el BCCh del MES DEL PAGO (no del cierre): el FX sale del
+    # pago, que ocurre ~1 ciclo después del cierre y a la tasa de ESE mes. Sin BCCh ese mes → no bloquea
+    # (mismo criterio que 9.6b). El saldo arrastrado se captura en el asiento (c) y NO descuadra este check.
     if is_usd:
         from pipeline.importers.fx_calculator import calculate_fx
-        fx_check = calculate_fx(model.balances.closing, settling_lump, bcch)
+        pay_ym = fx_res["payment_date"].strftime("%Y-%m")
+        fx_check = calculate_fx(model.balances.closing, settling_lump, lookup_bcch(bcch_path, pay_ym))
         result["fx_bcch"] = str(fx_check.bcch) if fx_check.bcch is not None else None
         result["fx_deviation_pct"] = (float(fx_check.deviation_pct)
                                       if fx_check.deviation_pct is not None else None)
         if fx_check.state in ("fx-out-of-tolerance", "fx-implausible"):
             result["reason"] = (
-                f"FX derivado {fx} CLP/USD no cuadra vs BCCh {ym} (bcch={fx_check.bcch}, "
+                f"FX derivado {fx} CLP/USD no cuadra vs BCCh {pay_ym} (bcch={fx_check.bcch}, "
                 f"desviación={fx_check.deviation_pct}%, {fx_check.state}) — ¿el lump o el total USD "
                 f"no corresponden?")
             return result

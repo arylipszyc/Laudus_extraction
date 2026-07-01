@@ -2,7 +2,7 @@
 import json
 from decimal import Decimal
 
-from pipeline.importers.fx_calculator import calculate_fx, lookup_bcch
+from pipeline.importers.fx_calculator import calculate_fx, latest_bcch, lookup_bcch
 
 
 def test_fx_in_tolerance():
@@ -53,3 +53,20 @@ def test_lookup_bcch(tmp_path):
 
 def test_lookup_bcch_missing_file(tmp_path):
     assert lookup_bcch(tmp_path / "nope.jsonl", "2026-04") is None
+
+
+def test_latest_bcch(tmp_path):
+    p = tmp_path / "fx-bcch-eom.jsonl"
+    p.write_text(
+        json.dumps({"year_month": "2026-04", "rate_clp_per_usd": 948.2}) + "\n"
+        + json.dumps({"year_month": "2026-03", "rate_clp_per_usd": 930.5}) + "\n",  # desordenado a propósito
+        encoding="utf-8",
+    )
+    assert latest_bcch(p) == Decimal("948.2")  # el mes más reciente, no el último en el archivo
+
+
+def test_latest_bcch_missing_or_empty(tmp_path):
+    assert latest_bcch(tmp_path / "nope.jsonl") is None
+    empty = tmp_path / "empty.jsonl"
+    empty.write_text("", encoding="utf-8")
+    assert latest_bcch(empty) is None

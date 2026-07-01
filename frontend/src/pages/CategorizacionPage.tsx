@@ -19,7 +19,12 @@ const COLOR_STYLE: Record<Color, { dot: string; label: string }> = {
   red: { dot: 'bg-red-500', label: 'text-red-700' },
 }
 
-const colorOf = (tx: PendingTx): Color => (tx.current_color as Color | null) ?? 'red'
+// Valida contra el set conocido (no solo null): un color inesperado de la meta (editada a mano, o
+// un color futuro) cae a 'red' en vez de reventar el render con COLOR_STYLE[undefined].
+const colorOf = (tx: PendingTx): Color => {
+  const c = tx.current_color
+  return c === 'green' || c === 'yellow' || c === 'red' ? c : 'red'
+}
 
 function ColorBadge({ color }: { color: Color }) {
   const s = COLOR_STYLE[color]

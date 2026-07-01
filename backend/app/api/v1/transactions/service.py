@@ -55,6 +55,12 @@ def list_pending(entries: list) -> list[dict]:
         cat = next((p.account for p in e.postings
                     if p.account.split(":")[0] in ("Expenses", "Income")), None)
         amt = e.postings[0].units.number if e.postings and e.postings[0].units else None
+        # `confidence` es meta Beancount (editable a mano): un valor no numérico no debe 500ear
+        # el endpoint entero — cae a None, como el try/except de `color_for`.
+        try:
+            conf = float(meta["confidence"]) if meta.get("confidence") is not None else None
+        except (TypeError, ValueError):
+            conf = None
         out.append({
             "tx_id": _tx_id_of(e),
             "bank_account_id": meta.get("bank_account_id"),
@@ -68,8 +74,7 @@ def list_pending(entries: list) -> list[dict]:
             # Goal B (§10.2): color advisory + confianza, para que el contador vea de un vistazo
             # qué revisar (los rojos arriba). El TC builder los estampa en la meta del asiento (a).
             "current_color": meta.get("color"),
-            "current_confidence": (float(meta["confidence"])
-                                   if meta.get("confidence") is not None else None),
+            "current_confidence": conf,
         })
     out.sort(key=lambda r: (r["bank_account_id"] or "", r["date"]))
     return out

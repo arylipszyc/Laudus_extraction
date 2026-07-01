@@ -367,31 +367,54 @@ def test_derive_fx_fallback_bcch_elige_dentro_de_tolerancia(tmp_path):
     assert res["payment_date"] == date(2026, 3, 6)
 
 
-def test_derive_fx_fallback_banda_sin_bcch(tmp_path):
-    # Sin BCCh ese mes → banda de plausibilidad [850, 1000]; elige el más temprano que cumpla.
+def test_derive_fx_fallback_multiples_en_tolerancia_elige_mas_temprano(tmp_path):
+    # Varios postings dentro de bcch±tol → elige el de fecha más temprana tras el cierre (§diseño).
     m = _model([("2026-02-10", "AMAZON", 1000, "compra")], opening="0", closing="1000",
                currency="USD", start="2026-01-28", end="2026-02-28")
     us = [
-        _us_payment(date(2026, 3, 4), "2000000.00", "pago consolidado"),   # FX 2000 ✗ (fuera banda)
+        _us_payment(date(2026, 3, 4), "2000000.00", "pago consolidado"),   # FX 2000 ✗ (fuera tol)
         _us_payment(date(2026, 3, 5), "899000.00", "pago consolidado"),    # FX 899 ✓ (más temprano)
         _us_payment(date(2026, 3, 6), "920000.00", "pago consolidado"),    # FX 920 ✓ pero posterior
     ]
-    res = derive_statement_fx(m, us, bcch=None)
+    res = derive_statement_fx(m, us, bcch=Decimal("910"))  # 899 y 920 caen en ±5% de 910
     assert res["status"] == "ok"
     assert res["fx"] == Decimal("899")
     assert res["payment_date"] == date(2026, 3, 5)
 
 
-def test_derive_fx_fallback_sin_candidato_en_banda_sigue_blocked(tmp_path):
-    # Ningún posting da FX en banda (ej. Mastercard USD marzo: saldo rodó a abril sin pago propio).
+def test_derive_fx_sin_bcch_de_referencia_bloquea(tmp_path):
+    # Sin BCCh de referencia (ni mes exacto ni último) → no hay ancla → falla segura (bloquea),
+    # NO cae a una banda hardcoded (decisión Ary 2026-06-30).
+    m = _model([("2026-02-10", "AMAZON", 1000, "compra")], opening="0", closing="1000",
+               currency="USD", start="2026-01-28", end="2026-02-28")
+    us = [_us_payment(date(2026, 3, 5), "899000.00", "pago consolidado")]  # FX 899, plausible pero sin ancla
+    res = derive_statement_fx(m, us, bcch=None)
+    assert res["status"] == "blocked" and res["fx"] is None
+
+
+def test_derive_fx_fallback_sin_candidato_en_tolerancia_sigue_blocked(tmp_path):
+    # Ningún posting cae en bcch±tol (ej. Mastercard USD marzo: saldo rodó a abril sin pago propio).
     m = _model([("2026-02-10", "AMAZON", 1000, "compra")], opening="0", closing="1000",
                currency="USD", start="2026-01-28", end="2026-02-28")
     us = [
         _us_payment(date(2026, 3, 5), "578000.00", "pago consolidado"),    # FX 578 ✗
         _us_payment(date(2026, 3, 6), "22955000.00", "pago consolidado"),  # FX 22955 ✗
     ]
-    res = derive_statement_fx(m, us, bcch=None)
+    res = derive_statement_fx(m, us, bcch=Decimal("931"))
     assert res["status"] == "blocked" and res["fx"] is None
+
+
+def test_derive_fx_fallback_gatea_por_mes_del_pago(tmp_path):
+    # El estado de feb se paga en MARZO; el gate debe usar el BCCh de marzo (931), no el de feb (861),
+    # o el FX ~931 del pago quedaría fuera de tolerancia contra el dólar de febrero (regresión del piloto).
+    m = _model([("2026-02-10", "AMAZON", 1387.63, "compra")], opening="0", closing="1387.63",
+               currency="USD", start="2026-01-28", end="2026-02-28")
+    us = [_us_payment(date(2026, 3, 6), "1291675.00", "pago consolidado sin USD")]  # FX ~930.8
+    bcch_by_month = {"2026-02": Decimal("861"), "2026-03": Decimal("931.57")}
+    res = derive_statement_fx(m, us, bcch=lambda d: bcch_by_month.get(d.strftime("%Y-%m")))
+    assert res["status"] == "ok"
+    assert Decimal("930") < res["fx"] < Decimal("932")
+    assert res["payment_date"] == date(2026, 3, 6)
 
 
 def test_derive_fx_glosa_bci_sin_cambios_con_bcch(tmp_path):
@@ -583,8 +606,9 @@ def _usd_model(closing="26188.93"):
 
 
 def test_correct_usd_end_to_end(tmp_path):
-    # FX derivado ≈ 898.99; BCCh del mes ≈ 899 → dentro de tolerancia → corrected.
-    root = _make_ledger(tmp_path, laudus=_USD_LAUDUS, bcch={"2026-04": 899})
+    # FX derivado ≈ 898.99; BCCh del mes DEL PAGO (2026-05, el pago que salda es del 14-may) ≈ 899 →
+    # dentro de tolerancia → corrected.
+    root = _make_ledger(tmp_path, laudus=_USD_LAUDUS, bcch={"2026-05": 899})
     _stage(root, _usd_model())
     res = correct_tc_cartola("b1", _FakeImporter(), root, ts=_TS)
 
@@ -622,7 +646,7 @@ def test_correct_usd_saldo_arrastrado_no_bloquea(tmp_path):
         '  Assets:EAG:Bancos:Test  -25341000.00 CLP\n'
         f'  {EXPENSE_TC}  25341000.00 CLP\n'
     )
-    root = _make_ledger(tmp_path, laudus=laudus, bcch={"2026-04": 899})
+    root = _make_ledger(tmp_path, laudus=laudus, bcch={"2026-05": 899})
     m = _model([
         ("2026-04-05", "EBAY", 13094.46, "compra"),
         ("2026-04-15", "AMAZON", 13094.47, "compra"),
@@ -634,9 +658,9 @@ def test_correct_usd_saldo_arrastrado_no_bloquea(tmp_path):
 
 
 def test_correct_usd_bloqueante_si_fx_fuera_de_tolerancia(tmp_path):
-    # FX derivado del pago ≈ 898.99, pero el BCCh del mes está en 700 → desviación ~28% > 5% →
-    # señal de que el lump o el total USD no corresponden → bloqueante.
-    root = _make_ledger(tmp_path, laudus=_USD_LAUDUS, bcch={"2026-04": 700})
+    # FX derivado del pago ≈ 898.99, pero el BCCh del mes del pago (2026-05) está en 700 → desviación
+    # ~28% > 5% → señal de que el lump o el total USD no corresponden → bloqueante.
+    root = _make_ledger(tmp_path, laudus=_USD_LAUDUS, bcch={"2026-05": 700})
     _stage(root, _usd_model())
     res = correct_tc_cartola("b1", _FakeImporter(), root, ts=_TS)
     assert res["status"] == "blocked"

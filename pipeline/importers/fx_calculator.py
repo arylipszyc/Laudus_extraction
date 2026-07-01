@@ -50,6 +50,34 @@ def lookup_bcch(jsonl_path: str | Path, year_month: str) -> Decimal | None:
     return None
 
 
+def latest_bcch(jsonl_path: str | Path) -> Decimal | None:
+    """Rate CLP/USD del mes MÁS RECIENTE en fx-bcch-eom.jsonl, o None si el archivo falta/vacío.
+
+    Ancla de plausibilidad para el matcher de pagos consolidados cuando NO hay BCCh del mes exacto:
+    la banda pasa a ser `último BCCh ±tolerancia` (decisión Ary 2026-06-30) en vez de un rango
+    hardcoded. Sin ningún BCCh → None → el matcher bloquea (falla segura, no adivina).
+    """
+    path = Path(jsonl_path)
+    if not path.exists():
+        return None
+    best_ym: str | None = None
+    best_rate: Decimal | None = None
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            entry = json.loads(line)
+        except json.JSONDecodeError:
+            logger.warning("línea malformada en %s", path)
+            continue
+        ym = entry.get("year_month")
+        rate = entry.get("rate_clp_per_usd")
+        if ym and rate is not None and (best_ym is None or ym > best_ym):  # "YYYY-MM" → orden lex = cronológico
+            best_ym, best_rate = ym, Decimal(str(rate))
+    return best_rate
+
+
 def calculate_fx(usd_cartola: Decimal, clp_laudus: Decimal, bcch_rate: Decimal | None) -> FXResult:
     """FX implícita + clasificación vs BCCh.
 
