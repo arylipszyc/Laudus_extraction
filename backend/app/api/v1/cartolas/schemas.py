@@ -27,6 +27,27 @@ class ValidateBalanceResponse(BaseModel):
     batch_id: str | None = None
 
 
+class TcCorrectionResponse(BaseModel):
+    """Resultado de corregir una cartola de TARJETA DE CRÉDITO (Story 6.2, flujo Valentina).
+
+    A diferencia del modelo A (`ValidateBalanceResponse`, reconcilia sin postear), la TC SÍ postea el
+    desglose al ledger, así que la forma de la respuesta es distinta: `corrected` (posteó) o `blocked`
+    (no pudo derivar FX/lump). Los campos TC-específicos son opcionales (un `blocked` no trae `file`)."""
+    status: Literal["corrected", "blocked"]
+    batch_id: str
+    currency: str
+    fx: str | None = None
+    purchases: int = 0
+    payments: int = 0
+    opening_emitted: bool = False
+    unmapped: list = []
+    fx_bcch: str | None = None
+    fx_deviation_pct: float | None = None
+    git_commit_sha: str | None = None
+    file: str | None = None
+    reason: str | None = None
+
+
 class UploadAcceptedResponse(BaseModel):
     """202 response from POST /api/v1/cartolas/upload — async pattern."""
     status: Literal["processing"] = "processing"

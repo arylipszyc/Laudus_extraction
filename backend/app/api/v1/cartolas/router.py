@@ -21,6 +21,7 @@ from fastapi.responses import JSONResponse
 
 from backend.app.api.v1.cartolas.schemas import (
     StatusResponse,
+    TcCorrectionResponse,
     UploadAcceptedResponse,
     ValidateBalanceRequest,
     ValidateBalanceResponse,
@@ -145,7 +146,8 @@ def get_cartola_status(
     )
 
 
-@router.patch("/{batch_id}/validate-balance", response_model=ValidateBalanceResponse)
+@router.patch("/{batch_id}/validate-balance",
+              response_model=ValidateBalanceResponse | TcCorrectionResponse)
 def validate_balance_endpoint(
     batch_id: str,
     request: ValidateBalanceRequest,
@@ -181,6 +183,9 @@ def validate_balance_endpoint(
             "message": "La validación contable falló por un motivo distinto al balance enviado",
             "detail": str(exc),
         }})
+    # La TC POSTEA (status corrected/blocked, otra forma) vs el modelo A reconcilia (status reconciled).
+    if result.get("status") in ("corrected", "blocked"):
+        return TcCorrectionResponse(**result).model_dump()
     return ValidateBalanceResponse(**result).model_dump()
 
 

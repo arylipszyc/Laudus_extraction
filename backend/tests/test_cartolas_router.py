@@ -128,6 +128,27 @@ def _family_cookie() -> dict[str, str]:
     return {"access_token": create_jwt(email="eduardo@eag.cl", role="family")}
 
 
+def test_validate_balance_tc_corrected_serializes_200(tmp_path):
+    # Regresión (bug hallado en el smoke por navegador): una cartola de TARJETA devuelve
+    # status='corrected' (forma distinta al modelo A 'reconciled'). El endpoint debe serializar 200 con
+    # TcCorrectionResponse, NO reventar el ValidateBalanceResponse (que pedía differences/blocking/matched).
+    client = _make_app(index_entry=None, gemini_mock=MagicMock(), staging_dir=tmp_path)
+    tc_result = {
+        "batch_id": "b1", "status": "corrected", "currency": "USD", "fx": "930.85",
+        "purchases": 40, "payments": 1, "opening_emitted": True, "unmapped": [],
+        "fx_bcch": "861.19", "fx_deviation_pct": 8.1, "git_commit_sha": None,
+        "file": "imports/cartolas/x-tc.beancount", "reason": None,
+    }
+    with patch("backend.app.api.v1.cartolas.router.validate_balance", return_value=tc_result):
+        r = client.patch("/api/v1/cartolas/b1/validate-balance",
+                         json={"opening": "0", "closing": "0"}, cookies=_contador_cookie())
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["status"] == "corrected"
+    assert body["fx"] == "930.85"
+    assert body["purchases"] == 40 and body["unmapped"] == []
+
+
 def _pdf_payload(content: bytes = b"%PDF-1.4 fake content") -> dict:
     return {
         "files": {"pdf_file": ("cartola.pdf", content, "application/pdf")},
