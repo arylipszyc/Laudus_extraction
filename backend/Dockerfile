@@ -18,6 +18,9 @@ COPY backend/ ./backend/
 # Copy pipeline package (sync, models, services, config, utils)
 COPY pipeline/ ./pipeline/
 
+# Copy bootstrap package (account_mapping.slugify — usado por el importer TC / reconcile)
+COPY bootstrap/ ./bootstrap/
+
 EXPOSE 8000
 
 COPY backend/entrypoint.sh ./entrypoint.sh
