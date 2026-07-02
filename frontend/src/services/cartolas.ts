@@ -47,6 +47,30 @@ export interface CartolaError {
   message: string
 }
 
+/**
+ * El handler global del backend a veces mete un objeto `{code, message}` dentro de
+ * `error.message` (HTTPException con `detail` dict — p.ej. staging expirado → 404).
+ * El panel renderiza `err.message` directo, así que un objeto ahí crashea el árbol de
+ * React (error #31 → pantalla en blanco). Normalizamos `code`/`message` a string.
+ */
+function normalizeApiError(
+  raw: unknown,
+  fallback: CartolaError,
+): CartolaError & Record<string, unknown> {
+  const e = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>
+  const code = typeof e.code === 'string' ? e.code : fallback.code
+  const m = e.message
+  const message =
+    typeof m === 'string'
+      ? m
+      : m && typeof m === 'object' && typeof (m as Record<string, unknown>).message === 'string'
+        ? ((m as Record<string, unknown>).message as string)
+        : m == null
+          ? fallback.message
+          : JSON.stringify(m)
+  return { ...e, code, message }
+}
+
 /** POST /api/v1/cartolas/upload — multipart. Resolves to 202 batch_id. */
 export async function uploadCartola(
   pdfFile: File,
@@ -62,11 +86,10 @@ export async function uploadCartola(
   })
   if (!res.ok) {
     const body = await res.json().catch(() => null)
-    const err: CartolaError = body?.error ?? {
+    throw normalizeApiError(body?.error, {
       code: 'UNKNOWN',
       message: `Upload failed: HTTP ${res.status}`,
-    }
-    throw err
+    })
   }
   return res.json()
 }
@@ -97,8 +120,7 @@ export async function validateBalance(
   })
   if (!res.ok) {
     const data = await res.json().catch(() => null)
-    const err = (data?.error ?? { code: 'UNKNOWN', message: `HTTP ${res.status}` }) as BalanceDiscrepancyError
-    throw err
+    throw normalizeApiError(data?.error, { code: 'UNKNOWN', message: `HTTP ${res.status}` }) as BalanceDiscrepancyError
   }
   return res.json()
 }
