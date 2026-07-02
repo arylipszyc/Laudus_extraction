@@ -161,10 +161,20 @@ class BankAccountIndex:
 # ── Singleton wiring ──────────────────────────────────────────────────────
 
 
-_DEFAULT_ACCOUNTS_PATH = Path(
-    os.getenv("LEDGER_ACCOUNTS_FILE")
-    or Path(__file__).resolve().parents[3] / "ledger" / "accounts.beancount"
-)
+def _default_accounts_path() -> Path:
+    # `LEDGER_ACCOUNTS_FILE` gana; si no, derivamos de `LEDGER_DIR` (el clone que
+    # arma entrypoint.sh, mismo patrón que reconciliation/sync); último recurso, el
+    # repo local para dev/tests.
+    explicit = os.getenv("LEDGER_ACCOUNTS_FILE")
+    if explicit:
+        return Path(explicit)
+    ledger_dir = os.getenv("LEDGER_DIR")
+    if ledger_dir:
+        return Path(ledger_dir) / "accounts.beancount"
+    return Path(__file__).resolve().parents[3] / "ledger" / "accounts.beancount"
+
+
+_DEFAULT_ACCOUNTS_PATH = _default_accounts_path()
 
 _singleton: BankAccountIndex | None = None
 _singleton_lock = threading.Lock()
