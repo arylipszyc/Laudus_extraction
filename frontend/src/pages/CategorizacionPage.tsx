@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { bulkCategorize, confirmCategory, getPendingCategorization, type PendingTx } from '@/services/categorizacion'
+import { bulkCategorize, getPendingCategorization, type PendingTx } from '@/services/categorizacion'
 import { CategoryAutocomplete } from '@/components/CategoryAutocomplete'
 
 // Las compras caen a Suspense hasta que el contador les pone cuenta. El batch confirma
@@ -52,10 +52,15 @@ export function CategorizacionPage() {
     queryFn: getPendingCategorization,
   })
 
-  // Categoría por fila, editable; arranca de la sugerida/Suspense y el consumidor la sube acá
-  // para que el botón batch sepa cuáles ya se sacaron de Suspense.
+  // Categoría por fila, editable; la sube el consumidor para que el botón batch sepa cuáles
+  // ya se categorizaron. Los ítems en Suspense arrancan EN BLANCO (estar acá ya implica Suspense);
+  // una sugerencia real (no-Suspense) sí se muestra para confirmarla.
   const [cats, setCats] = useState<Record<string, string>>({})
-  const catOf = (tx: PendingTx) => cats[tx.tx_id] ?? tx.current_category ?? ''
+  const catOf = (tx: PendingTx) => {
+    if (tx.tx_id in cats) return cats[tx.tx_id]
+    const cur = tx.current_category ?? ''
+    return cur === SUSPENSE ? '' : cur
+  }
 
   // Rojos arriba (lo que el contador debe decidir él); empate → mantiene el orden del backend.
   const sorted = data && [...data].sort((a, b) => COLOR_RANK[colorOf(a)] - COLOR_RANK[colorOf(b)])
@@ -112,15 +117,6 @@ function PendingRow({ tx, value, onChange }: {
   value: string
   onChange: (v: string) => void
 }) {
-  const qc = useQueryClient()
-
-  const mutation = useMutation({
-    mutationFn: () => confirmCategory(tx.tx_id, value.trim()),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['categorization-pending'] })
-    },
-  })
-
   return (
     <Card className="p-4 flex flex-wrap items-end gap-3">
       <div className="flex-1 min-w-[200px]">
@@ -137,10 +133,6 @@ function PendingRow({ tx, value, onChange }: {
         <label className="block text-xs text-muted-foreground mb-1">Cuenta de categoría</label>
         <CategoryAutocomplete value={value} onChange={onChange} />
       </div>
-      <Button onClick={() => mutation.mutate()} disabled={mutation.isPending || !value.trim()}>
-        {mutation.isPending ? 'Confirmando…' : 'Confirmar'}
-      </Button>
-      {mutation.error && <p className="w-full text-sm text-destructive">{(mutation.error as Error).message}</p>}
     </Card>
   )
 }

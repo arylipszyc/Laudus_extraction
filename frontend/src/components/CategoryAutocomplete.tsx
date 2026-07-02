@@ -1,4 +1,4 @@
-import { useMemo, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+import { useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { listAccounts } from '@/services/accounts'
 
@@ -23,6 +23,13 @@ export function CategoryAutocomplete({
   })
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(0)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const toggleOpen = () => {
+    setActive(0)
+    setOpen((o) => !o)
+    inputRef.current?.focus()
+  }
 
   const matches = useMemo(() => {
     const q = value.trim().toLowerCase()
@@ -46,6 +53,7 @@ export function CategoryAutocomplete({
     <div className="relative">
       <div className="relative">
         <input
+          ref={inputRef}
           value={value}
           onChange={(e) => { onChange(e.target.value); setOpen(true); setActive(0) }}
           onFocus={() => setOpen(true)}
@@ -53,12 +61,18 @@ export function CategoryAutocomplete({
           onKeyDown={onKeyDown}
           placeholder={placeholder}
           role="combobox" aria-expanded={open} aria-autocomplete="list"
-          className={`w-full border rounded-md px-3 py-2 bg-background text-sm ${known ? '' : 'border-amber-400'}`}
+          className={`w-full border rounded-md pl-3 pr-12 py-2 bg-background text-sm ${known ? '' : 'border-amber-400'}`}
         />
-        {value && (
-          <button type="button" onClick={() => onChange('')}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">✕</button>
-        )}
+        <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center text-muted-foreground">
+          {value && (
+            <button type="button" aria-label="Limpiar"
+              onMouseDown={(e) => { e.preventDefault(); onChange('') }}
+              className="px-1 text-xs hover:text-foreground">✕</button>
+          )}
+          <button type="button" aria-label="Abrir lista"
+            onMouseDown={(e) => { e.preventDefault(); toggleOpen() }}
+            className="px-1 text-xs hover:text-foreground">▾</button>
+        </div>
         {open && matches.length > 0 && (
           <ul role="listbox" className="absolute z-50 mt-1 w-full max-h-48 overflow-auto border rounded-md bg-card shadow text-sm">
             {matches.map((a, i) => (
