@@ -40,10 +40,20 @@ MAX_EXTRACTION_ATTEMPTS = 3
 
 JobStatus = Literal["processing", "ready", "failed"]
 
-_DEFAULT_STAGING_DIR = Path(
-    os.getenv("CARTOLA_STAGING_DIR")
-    or Path(__file__).resolve().parents[5] / "ledger" / "imports" / "cartolas" / "_staging"
-)
+def _default_staging_dir() -> Path:
+    # El staging debe vivir bajo el MISMO ledger root que lee validate_balance
+    # (`_ledger_root()` = `LEDGER_DIR` en prod, el clone en /app/ledger-repo). Antes esto
+    # usaba parents[5]/ledger fijo (=/app/ledger), así que en prod se escribía en un lado y
+    # se leía en otro → StagingNotFound (404). Local coincide (sin clone) — de ahí que el smoke pasara.
+    explicit = os.getenv("CARTOLA_STAGING_DIR")
+    if explicit:
+        return Path(explicit)
+    ledger_dir = os.getenv("LEDGER_DIR")
+    root = Path(ledger_dir) if ledger_dir else Path(__file__).resolve().parents[5] / "ledger"
+    return root / "imports" / "cartolas" / "_staging"
+
+
+_DEFAULT_STAGING_DIR = _default_staging_dir()
 
 
 def get_default_staging_dir() -> Path:
