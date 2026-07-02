@@ -40,12 +40,13 @@ from backend.app.api.v1.cartolas.service import (
     validate_upload_inputs,
 )
 from backend.app.auth.schemas import UserSession
-from backend.app.dependencies import require_role
+from backend.app.dependencies import get_ledger_service, require_role
 from backend.app.integrations.bank_account_index import (
     BankAccountIndex,
     get_bank_account_index,
 )
 from backend.app.integrations.gemini_client import GeminiClient
+from backend.app.services.ledger_service import LedgerService
 
 logger = logging.getLogger(__name__)
 
@@ -152,6 +153,7 @@ def validate_balance_endpoint(
     batch_id: str,
     request: ValidateBalanceRequest,
     user: UserSession = Depends(require_role(["contador", "admin"])),
+    ledger: LedgerService = Depends(get_ledger_service),
 ):
     """Promueve el staging a archivo final con validación de balance (Story 9.9).
 
@@ -185,6 +187,10 @@ def validate_balance_endpoint(
         }})
     # La TC POSTEA (status corrected/blocked, otra forma) vs el modelo A reconcilia (status reconciled).
     if result.get("status") in ("corrected", "blocked"):
+        # `corrected` escribió el desglose al ledger; refrescamos el ledger en memoria para que la
+        # cola de categorización lo vea sin depender del file-watcher (poco fiable en el contenedor).
+        if result.get("status") == "corrected":
+            ledger.load()
         return TcCorrectionResponse(**result).model_dump()
     return ValidateBalanceResponse(**result).model_dump()
 
