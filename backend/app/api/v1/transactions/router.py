@@ -11,6 +11,8 @@ from pathlib import Path
 from fastapi import APIRouter, Body, Depends, HTTPException
 
 from backend.app.api.v1.transactions.schemas import (
+    BulkCategorizeRequest,
+    BulkCategorizeResponse,
     BulkConfirmRequest,
     BulkConfirmResponse,
     PatchCategoryRequest,
@@ -19,6 +21,7 @@ from backend.app.api.v1.transactions.schemas import (
 from backend.app.api.v1.transactions.service import (
     CategoryEditError,
     TxNotFound,
+    bulk_categorize,
     bulk_confirm,
     update_category,
 )
@@ -69,3 +72,22 @@ def bulk_confirm_endpoint(
         raise HTTPException(status_code=422, detail=f"bean-check falló: {exc}")
     ledger.load()
     return BulkConfirmResponse(**result)
+
+
+@router.post("/bulk-categorize", response_model=BulkCategorizeResponse)
+def bulk_categorize_endpoint(
+    request: BulkCategorizeRequest,
+    user: UserSession = Depends(require_role(["contador", "admin"])),
+    ledger: LedgerService = Depends(get_ledger_service),
+):
+    """Confirma en un solo commit las tx que el contador ya categorizó (sacó de Suspense)."""
+    root = Path(ledger.main_path).parent
+    try:
+        result = bulk_categorize([(i.tx_id, i.category_account) for i in request.items],
+                                 entries=_entries(ledger), ledger_root=root, user_email=user.email)
+    except TxNotFound as exc:
+        raise HTTPException(status_code=404, detail=f"tx no encontrada: {exc}")
+    except CategoryEditError as exc:
+        raise HTTPException(status_code=422, detail=f"bean-check falló: {exc}")
+    ledger.load()
+    return BulkCategorizeResponse(**result)

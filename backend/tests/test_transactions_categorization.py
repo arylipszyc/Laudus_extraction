@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from backend.app.api.v1.transactions.service import (
     TxNotFound,
+    bulk_categorize,
     bulk_confirm,
     list_pending,
     update_category,
@@ -157,6 +158,37 @@ def test_bulk_confirm_scoped_solo_confirma_ese_batch(tmp_path):
     pend = list_pending(svc.entries())
     assert [p["current_category_status"] for p in pend] == ["suggested"]  # la de b2 sigue pendiente
     assert pend[0]["narration"] == "LIDER"
+
+
+# ── bulk-categorize: confirma seleccionadas con su categoría en un commit ──────
+
+
+def test_bulk_categorize_confirma_con_categoria_un_commit(tmp_path):
+    root = _ledger(tmp_path)
+    svc = _promote(root)
+    pend = sorted(list_pending(svc.entries()), key=lambda p: p["narration"])
+    items = [(pend[0]["tx_id"], "Expenses:EAG:Farmacia"),   # FARMACIA
+             (pend[1]["tx_id"], "Expenses:EAG:Super")]      # JUMBO
+    res = bulk_categorize(items, entries=svc.entries(), ledger_root=root,
+                          user_email="c@test.com", now_iso="2026-05-01T00:00:00Z")
+    assert res["confirmed"] == 2
+    f = next((root / "imports" / "cartolas").glob("*2026-03.beancount")).read_text(encoding="utf-8")
+    assert "Expenses:EAG:Farmacia" in f
+    assert 'category_status: "confirmed"' in f
+    # ambas quedan en la history (alimenta la supra)
+    hist = (root / "_meta" / "categorization-history.jsonl").read_text(encoding="utf-8")
+    assert "Expenses:EAG:Farmacia" in hist and "Expenses:EAG:Super" in hist
+    # tras recargar, nada pendiente
+    svc.load()
+    assert list_pending(svc.entries()) == []
+
+
+def test_bulk_categorize_tx_inexistente(tmp_path):
+    root = _ledger(tmp_path)
+    svc = _promote(root)
+    with pytest.raises(TxNotFound):
+        bulk_categorize([("deadbeef0000", "Expenses:EAG:Super")], entries=svc.entries(),
+                        ledger_root=root, user_email="c@test.com")
 
 
 def test_update_category_commitea_la_history_jsonl(tmp_path, monkeypatch):

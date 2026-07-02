@@ -22,6 +22,20 @@ class BulkConfirmResponse(BaseModel):
     git_sha: str | None = None
 
 
+class BulkCategorizeItem(BaseModel):
+    tx_id: str
+    category_account: str
+
+
+class BulkCategorizeRequest(BaseModel):
+    items: list[BulkCategorizeItem]
+
+
+class BulkCategorizeResponse(BaseModel):
+    confirmed: int
+    git_sha: str | None = None
+
+
 class PendingTx(BaseModel):
     tx_id: str
     bank_account_id: str | None = None

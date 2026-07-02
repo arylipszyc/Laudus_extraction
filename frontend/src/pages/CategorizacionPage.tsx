@@ -2,8 +2,12 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { confirmCategory, getPendingCategorization, type PendingTx } from '@/services/categorizacion'
+import { bulkCategorize, confirmCategory, getPendingCategorization, type PendingTx } from '@/services/categorizacion'
 import { CategoryAutocomplete } from '@/components/CategoryAutocomplete'
+
+// Las compras caen a Suspense hasta que el contador les pone cuenta. El batch confirma
+// justo las que ya salieron de Suspense (§tc_correction.SUSPENSE_ACCOUNT).
+const SUSPENSE = 'Expenses:EAG:Suspense'
 
 const fmt = (n: number | null) =>
   n == null ? '—' : new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(n)
@@ -42,39 +46,76 @@ function ColorBadge({ color }: { color: Color }) {
  * Goal B (§10.2): badge de color por ítem + rojos arriba (advisory; el contador confirma SIEMPRE).
  */
 export function CategorizacionPage() {
+  const qc = useQueryClient()
   const { data, isLoading, error } = useQuery({
     queryKey: ['categorization-pending'],
     queryFn: getPendingCategorization,
   })
 
+  // Categoría por fila, editable; arranca de la sugerida/Suspense y el consumidor la sube acá
+  // para que el botón batch sepa cuáles ya se sacaron de Suspense.
+  const [cats, setCats] = useState<Record<string, string>>({})
+  const catOf = (tx: PendingTx) => cats[tx.tx_id] ?? tx.current_category ?? ''
+
   // Rojos arriba (lo que el contador debe decidir él); empate → mantiene el orden del backend.
   const sorted = data && [...data].sort((a, b) => COLOR_RANK[colorOf(a)] - COLOR_RANK[colorOf(b)])
 
+  // Las ya categorizadas (fuera de Suspense) son las que el botón confirma en un solo commit.
+  const toConfirm = (sorted ?? []).filter((tx) => {
+    const c = catOf(tx).trim()
+    return c !== '' && c !== SUSPENSE
+  })
+
+  const bulk = useMutation({
+    mutationFn: () =>
+      bulkCategorize(toConfirm.map((tx) => ({ tx_id: tx.tx_id, category_account: catOf(tx).trim() }))),
+    onSuccess: () => {
+      setCats({})
+      qc.invalidateQueries({ queryKey: ['categorization-pending'] })
+    },
+  })
+
   return (
     <div className="p-6 space-y-6 max-w-4xl">
-      <h1 className="text-2xl font-semibold">Categorías pendientes</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold">Categorías pendientes</h1>
+        {toConfirm.length > 0 && (
+          <Button onClick={() => bulk.mutate()} disabled={bulk.isPending}>
+            {bulk.isPending ? 'Confirmando…' : `Confirmar categorizadas (${toConfirm.length})`}
+          </Button>
+        )}
+      </div>
       <p className="text-sm text-muted-foreground">
         Transacciones con categoría sugerida automáticamente. Confirmá la sugerida o corregí la cuenta.
         Los <span className="text-red-700 font-medium">rojos</span> son los que conviene revisar primero.
+        El botón <span className="font-medium">Confirmar categorizadas</span> confirma en un solo commit
+        las que ya sacaste de Suspense.
       </p>
 
+      {bulk.error && <p className="text-sm text-destructive">{(bulk.error as Error).message}</p>}
       {isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
       {error && <p className="text-sm text-destructive">{(error as Error).message}</p>}
       {data && data.length === 0 && (
         <Card className="p-6"><p className="text-sm text-muted-foreground">Nada pendiente. 🎉</p></Card>
       )}
 
-      {sorted?.map((tx) => <PendingRow key={tx.tx_id} tx={tx} />)}
+      {sorted?.map((tx) => (
+        <PendingRow key={tx.tx_id} tx={tx} value={catOf(tx)}
+          onChange={(v) => setCats((prev) => ({ ...prev, [tx.tx_id]: v }))} />
+      ))}
     </div>
   )
 }
 
-function PendingRow({ tx }: { tx: PendingTx }) {
+function PendingRow({ tx, value, onChange }: {
+  tx: PendingTx
+  value: string
+  onChange: (v: string) => void
+}) {
   const qc = useQueryClient()
-  const [category, setCategory] = useState(tx.current_category ?? '')
 
   const mutation = useMutation({
-    mutationFn: () => confirmCategory(tx.tx_id, category.trim()),
+    mutationFn: () => confirmCategory(tx.tx_id, value.trim()),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['categorization-pending'] })
     },
@@ -94,9 +135,9 @@ function PendingRow({ tx }: { tx: PendingTx }) {
       </div>
       <div className="flex-1 min-w-[240px]">
         <label className="block text-xs text-muted-foreground mb-1">Cuenta de categoría</label>
-        <CategoryAutocomplete value={category} onChange={setCategory} />
+        <CategoryAutocomplete value={value} onChange={onChange} />
       </div>
-      <Button onClick={() => mutation.mutate()} disabled={mutation.isPending || !category.trim()}>
+      <Button onClick={() => mutation.mutate()} disabled={mutation.isPending || !value.trim()}>
         {mutation.isPending ? 'Confirmando…' : 'Confirmar'}
       </Button>
       {mutation.error && <p className="w-full text-sm text-destructive">{(mutation.error as Error).message}</p>}

@@ -228,3 +228,63 @@ def bulk_confirm(
             raise CategoryEditError(detail)
         sha = git_commit_push(ledger_root, rels, f"[categorize] bulk-confirm {confirmed} tx")
     return {"confirmed": confirmed, "git_sha": sha}
+
+
+def bulk_categorize(
+    items: list[tuple[str, str]],
+    *,
+    entries: list,
+    ledger_root: Path,
+    user_email: str,
+    history_path: Path | None = None,
+    now_iso: str | None = None,
+) -> dict:
+    """Confirma una selección de tx con la categoría elegida, en UN solo commit (batch de la UI).
+
+    A diferencia de `bulk_confirm` (confirma sugeridas sin cambiar cuenta y saltea las pending),
+    acá cada tx trae su categoría — el contador la sacó de Suspense. Agrupa por (archivo, categoría),
+    reescribe cada grupo una vez, un solo bean-check con rollback, history + un git commit.
+    """
+    from pipeline.importers.laudus_run import acquire_lock, bean_check, git_commit_push
+
+    by_file: dict[Path, dict[str, set[str]]] = {}
+    bank_by_file: dict[Path, str] = {}
+    records: list[tuple[str, str, str | None, str]] = []  # (tx_id, new_cat, original_cat, narration)
+    for tx_id, new_cat in items:
+        t = _find(entries, tx_id)
+        if t is None:
+            raise TxNotFound(tx_id)
+        fp = Path(t.meta["filename"])
+        bank_by_file.setdefault(fp, _resolve_bank_target(t, ledger_root))
+        original_cat = next((p.account for p in t.postings
+                             if p.account.split(":")[0] in ("Expenses", "Income")), None)
+        by_file.setdefault(fp, {}).setdefault(new_cat, set()).add(tx_id)
+        records.append((tx_id, new_cat, original_cat, t.narration or ""))
+
+    if not by_file:
+        return {"confirmed": 0, "git_sha": None}
+
+    main_path = ledger_root / "main.beancount"
+    lock_path = ledger_root / ".import.lock"
+    hp = history_path or (ledger_root / "_meta" / "categorization-history.jsonl")
+
+    confirmed = 0
+    with acquire_lock(lock_path):
+        snapshots = {fp: fp.read_text(encoding="utf-8") for fp in by_file}
+        rels = []
+        for fp, by_cat in by_file.items():
+            for cat, ids in by_cat.items():
+                confirmed += len(_rewrite_file(fp, ids, cat, bank_by_file[fp]))
+            rels.append(f"ledger/imports/cartolas/{fp.name}")
+        ok, detail = bean_check(main_path)
+        if not ok:
+            for fp, content in snapshots.items():
+                fp.write_text(content, encoding="utf-8")
+            raise CategoryEditError(detail)
+        for tx_id, new_cat, original_cat, narration in records:
+            append_correction(hp, build_record(
+                description=narration, corrected_category=new_cat,
+                original_suggestion=original_cat, user=user_email, ts=now_iso))
+        rels.append("ledger/_meta/categorization-history.jsonl")
+        sha = git_commit_push(ledger_root, rels, f"[categorize] bulk {confirmed} tx")
+    return {"confirmed": confirmed, "git_sha": sha}

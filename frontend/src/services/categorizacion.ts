@@ -34,3 +34,20 @@ export async function confirmCategory(txId: string, categoryAccount: string): Pr
     throw new Error(d?.detail ?? `Error confirmando (${res.status})`)
   }
 }
+
+/** POST /api/v1/transactions/bulk-categorize — confirma varias con su categoría en UN commit. */
+export async function bulkCategorize(
+  items: { tx_id: string; category_account: string }[],
+): Promise<{ confirmed: number; git_sha: string | null }> {
+  const res = await fetch(`${api.baseUrl}/api/v1/transactions/bulk-categorize`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ items }),
+  })
+  if (!res.ok) {
+    const d = await res.json().catch(() => null)
+    throw new Error(d?.detail ?? `Error confirmando en lote (${res.status})`)
+  }
+  return res.json()
+}
