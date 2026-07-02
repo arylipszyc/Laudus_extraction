@@ -1,4 +1,4 @@
-import { useMemo, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
@@ -16,7 +16,7 @@ import {
   type PeriodStatus,
 } from '@/services/reconciliation'
 import { listBankAccounts, type BankAccount } from '@/services/bankAccounts'
-import { listAccounts } from '@/services/accounts'
+import { CategoryAutocomplete as AccountCombobox } from '@/components/CategoryAutocomplete'
 
 const fmt = (n: number | null | undefined, c?: string | null) => {
   if (n == null) return '—'
@@ -338,60 +338,10 @@ function DrillDown({ discrepancy, accountLabel, onClose, onResolved }: {
 
 /** Autocompletado de cuenta de categoría (Expenses) para confirm-cartola-only (AC1). */
 function CategoryAutocomplete({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const { data: accounts = [] } = useQuery({ queryKey: ['accounts', 'Expenses'], queryFn: () => listAccounts('Expenses') })
-  const [open, setOpen] = useState(false)
-  const [active, setActive] = useState(0)
-
-  const matches = useMemo(() => {
-    const q = value.trim().toLowerCase()
-    const list = q ? accounts.filter((a) => a.toLowerCase().includes(q)) : accounts
-    return list.slice(0, 50)
-  }, [accounts, value])
-
-  const known = value.trim() === '' || accounts.includes(value.trim())
-
-  const select = (a: string) => { onChange(a); setOpen(false) }
-
-  const onKeyDown = (e: ReactKeyboardEvent) => {
-    if (!open) return
-    if (e.key === 'ArrowDown') { e.preventDefault(); setActive((i) => Math.min(i + 1, matches.length - 1)) }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive((i) => Math.max(i - 1, 0)) }
-    else if (e.key === 'Enter' && matches[active]) { e.preventDefault(); select(matches[active]) }
-    else if (e.key === 'Escape') setOpen(false)
-  }
-
   return (
-    <div className="relative">
+    <div>
       <label className="block text-sm font-medium mb-1">Categoría del gasto (opcional)</label>
-      <div className="relative">
-        <input
-          value={value}
-          onChange={(e) => { onChange(e.target.value); setOpen(true); setActive(0) }}
-          onFocus={() => setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 150)}
-          onKeyDown={onKeyDown}
-          placeholder="Buscar cuenta… (ej. Expenses:EAG:Super)"
-          role="combobox" aria-expanded={open} aria-autocomplete="list"
-          className={`w-full border rounded-md px-3 py-2 bg-background text-sm ${known ? '' : 'border-amber-400'}`}
-        />
-        {value && (
-          <button type="button" onClick={() => onChange('')}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">✕</button>
-        )}
-        {open && matches.length > 0 && (
-          <ul role="listbox" className="absolute z-50 mt-1 w-full max-h-48 overflow-auto border rounded-md bg-card shadow text-sm">
-            {matches.map((a, i) => (
-              <li key={a} role="option" aria-selected={i === active}
-                onMouseDown={(e) => { e.preventDefault(); select(a) }}
-                onMouseEnter={() => setActive(i)}
-                className={`px-3 py-1.5 cursor-pointer ${i === active ? 'bg-accent' : ''}`}>
-                {a}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      {!known && <p className="text-xs text-amber-600 mt-1">cuenta no reconocida — se validará al guardar</p>}
+      <AccountCombobox value={value} onChange={onChange} />
       <p className="text-xs text-muted-foreground mt-1">
         Si lo dejás vacío, el gasto entra como pendiente y lo categorizás después en Categorización.
       </p>

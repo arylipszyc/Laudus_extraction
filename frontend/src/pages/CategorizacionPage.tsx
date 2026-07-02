@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { confirmCategory, getPendingCategorization, type PendingTx } from '@/services/categorizacion'
+import { CategoryAutocomplete } from '@/components/CategoryAutocomplete'
 
 const fmt = (n: number | null) =>
   n == null ? '—' : new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(n)
@@ -93,13 +94,7 @@ function PendingRow({ tx }: { tx: PendingTx }) {
       </div>
       <div className="flex-1 min-w-[240px]">
         <label className="block text-xs text-muted-foreground mb-1">Cuenta de categoría</label>
-        <input
-          type="text"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          placeholder="Expenses:EAG:..."
-          className="w-full border rounded-md px-3 py-2 bg-background text-sm font-mono"
-        />
+        <CategoryAutocomplete value={category} onChange={setCategory} />
       </div>
       <Button onClick={() => mutation.mutate()} disabled={mutation.isPending || !category.trim()}>
         {mutation.isPending ? 'Confirmando…' : 'Confirmar'}
