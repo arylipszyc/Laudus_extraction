@@ -47,7 +47,7 @@ function ColorBadge({ color }: { color: Color }) {
  */
 export function CategorizacionPage() {
   const qc = useQueryClient()
-  const { data, isLoading, error } = useQuery({
+  const { data, isFetching, error, refetch } = useQuery({
     queryKey: ['categorization-pending'],
     queryFn: getPendingCategorization,
   })
@@ -84,11 +84,16 @@ export function CategorizacionPage() {
     <div className="p-6 space-y-6 max-w-4xl">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Categorías pendientes</h1>
-        {toConfirm.length > 0 && (
-          <Button onClick={() => bulk.mutate()} disabled={bulk.isPending}>
-            {bulk.isPending ? 'Confirmando…' : `Confirmar categorizadas (${toConfirm.length})`}
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
+            {isFetching ? 'Actualizando…' : 'Actualizar'}
           </Button>
-        )}
+          {toConfirm.length > 0 && (
+            <Button onClick={() => bulk.mutate()} disabled={bulk.isPending}>
+              {bulk.isPending ? 'Confirmando…' : `Confirmar categorizadas (${toConfirm.length})`}
+            </Button>
+          )}
+        </div>
       </div>
       <p className="text-sm text-muted-foreground">
         Transacciones con categoría sugerida automáticamente. Confirmá la sugerida o corregí la cuenta.
@@ -98,9 +103,19 @@ export function CategorizacionPage() {
       </p>
 
       {bulk.error && <p className="text-sm text-destructive">{(bulk.error as Error).message}</p>}
-      {isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
       {error && <p className="text-sm text-destructive">{(error as Error).message}</p>}
-      {data && data.length === 0 && (
+
+      {/* Cargando/procesando: cubre el hueco tras importar una cartola (el ledger tarda unos
+          segundos en recargar). No tapa las filas si ya hay data (para no cortar la edición). */}
+      {isFetching && (!data || data.length === 0) && (
+        <Card className="p-6">
+          <p className="text-sm text-muted-foreground flex items-center gap-2">
+            <span className="inline-block h-4 w-4 rounded-full border-2 border-muted-foreground/40 border-t-muted-foreground animate-spin" />
+            Cargando movimientos… procesar una cartola recién importada tarda unos segundos.
+          </p>
+        </Card>
+      )}
+      {!isFetching && data && data.length === 0 && (
         <Card className="p-6"><p className="text-sm text-muted-foreground">Nada pendiente. 🎉</p></Card>
       )}
 
