@@ -56,9 +56,22 @@ class LedgerService:
         self._loaded_at: datetime | None = None
         self._lock = threading.Lock()
 
+    def _picklecache_path(self) -> str:
+        """Ruta del picklecache de beancount para `main.beancount` (misma convención que la lib)."""
+        d, base = os.path.split(self._main_path)
+        return os.path.join(d, "." + base + ".picklecache")
+
     def load(self) -> None:
         """(Re)load the ledger from disk. Errors are stored, not raised."""
         with self._lock:
+            # beancount cachea el ledger por mtime del top-file + includes CONOCIDOS. Una cartola
+            # recién importada entra por glob (`include imports/cartolas/*.beancount`) sin cambiar el
+            # mtime de main.beancount, así que el cache no se invalida y load_file devuelve datos
+            # viejos (sin la cartola nueva). Borramos el cache para forzar re-parseo en cada reload.
+            try:
+                os.remove(self._picklecache_path())
+            except FileNotFoundError:
+                pass
             self._entries, self._errors, self._options = loader.load_file(self._main_path)
             self._loaded_at = datetime.now(timezone.utc)
             if self._errors:

@@ -74,6 +74,20 @@ def test_reload_reflects_file_change(tmp_path):
     assert len(svc.entries()) > count_before
 
 
+def test_load_removes_stale_picklecache(tmp_path):
+    """Regresión: load() borra el picklecache de beancount. Una cartola nueva entra por glob sin
+    cambiar el mtime de main.beancount, así que el cache no se invalida solo y load_file devolvería
+    datos viejos (la cartola no aparece en Categorías Pendientes) — por eso lo borramos en cada load."""
+    main_path = tmp_path / "main.beancount"
+    _write(main_path, VALID_LEDGER)
+    svc = LedgerService(str(main_path))
+    svc.load()
+    cache = tmp_path / ".main.beancount.picklecache"
+    cache.write_bytes(b"stale-cache")
+    svc.load()
+    assert not cache.exists()
+
+
 # ── broken ledger → unavailable + 503 path ───────────────────────────────────
 
 
