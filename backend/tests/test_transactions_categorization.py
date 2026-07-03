@@ -191,6 +191,35 @@ def test_bulk_categorize_tx_inexistente(tmp_path):
                         ledger_root=root, user_email="c@test.com")
 
 
+def test_rewrite_preserva_pata_liability_tc(tmp_path):
+    """Regresión del bug que BORRABA la deuda: categorizar una compra TC debe reescribir SOLO la
+    pata Expenses (Suspense→categoría) y PRESERVAR la pata `Liabilities:TC:Real`. Antes se reescribían
+    ambas (la deuda TC:Real no resuelve del bank_account_id) → las 2 patas quedaban iguales → deuda 0."""
+    from beancount.parser import parser
+    from backend.app.api.v1.transactions.service import _rewrite_file, _tx_id_of
+
+    f = tmp_path / "tc.beancount"
+    f.write_text(
+        '2026-04-10 * "COMPRA X"\n'
+        '  bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"\n'
+        '  operation_type: "compra"\n'
+        '  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -22042.0 CLP\n'
+        '  Expenses:EAG:Suspense                        22042.0 CLP\n',
+        encoding="utf-8")
+    entries, _e, _o = parser.parse_file(str(f))
+    tx_id = _tx_id_of(entries[0])
+
+    _rewrite_file(f, {tx_id}, "Expenses:EAG:Remedios-430051")
+
+    out, _e, _o = parser.parse_file(str(f))
+    accts = [p.account for p in out[0].postings]
+    assert "Liabilities:EAG:TC:Real:Tc1027VisaInfinity" in accts  # la deuda SIGUE
+    assert "Expenses:EAG:Remedios-430051" in accts                # el gasto se recategorizó
+    assert "Expenses:EAG:Suspense" not in accts                   # Suspense reemplazado
+    # y el asiento sigue balanceado (2 patas distintas, no 2 iguales que se anulan)
+    assert len(set(accts)) == 2
+
+
 def test_update_category_commitea_la_history_jsonl(tmp_path, monkeypatch):
     # La history debe entrar en el commit (si no, el reset --hard del refresh la descarta).
     import pipeline.importers.laudus_run as lr

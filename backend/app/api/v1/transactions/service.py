@@ -80,7 +80,7 @@ def list_pending(entries: list) -> list[dict]:
     return out
 
 
-def _rewrite_file(file_path: Path, tx_ids: set[str], new_category: str | None, bank_target: str) -> dict[str, str]:
+def _rewrite_file(file_path: Path, tx_ids: set[str], new_category: str | None) -> dict[str, str]:
     """Re-genera el archivo: por cada tx en `tx_ids`, flag→*, status confirmed y (si new_category)
     cambia el posting de categoría. Devuelve {tx_id: narration} de las afectadas."""
     from pipeline.importers.cartola_pdf_importer import render_entries
@@ -92,8 +92,13 @@ def _rewrite_file(file_path: Path, tx_ids: set[str], new_category: str | None, b
         if isinstance(e, data.Transaction) and _tx_id_of(e) in tx_ids:
             postings = e.postings
             if new_category is not None:
+                # Recategorizar SOLO la pata de resultado (Expenses/Income). Las patas de plata
+                # (Assets/Liabilities/Equity) se preservan SIEMPRE: en una TC la deuda es
+                # `Liabilities:TC:Real` (no resuelve del bank_account_id), y reescribirla la
+                # destruía dejando el asiento con las 2 patas iguales → deuda borrada.
                 postings = [
-                    p._replace(account=new_category) if p.account != bank_target else p
+                    p._replace(account=new_category)
+                    if p.account.split(":")[0] in ("Expenses", "Income") else p
                     for p in postings
                 ]
             meta = dict(e.meta or {})
@@ -103,22 +108,6 @@ def _rewrite_file(file_path: Path, tx_ids: set[str], new_category: str | None, b
         out_entries.append(e)
     file_path.write_text(render_entries(out_entries), encoding="utf-8")
     return affected
-
-
-def _resolve_bank_target(entry: data.Transaction, ledger_root: Path) -> str:
-    """Cuenta del banco/TC de la tx (la posting que NO es la categoría)."""
-    from pipeline.importers.bank_account_resolver import BankAccountResolver
-    bank_id = (entry.meta or {}).get("bank_account_id")
-    if bank_id:
-        try:
-            return BankAccountResolver(ledger_root / "accounts.beancount").resolve(str(bank_id))
-        except Exception:  # noqa: BLE001
-            pass
-    # fallback: la posting Assets/Liabilities
-    for p in entry.postings:
-        if p.account.split(":")[0] in ("Assets", "Liabilities"):
-            return p.account
-    return entry.postings[0].account if entry.postings else ""
 
 
 def _find(entries: list, tx_id: str) -> data.Transaction | None:
@@ -153,7 +142,6 @@ def update_category(
         raise TxNotFound(tx_id)
 
     file_path = Path(target.meta["filename"])
-    bank_target = _resolve_bank_target(target, ledger_root)
     original_cat = next((p.account for p in target.postings
                          if p.account.split(":")[0] in ("Expenses", "Income")), None)
     main_path = ledger_root / "main.beancount"
@@ -161,7 +149,7 @@ def update_category(
 
     with acquire_lock(lock_path):
         original = file_path.read_text(encoding="utf-8")
-        affected = _rewrite_file(file_path, {tx_id}, new_category, bank_target)
+        affected = _rewrite_file(file_path, {tx_id}, new_category)
         ok, detail = bean_check(main_path)
         if not ok:
             file_path.write_text(original, encoding="utf-8")
@@ -218,7 +206,7 @@ def bulk_confirm(
         snapshots = {fp: fp.read_text(encoding="utf-8") for fp in by_file}
         rels = []
         for fp, ids in by_file.items():
-            affected = _rewrite_file(fp, ids, None, bank_target="")  # solo confirma, no cambia cuenta
+            affected = _rewrite_file(fp, ids, None)  # solo confirma, no cambia cuenta
             confirmed += len(affected)
             rels.append(f"ledger/imports/cartolas/{fp.name}")
         ok, detail = bean_check(main_path)
@@ -248,14 +236,12 @@ def bulk_categorize(
     from pipeline.importers.laudus_run import acquire_lock, bean_check, git_commit_push
 
     by_file: dict[Path, dict[str, set[str]]] = {}
-    bank_by_file: dict[Path, str] = {}
     records: list[tuple[str, str, str | None, str]] = []  # (tx_id, new_cat, original_cat, narration)
     for tx_id, new_cat in items:
         t = _find(entries, tx_id)
         if t is None:
             raise TxNotFound(tx_id)
         fp = Path(t.meta["filename"])
-        bank_by_file.setdefault(fp, _resolve_bank_target(t, ledger_root))
         original_cat = next((p.account for p in t.postings
                              if p.account.split(":")[0] in ("Expenses", "Income")), None)
         by_file.setdefault(fp, {}).setdefault(new_cat, set()).add(tx_id)
@@ -274,7 +260,7 @@ def bulk_categorize(
         rels = []
         for fp, by_cat in by_file.items():
             for cat, ids in by_cat.items():
-                confirmed += len(_rewrite_file(fp, ids, cat, bank_by_file[fp]))
+                confirmed += len(_rewrite_file(fp, ids, cat))
             rels.append(f"ledger/imports/cartolas/{fp.name}")
         ok, detail = bean_check(main_path)
         if not ok:
