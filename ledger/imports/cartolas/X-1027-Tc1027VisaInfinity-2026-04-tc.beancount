@@ -21,9 +21,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -14177.0 CLP
-  Expenses:EAG:Suspense                        14177.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -14177.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   14177.0 CLP
 2026-01-05 * "MERPAGO*MERCADOLIBR TASA INT. (cuota 04/12)"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -34,9 +34,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -999.0 CLP
-  Expenses:EAG:Suspense                        999.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -999.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   999.0 CLP
 2026-01-05 * "MP *MERCADO LIB TASA INT. 0,00% (cuota 04/06)"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -47,9 +47,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -16186.0 CLP
-  Expenses:EAG:Suspense                        16186.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -16186.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   16186.0 CLP
 2026-03-22 * "MERCADOPAGO*MERCADO TASA INT. (cuota 01/06)"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -60,9 +60,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -59282.0 CLP
-  Expenses:EAG:Suspense                        59282.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -59282.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   59282.0 CLP
 2026-03-27 * "C. VERDE STA MARIA SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -86,9 +86,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -80936.0 CLP
-  Expenses:EAG:Suspense                        80936.0 CLP
+  category_status: "confirmed"
+  Expenses:Jael:IsapreGastosMdicos-990051  -80936.0 CLP
+  Expenses:Jael:IsapreGastosMdicos-990051   80936.0 CLP
 2026-03-27 * "MERCADOPAGO*BOZZOCH LAS CONDES"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -99,9 +99,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -25201.0 CLP
-  Expenses:EAG:Suspense                        25201.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -25201.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   25201.0 CLP
 2026-03-28 * "TANAKA LA DEHESA SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -112,9 +112,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -100540.0 CLP
-  Expenses:EAG:Suspense                        100540.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -100540.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   100540.0 CLP
 2026-03-29 * "MERCADOPAGO*MERCADO LAS CONDES"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -125,9 +125,9 @@
   match_source: "historical"
   confidence: "0.2"
   color: "yellow"
-  category_status: "suggested"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -30411.0 CLP
-  Expenses:EAG:TC:TcVariasEag-430017           30411.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -30411.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   30411.0 CLP
 2026-03-31 * "MUNICIPALIDAD DE AL ALHUE"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -138,9 +138,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -299412.0 CLP
-  Expenses:EAG:Suspense                        299412.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -299412.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   299412.0 CLP
 2026-03-31 * "FLOW *ZURICH SANT SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -151,9 +151,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -5990.0 CLP
-  Expenses:EAG:Suspense                        5990.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -5990.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   5990.0 CLP
 2026-04-06 * "COLMENA GOLDEN CR SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -164,9 +164,9 @@
   match_source: "historical"
   confidence: "0.1"
   color: "yellow"
-  category_status: "suggested"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -382282.0 CLP
-  Expenses:EAG:CotizacinIsapre-430055          382282.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:CotizacinIsapre-430055  -382282.0 CLP
+  Expenses:EAG:CotizacinIsapre-430055   382282.0 CLP
 2026-04-08 * "VARSOVIENNE PORTAL SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -177,9 +177,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -26980.0 CLP
-  Expenses:EAG:Suspense                        26980.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -26980.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   26980.0 CLP
 2026-04-09 * "DLOCAL *AMAZONCOM SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -190,9 +190,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -7609.0 CLP
-  Expenses:EAG:Suspense                        7609.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -7609.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   7609.0 CLP
 2026-04-11 * "DLOCAL *PRIME VIDEO SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -203,9 +203,9 @@
   match_source: "historical"
   confidence: "0.3"
   color: "yellow"
-  category_status: "suggested"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -3900.0 CLP
-  Expenses:EAG:TC:TcVariasEag-430017           3900.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -3900.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   3900.0 CLP
 2026-04-12 * "DLOCAL *AMAZONCOM SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -216,9 +216,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -52671.0 CLP
-  Expenses:EAG:Suspense                        52671.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -52671.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   52671.0 CLP
 2026-04-12 * "DLOCAL *AMAZONCOM SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -229,9 +229,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -117791.0 CLP
-  Expenses:EAG:Suspense                        117791.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -117791.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   117791.0 CLP
 2026-04-12 * "DLOCAL *AMAZONCOM SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -242,9 +242,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -187774.0 CLP
-  Expenses:EAG:Suspense                        187774.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -187774.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   187774.0 CLP
 2026-04-12 * "DLOCAL *AMAZONCOM SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -255,9 +255,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -58790.0 CLP
-  Expenses:EAG:Suspense                        58790.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -58790.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   58790.0 CLP
 2026-04-12 * "DLOCAL *AMAZONCOM SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -268,9 +268,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -41707.0 CLP
-  Expenses:EAG:Suspense                        41707.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -41707.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   41707.0 CLP
 2026-04-13 * "ENEL SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -281,9 +281,9 @@
   match_source: "historical"
   confidence: "0.1"
   color: "yellow"
-  category_status: "suggested"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -852689.0 CLP
-  Expenses:EAG:Luz-411005                      852689.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:Luz-411005  -852689.0 CLP
+  Expenses:EAG:Luz-411005   852689.0 CLP
 2026-04-14 * "PAGO PAC EN PESOS"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -303,9 +303,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -169525.0 CLP
-  Expenses:EAG:Suspense                        169525.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -169525.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   169525.0 CLP
 2026-04-15 * "AUDIA SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -316,9 +316,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -74000.0 CLP
-  Expenses:EAG:Suspense                        74000.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -74000.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   74000.0 CLP
 2026-04-16 * "MERCADOPAGO*LAGARDE LAS CONDES"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -342,9 +342,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -33943.0 CLP
-  Expenses:EAG:Suspense                        33943.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -33943.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   33943.0 CLP
 2026-04-17 * "TUU*DORIS FELIU LO BARNECHEA"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -355,9 +355,9 @@
   match_source: "historical"
   confidence: "0.06666666666666667"
   color: "yellow"
-  category_status: "suggested"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -96000.0 CLP
-  Expenses:EAG:TC:TcVariasEag-430017           96000.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -96000.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   96000.0 CLP
 2026-04-19 * "FOGO DE CHAO CV SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -368,9 +368,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -283350.0 CLP
-  Expenses:EAG:Suspense                        283350.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -283350.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   283350.0 CLP
 2026-04-19 * "DLOCAL *PRIME VIDEO SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -381,9 +381,9 @@
   match_source: "historical"
   confidence: "0.3"
   color: "yellow"
-  category_status: "suggested"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -3490.0 CLP
-  Expenses:EAG:TC:TcVariasEag-430017           3490.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -3490.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   3490.0 CLP
 2026-04-20 * "MP*POTTERY LAS CONDES"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -394,9 +394,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -69980.0 CLP
-  Expenses:EAG:Suspense                        69980.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -69980.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   69980.0 CLP
 2026-04-21 * "MP*POTTERY LAS CONDES"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -407,9 +407,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -49980.0 CLP
-  Expenses:EAG:Suspense                        49980.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -49980.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   49980.0 CLP
 2026-04-22 * "MERPAGO*MELIMAS SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -420,9 +420,9 @@
   match_source: "historical"
   confidence: "0.1"
   color: "yellow"
-  category_status: "suggested"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -12990.0 CLP
-  Expenses:EAG:TC:TcVariasEag-430017           12990.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -12990.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   12990.0 CLP
 2026-04-25 * "DL RAPPI PRO CHIL LAS CONDES"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -433,9 +433,9 @@
   match_source: "historical"
   confidence: "0.13333333333333333"
   color: "yellow"
-  category_status: "suggested"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -3990.0 CLP
-  Expenses:EAG:TC:TcVariasEag-430017           3990.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TC:TcVariasEag-430017  -3990.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017   3990.0 CLP
 2026-04-27 * "GTD MANQUEHUE S.A SANTIAGO"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -446,9 +446,9 @@
   match_source: "historical"
   confidence: "0.13333333333333333"
   color: "yellow"
-  category_status: "suggested"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -35606.0 CLP
-  Expenses:EAG:TvCableInternet-411009          35606.0 CLP
+  category_status: "confirmed"
+  Expenses:EAG:TvCableInternet-411009  -35606.0 CLP
+  Expenses:EAG:TvCableInternet-411009   35606.0 CLP
 2026-04-27 * "IMPUESTO DECRETO LEY 3475 TASA 0,800%"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
