@@ -8,7 +8,7 @@ import {
   useCartolaUploadMutation,
   useCartolaStatus,
 } from '@/hooks/useCartolaUpload'
-import type { CartolaError, CartolaCanonical, ValidateBalanceResult } from '@/services/cartolas'
+import type { CartolaError, CartolaCanonical, ValidateBalanceResult, TcCuadre } from '@/services/cartolas'
 import { BalanceValidationPanel } from '@/components/BalanceValidationPanel'
 
 const MAX_PDF_BYTES = 20 * 1024 * 1024
@@ -226,9 +226,7 @@ function CartolaReady({
           ✅ Cartola importada — {c.transactions.length} transacciones, {pending} pendientes de categorizar
           {validated.override && ' · (override con justificación registrado en git)'}
         </p>
-        <p className="text-xs text-muted-foreground">
-          Archivo: <code className="font-mono">{validated.file}</code>
-        </p>
+        {validated.cuadre && <CuadrePanel q={validated.cuadre} currency={c.currency} />}
         <Button variant="outline" onClick={onReset}>Subir otra</Button>
       </Card>
     )
@@ -315,5 +313,57 @@ function CartolaReady({
         <code className="font-mono">ledger/imports/cartolas/_staging/</code>
       </p>
     </Card>
+  )
+}
+
+/**
+ * Cuadre de la cartola contra la contabilidad (post-confirmación) — v1, diseño Valentina.
+ * C1: la deuda TC:Real al cierre == −cierre declarado. Pago: PAGO PAC de la cartola == pago que
+ * Laudus registró para la tarjeta ese mes (Assets:Banco → lump), mostrado al expandir.
+ */
+function CuadrePanel({ q, currency }: { q: TcCuadre; currency: string }) {
+  const [open, setOpen] = useState(false)
+  const dot = (ok: boolean) => (ok ? '🟢' : '🔴')
+  const row = (label: string, value: number, ok?: boolean) => (
+    <>
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-mono text-right">{formatAmount(String(value), currency)}</span>
+      <span className="w-5 text-center">{ok === undefined ? '' : dot(ok)}</span>
+    </>
+  )
+  return (
+    <div className="border-t pt-3 space-y-2 text-sm">
+      <h3 className="font-medium">Cuadre con la contabilidad</h3>
+      <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 gap-y-1 items-baseline">
+        {row('Deuda de la tarjeta (TC:Real) al cierre', q.tc_real_balance)}
+        {row('Cierre declarado por la cartola', q.closing, q.c1_ok)}
+        {row('Pago de la cartola (PAGO PAC)', q.pago_cartola)}
+        {row('Pago registrado en Laudus (este mes)', q.laudus_payment_total, q.pago_ok)}
+      </div>
+
+      {q.laudus_payments.length > 0 && (
+        <button type="button" onClick={() => setOpen(!open)}
+          className="text-xs text-muted-foreground underline hover:text-foreground">
+          {open ? 'ocultar' : 'ver'} asiento{q.laudus_payments.length > 1 ? 's' : ''} de Laudus
+        </button>
+      )}
+      {open && q.laudus_payments.map((p, i) => (
+        <div key={i} className="text-xs bg-muted rounded p-2">
+          <span className="font-mono">{p.date}</span> · {p.narration} ·{' '}
+          <span className="font-mono">{formatAmount(String(p.amount), currency)}</span>
+          {p.bank_account && <span className="text-muted-foreground"> · {p.bank_account}</span>}
+        </div>
+      ))}
+
+      {(!q.c1_ok || !q.pago_ok) && (
+        <p className="text-xs text-amber-600">
+          ⚠ Hay un descuadre entre la cartola y la contabilidad. Las herramientas para ajustarlo vienen
+          en la próxima versión — por ahora, quedó registrado para revisar.
+        </p>
+      )}
+      {q.c1_ok && q.pago_ok && (
+        <p className="text-xs text-green-600">✓ La cartola cuadra con la contabilidad.</p>
+      )}
+    </div>
   )
 }

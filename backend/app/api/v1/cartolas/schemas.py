@@ -27,6 +27,24 @@ class ValidateBalanceResponse(BaseModel):
     batch_id: str | None = None
 
 
+class TcLaudusPayment(BaseModel):
+    date: str
+    narration: str
+    amount: float
+    bank_account: str | None = None
+
+
+class TcCuadre(BaseModel):
+    """Cuadre de la cartola contra el ledger (post-confirmación) — Valentina 2026-07-02."""
+    c1_ok: bool                       # TC:Real al cierre == −cierre declarado
+    tc_real_balance: float
+    closing: float
+    pago_cartola: float               # PAGO PAC de la cartola
+    laudus_payment_total: float       # pago que Laudus registró para la tarjeta ese mes
+    laudus_payments: list[TcLaudusPayment] = []
+    pago_ok: bool                     # pago cartola == pago Laudus
+
+
 class TcCorrectionResponse(BaseModel):
     """Resultado de corregir una cartola de TARJETA DE CRÉDITO (Story 6.2, flujo Valentina).
 
@@ -46,6 +64,7 @@ class TcCorrectionResponse(BaseModel):
     git_commit_sha: str | None = None
     file: str | None = None
     reason: str | None = None
+    cuadre: TcCuadre | None = None
 
 
 class UploadAcceptedResponse(BaseModel):

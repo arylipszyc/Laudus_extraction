@@ -423,7 +423,11 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
     result = {"batch_id": batch_id, "status": "blocked", "currency": model.currency, "fx": None,
               "purchases": 0, "payments": 0, "opening_emitted": False, "unmapped": [],
               "fx_bcch": None, "fx_deviation_pct": None,
-              "git_commit_sha": None, "reason": None}
+              "git_commit_sha": None, "reason": None,
+              # Plumbing para el cuadre post-confirmación (lo consume el endpoint desde el ledger
+              # recargado; se saca antes de armar la respuesta).
+              "tc_real_account": tc_real, "expense_tc_account": expense_tc,
+              "year_month": model.period.end.strftime("%Y-%m")}
 
     # Archivo de salida — incluye el stem de la `TC:Real` para que CLP (`<x>`) y USD (`<x>Us`) de la
     # misma tarjeta/mes (mismo banco + last4) no colisionen en el mismo `{slug}-tc.beancount`.

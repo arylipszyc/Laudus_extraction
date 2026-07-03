@@ -187,10 +187,23 @@ def validate_balance_endpoint(
         }})
     # La TC POSTEA (status corrected/blocked, otra forma) vs el modelo A reconcilia (status reconciled).
     if result.get("status") in ("corrected", "blocked"):
+        # Plumbing del cuadre (lo agregó correct_tc_cartola); se saca de la respuesta.
+        tc_real = result.pop("tc_real_account", None)
+        lump = result.pop("expense_tc_account", None)
+        year_month = result.pop("year_month", None)
         # `corrected` escribió el desglose al ledger; refrescamos el ledger en memoria para que la
         # cola de categorización lo vea sin depender del file-watcher (poco fiable en el contenedor).
         if result.get("status") == "corrected":
             ledger.load()
+            # Cuadre post-confirmación (C1 + pago vs Laudus) — informativo, nunca rompe el posteo.
+            if tc_real and lump and year_month:
+                try:
+                    from backend.app.services.tc_cuadre import compute_tc_cuadre
+                    result["cuadre"] = compute_tc_cuadre(
+                        ledger.entries(), tc_real_account=tc_real, lump_account=lump,
+                        year_month=year_month, closing=request.closing)
+                except Exception:  # noqa: BLE001
+                    logger.exception("cuadre TC falló (no bloquea el posteo)")
         return TcCorrectionResponse(**result).model_dump()
     return ValidateBalanceResponse(**result).model_dump()
 

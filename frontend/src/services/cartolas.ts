@@ -94,11 +94,23 @@ export async function uploadCartola(
   return res.json()
 }
 
+export interface TcCuadre {
+  c1_ok: boolean
+  tc_real_balance: number
+  closing: number
+  pago_cartola: number
+  laudus_payment_total: number
+  laudus_payments: { date: string; narration: string; amount: number; bank_account: string | null }[]
+  pago_ok: boolean
+}
+
 export interface ValidateBalanceResult {
-  status: 'validated'
-  file: string
-  git_sha: string | null
-  override: boolean
+  // 'validated' (modelo A) | 'corrected'/'blocked' (TC). Campos opcionales según la forma.
+  status: string
+  file?: string
+  git_sha?: string | null
+  override?: boolean
+  cuadre?: TcCuadre | null   // cuadre TC post-confirmación (C1 + pago vs Laudus)
 }
 
 export interface BalanceDiscrepancyError extends CartolaError {
