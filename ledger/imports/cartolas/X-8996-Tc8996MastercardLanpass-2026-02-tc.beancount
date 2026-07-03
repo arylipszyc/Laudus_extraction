@@ -1,3 +1,29 @@
+2025-12-05 * "MERPAGO*MERCADOLIBRE (cuota 03/06)"
+  source: "cartola-tc"
+  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
+  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
+  line: "27"
+  operation_type: "cuota"
+  period: "2026-02"
+  match_source: "pending"
+  confidence: "0.0"
+  color: "red"
+  category_status: "confirmed"
+  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -2165.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                2165.0 CLP
+2025-12-05 * "MERPAGO*MERCADOLIBRE (cuota 03/12)"
+  source: "cartola-tc"
+  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
+  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
+  line: "28"
+  operation_type: "cuota"
+  period: "2026-02"
+  match_source: "pending"
+  confidence: "0.0"
+  color: "red"
+  category_status: "confirmed"
+  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -1647.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                1647.0 CLP
 2026-01-09 * "MP *MERCADO LIBRE (cuota 02/03)"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -8,9 +34,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -118519.0 CLP
-  Expenses:EAG:Suspense                             118519.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                118519.0 CLP
 2026-01-10 * "MP *MERCADO LIBRE (cuota 02/06)"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -21,9 +47,18 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -68396.0 CLP
-  Expenses:EAG:Suspense                             68396.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                68396.0 CLP
+2026-01-26 * "Apertura TC T/C: 8996 - Mastercard Lanpass - $"
+  source: "cartola-tc"
+  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
+  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
+  line: "0"
+  operation_type: "apertura"
+  period: "2026-02"
+  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -9038300.0 CLP
+  Equity:Apertura:TarjetasSinDetalle                9038300.0 CLP
 2026-01-27 * "DL*STARLINK"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -47,9 +82,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -41477.0 CLP
-  Expenses:EAG:Suspense                             41477.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                41477.0 CLP
 2026-02-04 * "PAYU *UBER EATS"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -60,9 +95,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -45174.0 CLP
-  Expenses:EAG:Suspense                             45174.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                45174.0 CLP
 2026-02-05 * "PAYU *UBER EATS"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -73,9 +108,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -1636.0 CLP
-  Expenses:EAG:Suspense                             1636.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                1636.0 CLP
 2026-02-05 * "PAYU *UBER EATS"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -86,9 +121,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -53263.0 CLP
-  Expenses:EAG:Suspense                             53263.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                53263.0 CLP
 2026-02-06 * "PAYU *UBER EATS"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -99,9 +134,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -49259.0 CLP
-  Expenses:EAG:Suspense                             49259.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                49259.0 CLP
 2026-02-06 * "PAYU *UBER EATS"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -112,9 +147,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -1477.0 CLP
-  Expenses:EAG:Suspense                             1477.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                1477.0 CLP
 2026-02-06 * "LATAM.COM XP OTRAS (cuota 01/03)"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -125,9 +160,22 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -96835.0 CLP
-  Expenses:EAG:Suspense                             96835.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                96835.0 CLP
+2026-02-06 * "PAYU *UBER EATS"
+  source: "cartola-tc"
+  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
+  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
+  line: "29"
+  operation_type: "compra"
+  period: "2026-02"
+  match_source: "pending"
+  confidence: "0.0"
+  color: "red"
+  category_status: "confirmed"
+  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -31803.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                31803.0 CLP
 2026-02-07 * "PAYU *UBER EATS"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -138,9 +186,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -64296.0 CLP
-  Expenses:EAG:Suspense                             64296.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                64296.0 CLP
 2026-02-07 * "PAYU *UBER EATS"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -151,9 +199,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -2211.0 CLP
-  Expenses:EAG:Suspense                             2211.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                2211.0 CLP
 2026-02-08 * "PAYU *UBER EATS"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -164,9 +212,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -21399.0 CLP
-  Expenses:EAG:Suspense                             21399.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                21399.0 CLP
 2026-02-08 * "PAYU *UBER EATS"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -177,9 +225,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -1069.0 CLP
-  Expenses:EAG:Suspense                             1069.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                1069.0 CLP
 2026-02-08 * "SANTIAGO DUFRY SHOPPIN"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -190,9 +238,22 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -124149.0 CLP
-  Expenses:EAG:Suspense                             124149.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                124149.0 CLP
+2026-02-09 * "MERCADOPAGO *MERCADOL"
+  source: "cartola-tc"
+  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
+  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
+  line: "30"
+  operation_type: "compra"
+  period: "2026-02"
+  match_source: "pending"
+  confidence: "0.0"
+  color: "red"
+  category_status: "confirmed"
+  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -217610.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                217610.0 CLP
 2026-02-10 * "PAYU *UBER EATS"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -203,9 +264,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -50463.0 CLP
-  Expenses:EAG:Suspense                             50463.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                50463.0 CLP
 2026-02-10 * "PAYU *UBER EATS"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -216,9 +277,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -1653.0 CLP
-  Expenses:EAG:Suspense                             1653.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                1653.0 CLP
 2026-02-10 * "MONTO CANCELADO"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -238,9 +299,61 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -12990.0 CLP
-  Expenses:EAG:Suspense                             12990.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                12990.0 CLP
+2026-02-12 * "DP *FALABELLA.COM"
+  source: "cartola-tc"
+  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
+  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
+  line: "31"
+  operation_type: "compra"
+  period: "2026-02"
+  match_source: "pending"
+  confidence: "0.0"
+  color: "red"
+  category_status: "confirmed"
+  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -114980.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                114980.0 CLP
+2026-02-12 * "DP *FALABELLA.COM"
+  source: "cartola-tc"
+  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
+  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
+  line: "32"
+  operation_type: "compra"
+  period: "2026-02"
+  match_source: "pending"
+  confidence: "0.0"
+  color: "red"
+  category_status: "confirmed"
+  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -189410.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                189410.0 CLP
+2026-02-12 * "MP *MUSESTORESPA"
+  source: "cartola-tc"
+  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
+  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
+  line: "33"
+  operation_type: "compra"
+  period: "2026-02"
+  match_source: "pending"
+  confidence: "0.0"
+  color: "red"
+  category_status: "confirmed"
+  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -92490.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                92490.0 CLP
+2026-02-12 * "MERCADOPAGO *MERCADOL"
+  source: "cartola-tc"
+  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
+  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
+  line: "34"
+  operation_type: "compra"
+  period: "2026-02"
+  match_source: "pending"
+  confidence: "0.0"
+  color: "red"
+  category_status: "confirmed"
+  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -270123.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                270123.0 CLP
 2026-02-13 * "PAYU *UBER EATS"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -251,9 +364,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -80250.0 CLP
-  Expenses:EAG:Suspense                             80250.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                80250.0 CLP
 2026-02-13 * "PAYU *UBER EATS"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -264,9 +377,22 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -2586.0 CLP
-  Expenses:EAG:Suspense                             2586.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017                2586.0 CLP
+2026-02-13 * "MERCADOPAGO *MERCADOL"
+  source: "cartola-tc"
+  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
+  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
+  line: "35"
+  operation_type: "compra"
+  period: "2026-02"
+  match_source: "pending"
+  confidence: "0.0"
+  color: "red"
+  category_status: "pending"
+  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -37900.0 CLP
+  Expenses:EAG:Suspense                             37900.0 CLP
 2026-02-15 * "PAYU *UBER EATS"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -332,129 +458,3 @@
   category_status: "pending"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -28860.0 CLP
   Expenses:EAG:Suspense                             28860.0 CLP
-2025-12-05 * "MERPAGO*MERCADOLIBRE (cuota 03/06)"
-  source: "cartola-tc"
-  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
-  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
-  line: "27"
-  operation_type: "cuota"
-  period: "2026-02"
-  match_source: "pending"
-  confidence: "0.0"
-  color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -2165.0 CLP
-  Expenses:EAG:Suspense                             2165.0 CLP
-2025-12-05 * "MERPAGO*MERCADOLIBRE (cuota 03/12)"
-  source: "cartola-tc"
-  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
-  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
-  line: "28"
-  operation_type: "cuota"
-  period: "2026-02"
-  match_source: "pending"
-  confidence: "0.0"
-  color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -1647.0 CLP
-  Expenses:EAG:Suspense                             1647.0 CLP
-2026-02-06 * "PAYU *UBER EATS"
-  source: "cartola-tc"
-  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
-  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
-  line: "29"
-  operation_type: "compra"
-  period: "2026-02"
-  match_source: "pending"
-  confidence: "0.0"
-  color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -31803.0 CLP
-  Expenses:EAG:Suspense                             31803.0 CLP
-2026-02-09 * "MERCADOPAGO *MERCADOL"
-  source: "cartola-tc"
-  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
-  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
-  line: "30"
-  operation_type: "compra"
-  period: "2026-02"
-  match_source: "pending"
-  confidence: "0.0"
-  color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -217610.0 CLP
-  Expenses:EAG:Suspense                             217610.0 CLP
-2026-02-12 * "DP *FALABELLA.COM"
-  source: "cartola-tc"
-  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
-  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
-  line: "31"
-  operation_type: "compra"
-  period: "2026-02"
-  match_source: "pending"
-  confidence: "0.0"
-  color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -114980.0 CLP
-  Expenses:EAG:Suspense                             114980.0 CLP
-2026-02-12 * "DP *FALABELLA.COM"
-  source: "cartola-tc"
-  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
-  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
-  line: "32"
-  operation_type: "compra"
-  period: "2026-02"
-  match_source: "pending"
-  confidence: "0.0"
-  color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -189410.0 CLP
-  Expenses:EAG:Suspense                             189410.0 CLP
-2026-02-12 * "MP *MUSESTORESPA"
-  source: "cartola-tc"
-  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
-  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
-  line: "33"
-  operation_type: "compra"
-  period: "2026-02"
-  match_source: "pending"
-  confidence: "0.0"
-  color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -92490.0 CLP
-  Expenses:EAG:Suspense                             92490.0 CLP
-2026-02-12 * "MERCADOPAGO *MERCADOL"
-  source: "cartola-tc"
-  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
-  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
-  line: "34"
-  operation_type: "compra"
-  period: "2026-02"
-  match_source: "pending"
-  confidence: "0.0"
-  color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -270123.0 CLP
-  Expenses:EAG:Suspense                             270123.0 CLP
-2026-02-13 * "MERCADOPAGO *MERCADOL"
-  source: "cartola-tc"
-  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
-  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
-  line: "35"
-  operation_type: "compra"
-  period: "2026-02"
-  match_source: "pending"
-  confidence: "0.0"
-  color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -37900.0 CLP
-  Expenses:EAG:Suspense                             37900.0 CLP
-2026-01-26 * "Apertura TC T/C: 8996 - Mastercard Lanpass - $"
-  source: "cartola-tc"
-  bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
-  batch_id: "fd4a73d6-a184-4f18-be3b-cfde0f288e76"
-  line: "0"
-  operation_type: "apertura"
-  period: "2026-02"
-  Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -9038300.0 CLP
-  Equity:Apertura:TarjetasSinDetalle                9038300.0 CLP
