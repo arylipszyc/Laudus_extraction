@@ -62,6 +62,23 @@ def get_default_staging_dir() -> Path:
     return _DEFAULT_STAGING_DIR
 
 
+def tc_cartola_already_imported(canonical, index, out_dir: Path) -> bool:
+    """¿Ya existe el archivo de ESTA cartola TC (misma tarjeta/moneda/mes)? — para avisar antes de
+    sobrescribir (re-importar resetea las categorizaciones). Determinista por el mismo slug del posteo."""
+    if canonical is None or canonical.source.account_type != "tarjeta_credito":
+        return False
+    entry = index.get(canonical.source.bank_account_id)
+    if entry is None or not entry.beancount_account:
+        return False
+    from pipeline.importers.tc_correction import tc_cartola_filename, tc_real_account
+    try:
+        tc_real = tc_real_account(entry.beancount_account)
+    except Exception:  # noqa: BLE001 — cuenta inesperada → no bloquea, solo no avisa
+        return False
+    fname = tc_cartola_filename(entry.bank_name, entry.last4, tc_real, canonical.period.end)
+    return (Path(out_dir) / fname).exists()
+
+
 # ── Domain errors (caller maps to HTTP) ───────────────────────────────────
 
 

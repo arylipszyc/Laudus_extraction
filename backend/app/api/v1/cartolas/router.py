@@ -6,6 +6,7 @@ GET  /api/v1/cartolas/{batch_id} — async status polling
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import (
@@ -36,6 +37,7 @@ from backend.app.api.v1.cartolas.service import (
     get_job_store,
     new_batch_id,
     run_job,
+    tc_cartola_already_imported,
     validate_balance,
     validate_upload_inputs,
 )
@@ -132,6 +134,8 @@ async def upload_cartola(
 def get_cartola_status(
     batch_id: str,
     _user: UserSession = Depends(require_role(["contador", "admin"])),
+    index: BankAccountIndex = Depends(get_bank_account_index),
+    ledger: LedgerService = Depends(get_ledger_service),
 ) -> StatusResponse:
     job = get_job_store().get(batch_id)
     if job is None:
@@ -139,11 +143,16 @@ def get_cartola_status(
             status_code=404,
             detail={"code": "NOT_FOUND", "message": f"batch_id {batch_id} not found or expired"},
         )
+    already = False
+    if job["status"] == "ready" and job["canonical"] is not None:
+        out_dir = Path(ledger.main_path).parent / "imports" / "cartolas"
+        already = tc_cartola_already_imported(job["canonical"], index, out_dir)
     return StatusResponse(
         batch_id=batch_id,
         status=job["status"],
         canonical=job["canonical"],
         error=job["error"],
+        already_imported=already,
     )
 
 

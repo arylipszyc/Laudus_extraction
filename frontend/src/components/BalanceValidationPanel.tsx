@@ -22,16 +22,19 @@ export function BalanceValidationPanel({
   canonical,
   batchId,
   onValidated,
+  alreadyImported = false,
 }: {
   canonical: CartolaCanonical
   batchId: string
   onValidated: (r: ValidateBalanceResult) => void
+  alreadyImported?: boolean
 }) {
   const currency = canonical.currency
   const [opening, setOpening] = useState(canonical.balances.opening)
   const [closing, setClosing] = useState(canonical.balances.closing)
   const [overrideMode, setOverrideMode] = useState(false)
   const [justification, setJustification] = useState('')
+  const [ack, setAck] = useState(false)  // gate de sobrescritura cuando la cartola ya existe
 
   const sumTx = canonical.transactions.reduce((acc, t) => acc + Number.parseFloat(t.amount || '0'), 0)
   const discrepancy = Number.parseFloat(closing || '0') - Number.parseFloat(opening || '0') - sumTx
@@ -49,7 +52,8 @@ export function BalanceValidationPanel({
 
   const canConfirm =
     !mutation.isPending &&
-    (balanced || (overrideMode && justification.trim().length >= MIN_JUSTIFICATION))
+    (balanced || (overrideMode && justification.trim().length >= MIN_JUSTIFICATION)) &&
+    (!alreadyImported || ack)
 
   const err = mutation.error as BalanceDiscrepancyError | null
 
@@ -100,12 +104,21 @@ export function BalanceValidationPanel({
         </p>
       )}
 
+      {alreadyImported && (
+        <label className="flex items-center gap-2 text-sm text-amber-800">
+          <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} />
+          Entiendo que sobrescribe la cartola ya importada y resetea sus categorizaciones
+        </label>
+      )}
+
       <Button onClick={() => mutation.mutate()} disabled={!canConfirm}>
         {mutation.isPending
           ? 'Confirmando…'
-          : overrideMode && !balanced
-            ? 'Confirmar override'
-            : 'Confirmar validación'}
+          : alreadyImported
+            ? 'Sobrescribir cartola'
+            : overrideMode && !balanced
+              ? 'Confirmar override'
+              : 'Confirmar validación'}
       </Button>
     </div>
   )

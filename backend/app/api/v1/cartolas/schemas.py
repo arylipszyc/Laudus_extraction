@@ -79,3 +79,4 @@ class StatusResponse(BaseModel):
     status: Literal["processing", "ready", "failed"]
     canonical: CartolaCanonicalV1 | None = None
     error: dict | None = None
+    already_imported: bool = False  # ya existe una cartola para esta tarjeta/mes (avisar antes de sobrescribir)

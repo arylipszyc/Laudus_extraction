@@ -203,17 +203,19 @@ function CartolaResult({
 
   // status === 'ready'
   const c = data.canonical!
-  return <CartolaReady c={c} batchId={batchId} onReset={onReset} />
+  return <CartolaReady c={c} batchId={batchId} onReset={onReset} alreadyImported={!!data.already_imported} />
 }
 
 function CartolaReady({
   c,
   batchId,
   onReset,
+  alreadyImported,
 }: {
   c: CartolaCanonical | null
   batchId: string
   onReset: () => void
+  alreadyImported: boolean
 }) {
   const [validated, setValidated] = useState<ValidateBalanceResult | null>(null)
   if (!c) return null
@@ -242,6 +244,14 @@ function CartolaReady({
           Subir otra
         </Button>
       </div>
+
+      {alreadyImported && (
+        <div className="rounded-md border border-amber-400 bg-amber-50 p-3 text-sm text-amber-800">
+          ⚠ <strong>Esta cartola ya fue importada</strong> ({c.source.account_label} · {c.period.end.slice(0, 7)}).
+          Volver a confirmarla <strong>sobrescribe</strong> el archivo y <strong>resetea las categorizaciones</strong>
+          que hayas hecho de este mes. Si no querés eso, apretá "Subir otra".
+        </div>
+      )}
 
       <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
         <dt className="text-muted-foreground">Banco</dt>
@@ -306,7 +316,8 @@ function CartolaReady({
         </table>
       </details>
 
-      <BalanceValidationPanel canonical={c} batchId={batchId} onValidated={setValidated} />
+      <BalanceValidationPanel canonical={c} batchId={batchId} onValidated={setValidated}
+        alreadyImported={alreadyImported} />
 
       <p className="text-xs text-muted-foreground">
         batch_id: <code className="font-mono">{batchId}</code> · staging:{' '}

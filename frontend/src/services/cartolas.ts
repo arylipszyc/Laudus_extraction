@@ -40,6 +40,7 @@ export interface CartolaStatus {
   status: 'processing' | 'ready' | 'failed'
   canonical: CartolaCanonical | null
   error: { code: string; message: string; detail?: unknown } | null
+  already_imported?: boolean   // ya existe una cartola para esta tarjeta/mes → avisar antes de sobrescribir
 }
 
 export interface CartolaError {

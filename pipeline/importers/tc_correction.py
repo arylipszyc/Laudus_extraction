@@ -348,6 +348,16 @@ def tc_real_account(expense_tc_account: str) -> str:
     return _TC_REAL_PREFIX + stem
 
 
+def tc_cartola_filename(bank_name: str, last4: str | None, tc_real: str, period_end) -> str:
+    """Nombre del archivo de salida de una cartola TC — determinista por tarjeta/moneda/mes. Incluye
+    el stem de la `TC:Real` para que CLP (`<x>`) y USD (`<x>Us`) de la misma tarjeta/mes no colisionen.
+    Compartido por el posteo y por el chequeo de "ya importada" (idempotencia visible)."""
+    from bootstrap.account_mapping import slugify
+    stem = tc_real.rsplit(":", 1)[-1]
+    slug = f"{slugify(bank_name) or 'Banco'}-{last4 or 'xxxx'}-{stem}-{period_end.strftime('%Y-%m')}"
+    return f"{slug}-tc.beancount"
+
+
 def _opening_exists(out_dir: Path, tc_real_account: str, *, exclude: Path | None = None) -> bool:
     """¿Ya hay un asiento de apertura para esta `TC:Real` en una cartola previa? (AC4 idempotencia).
 
@@ -429,13 +439,9 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
               "tc_real_account": tc_real, "expense_tc_account": expense_tc,
               "year_month": model.period.end.strftime("%Y-%m")}
 
-    # Archivo de salida — incluye el stem de la `TC:Real` para que CLP (`<x>`) y USD (`<x>Us`) de la
-    # misma tarjeta/mes (mismo banco + last4) no colisionen en el mismo `{slug}-tc.beancount`.
-    last4 = importer.resolver.get(bank_account_id).last4 or "xxxx"
-    stem = tc_real.rsplit(":", 1)[-1]
-    slug = (f"{slugify(model.source.bank_name) or 'Banco'}-{last4}-{stem}-"
-            f"{model.period.end.strftime('%Y-%m')}")
-    out_file = out_dir / f"{slug}-tc.beancount"
+    # Archivo de salida — determinista por tarjeta/moneda/mes (mismo slug → re-import sobrescribe).
+    last4 = importer.resolver.get(bank_account_id).last4
+    out_file = out_dir / tc_cartola_filename(model.source.bank_name, last4, tc_real, model.period.end)
 
     # FX + lump por pago.
     if is_usd:
