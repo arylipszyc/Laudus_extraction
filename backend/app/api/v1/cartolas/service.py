@@ -497,7 +497,11 @@ def validate_balance(
                 "purchases": res["purchases"], "payments": res["payments"],
                 "opening_emitted": res["opening_emitted"], "fx_bcch": res["fx_bcch"],
                 "fx_deviation_pct": res["fx_deviation_pct"],
-                "reason": res["reason"], "git_sha": res["git_commit_sha"], "batch_id": batch_id}
+                "reason": res["reason"], "git_sha": res["git_commit_sha"], "batch_id": batch_id,
+                # Plumbing del cuadre post-confirmación (el endpoint lo usa y lo saca de la respuesta).
+                "tc_real_account": res.get("tc_real_account"),
+                "expense_tc_account": res.get("expense_tc_account"),
+                "year_month": res.get("year_month")}
 
     res = reconcile_cartola(batch_id, importer, root, ts=ts)
     return {"status": res["status"], "differences": res["differences"], "blocking": res["blocking"],
