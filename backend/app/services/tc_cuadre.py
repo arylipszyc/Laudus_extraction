@@ -92,17 +92,24 @@ def compute_tc_cuadre(
     else:
         closing = Decimal(str(closing))
 
-    # ── C1 — saldo TC:Real acumulado hasta el fin del mes de la cartola vs −(closing×fx) ──
-    # TC:Real siempre se postea en CLP (montos × fx), así que la comparación es en CLP: para CLP
-    # `fx=1` → −closing; para USD → −closing×fx. Tolerancia CLP.
-    tc_real_balance = Decimal(0)
+    # ── C1 — saldo TC:Real acumulado hasta el fin del mes de la cartola vs −closing ──
+    # TC:Real se postea en CLP (montos × fx del estado que los generó). Para una cartola USD el saldo
+    # CLP acumulado mezcla fx históricos → compararlo contra closing×fx_actual daría un residual que es
+    # DIFERENCIA DE CAMBIO no realizada (no descuadre). Por eso C1 compara en MONEDA NATIVA: reconstruye
+    # el saldo dividiendo cada pata por el fx de SU asiento (`_month(date) ≤ ym`) y lo mide contra
+    # −closing (nativo). Para CLP `fx=1` → nativo == CLP → idéntico al comportamiento previo. Tolerancia
+    # nativa (USD 0.01 / CLP 1). Decisión Valentina 2026-07-04 (supersede "comparar en CLP×fx").
+    tc_real_balance = Decimal(0)   # CLP posteado, para el display lado a lado
+    tc_real_native = Decimal(0)    # nativo (CLP / fx del asiento), lo que compara C1
     for e in entries:
         if isinstance(e, data.Transaction) and _month(e.date) <= year_month:
+            e_fx = Decimal(str((e.meta or {}).get("fx"))) if (e.meta or {}).get("fx") else Decimal(1)
             for p in e.postings:
                 if p.account == tc_real_account and p.units:
                     tc_real_balance += p.units.number
+                    tc_real_native += p.units.number / e_fx
     closing_clp = closing * fx
-    c1_ok = abs(tc_real_balance + closing_clp) <= _TOL_CLP
+    c1_ok = abs(tc_real_native + closing) <= _native_tol(currency)
 
     # ── C2 — contigüidad: apertura[M] == cierre[M−1] (misma tarjeta, moneda nativa) ──
     prev = _statement_meta(entries, tc_real_account, _prev_month(year_month))
@@ -189,6 +196,7 @@ def compute_tc_cuadre(
         # C1
         "c1_ok": c1_ok,
         "tc_real_balance": float(tc_real_balance),
+        "tc_real_native": float(tc_real_native),
         "closing": float(closing),
         "closing_clp": float(closing_clp),
         "currency": currency,

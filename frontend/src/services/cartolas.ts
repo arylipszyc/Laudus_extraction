@@ -99,6 +99,7 @@ export interface TcCuadre {
   // C1
   c1_ok: boolean
   tc_real_balance: number
+  tc_real_native: number
   closing: number
   closing_clp: number
   currency: string

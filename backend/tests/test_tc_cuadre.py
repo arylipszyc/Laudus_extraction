@@ -160,10 +160,53 @@ LEDGER_USD = """
 def test_c1_usd_aplica_fx():
     r = compute_tc_cuadre(_parse(LEDGER_USD), tc_real_account="Liabilities:EAG:TC:Real:TestCardUs",
                           lump_account="Expenses:EAG:TC:TestCardUs-430006", year_month="2026-05")
-    assert r["c1_ok"] is True           # −9000 == −(10 × 900)
+    assert r["c1_ok"] is True           # nativo: −9000/900 = −10 == −closing(10)
     assert r["currency"] == "USD"
     assert r["fx"] == 900.0
+    assert r["tc_real_native"] == -10.0
     assert r["closing_clp"] == 9000.0
+
+
+# USD multi-mes con fx DISTINTO por estado (el caso que el drift rompía). Mayo fx 900 (compra 10 USD →
+# TC:Real −9000 CLP, native −10). Junio fx 950 (compra 5 USD → TC:Real −4750 CLP, native −5). Saldo CLP
+# acumulado junio = −13750, pero closing_jun×fx_jun = 15×950 = 14250 → la fórmula CLP daría |−13750+14250|
+# = 500 > tol → FALSO ROJO. En nativo: −10 + −5 = −15 == −closing(15) → verde. Decisión Valentina.
+LEDGER_USD_MULTIMES = """
+2026-05-08 * "COMPRA MAYO USD"
+  operation_type: "compra"
+  source: "cartola-tc"
+  period: "2026-05"
+  bank_account_id: "BCI_1027_USD"
+  opening: "0"
+  closing: "10"
+  currency: "USD"
+  fx: "900"
+  Liabilities:EAG:TC:Real:TestCardUs   -9000.00 CLP
+  Expenses:EAG:Suspense                 9000.00 CLP
+
+2026-06-08 * "COMPRA JUNIO USD"
+  operation_type: "compra"
+  source: "cartola-tc"
+  period: "2026-06"
+  bank_account_id: "BCI_1027_USD"
+  opening: "10"
+  closing: "15"
+  currency: "USD"
+  fx: "950"
+  Liabilities:EAG:TC:Real:TestCardUs   -4750.00 CLP
+  Expenses:EAG:Suspense                 4750.00 CLP
+"""
+
+
+def test_c1_usd_multimes_nativo_no_falso_rojo():
+    """Junio: la deuda cuadra en nativo aunque el saldo CLP mezcle fx históricos (diferencia de cambio)."""
+    real = "Liabilities:EAG:TC:Real:TestCardUs"
+    r = compute_tc_cuadre(_parse(LEDGER_USD_MULTIMES), tc_real_account=real,
+                          lump_account="Expenses:EAG:TC:TestCardUs-430006", year_month="2026-06")
+    assert r["c1_ok"] is True                       # nativo −15 == −closing(15), NO falso rojo
+    assert r["tc_real_native"] == -15.0             # −9000/900 + −4750/950
+    assert r["tc_real_balance"] == -13750.0         # saldo CLP (mezcla fx) para el display
+    # con la fórmula CLP vieja habría sido |−13750 + 15×950| = 500 → rojo
 
 
 # Asiento corrupto: ambas patas a Expenses (pata TC:Real destruida — el bug de categorización).

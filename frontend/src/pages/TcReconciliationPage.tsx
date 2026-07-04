@@ -122,7 +122,12 @@ function TcRow({ r, open, onToggle }: { r: TcReconciliationRow; open: boolean; o
         <td className="text-center">{dot(r.c3_ok, true)}</td>
         <td className="text-center">{dot(r.pago_ok, false)}</td>
         <td className="text-center">{dot(r.c5_ok, false)}</td>
-        <td className="px-3 py-2 text-right font-mono">{fmt(r.tc_real_balance)}</td>
+        <td className="px-3 py-2 text-right font-mono">
+          {fmt(r.currency === 'CLP' ? r.tc_real_balance : r.tc_real_native, r.currency)}
+          {r.currency !== 'CLP' && (
+            <span className="text-muted-foreground"> ({fmt(r.tc_real_balance)})</span>
+          )}
+        </td>
         <td className="px-3 py-2 text-right font-mono">
           {fmt(r.closing, r.currency)}
           {r.currency !== 'CLP' && (
@@ -135,8 +140,8 @@ function TcRow({ r, open, onToggle }: { r: TcReconciliationRow; open: boolean; o
           <td colSpan={8} className="px-4 py-3 space-y-3">
             {!r.c1_ok && (
               <p className="text-xs text-red-600">
-                🔴 C1: la deuda TC:Real ({fmt(r.tc_real_balance)}) no coincide con −cierre
-                ({fmt(-r.closing_clp)}). La cartola no está bien materializada.
+                🔴 C1: la deuda TC:Real ({fmt(r.currency === 'CLP' ? r.tc_real_balance : r.tc_real_native, r.currency)}) no coincide con −cierre
+                ({fmt(-r.closing, r.currency)}). La cartola no está bien materializada.
               </p>
             )}
             {!r.c3_ok && (

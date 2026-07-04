@@ -345,7 +345,7 @@ function CuadrePanel({ q, currency }: { q: TcCuadre; currency: string }) {
     <div className="border-t pt-3 space-y-2 text-sm">
       <h3 className="font-medium">Cuadre con la contabilidad</h3>
       <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 items-baseline">
-        {check('C1', `deuda TC:Real ${formatAmount(String(q.tc_real_balance), 'CLP')} == −cierre ${formatAmount(String(q.closing_clp), 'CLP')}`, q.c1_ok, true)}
+        {check('C1', `deuda TC:Real ${formatAmount(String(q.currency === 'CLP' ? q.tc_real_balance : q.tc_real_native), q.currency)} == −cierre ${formatAmount(String(q.closing), q.currency)}`, q.c1_ok, true)}
         {check('C2', q.c2_ok ? 'apertura == cierre del mes anterior' : (q.c2_reason ?? 'apertura ≠ cierre anterior'), q.c2_ok, false)}
         {check('C3', q.c3_ok ? 'todos los asientos conservan su pata de deuda' : `${q.c3_corrupted_count} asiento(s) sin pata TC:Real`, q.c3_ok, true)}
         {check('C4', `pago cartola ${formatAmount(String(q.pago_cartola), 'CLP')} == pago Laudus ${formatAmount(String(q.laudus_payment_total), 'CLP')}`, q.pago_ok, false)}
