@@ -17,6 +17,7 @@ const contadorNavItems = [
   { label: 'Cuentas Pendientes', to: '/cuentas-pendientes' },
   { label: 'Categorías Pendientes', to: '/categorizacion' },
   { label: 'Reconciliación', to: '/reconciliation' },
+  { label: 'Cuadre TC', to: '/cuadre-tc' },
 ]
 
 function NavItem({ to, label }: { to: string; label: string }) {

@@ -13,6 +13,7 @@ from backend.app.api.v1.cuentas_pendientes.router import router as cuentas_pendi
 from backend.app.api.v1.transactions.router import router as transactions_router
 from backend.app.api.v1.categorization.router import router as categorization_router
 from backend.app.api.v1.reconciliation.router import router as reconciliation_router
+from backend.app.api.v1.tc_reconciliation.router import router as tc_reconciliation_router
 from backend.app.api.v1.accounts.router import router as accounts_router
 
 router = APIRouter()
@@ -25,6 +26,7 @@ router.include_router(cuentas_pendientes_router)
 router.include_router(transactions_router)
 router.include_router(categorization_router)
 router.include_router(reconciliation_router)
+router.include_router(tc_reconciliation_router)
 router.include_router(accounts_router)
 router.include_router(cartolas_router)
 router.include_router(reportes_router)

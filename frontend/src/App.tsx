@@ -8,6 +8,7 @@ import { CartolaUploadPage } from '@/pages/CartolaUploadPage'
 import { ReportesPage } from '@/pages/ReportesPage'
 import { CuentasPendientesPage } from '@/pages/CuentasPendientesPage'
 import { ReconciliationPage } from '@/pages/ReconciliationPage'
+import { TcReconciliationPage } from '@/pages/TcReconciliationPage'
 import { CategorizacionPage } from '@/pages/CategorizacionPage'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/hooks/useAuth'
@@ -92,6 +93,18 @@ function App() {
           }
         >
           <Route index element={<ReconciliationPage />} />
+        </Route>
+        <Route
+          path="/cuadre-tc"
+          element={
+            <RequireAuth>
+              <RequireContador>
+                <DashboardLayout />
+              </RequireContador>
+            </RequireAuth>
+          }
+        >
+          <Route index element={<TcReconciliationPage />} />
         </Route>
         <Route
           path="/categorizacion"

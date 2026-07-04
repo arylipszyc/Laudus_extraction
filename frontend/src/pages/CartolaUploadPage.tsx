@@ -328,28 +328,28 @@ function CartolaReady({
 }
 
 /**
- * Cuadre de la cartola contra la contabilidad (post-confirmación) — v1, diseño Valentina.
- * C1: la deuda TC:Real al cierre == −cierre declarado. Pago: PAGO PAC de la cartola == pago que
- * Laudus registró para la tarjeta ese mes (Assets:Banco → lump), mostrado al expandir.
+ * Cuadre de la cartola contra la contabilidad (post-confirmación) — C1–C5 (Story 6.6, diseño Valentina).
+ * C1 (🔴) TC:Real al cierre == −cierre; C2 (🟡) apertura == cierre anterior; C3 (🔴) integridad del
+ * asiento; C4 (🟡) pago vs Laudus; C5 (🟡) lump residual. C1/C3 son críticos (rojos).
  */
 function CuadrePanel({ q, currency }: { q: TcCuadre; currency: string }) {
   const [open, setOpen] = useState(false)
-  const dot = (ok: boolean) => (ok ? '🟢' : '🔴')
-  const row = (label: string, value: number, ok?: boolean) => (
+  const dot = (ok: boolean, critical: boolean) => (ok ? '🟢' : critical ? '🔴' : '🟡')
+  const check = (code: string, label: string, ok: boolean, critical: boolean) => (
     <>
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-mono text-right">{formatAmount(String(value), currency)}</span>
-      <span className="w-5 text-center">{ok === undefined ? '' : dot(ok)}</span>
+      <span className="w-6 text-center">{dot(ok, critical)}</span>
+      <span className="text-muted-foreground"><span className="font-mono">{code}</span> · {label}</span>
     </>
   )
   return (
     <div className="border-t pt-3 space-y-2 text-sm">
       <h3 className="font-medium">Cuadre con la contabilidad</h3>
-      <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 gap-y-1 items-baseline">
-        {row('Deuda de la tarjeta (TC:Real) al cierre', q.tc_real_balance)}
-        {row('Cierre declarado por la cartola', q.closing, q.c1_ok)}
-        {row('Pago de la cartola (PAGO PAC)', q.pago_cartola)}
-        {row('Pago registrado en Laudus (este mes)', q.laudus_payment_total, q.pago_ok)}
+      <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 items-baseline">
+        {check('C1', `deuda TC:Real ${formatAmount(String(q.tc_real_balance), 'CLP')} == −cierre ${formatAmount(String(q.closing_clp), 'CLP')}`, q.c1_ok, true)}
+        {check('C2', q.c2_ok ? 'apertura == cierre del mes anterior' : (q.c2_reason ?? 'apertura ≠ cierre anterior'), q.c2_ok, false)}
+        {check('C3', q.c3_ok ? 'todos los asientos conservan su pata de deuda' : `${q.c3_corrupted_count} asiento(s) sin pata TC:Real`, q.c3_ok, true)}
+        {check('C4', `pago cartola ${formatAmount(String(q.pago_cartola), 'CLP')} == pago Laudus ${formatAmount(String(q.laudus_payment_total), 'CLP')}`, q.pago_ok, false)}
+        {check('C5', q.c5_ok ? 'lump del mes neteado (≈0)' : `lump con residual ${formatAmount(String(q.c5_residual), 'CLP')}`, q.c5_ok, false)}
       </div>
 
       {q.laudus_payments.length > 0 && (
@@ -366,13 +366,18 @@ function CuadrePanel({ q, currency }: { q: TcCuadre; currency: string }) {
         </div>
       ))}
 
-      {(!q.c1_ok || !q.pago_ok) && (
-        <p className="text-xs text-amber-600">
-          ⚠ Hay un descuadre entre la cartola y la contabilidad. Las herramientas para ajustarlo vienen
-          en la próxima versión — por ahora, quedó registrado para revisar.
+      {q.status === 'red' && (
+        <p className="text-xs text-red-600">
+          🔴 Hay un descuadre CRÍTICO entre la cartola y la contabilidad (C1/C3). Las herramientas para
+          ajustarlo vienen en la próxima versión — por ahora, quedó registrado para revisar.
         </p>
       )}
-      {q.c1_ok && q.pago_ok && (
+      {q.status === 'yellow' && (
+        <p className="text-xs text-amber-600">
+          🟡 La deuda cuadra, pero hay un chequeo secundario en amarillo (C2/C4/C5) — revisá el detalle.
+        </p>
+      )}
+      {q.status === 'green' && (
         <p className="text-xs text-green-600">✓ La cartola cuadra con la contabilidad.</p>
       )}
     </div>

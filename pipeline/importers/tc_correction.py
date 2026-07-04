@@ -216,7 +216,8 @@ def _posting(account: str, number: Decimal) -> data.Posting:
 
 
 def _meta(*, line_no: int, bank_account_id: str, batch_id: str, op: str, fx: Decimal,
-          year_month: str, category: "CategorizationResult | None" = None) -> dict:
+          year_month: str, opening: Decimal, closing: Decimal, currency: str,
+          category: "CategorizationResult | None" = None) -> dict:
     m = data.new_metadata("<tc-correction>", line_no)
     m.update({
         "source": "cartola-tc",
@@ -227,6 +228,12 @@ def _meta(*, line_no: int, bank_account_id: str, batch_id: str, op: str, fx: Dec
         # Story 6.5b: período del ESTADO DE CUENTA (distinto de `date`, que es la fecha de la compra).
         # Una compra del 28-abr puede pertenecer al estado de mayo por la fecha de cierre/facturación.
         "period": year_month,
+        # Story 6.6: apertura/cierre declarados por la cartola (moneda NATIVA) persistidos en cada
+        # asiento del batch → la vista de cuadre (C1/C2) los lee del ledger sin depender del request,
+        # que hoy los pierde al borrar el staging. Idempotente: re-importar sobrescribe el archivo.
+        "opening": str(opening),
+        "closing": str(closing),
+        "currency": currency,
     })
     if fx != Decimal(1):
         m["fx"] = str(fx)
@@ -264,6 +271,9 @@ def build_tc_correction_entries(
     """
     fx = Decimal(fx)
     year_month = model.period.end.strftime("%Y-%m")  # Story 6.5b: período del estado de cuenta
+    opening = model.balances.opening  # Story 6.6: nativos (USD para cartola USD); C1 aplica fx al leer
+    closing = model.balances.closing
+    currency = model.currency
     entries: list = []
 
     for tx in model.transactions:
@@ -307,7 +317,8 @@ def build_tc_correction_entries(
             meta_op = op or (raw_op or "desconocido")
         entries.append(data.Transaction(
             meta=_meta(line_no=tx.line_no, bank_account_id=bank_account_id, batch_id=batch_id,
-                       op=meta_op, fx=fx, year_month=year_month, category=category),
+                       op=meta_op, fx=fx, year_month=year_month, opening=opening, closing=closing,
+                       currency=currency, category=category),
             date=tx.date, flag="*", payee=None,
             narration=tx.description or f"line {tx.line_no}",
             tags=frozenset(), links=frozenset(), postings=postings,
@@ -317,7 +328,7 @@ def build_tc_correction_entries(
     if emit_opening and model.balances.opening != 0:
         opening_clp = model.balances.opening * fx
         meta = _meta(line_no=0, bank_account_id=bank_account_id, batch_id=batch_id, op="apertura", fx=fx,
-                     year_month=year_month)
+                     year_month=year_month, opening=opening, closing=closing, currency=currency)
         entries.append(data.Transaction(
             meta=meta, date=model.period.start, flag="*", payee=None,
             narration=f"Apertura TC {model.source.account_label}",
@@ -437,7 +448,8 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
               # Plumbing para el cuadre post-confirmación (lo consume el endpoint desde el ledger
               # recargado; se saca antes de armar la respuesta).
               "tc_real_account": tc_real, "expense_tc_account": expense_tc,
-              "year_month": model.period.end.strftime("%Y-%m")}
+              "year_month": model.period.end.strftime("%Y-%m"),
+              "cuadre_bank_account_id": bank_account_id}  # Story 6.6: scope de C3 en el cuadre inline
 
     # Archivo de salida — determinista por tarjeta/moneda/mes (mismo slug → re-import sobrescribe).
     last4 = importer.resolver.get(bank_account_id).last4

@@ -96,13 +96,31 @@ export async function uploadCartola(
 }
 
 export interface TcCuadre {
+  // C1
   c1_ok: boolean
   tc_real_balance: number
   closing: number
+  closing_clp: number
+  currency: string
+  fx: number
+  opening: number | null
+  // C2
+  c2_ok: boolean
+  c2_prior_closing: number | null
+  c2_reason: string | null
+  // C3
+  c3_ok: boolean
+  c3_corrupted_count: number
+  // C4 (pago)
   pago_cartola: number
   laudus_payment_total: number
   laudus_payments: { date: string; narration: string; amount: number; bank_account: string | null }[]
   pago_ok: boolean
+  // C5
+  c5_ok: boolean
+  c5_residual: number
+  // agregado
+  status: 'green' | 'yellow' | 'red'
 }
 
 export interface ValidateBalanceResult {

@@ -35,14 +35,33 @@ class TcLaudusPayment(BaseModel):
 
 
 class TcCuadre(BaseModel):
-    """Cuadre de la cartola contra el ledger (post-confirmación) — Valentina 2026-07-02."""
-    c1_ok: bool                       # TC:Real al cierre == −cierre declarado
+    """Cuadre C1–C5 de la cartola contra el ledger (post-confirmación) — Valentina 2026-07-02 (v1),
+    Story 6.6 (C2/C3/C5). Mismos campos que devuelve `compute_tc_cuadre`."""
+    # C1 — invariante de cierre
+    c1_ok: bool                       # TC:Real al cierre == −cierre declarado (USD: −cierre×fx)
     tc_real_balance: float
-    closing: float
+    closing: float                    # moneda nativa
+    closing_clp: float = 0.0          # cierre × fx (CLP), lo que compara C1
+    currency: str = "CLP"
+    fx: float = 1.0
+    opening: float | None = None
+    # C2 — contigüidad
+    c2_ok: bool = False               # apertura[M] == cierre[M−1]
+    c2_prior_closing: float | None = None
+    c2_reason: str | None = None
+    # C3 — integridad del asiento
+    c3_ok: bool = True                # toda compra/cuota conserva su pata TC:Real
+    c3_corrupted_count: int = 0
+    # C4 — pago vs Laudus
     pago_cartola: float               # PAGO PAC de la cartola
     laudus_payment_total: float       # pago que Laudus registró para la tarjeta ese mes
     laudus_payments: list[TcLaudusPayment] = []
     pago_ok: bool                     # pago cartola == pago Laudus
+    # C5 — lump residual
+    c5_ok: bool = True                # el lump del mes quedó neteado (≈0)
+    c5_residual: float = 0.0
+    # semáforo agregado
+    status: str = "green"             # green | yellow | red
 
 
 class TcCorrectionResponse(BaseModel):

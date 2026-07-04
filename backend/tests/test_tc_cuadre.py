@@ -71,3 +71,135 @@ def test_pago_no_cuadra_sin_asiento_laudus():
                           year_month="2026-04", closing=Decimal("300"))
     assert r["laudus_payments"] == []
     assert r["pago_ok"] is False
+
+
+# ── Story 6.6: C1–C5 con metadata persistida (opening/closing/currency/fx) ──
+
+# Dos meses contiguos de la misma tarjeta CLP: mar (0→1000) y abr (1000→1300). La deuda TC:Real
+# acumulada a fin de abr = −1300 = −closing_abr (C1); apertura abr 1000 == cierre mar 1000 (C2).
+LEDGER_2M = """
+2026-03-10 * "COMPRA MARZO"
+  operation_type: "compra"
+  source: "cartola-tc"
+  period: "2026-03"
+  bank_account_id: "BCI_1027"
+  opening: "0"
+  closing: "1000"
+  currency: "CLP"
+  Liabilities:EAG:TC:Real:TestCard   -1000.00 CLP
+  Expenses:EAG:Suspense               1000.00 CLP
+
+2026-04-05 * "COMPRA ABRIL"
+  operation_type: "compra"
+  source: "cartola-tc"
+  period: "2026-04"
+  bank_account_id: "BCI_1027"
+  opening: "1000"
+  closing: "1300"
+  currency: "CLP"
+  Liabilities:EAG:TC:Real:TestCard   -300.00 CLP
+  Expenses:EAG:Suspense               300.00 CLP
+"""
+
+
+def _parse(text):
+    entries, errors, _ = parser.parse_string(text)
+    assert not errors, errors
+    return entries
+
+
+def test_c1_c2_ok_contiguo():
+    r = compute_tc_cuadre(_parse(LEDGER_2M), tc_real_account=REAL, lump_account=LUMP,
+                          year_month="2026-04")  # closing se lee de la metadata
+    assert r["c1_ok"] is True          # −1300 == −(1300 × 1)
+    assert r["tc_real_balance"] == -1300.0
+    assert r["closing"] == 1300.0
+    assert r["c2_ok"] is True           # apertura abr 1000 == cierre mar 1000
+    assert r["c2_prior_closing"] == 1000.0
+    assert r["c3_ok"] is True
+
+
+LEDGER_SOLO_ABRIL = """
+2026-04-05 * "COMPRA ABRIL"
+  operation_type: "compra"
+  source: "cartola-tc"
+  period: "2026-04"
+  bank_account_id: "BCI_1027"
+  opening: "1000"
+  closing: "1300"
+  currency: "CLP"
+  Liabilities:EAG:TC:Real:TestCard   -300.00 CLP
+  Expenses:EAG:Suspense               300.00 CLP
+"""
+
+
+def test_c2_falla_sin_mes_anterior():
+    # Solo abril → no hay cartola de marzo → C2 no puede cuadrar.
+    r = compute_tc_cuadre(_parse(LEDGER_SOLO_ABRIL), tc_real_account=REAL, lump_account=LUMP,
+                          year_month="2026-04")
+    assert r["c2_ok"] is False
+    assert r["c2_reason"] == "sin cartola anterior"
+
+
+# USD: closing en USD (10), fx 900 → TC:Real (CLP) debe ser −9000. C1 aplica el fx.
+LEDGER_USD = """
+2026-05-08 * "COMPRA USD"
+  operation_type: "compra"
+  source: "cartola-tc"
+  period: "2026-05"
+  bank_account_id: "BCI_1027_USD"
+  opening: "0"
+  closing: "10"
+  currency: "USD"
+  fx: "900"
+  Liabilities:EAG:TC:Real:TestCardUs   -9000.00 CLP
+  Expenses:EAG:Suspense                 9000.00 CLP
+"""
+
+
+def test_c1_usd_aplica_fx():
+    r = compute_tc_cuadre(_parse(LEDGER_USD), tc_real_account="Liabilities:EAG:TC:Real:TestCardUs",
+                          lump_account="Expenses:EAG:TC:TestCardUs-430006", year_month="2026-05")
+    assert r["c1_ok"] is True           # −9000 == −(10 × 900)
+    assert r["currency"] == "USD"
+    assert r["fx"] == 900.0
+    assert r["closing_clp"] == 9000.0
+
+
+# Asiento corrupto: ambas patas a Expenses (pata TC:Real destruida — el bug de categorización).
+LEDGER_CORRUPTO = """
+2026-04-05 * "COMPRA CORRUPTA"
+  operation_type: "compra"
+  source: "cartola-tc"
+  period: "2026-04"
+  bank_account_id: "BCI_1027"
+  opening: "1000"
+  closing: "1300"
+  currency: "CLP"
+  Expenses:EAG:Suspense    300.00 CLP
+  Expenses:EAG:Otros      -300.00 CLP
+"""
+
+
+def test_c3_detecta_asiento_corrupto():
+    r = compute_tc_cuadre(_parse(LEDGER_CORRUPTO), tc_real_account=REAL, lump_account=LUMP,
+                          year_month="2026-04", bank_account_id="BCI_1027")
+    assert r["c3_ok"] is False          # sin pata TC:Real → corrupto
+    assert r["c3_corrupted_count"] == 1
+    assert r["status"] == "red"
+
+
+# Lump con residual: un pago de Laudus al lump SIN el asiento (b) que lo reclasifica → no netea.
+LEDGER_LUMP_RESIDUAL = """
+2026-04-14 * "Pago Laudus sin reclasificar"
+  id: "999"
+  Assets:EAG:Bancos:Test            -1000.00 CLP
+  Expenses:EAG:TC:TestCard-430005    1000.00 CLP
+"""
+
+
+def test_c5_residual_no_cero():
+    r = compute_tc_cuadre(_parse(LEDGER_LUMP_RESIDUAL), tc_real_account=REAL, lump_account=LUMP,
+                          year_month="2026-04", closing=Decimal("0"))
+    assert r["c5_ok"] is False
+    assert r["c5_residual"] == 1000.0

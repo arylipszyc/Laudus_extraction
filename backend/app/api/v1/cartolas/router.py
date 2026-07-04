@@ -200,6 +200,7 @@ def validate_balance_endpoint(
         tc_real = result.pop("tc_real_account", None)
         lump = result.pop("expense_tc_account", None)
         year_month = result.pop("year_month", None)
+        cuadre_baid = result.pop("cuadre_bank_account_id", None)
         # `corrected` escribió el desglose al ledger; refrescamos el ledger en memoria para que la
         # cola de categorización lo vea sin depender del file-watcher (poco fiable en el contenedor).
         if result.get("status") == "corrected":
@@ -210,7 +211,8 @@ def validate_balance_endpoint(
                     from backend.app.services.tc_cuadre import compute_tc_cuadre
                     result["cuadre"] = compute_tc_cuadre(
                         ledger.entries(), tc_real_account=tc_real, lump_account=lump,
-                        year_month=year_month, closing=request.closing)
+                        year_month=year_month, closing=request.closing,
+                        bank_account_id=cuadre_baid)
                 except Exception:  # noqa: BLE001
                     logger.exception("cuadre TC falló (no bloquea el posteo)")
         return TcCorrectionResponse(**result).model_dump()
