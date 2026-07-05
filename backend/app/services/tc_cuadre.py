@@ -92,20 +92,23 @@ def compute_tc_cuadre(
     else:
         closing = Decimal(str(closing))
 
-    # ── C1 — saldo TC:Real acumulado hasta el fin del mes de la cartola vs −(closing×fx) ──
-    # TC:Real se postea en CLP (montos × fx del estado). El saldo acumulado en CLP **telescopa** a
-    # −closing×fx_del_estado de forma exacta: el pago (b) de cada mes es el CLP REAL que canceló las
-    # compras del mes anterior (mismo CLP), así que se anulan y solo sobrevive −closing_M×fx_M. Por eso
-    # C1 compara en CLP contra −(closing×fx), con la apertura ya valorizada al CLP del pago que la salda
-    # (fix en tc_correction). Verificado sobre 1027 USD feb/mar: diff 0,00. (Comparar en nativo dividiendo
-    # por fx se rompe: el pago lleva CLP real al fx del mes ANTERIOR pero está estampado con el del mes
-    # actual → mis-valora ~1 dólar por mes.) Tolerancia CLP.
+    # ── C1 — saldo TC:Real acumulado hasta el ESTADO de la cartola vs −(closing×fx) ──
+    # Acumula por PERÍODO del estado (metadata `period`), NO por fecha de la tx: una compra del 27-feb
+    # puede facturarse en el estado de MARZO (period=2026-03) por el corte → sumarla por fecha en febrero
+    # infla la deuda y da falso rojo. Por período, cada tx cae en su estado. El saldo CLP telescopa exacto
+    # a −closing_M×fx_M: el pago (b) de cada mes es el CLP REAL que canceló las compras del mes anterior
+    # (mismo CLP) → se anulan y sobrevive −closing_M×fx_M, con la apertura ya valorizada al CLP del pago
+    # que la salda (fix en tc_correction). Verificado sobre 1027 USD feb/mar: diff 0,00. Tolerancia CLP.
     tc_real_balance = Decimal(0)
     for e in entries:
-        if isinstance(e, data.Transaction) and _month(e.date) <= year_month:
-            for p in e.postings:
-                if p.account == tc_real_account and p.units:
-                    tc_real_balance += p.units.number
+        if not isinstance(e, data.Transaction):
+            continue
+        period = (e.meta or {}).get("period") or _month(e.date)   # fallback a la fecha (6.5b)
+        if period > year_month:
+            continue
+        for p in e.postings:
+            if p.account == tc_real_account and p.units:
+                tc_real_balance += p.units.number
     closing_clp = closing * fx
     c1_ok = abs(tc_real_balance + closing_clp) <= _TOL_CLP
 

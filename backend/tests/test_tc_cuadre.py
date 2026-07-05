@@ -166,6 +166,32 @@ def test_c1_usd_aplica_fx():
     assert r["closing_clp"] == 9000.0
 
 
+# C1 acumula por PERÍODO del estado, no por FECHA de la tx: una compra del 27-feb facturada en el
+# estado de MARZO (period=2026-03) NO debe contar en el C1 de febrero (real: 1027 USD, 3 compras así).
+LEDGER_STRADDLE = """
+2026-02-10 * "COMPRA FEB (estado feb)"
+  operation_type: "compra"
+  source: "cartola-tc"
+  period: "2026-02"
+  Liabilities:EAG:TC:Real:TestCard   -1000.00 CLP
+  Expenses:EAG:Suspense               1000.00 CLP
+
+2026-02-27 * "COMPRA FEB pero facturada en MARZO"
+  operation_type: "compra"
+  source: "cartola-tc"
+  period: "2026-03"
+  Liabilities:EAG:TC:Real:TestCard   -500.00 CLP
+  Expenses:EAG:Suspense               500.00 CLP
+"""
+
+
+def test_c1_acumula_por_periodo_no_por_fecha():
+    r = compute_tc_cuadre(_parse(LEDGER_STRADDLE), tc_real_account=REAL, lump_account=LUMP,
+                          year_month="2026-02", closing=Decimal("1000"))
+    assert r["tc_real_balance"] == -1000.0    # NO cuenta la compra del 27-feb del estado de marzo
+    assert r["c1_ok"] is True                 # −1000 == −closing(1000)
+
+
 # Asiento corrupto: ambas patas a Expenses (pata TC:Real destruida — el bug de categorización).
 LEDGER_CORRUPTO = """
 2026-04-05 * "COMPRA CORRUPTA"
