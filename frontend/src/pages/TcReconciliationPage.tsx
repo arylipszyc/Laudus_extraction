@@ -81,7 +81,7 @@ export function TcReconciliationPage() {
               <tr>
                 <th className="text-left px-3 py-2 font-medium">Mes</th>
                 {CHECKS.map((c) => (
-                  <th key={c.code} className="px-2 py-2 font-medium" title={`${c.label} — ${c.desc}`}>{c.code}</th>
+                  <th key={c.code} className="px-2 py-2 font-medium" title={c.title}>{c.code}</th>
                 ))}
                 <th className="text-right px-3 py-2 font-medium">Deuda TC:Real</th>
                 <th className="text-right px-3 py-2 font-medium">Cierre cartola</th>
@@ -101,18 +101,22 @@ export function TcReconciliationPage() {
         </Card>
       )}
 
-      <Card className="p-4 text-sm space-y-2">
-        <p className="font-medium">Qué chequea cada uno</p>
+      <Card className="p-4 text-sm space-y-3">
+        <p className="font-medium">Qué controla cada chequeo</p>
         {CHECKS.map((c) => (
-          <p key={c.code} className="flex gap-2">
-            <span aria-hidden>{c.critical ? '🔴' : '🟡'}</span>
-            <span>
-              <span className="font-mono">{c.code}</span> · <span className="font-medium">{c.label}</span> — {c.desc}
-            </span>
-          </p>
+          <div key={c.code}>
+            <p>
+              <span aria-hidden>{c.critical ? '🔴' : '🟡'}</span>{' '}
+              <span className="font-mono">{c.code}</span> · {c.title}
+            </p>
+            <p className="text-muted-foreground pl-6">Compara {c.compara}</p>
+            <p className="text-muted-foreground pl-6">
+              <span aria-hidden>{c.critical ? '🔴' : '🟡'}</span> {c.color}
+            </p>
+          </div>
         ))}
         <p className="text-xs text-muted-foreground pt-1">
-          🔴 crítico (parar y revisar) · 🟡 secundario (revisar el detalle) · 🟢 pasa. Un mes está verde cuando pasan los cinco.
+          🟢 pasa · 🟡 revisar el detalle (no crítico) · 🔴 crítico, parar y revisar. Un mes está verde cuando pasan los cinco.
         </p>
       </Card>
     </div>
@@ -120,16 +124,26 @@ export function TcReconciliationPage() {
 }
 
 const CHECKS = [
-  { code: 'C1', critical: true, label: 'Invariante de cierre',
-    desc: 'la deuda TC:Real acumulada al cierre del mes coincide con el cierre que declara la cartola (en USD se compara al fx del estado).' },
-  { code: 'C2', critical: false, label: 'Contigüidad',
-    desc: 'la apertura del mes coincide con el cierre del mes anterior. La primera cartola de una tarjeta sale 🟡 «sin cartola anterior» — es esperado.' },
-  { code: 'C3', critical: true, label: 'Integridad del asiento',
-    desc: 'toda compra/cuota conserva su pata de deuda TC:Real (caza la corrupción de categorización que borra el pasivo).' },
-  { code: 'C4', critical: false, label: 'Pago vs Laudus',
-    desc: 'el pago de la cartola concilia por monto con el pago que registró el banco en Laudus.' },
-  { code: 'C5', critical: false, label: 'Lump residual',
-    desc: 'el gasto «lumpeado» del mes quedó neteado (≈0) a medida que se categoriza. Es informativo, no un descuadre.' },
+  { code: 'C1', critical: true,
+    title: 'Cuadre de la deuda — lo que la contabilidad dice que se debe vs. lo que dice el estado de cuenta.',
+    compara: 'el saldo de la cuenta de la tarjeta en la contabilidad (acumulado al cierre del mes) con el saldo de cierre que trae la cartola.',
+    color: 'no cuadran: una compra o un pago se cargó mal, o falta algo. Revisar.' },
+  { code: 'C2', critical: false,
+    title: 'Continuidad entre meses — que no falte ninguna cartola.',
+    compara: 'la apertura de la cartola de este mes con el cierre de la del mes anterior (misma tarjeta).',
+    color: 'no coinciden o falta el mes anterior: puede faltar una cartola. La primera siempre sale amarilla («sin cartola anterior»), es normal.' },
+  { code: 'C3', critical: true,
+    title: 'Compras con su deuda — que categorizar no borre la deuda de la tarjeta.',
+    compara: 'los asientos de compra del mes en la contabilidad (que cada uno mantenga su registro de deuda).',
+    color: 'a alguna compra se le borró la deuda: el saldo quedó más bajo que el real. Revisar.' },
+  { code: 'C4', critical: false,
+    title: 'Pago vs banco — que el pago de la cartola sea el que registró el banco.',
+    compara: 'el pago que muestra la cartola con el pago que el banco registró en Laudus.',
+    color: 'los montos no coinciden. Revisar el pago.' },
+  { code: 'C5', critical: false,
+    title: 'Gasto del mes saldado — que el gasto cargado en bloque se reemplace por las compras detalladas.',
+    compara: 'el saldo que queda en la cuenta de gasto de la tarjeta del mes (debería quedar en ≈0).',
+    color: 'todavía queda gasto sin detallar; mejora a medida que se categorizan las compras. Es informativo, no un descuadre.' },
 ] as const
 
 function TcRow({ r, open, onToggle }: { r: TcReconciliationRow; open: boolean; onToggle: () => void }) {
