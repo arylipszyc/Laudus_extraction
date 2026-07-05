@@ -128,7 +128,20 @@ def git_commit_push(repo_root, paths: list[str], message: str) -> str | None:
         logger.info("git: nada que commitear (corrida idempotente) — se omite commit/push")
         return None
     subprocess.run(["git", "-C", toplevel, "commit", "-m", message], check=True)
-    sha = subprocess.run(
+    # Sincroniza con el remoto ANTES de pushear: el ledger y el código viven en el MISMO repo/branch
+    # (`main`), así que cualquier push de código mueve `origin` y dejaría este push rechazado
+    # (non-fast-forward → "failed to fetch" en el import). Un fetch + rebase trae esos commits (tocan
+    # archivos distintos → sin conflicto) y replaya el commit del ledger encima. Si el remoto no tiene
+    # `main` todavía (primer push) el fetch falla → se omite el rebase y el push lo crea.
+    fetched = subprocess.run(["git", "-C", toplevel, "fetch", "origin", "main"]).returncode == 0
+    if fetched:
+        rebase = subprocess.run(["git", "-C", toplevel, "rebase", "origin/main"])
+        if rebase.returncode != 0:
+            subprocess.run(["git", "-C", toplevel, "rebase", "--abort"])
+            raise RuntimeError(
+                "git rebase sobre origin/main falló (conflicto inesperado — ledger y código deberían "
+                "tocar archivos distintos); no se pushea para no corromper el remoto")
+    sha = subprocess.run(   # tras el rebase el HEAD puede tener otro sha → capturarlo acá
         ["git", "-C", toplevel, "rev-parse", "HEAD"],
         check=True, capture_output=True, text=True,
     ).stdout.strip()

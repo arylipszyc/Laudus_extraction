@@ -98,6 +98,51 @@ def test_git_commit_push_stages_from_repo_toplevel(tmp_path, monkeypatch):
     assert "2024-03.beancount" in tracked
 
 
+def test_git_commit_push_rebasea_cuando_origin_se_movio(tmp_path, monkeypatch):
+    """El ledger y el código comparten `main`: si un push de código movió `origin` entre medio, el
+    push del import haría non-fast-forward (el "failed to fetch"). git_commit_push hace fetch+rebase
+    → trae el commit ajeno (archivo distinto), replaya el del ledger encima y pushea sin conflicto."""
+    remote = tmp_path / "remote.git"
+    subprocess.run(["git", "init", "--bare", "-b", "main", str(remote)], check=True, capture_output=True)
+
+    # repo del backend: commit inicial + push (crea main en el remoto).
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_git_repo(repo)
+    subprocess.run(["git", "-C", str(repo), "remote", "add", "origin", str(remote)], check=True)
+    (repo / "seed.txt").write_text("seed\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo), "add", "-A"], check=True)
+    subprocess.run(["git", "-C", str(repo), "commit", "-m", "seed"], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(repo), "push", "origin", "main"], check=True, capture_output=True)
+
+    # otra copia mueve origin (simula un push de CÓDIGO): commit en un archivo distinto.
+    other = tmp_path / "other"
+    subprocess.run(["git", "clone", str(remote), str(other)], check=True, capture_output=True)
+    _init_git_repo(other)  # config user en la copia
+    subprocess.run(["git", "-C", str(other), "remote", "set-url", "origin", str(remote)], check=True)
+    (other / "codigo.py").write_text("print('x')\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(other), "add", "-A"], check=True)
+    subprocess.run(["git", "-C", str(other), "commit", "-m", "cambio de codigo"], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(other), "push", "origin", "main"], check=True, capture_output=True)
+
+    # el repo del backend quedó ATRÁS. Ahora importa (archivo del ledger) → antes daba push rechazado.
+    target = repo / "ledger" / "imports" / "laudus"
+    target.mkdir(parents=True)
+    (target / "2024-03.beancount").write_text("; data\n", encoding="utf-8")
+    monkeypatch.setenv("IMPORTER_GIT_ENABLED", "true")
+
+    sha = laudus_run.git_commit_push(repo / "ledger", ["ledger/imports/laudus/"], "import ledger")
+
+    assert sha  # pushó (fetch+rebase evitó el non-fast-forward)
+    # tras rebase+push, el HEAD del repo tiene AMBOS: el commit ajeno de código Y el del ledger.
+    files = subprocess.run(
+        ["git", "-C", str(repo), "ls-tree", "-r", "--name-only", "HEAD"],
+        check=True, capture_output=True, text=True,
+    ).stdout
+    assert "codigo.py" in files                                   # el commit ajeno se trajo con el rebase
+    assert "ledger/imports/laudus/2024-03.beancount" in files     # el del ledger quedó encima
+
+
 def test_git_commit_push_noop_when_nothing_staged(tmp_path, monkeypatch):
     """Corrida idempotente (nada cambió) → None sin raise; no es un fallo (preserva review #10)."""
     repo = tmp_path / "repo"
