@@ -151,6 +151,46 @@ def test_apertura_no_se_emite_si_emit_opening_false(tmp_path):
     assert OPENING_EQUITY not in net
 
 
+def test_apertura_usd_al_fx_del_pago_que_la_salda(tmp_path):
+    """Apertura USD: se valoriza al CLP real del pago (MONTO CANCELADO) que la salda, NO a
+    opening×fx_del_estado → TC:Real cierra a −closing×fx sin diferencia de cambio fantasma
+    (decisión Valentina 2026-07-04). Caso real 1027 USD feb: la deuda de enero se pagó a un fx
+    distinto del estado de febrero."""
+    fx = Decimal("931")
+    # opening USD 1448.79 saldado por un MONTO CANCELADO cuyo CLP real (1.250.161, pagado a ~863)
+    # ≠ opening×fx (1.348.823). + una compra de 465.62 USD.
+    m = _model([("2026-02-10", "EBAY", 465.62, "compra"),
+                ("2026-02-12", "MONTO CANCELADO", -1448.79, "pago")],
+               opening="1448.79", closing="465.62", currency="USD",
+               start="2026-02-01", end="2026-02-28")
+    entries = build_tc_correction_entries(
+        model=m, tc_real_account=TC_REAL, expense_tc_account=EXP_TC, fx=fx,
+        lump_for=lambda tx: Decimal("1250161"), category_for=lambda tx: CAT,
+        batch_id="b1", bank_account_id="tc-test", emit_opening=True,
+    )
+    net = _net_by_account(entries)
+    assert net[OPENING_EQUITY] == Decimal("1250161")          # al pago real, NO 1448.79×931
+    assert net[TC_REAL] == (-Decimal("465.62") * fx)          # cierra a −closing×fx (nativo exacto)
+    assert net[EXP_TC] == Decimal("-1250161")                 # el pago sacó el gasto falso de Laudus
+    assert _bean_check(tmp_path, entries) == []
+
+
+def test_apertura_usd_fallback_si_no_se_salda_en_la_cartola(tmp_path):
+    """Si ningún pago salda la apertura completa (opening parcial/en cuotas), cae al fx del estado
+    (comportamiento previo) — no rompe, se acepta el residuo hasta que se salde."""
+    fx = Decimal("931")
+    m = _model([("2026-02-10", "EBAY", 465.62, "compra")],   # sin pago que matchee el opening
+               opening="1448.79", closing="1914.41", currency="USD",
+               start="2026-02-01", end="2026-02-28")
+    entries = build_tc_correction_entries(
+        model=m, tc_real_account=TC_REAL, expense_tc_account=EXP_TC, fx=fx,
+        lump_for=lambda tx: abs(tx.amount), category_for=lambda tx: CAT,
+        batch_id="b1", bank_account_id="tc-test", emit_opening=True,
+    )
+    net = _net_by_account(entries)
+    assert net[OPENING_EQUITY] == (Decimal("1448.79") * fx)   # fallback opening×fx
+
+
 # ── No doble conteo (§7): gasto neto = Σ compras − Σ abonos; Expenses:TC → 0 ───
 
 

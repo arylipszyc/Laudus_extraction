@@ -275,6 +275,13 @@ def build_tc_correction_entries(
     closing = model.balances.closing
     currency = model.currency
     entries: list = []
+    # (c) La apertura (deuda arrastrada) se salda con el pago MONTO CANCELADO de ESTA cartola (paga el
+    # período anterior). La apertura debe valorizarse al CLP REAL de ese pago —NO a opening×fx_del_estado—
+    # porque la deuda vieja se liquidó al fx de SU mes, no al de este estado (decisión Valentina 2026-07-04,
+    # misma regla del CLP real del asiento (b)). Así la apertura y su pago se netean exacto → TC:Real cierra
+    # a −closing y no queda diferencia de cambio fantasma. Solo aplica si el pago salda la apertura completa
+    # (mismo nativo); si no (opening parcial/en cuotas) → fallback a opening×fx.
+    opening_settle_clp: Decimal | None = None
 
     for tx in model.transactions:
         raw_op = (tx.raw or {}).get("operation_type")
@@ -287,6 +294,10 @@ def build_tc_correction_entries(
                 continue
             postings = [_posting(expense_tc_account, -lump), _posting(tc_real_account, lump)]
             meta_op = op
+            # ¿este pago salda la apertura? (MONTO CANCELADO nativo == opening nativo) → su CLP real
+            # valoriza la apertura.
+            if emit_opening and opening != 0 and abs(abs(tx.amount) - abs(opening)) <= Decimal("0.01"):
+                opening_settle_clp = lump
         else:
             # asiento (a): TODA línea (consumo/cargo/avance/abono/desconocido) toca TC:Real por
             # -monto×fx → el pasivo cuadra con el closing SIEMPRE. La contrapartida depende del tipo.
@@ -326,7 +337,9 @@ def build_tc_correction_entries(
 
     # (c) apertura — una sola vez por tarjeta. La deuda arrastrada va a Equity (no gasto).
     if emit_opening and model.balances.opening != 0:
-        opening_clp = model.balances.opening * fx
+        # Valorizar al CLP real del pago que la salda (arriba); fallback a opening×fx si no se saldó
+        # completa en esta cartola (opening parcial → posición de cambio abierta, se acepta el residuo).
+        opening_clp = opening_settle_clp if opening_settle_clp is not None else model.balances.opening * fx
         meta = _meta(line_no=0, bank_account_id=bank_account_id, batch_id=batch_id, op="apertura", fx=fx,
                      year_month=year_month, opening=opening, closing=closing, currency=currency)
         entries.append(data.Transaction(
