@@ -125,7 +125,8 @@ def compute_tc_cuadre(
 
     # ── C3 — integridad del asiento: compra/cuota con UNA pata TC:Real y 2 cuentas distintas ──
     # Caza el bug de categorización (reescribía ambas patas a Expenses → pata de deuda destruida).
-    c3_corrupted = 0
+    # Junta la LISTA de los corruptos (fecha/glosa/monto) para que el contador vea CUÁLES arreglar.
+    c3_corrupted_list: list[dict] = []
     for e in entries:
         if not isinstance(e, data.Transaction):
             continue
@@ -141,7 +142,13 @@ def compute_tc_cuadre(
             continue
         real_legs = [p for p in e.postings if p.account.startswith(_TC_REAL_PREFIX)]
         if len(real_legs) != 1 or len({p.account for p in e.postings}) < 2:
-            c3_corrupted += 1
+            gasto = next((p for p in e.postings if p.units and p.account.split(":")[0] == "Expenses"), None)
+            c3_corrupted_list.append({
+                "date": e.date.isoformat(),
+                "narration": e.narration or "",
+                "amount": float(gasto.units.number) if gasto else 0.0,
+            })
+    c3_corrupted = len(c3_corrupted_list)
     c3_ok = c3_corrupted == 0
 
     # ── C4 — pago de la cartola vs pago que registró Laudus (idéntico a la v1) ──
@@ -209,6 +216,7 @@ def compute_tc_cuadre(
         # C3
         "c3_ok": c3_ok,
         "c3_corrupted_count": c3_corrupted,
+        "c3_corrupted": c3_corrupted_list,
         # C4 (pago)
         "pago_cartola": float(pago_cartola),
         "laudus_payment_total": float(laudus_total),

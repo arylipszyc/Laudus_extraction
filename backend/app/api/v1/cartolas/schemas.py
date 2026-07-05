@@ -34,6 +34,13 @@ class TcLaudusPayment(BaseModel):
     bank_account: str | None = None
 
 
+class TcLine(BaseModel):
+    """Línea genérica fecha/glosa/monto (ej. un asiento corrupto de C3)."""
+    date: str
+    narration: str
+    amount: float
+
+
 class TcCuadre(BaseModel):
     """Cuadre C1–C5 de la cartola contra el ledger (post-confirmación) — Valentina 2026-07-02 (v1),
     Story 6.6 (C2/C3/C5). Mismos campos que devuelve `compute_tc_cuadre`."""
@@ -52,6 +59,7 @@ class TcCuadre(BaseModel):
     # C3 — integridad del asiento
     c3_ok: bool = True                # toda compra/cuota conserva su pata TC:Real
     c3_corrupted_count: int = 0
+    c3_corrupted: list[TcLine] = []   # los asientos sin su pata de deuda (fecha/glosa/monto)
     # C4 — pago vs Laudus
     pago_cartola: float               # PAGO PAC de la cartola
     laudus_payment_total: float       # pago que Laudus registró para la tarjeta ese mes

@@ -28,6 +28,7 @@ export interface TcReconciliationRow {
   // C3
   c3_ok: boolean
   c3_corrupted_count: number
+  c3_corrupted: { date: string; narration: string; amount: number }[]
   // C4 (pago)
   pago_cartola: number
   laudus_payment_total: number

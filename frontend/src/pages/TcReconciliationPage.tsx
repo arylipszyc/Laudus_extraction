@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -166,59 +166,191 @@ function TcRow({ r, open, onToggle }: { r: TcReconciliationRow; open: boolean; o
       </tr>
       {open && (
         <tr className="bg-muted/20">
-          <td colSpan={8} className="px-4 py-3 space-y-3">
-            {!r.c1_ok && (
-              <p className="text-xs text-red-600">
-                🔴 C1: la deuda TC:Real ({fmt(r.tc_real_balance)}) no coincide con −cierre
-                ({fmt(-r.closing_clp)}). La cartola no está bien materializada.
-              </p>
-            )}
-            {!r.c3_ok && (
-              <p className="text-xs text-red-600">
-                🔴 C3: {r.c3_corrupted_count} asiento(s) de compra/cuota sin su pata de deuda TC:Real
-                (posible corrupción de categorización).
-              </p>
-            )}
-            {!r.c2_ok && (
-              <p className="text-xs text-amber-600">
-                🟡 C2: {r.c2_reason ?? `apertura ${fmt(r.opening, r.currency)} ≠ cierre anterior ${fmt(r.c2_prior_closing, r.currency)}`}.
-              </p>
-            )}
-            {!r.c5_ok && (
-              <p className="text-xs text-amber-600">
-                🟡 C5: el lump del mes quedó con residual {fmt(r.c5_residual)} (gasto sin desglosar).
-              </p>
-            )}
-
-            <div>
-              <p className="text-xs font-medium text-muted-foreground mb-1">
-                Movimientos de la cartola (compras {fmt(r.sum_compras)} · pagos {fmt(r.sum_pagos)} · cargos {fmt(r.sum_cargos)})
-              </p>
-              {r.movements.length === 0 && <p className="text-xs text-muted-foreground">— sin movimientos —</p>}
-              {r.movements.map((m, i) => (
-                <div key={i} className="text-xs grid grid-cols-[5rem_1fr_auto] gap-2">
-                  <span className="font-mono text-muted-foreground">{m.date}</span>
-                  <span className="truncate">{m.operation_type} · {m.narration}</span>
-                  <span className="font-mono text-right">{fmt(m.amount)}</span>
-                </div>
-              ))}
-            </div>
-
-            {r.laudus_payments.length > 0 && (
-              <div>
-                <p className="text-xs font-medium text-muted-foreground mb-1">Pago(s) registrado(s) por Laudus</p>
-                {r.laudus_payments.map((p, i) => (
-                  <div key={i} className="text-xs bg-muted rounded p-2">
-                    <span className="font-mono">{p.date}</span> · {p.narration} ·{' '}
-                    <span className="font-mono">{fmt(p.amount)}</span>
-                    {p.bank_account && <span className="text-muted-foreground"> · {p.bank_account}</span>}
-                  </div>
-                ))}
-              </div>
-            )}
+          <td colSpan={8} className="px-4 py-3">
+            <CheckDetail r={r} />
           </td>
         </tr>
       )}
     </>
+  )
+}
+
+// Dólar / número plano (no moneda) — para mostrar el fx del estado (ej. "931,05").
+const num = (n: number) => new Intl.NumberFormat('es-CL', { maximumFractionDigits: 2 }).format(n)
+
+// Fila de comparación de dos lados + diferencia (deuda/monto en positivo, como lo lee un contador).
+function TwoSided({ rows, diff, diffOk }: {
+  rows: { label: string; value: string }[]; diff: string; diffOk: boolean
+}) {
+  return (
+    <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-0.5 items-baseline">
+      {rows.map((r, i) => (
+        <Fragment key={i}>
+          <span className="text-muted-foreground">{r.label}</span>
+          <span className="font-mono text-right">{r.value}</span>
+        </Fragment>
+      ))}
+      <span className="text-muted-foreground border-t pt-0.5">Diferencia</span>
+      <span className={`font-mono text-right border-t pt-0.5 ${diffOk ? 'text-green-600' : 'text-red-600'}`}>
+        {diff} {diffOk ? '✓' : '✗'}
+      </span>
+    </div>
+  )
+}
+
+// Panel abrible por chequeo (auto-abierto si falla): el contador ve QUÉ compara y los dos números.
+function CheckPanel({ code, ok, critical, children }: {
+  code: string; ok: boolean; critical: boolean; children: ReactNode
+}) {
+  const short = CHECKS.find((c) => c.code === code)?.title.split(' — ')[0] ?? code
+  return (
+    <details open={!ok} className="border rounded-md bg-background">
+      <summary className="cursor-pointer select-none px-3 py-2 flex items-center gap-2">
+        <span aria-hidden>{dot(ok, critical)}</span>
+        <span className="font-mono">{code}</span>
+        <span className="text-muted-foreground">· {short}</span>
+      </summary>
+      <div className="px-3 pb-3 pt-1 text-xs space-y-2">{children}</div>
+    </details>
+  )
+}
+
+function CheckDetail({ r }: { r: TcReconciliationRow }) {
+  const cur = r.currency
+  const isUsd = cur !== 'CLP'
+  const compraCount = r.movements.filter((m) => m.operation_type === 'compra' || m.operation_type === 'cuota').length
+  const deuda = Math.abs(r.tc_real_balance)
+  return (
+    <div className="space-y-2">
+      {/* C1 — cuadre de la deuda */}
+      <CheckPanel code="C1" ok={r.c1_ok} critical>
+        <TwoSided
+          rows={[
+            { label: 'Deuda en la contabilidad (al cierre del mes)', value: fmt(deuda) },
+            {
+              label: 'Deuda según la cartola (cierre del estado)',
+              value: isUsd ? `${fmt(r.closing, cur)} × ${num(r.fx)} = ${fmt(r.closing_clp)}` : fmt(r.closing_clp),
+            },
+          ]}
+          diff={fmt(deuda - r.closing_clp)}
+          diffOk={r.c1_ok}
+        />
+        {!r.c1_ok && (
+          <p className="text-red-600">
+            La deuda registrada no coincide con el estado de cuenta. Causas típicas: una compra o un pago
+            se cargó mal, o falta cargar una cartola de un mes anterior. Revisá y, si hace falta, rechazá y
+            volvé a importar.
+          </p>
+        )}
+      </CheckPanel>
+
+      {/* C2 — continuidad */}
+      <CheckPanel code="C2" ok={r.c2_ok} critical={false}>
+        {r.c2_reason ? (
+          <p className="text-muted-foreground">
+            {r.c2_reason === 'sin cartola anterior'
+              ? 'Es la primera cartola cargada de esta tarjeta; no hay mes anterior con qué comparar. Cargá los meses en orden.'
+              : r.c2_reason}
+          </p>
+        ) : (
+          <>
+            <TwoSided
+              rows={[
+                { label: 'Apertura de esta cartola', value: fmt(r.opening, cur) },
+                { label: 'Cierre de la cartola del mes anterior', value: fmt(r.c2_prior_closing, cur) },
+              ]}
+              diff={fmt((r.opening ?? 0) - (r.c2_prior_closing ?? 0), cur)}
+              diffOk={r.c2_ok}
+            />
+            {!r.c2_ok && (
+              <p className="text-amber-600">
+                La apertura de este mes no coincide con el cierre del mes pasado — probablemente falte
+                cargar una cartola entre medio.
+              </p>
+            )}
+          </>
+        )}
+      </CheckPanel>
+
+      {/* C3 — compras con su deuda */}
+      <CheckPanel code="C3" ok={r.c3_ok} critical>
+        {r.c3_ok ? (
+          <p className="text-muted-foreground">Las {compraCount} compras del mes conservan su deuda.</p>
+        ) : (
+          <>
+            <p className="text-red-600">
+              {r.c3_corrupted_count} compra(s) perdieron su registro de deuda. Se categorizaron mal (se
+              borró la deuda). Solución: rechazá y volvé a importar la cartola de este mes.
+            </p>
+            {r.c3_corrupted.map((m, i) => (
+              <div key={i} className="grid grid-cols-[5rem_1fr_auto] gap-2">
+                <span className="font-mono text-muted-foreground">{m.date}</span>
+                <span className="truncate">{m.narration}</span>
+                <span className="font-mono text-right">{fmt(m.amount)}</span>
+              </div>
+            ))}
+          </>
+        )}
+      </CheckPanel>
+
+      {/* C4 — pago vs banco */}
+      <CheckPanel code="C4" ok={r.pago_ok} critical={false}>
+        <TwoSided
+          rows={[
+            { label: 'Pago según la cartola', value: fmt(r.pago_cartola) },
+            { label: 'Pago registrado por el banco (Laudus)', value: fmt(r.laudus_payment_total) },
+          ]}
+          diff={fmt(r.pago_cartola - r.laudus_payment_total)}
+          diffOk={r.pago_ok}
+        />
+        {!r.pago_ok && (
+          <p className="text-amber-600">
+            El pago de la cartola no coincide con lo que registró el banco. Suele pasar cuando el banco
+            paga varias tarjetas en un solo movimiento (pago consolidado), o si falta el pago del mes.
+          </p>
+        )}
+        {r.laudus_payments.length > 0 && (
+          <div className="pt-1">
+            <p className="text-muted-foreground mb-0.5">Detalle del banco:</p>
+            {r.laudus_payments.map((p, i) => (
+              <div key={i} className="grid grid-cols-[5rem_1fr_auto] gap-2">
+                <span className="font-mono text-muted-foreground">{p.date}</span>
+                <span className="truncate">{p.narration}</span>
+                <span className="font-mono text-right">{fmt(p.amount)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </CheckPanel>
+
+      {/* C5 — gasto del mes saldado (informativo) */}
+      <CheckPanel code="C5" ok={r.c5_ok} critical={false}>
+        <div className="grid grid-cols-[1fr_auto] gap-x-4">
+          <span className="text-muted-foreground">Gasto sin detallar todavía</span>
+          <span className="font-mono text-right">{fmt(r.c5_residual)}</span>
+        </div>
+        <p className="text-muted-foreground">
+          El banco carga el gasto de la tarjeta en bloque; a medida que se categorizan las compras, este
+          saldo baja a $0. Es informativo, no un descuadre.
+        </p>
+      </CheckPanel>
+
+      {/* Movimientos de la cartola (contexto) */}
+      <details className="border rounded-md bg-background">
+        <summary className="cursor-pointer select-none px-3 py-2 text-muted-foreground">
+          Movimientos de la cartola (compras {fmt(r.sum_compras)} · pagos {fmt(r.sum_pagos)} · cargos {fmt(r.sum_cargos)})
+        </summary>
+        <div className="px-3 pb-3 pt-1 text-xs">
+          {r.movements.length === 0 && <p className="text-muted-foreground">— sin movimientos —</p>}
+          {r.movements.map((m, i) => (
+            <div key={i} className="grid grid-cols-[5rem_1fr_auto] gap-2">
+              <span className="font-mono text-muted-foreground">{m.date}</span>
+              <span className="truncate">{m.operation_type} · {m.narration}</span>
+              <span className="font-mono text-right">{fmt(m.amount)}</span>
+            </div>
+          ))}
+        </div>
+      </details>
+    </div>
   )
 }

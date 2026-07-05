@@ -213,6 +213,10 @@ def test_c3_detecta_asiento_corrupto():
     assert r["c3_ok"] is False          # sin pata TC:Real → corrupto
     assert r["c3_corrupted_count"] == 1
     assert r["status"] == "red"
+    # la LISTA de corruptos (fecha/glosa/monto) para que el contador vea CUÁL arreglar
+    assert len(r["c3_corrupted"]) == 1
+    assert r["c3_corrupted"][0]["narration"] == "COMPRA CORRUPTA"
+    assert r["c3_corrupted"][0]["date"] == "2026-04-05"
 
 
 # Lump con residual: un pago de Laudus al lump SIN el asiento (b) que lo reclasifica → no netea.

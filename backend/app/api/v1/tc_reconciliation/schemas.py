@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from backend.app.api.v1.cartolas.schemas import TcLaudusPayment
+from backend.app.api.v1.cartolas.schemas import TcLaudusPayment, TcLine
 
 
 class TcMovement(BaseModel):
@@ -38,6 +38,7 @@ class TcReconciliationRow(BaseModel):
     # C3
     c3_ok: bool
     c3_corrupted_count: int
+    c3_corrupted: list[TcLine] = []
     # C4 (pago)
     pago_cartola: float
     laudus_payment_total: float

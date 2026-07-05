@@ -14,7 +14,7 @@ const base = {
   card: 'BCI_1027', tc_real_account: 'Liabilities:EAG:TC:Real:Tc1027', lump_account: 'Expenses:EAG:TC:Tc1027-430005',
   currency: 'CLP', fx: 1, opening: 1000, closing_clp: 1300,
   c2_ok: true, c2_prior_closing: 1000, c2_reason: null,
-  c3_corrupted_count: 0, pago_cartola: 0, laudus_payment_total: 0, laudus_payments: [], pago_ok: true,
+  c3_corrupted_count: 0, c3_corrupted: [], pago_cartola: 0, laudus_payment_total: 0, laudus_payments: [], pago_ok: true,
   c5_ok: true, c5_residual: 0, movements: [], sum_compras: 0, sum_pagos: 0, sum_cargos: 0,
 }
 const GREEN: TcReconciliationRow = {
@@ -53,9 +53,13 @@ describe('<TcReconciliationPage /> (Story 6.6)', () => {
     expect(months[0]).toBe('2026-03')
   })
 
-  it('expande la fila y muestra el detalle del descuadre C1', async () => {
+  it('expande la fila y muestra el detalle de la comparación C1 (dos lados + acción)', async () => {
     renderPage()
     fireEvent.click(await screen.findByText('2026-03'))
-    expect(await screen.findByText(/C1: la deuda TC:Real/)).toBeInTheDocument()
+    // el panel C1 muestra los dos lados de la comparación...
+    expect(await screen.findByText(/Deuda en la contabilidad/)).toBeInTheDocument()
+    expect(screen.getByText(/Deuda según la cartola/)).toBeInTheDocument()
+    // ...y el texto de acción cuando está en rojo (RED tiene c1_ok=false)
+    expect(screen.getByText(/no coincide con el estado de cuenta/)).toBeInTheDocument()
   })
 })
