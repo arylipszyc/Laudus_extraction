@@ -53,13 +53,15 @@ describe('<TcReconciliationPage /> (Story 6.6)', () => {
     expect(months[0]).toBe('2026-03')
   })
 
-  it('expande la fila y muestra el detalle de la comparación C1 (dos lados + acción)', async () => {
+  it('expande la fila y muestra la cascada de conciliación + el detalle por chequeo', async () => {
     renderPage()
     fireEvent.click(await screen.findByText('2026-03'))
-    // el panel C1 muestra los dos lados de la comparación...
-    expect(await screen.findByText(/Deuda en la contabilidad/)).toBeInTheDocument()
-    expect(screen.getByText(/Deuda según la cartola/)).toBeInTheDocument()
-    // ...y el texto de acción cuando está en rojo (RED tiene c1_ok=false)
+    // la cascada de conciliación (la cadena de montos que ata mes a mes)
+    expect(await screen.findByText('Conciliación del mes')).toBeInTheDocument()
+    expect(screen.getByText('Saldo del mes anterior')).toBeInTheDocument()
+    expect(screen.getByText('Saldo en la contabilidad')).toBeInTheDocument()
+    // y el detalle por chequeo con la comparación C1 (dos lados + acción)
+    expect(screen.getByText(/Deuda en la contabilidad/)).toBeInTheDocument()
     expect(screen.getByText(/no coincide con el estado de cuenta/)).toBeInTheDocument()
   })
 })

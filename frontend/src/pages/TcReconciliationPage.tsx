@@ -198,6 +198,94 @@ function TwoSided({ rows, diff, diffOk }: {
   )
 }
 
+// Buckets de operation_type para la cascada de conciliación.
+const COMPRA_OPS = ['compra', 'cuota']
+const CARGO_OPS = ['impuesto', 'comision', 'interes', 'seguro', 'mantencion']
+const ABONO_OPS = ['abono', 'nota_credito']
+const PAGO_OPS = ['pago']
+
+const prevMonth = (ym: string) => {
+  const [y, m] = ym.split('-').map(Number)
+  return m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`
+}
+
+// Una fila de la cascada: signo · concepto (+ fecha/fuente) · monto.
+function CascadeRow({ sign, label, note, amount, bad, total }: {
+  sign?: string; label: string; note?: string; amount: string; bad?: boolean; total?: boolean
+}) {
+  return (
+    <div className={`grid grid-cols-[1.1rem_1fr_auto] gap-x-2 items-baseline ${bad ? 'text-red-600' : total ? 'font-medium' : ''}`}>
+      <span className="text-right text-muted-foreground">{sign ?? ''}</span>
+      <span>{label}{note && <span className="text-muted-foreground text-[11px]"> · {note}</span>}</span>
+      <span className={`font-mono text-right ${total ? '' : ''}`}>{amount}</span>
+    </div>
+  )
+}
+
+// Cascada de conciliación (diseño Valentina): la cadena de montos que ata mes a mes, en CLP.
+// saldo_anterior = saldo contable − Σ movimientos (despejado → cierra por construcción, CLP y USD).
+function Cascada({ r }: { r: TcReconciliationRow }) {
+  const bucket = (ops: string[]) =>
+    r.movements.filter((m) => ops.includes(m.operation_type)).reduce((s, m) => s + Math.abs(m.amount), 0)
+  const compras = bucket(COMPRA_OPS)
+  const cargos = bucket(CARGO_OPS)
+  const abonos = bucket(ABONO_OPS)
+  const pago = bucket(PAGO_OPS)
+  const otros = r.movements
+    .filter((m) => ![...COMPRA_OPS, ...CARGO_OPS, ...ABONO_OPS, ...PAGO_OPS].includes(m.operation_type))
+    .reduce((s, m) => s + Math.abs(m.amount), 0)
+  const movSum = r.movements.reduce((s, m) => s + m.amount, 0)         // signed
+  const saldoAnterior = Math.abs(r.tc_real_balance - movSum)           // despejado
+  const deuda = Math.abs(r.tc_real_balance)                            // saldo contable al cierre
+
+  // Cartola vieja sin cierre persistido (import pre-6.6): no comparar contra 0.
+  const sinCierre = r.closing_clp === 0 && deuda > 1
+  const pagoBanco = r.laudus_payment_total
+  const pagoDate = r.laudus_payments[0]?.date
+
+  return (
+    <div className="border rounded-md bg-background p-3 text-xs space-y-1">
+      <p className="font-medium text-sm mb-1">Conciliación del mes</p>
+      <CascadeRow label="Saldo del mes anterior" note={`al cierre de ${prevMonth(r.year_month)}`} amount={fmt(saldoAnterior)} />
+      <CascadeRow sign="−" label="Pago del saldo" note={pagoDate ? `banco ${pagoDate}` : 'banco'} amount={fmt(pago)}
+        bad={!r.pago_ok} />
+      {!r.pago_ok && (
+        <p className="text-amber-600 pl-[1.1rem]">
+          ⚠ el banco registró {fmt(pagoBanco)} — no coincide con el pago de la cartola. Puede ser un pago
+          consolidado de varias tarjetas, o falta el pago del mes.
+        </p>
+      )}
+      <CascadeRow sign="+" label="Compras y cuotas del mes" note={r.year_month} amount={fmt(compras)} />
+      <CascadeRow sign="+" label="Cargos (impuestos, comisiones)" note={r.year_month} amount={fmt(cargos)} />
+      <CascadeRow sign="−" label="Abonos (devoluciones)" note={r.year_month} amount={fmt(abonos)} />
+      {otros > 1 && <CascadeRow sign="+" label="Otros (avances, etc.)" note={r.year_month} amount={fmt(otros)} />}
+      <div className="border-t my-1" />
+      <CascadeRow label="Saldo en la contabilidad" note="al cierre" amount={fmt(deuda)} total />
+      {sinCierre ? (
+        <p className="text-amber-600 pt-1">
+          🟡 Esta cartola se cargó antes de que se guardara el cierre — no puedo compararla. Re-importala
+          para cuadrarla.
+        </p>
+      ) : (
+        <CascadeRow
+          label="Cierre según la cartola"
+          note={r.currency !== 'CLP' ? `${fmt(r.closing, r.currency)} × ${num(r.fx)}` : undefined}
+          amount={fmt(r.closing_clp)}
+          bad={!r.c1_ok}
+          total
+        />
+      )}
+      {!sinCierre && !r.c1_ok && (
+        <p className="text-red-600 pt-1">
+          🔴 El saldo en la contabilidad no coincide con el cierre de la cartola (diferencia{' '}
+          {fmt(Math.abs(deuda - r.closing_clp))}). Si las líneas de arriba están bien, revisá si a una
+          compra se le borró la deuda (chequeo C3).
+        </p>
+      )}
+    </div>
+  )
+}
+
 // Panel abrible por chequeo (auto-abierto si falla): el contador ve QUÉ compara y los dos números.
 function CheckPanel({ code, ok, critical, children }: {
   code: string; ok: boolean; critical: boolean; children: ReactNode
@@ -221,7 +309,13 @@ function CheckDetail({ r }: { r: TcReconciliationRow }) {
   const compraCount = r.movements.filter((m) => m.operation_type === 'compra' || m.operation_type === 'cuota').length
   const deuda = Math.abs(r.tc_real_balance)
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
+      <Cascada r={r} />
+      <details className="border rounded-md bg-background">
+        <summary className="cursor-pointer select-none px-3 py-2 text-muted-foreground">
+          Detalle por chequeo (C1–C5)
+        </summary>
+        <div className="px-3 pb-3 pt-1 space-y-2">
       {/* C1 — cuadre de la deuda */}
       <CheckPanel code="C1" ok={r.c1_ok} critical>
         <TwoSided
@@ -349,6 +443,8 @@ function CheckDetail({ r }: { r: TcReconciliationRow }) {
               <span className="font-mono text-right">{fmt(m.amount)}</span>
             </div>
           ))}
+        </div>
+      </details>
         </div>
       </details>
     </div>
