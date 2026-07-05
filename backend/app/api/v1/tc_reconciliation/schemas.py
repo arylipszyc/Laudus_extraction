@@ -30,8 +30,7 @@ class TcReconciliationRow(BaseModel):
     closing_clp: float       # closing × fx (CLP), lo que compara C1
     # C1
     c1_ok: bool
-    tc_real_balance: float           # saldo CLP posteado (display)
-    tc_real_native: float = 0.0      # saldo en moneda nativa (lo que compara C1)
+    tc_real_balance: float
     # C2
     c2_ok: bool
     c2_prior_closing: float | None = None

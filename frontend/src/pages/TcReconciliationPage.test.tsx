@@ -18,11 +18,11 @@ const base = {
   c5_ok: true, c5_residual: 0, movements: [], sum_compras: 0, sum_pagos: 0, sum_cargos: 0,
 }
 const GREEN: TcReconciliationRow = {
-  ...base, year_month: '2026-04', closing: 1300, tc_real_balance: -1300, tc_real_native: -1300,
+  ...base, year_month: '2026-04', closing: 1300, tc_real_balance: -1300,
   c1_ok: true, c3_ok: true, status: 'green',
 }
 const RED: TcReconciliationRow = {
-  ...base, year_month: '2026-03', closing: 1000, tc_real_balance: -999, tc_real_native: -999,
+  ...base, year_month: '2026-03', closing: 1000, tc_real_balance: -999,
   c1_ok: false, c3_ok: true, status: 'red',
 }
 

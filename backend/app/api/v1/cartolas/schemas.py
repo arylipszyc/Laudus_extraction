@@ -38,9 +38,8 @@ class TcCuadre(BaseModel):
     """Cuadre C1–C5 de la cartola contra el ledger (post-confirmación) — Valentina 2026-07-02 (v1),
     Story 6.6 (C2/C3/C5). Mismos campos que devuelve `compute_tc_cuadre`."""
     # C1 — invariante de cierre
-    c1_ok: bool                       # TC:Real al cierre == −cierre declarado (compara en moneda nativa)
-    tc_real_balance: float            # saldo CLP posteado (display)
-    tc_real_native: float = 0.0       # saldo reconstruido en moneda nativa (lo que compara C1)
+    c1_ok: bool                       # TC:Real al cierre (CLP) == −cierre×fx
+    tc_real_balance: float
     closing: float                    # moneda nativa
     closing_clp: float = 0.0          # cierre × fx (CLP), lo que compara C1
     currency: str = "CLP"

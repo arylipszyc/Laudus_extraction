@@ -21,7 +21,6 @@ export interface TcReconciliationRow {
   // C1
   c1_ok: boolean
   tc_real_balance: number
-  tc_real_native: number
   // C2
   c2_ok: boolean
   c2_prior_closing: number | null

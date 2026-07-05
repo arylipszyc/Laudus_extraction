@@ -98,6 +98,88 @@ flujo 10.3 es solo para promover cuentas que Laudus descubre.
 **Falta para que el desglose corra end-to-end** (dev/Ary, no contable): wirear el categorizador 9.7 en
 `_build_importer` (hoy Noop→Suspense) + importar una cartola 2026 real por tarjeta. Ver [[BOND]].
 
+## ✅ operation_type completo en desglose TC (2026-06-26) — cierra drop silencioso
+
+La verificación end-to-end (cartola BCI 2026-04 real, sandbox) destapó que el builder solo manejaba
+`{compra,cuota,abono,pago}` y **descartaba el resto en silencio** (impuesto+comisión BCI → $6.795
+perdidos en AMBOS lados: pasivo `TC:Real` subvaluado Y gasto desaparecido). Test de completitud:
+**`saldo TC:Real al cierre == −closing`**. Decisiones (detalle en §10.1/§12.4 del planning-artifact):
+
+- **Cargos bancarios** (impuesto/comision/interes/seguro/mantencion) → `Expenses:EAG:GastosBancarios-430003`
+  (existe, cat2 poblada → cuenta en reporte). **Global** (Ary). Determinístico por op, NO usa el 9.7.
+- **`avance`** = préstamo (plata que entró), NO gasto → `Assets:EAG:Caja-111001` / `CajaUs-111003`
+  (existen, sirven TC+débito). **Lección general: no todo lo que sube la deuda es gasto.**
+- **Nunca descartar:** op no reconocida → asiento (a) contra `Suspense` + reportar en `result`.
+- Cero cuentas nuevas — todo ya en el plan. Fix queda para dev (ampliar mapeo + surfacear no-mapeadas).
+
+**Barrido 304 cartolas (2026-06-27):** `operation_type` de Gemini es vocabulario sucio → **630 líneas en
+`None`** (compras sin taggear, MUCHO más que los $6.795 de BCI) + sinónimos `COMPRAS P.A.T.`/`pat`/
+`compra_automatica`/`cargo_automatico` (→ compra) + `nota_credito` (→ abono). El builder DEBE normalizar
+antes de despachar. Limitación: normalizar en el prompt 9.5 sería lo durable pero es riesgoso → band-aid
+en el builder + red de seguridad (Suspense). Detalle §10.1.
+
+**Recomendación + colores (Ary 2026-06-27):** el contador **confirma SIEMPRE, nada va a automático** (la
+confirmación = su chequeo rápido). Lo que se afina es la recomendación + una **regla de 3 colores** (🟢/🟡/
+🔴 = confianza, rojos arriba) para que vea de un vistazo dónde fijarse. **Aprendizaje sin auto:** el color
+se pone más verde con cada confirmación (confianza historical = #conf/30); el umbral 30 deja de ser
+compuerta y pasa a ser termómetro del color — nunca "deja de preguntar". Dev: el 9.7 ya calcula confianza+
+fuente pero se pierden (`predict()[0]`); exponerlas + pintar en `/categorizacion`. Detalle §10.2/§12.5.
+
+## ✅ Validado contra 14 cartolas reales (2026-06-29) + limitación Laudus nueva
+
+Dry-run del desglose TC (fix "contabiliza todo operation_type", prod commit `26aacf4`) contra las 14
+cartolas reales de `samples/` (3 tarjetas × CLP/USD × feb/mar/abr). **11 corrected / 3 blocked,
+`unmapped` vacío en las 14** → el fix es robusto sobre datos reales, cero drops. Veredicto completo en
+`_bmad-output/planning-artifacts/valentina-veredicto-desglose-tc-14cartolas-2026-06-29.md`.
+
+**LIMITACIÓN DEL MATCHER (no de Laudus) — pagos Santander consolidados.** Los 3 bloqueos USD (Mastercard
+8996 feb/mar, Latanpass 0858 feb) NO son bug, NO son impago, y (corregido tras ver los asientos
+completos) NO es que Laudus esté mal: **los pagos están bien posteados por cuenta**. Santander paga las
+tarjetas Santander con asientos CONSOLIDADOS — UN asiento "Visa Santander 0858" paga 4 cuentas TC a la
+vez (Master CLP+USD, Latanpass CLP+USD) desde la cta cte Santander; la glosa nombra UNA tarjeta y UN USD
+aunque paga varias. **El problema es que `derive_statement_fx` matchea por la GLOSA de texto** (que
+Santander llena inconsistente), no por el monto CLP que entró a cada cuenta. Ese monto SÍ da FX sano:
+Master USD feb 1.291.675/1.387,63 = **930,8 ✅**; Latanpass USD feb 3.000.722/3.217,07 = **932,7 ✅**.
+→ es recuperable. **Excepción real: Master USD marzo** — ningún posting da FX sano; el 2026-05-06 postea
+**51,3M CLP a la cuenta MasterUs** (~57k USD, muchísimo más que el closing) = lump acumulado o misposteo,
+necesita revisión humana de Ary. Contraste: BCI 1027 USD tiene glosas limpias (1 asiento/tarjeta/moneda,
+USD en glosa) → cuadró los 3 meses. **FIX correcto (NO es BCCh ni limpiar Laudus): augmentar el matcher**
+— si la glosa no cuadra, caer a `CLP a la cuenta de esta tarjeta ÷ closing`, gateado por el chequeo BCCh
+existente (rechaza FX absurdos, acepta ~930). Preserva el cuadre exacto §12.1. Story nueva (mi dominio).
+
+**Contigüidad:** la apertura ancla una vez; un mes faltante desfasa el SALDO del pasivo (no la
+itemización, que va estado por estado). Materializar en corridas CONTIGUAS por tarjeta. Recomendé a Ary:
+materializar primero lo limpio (CLP de las 3 + Visa Infinity USD), dejar las USD Santander hasta limpiar
+Laudus, NO forzar FX.
+
+## Segundo libro Laudus — RUT2 / Fondo Común (2026-06-30)
+
+Proyecto en curso: replicar el sistema para un SEGUNDO libro de Laudus (RUT placeholder `12.345.678-2`, no entidad legal — otro libro de la misma familia, mismos contadores). Entidad hermana de EAG. Clasifiqué su plan de cuentas real (357 cuentas). Detalle en `_bmad-output/planning-artifacts/valentina-clasificacion-rut2-fondo-comun-2026-06-30.md`.
+
+- **Son DOS sub-entidades** (patrón EAG+hijas): **FFCC** (Fondo Común, raíces 1·2·3·4) y **JAB/FGK** (raíces 6·7·8, sin pasivo propio). Grupo de consolidación = [FFCC, JAB].
+- **Mapeo raíz→Beancount mecánico**: 1/6→Assets, 2→Liabilities, 3/7→Income, 4/8→Expenses; entidad por dígito (1-4=FFCC, 6-8=JAB). NO depende de categoria1.
+- **Reporte por sub-entidad + categoria2** (encabezado numérico): FFCC = 41 Gastos Grales / 43 Gastos Fijos Oficina; JAB = 81 Casas / 83 Aviones / 85 Yates / 87 Gastos Personales. 196 hojas de raíz 8 ruedan a ~7 buckets — clasificación mecánica.
+- 🚩 **MISMO problema de tarjetas que EAG**: TC de JAB/FGK (871005/873005) están como GASTO lumpeado; pasivo (raíz 2) vacío. El reporte de RUT2 hereda la limitación TC. Detalle = requiere desglose Epic 6 (futuro, no bloquea).
+- Pendientes con el contador: falta Equity/apertura para cerrar balance; ¿FGK y JAB juntas o separadas?; ¿gastos FFCC vs JAB son P&L separados (presumo sí)?
+
+## ✅ Piloto TC materializado + bug de datos + vista de cuadre (2026-07-02)
+
+Piloto BCI Visa Infinity 1027 CLP (feb/mar/abr) posteado en prod, **cierra al peso: `TC:Real ==
+−3.219.948`** (cierre abril). Detalle en `sessions/2026-07-02.md` y artefacto
+`valentina-bug-categorizacion-destruye-tc-real-2026-07-02.md`.
+
+- **BUG CRÍTICO hallado+arreglado:** categorizar una compra TC BORRABA la pata `Liabilities:TC:Real`
+  (el rewrite reescribía las 2 patas a la cuenta de gasto porque decidía por `bank_account_id`, que
+  en TC da el lump 430005, no la deuda). Daba saldo positivo falso. Fix: categorizar toca SOLO la
+  pata `Expenses:`/`Income:`. **Regla general:** el patrón "preservar la pata del bank_account_id" NO
+  sirve para TC (la deuda `TC:Real` es cuenta derivada por nombre, sin bank_account_id).
+- **Vista de cuadre (v1, construida):** NO es página aparte — es un paso en el flujo de subida. Panel
+  post-confirmación con **C1** (`TC:Real al cierre == −cierre`, el chequeo estrella que habría cachado
+  el bug) + pago cartola vs **asiento de pago Laudus** (`Assets:Banco → 430005`, un asiento/mes, glosa
+  corrida un mes, monto == PAGO PAC). Fase 2 diferida: herramientas de ajuste si no cuadra.
+- Re-importar una cartola sobrescribe el archivo y **resetea sus categorizaciones** → hay alarma que
+  avisa antes de re-subir una ya importada.
+
 ## Reportes Aprobados
 _Reportes que el dueño ha aprobado desarrollar. Actualizar a medida que se aprueban._
 
@@ -117,6 +199,48 @@ _Decisiones arquitecturales tomadas. Para no re-litigar._
   arregla solo porque el import es continuo.
 - Tarjeta/período sin cartola → queda tal cual (gasto en cuenta TC original). Corrección es por
   tarjeta y por período.
+
+**Decisiones para Story 6.6 (vista de cuadre TC C1–C5) — code review (2026-07-04/05):**
+- **C1 USD = comparar en CLP contra −closing×fx_del_estado.** ⚠️ CORRIGE un rodeo: el 04-07 se
+  implementó "C1 en nativo" por un diagnóstico MÍO errado (creí que había un "drift multi-mes" =
+  closing×Δfx). NO existe: el pago (b) de cada mes es el CLP REAL que canceló las compras del mes
+  anterior → en CLP el saldo TC:Real **telescopa exacto** a −closing_M×fx_M. Verificado sobre 1027 USD
+  feb/mar: **C1 en CLP diff = 0,00**; en nativo diff = 14,73 USD (falso rojo, porque el pago lleva CLP
+  al fx del mes ANTERIOR pero está estampado con el del mes actual → ÷fx equivocado). Revertido a CLP
+  el 05-07. **El fix REAL era solo la apertura (abajo), no el nativo.** (Caveat: la fórmula CLP asume
+  pago-full; una tarjeta que arrastra saldo sin pagar sí tendría dif. de cambio real — no aplica a las
+  pago-full que materializamos.)
+- **Endpoint GET /tc/reconciliation = forma PLANA, no anidada.** El AC6 pedía {cartola/ledger/laudus/
+  checks}; el dev entregó plano (todos los campos al nivel del row). Todos los datos están, el front ya
+  lo consume. Utilidad>forma: reformar = retrabajo cero-valor. Actualizar el spec a plano; `card`=
+  bank_account_id (no stem), detalle de API. Los nombres ya distinguen la fuente (`closing`=cartola,
+  `tc_real_balance`=ledger, `laudus_payment_total`=Laudus).
+- **Gotcha operacional:** el cuadre lee opening/closing de la metadata del asiento (6.6 Task 1). Una
+  cartola importada con la v1 (sin esa metadata) da C1 contra 0 → rojo; hay que **re-importar** bajo 6.6
+  para que estampe opening/closing. Feb 1027 USD estaba importada con v1 → re-import pendiente.
+
+**Apertura USD al fx del pago que la salda, NO al fx del estado (2026-07-04) — cierra el C1-rojo de la 1027 USD:**
+- Caso real (1027 Visa Infinity USD feb): C1 rojo, TC:Real −571,64 vs cierre −465,59 (US$106 / 98.736 CLP).
+  Verificado: la apertura (deuda de enero US$1.448,79) se valorizaba a `opening×fx_ESTADO` (931 de feb) =
+  1.348.897, pero enero se saldó con 1.250.161 CLP reales al fx de ENERO (~863). El pago real no limpia la
+  apertura sobrevaluada → 98.736 de deuda fantasma. `98.736 = 1.448,79 × (931−863)` = dif. de cambio sobre
+  la apertura.
+- **FIX (opción A): valorizar la apertura al CLP REAL del pago (MONTO CANCELADO) que la salda, no a
+  opening×fx_estado.** Misma regla del CLP real que el asiento (b). Apertura y primer MONTO CANCELADO son la
+  MISMA deuda → mismo CLP → se netean. TC:Real cierra a −closing nativo, C1 verde. Arregla el balance (hoy
+  TC:Real y Equity:Apertura están los 2 inflados en la dif. de cambio); manda bien a Equity el pago de la
+  deuda pre-2026 (no es gasto 2026).
+- **Solo la apertura (one-time).** Los demás meses se autocancelan: el fx del estado SALE del pago que lo
+  salda (§12.1), así que compra@fx_M y su liquidación@fx_M comparten dólar por construcción (feb compras
+  @931, feb pagado @931). La apertura es la única deuda cuyo fx de carga ≠ fx de settlement.
+- **NO es (B)** (dif. de cambio a resultado): la apertura es un plug sin base CLP previa → valorizarla a lo
+  que cuesta saldarla no genera ganancia/pérdida. (B) rompería el espejo-Laudus (no revaloriza). No rompe
+  §12.1 ni el no-doble-conteo (la apertura va contra Equity, no toca gasto; el cuadre Σcompras×fx=lump es
+  intra-estado).
+- **CAVEAT:** limpio si la apertura se salda en la 1ª cartola (tarjeta pago-full, como 1027). Opening que
+  se arrastra/paga en cuotas a fx distintos = posición de cambio abierta → repensar (valorizar al fx del 1er
+  pago, aceptar residual hasta saldar). **Dev:** `tc_correction.emit_opening` hoy `opening_clp=opening×fx`;
+  cambiar a el CLP del pago que salda la apertura (opening_fx = pago_CLP ÷ opening_USD, solo para apertura).
 
 **Decisiones para Story 6.2 (2026-06-22)** — ver §12 del doc. Tres cierres clave:
 - **FX USD** = lump CLP del pago que SALDA el estado (mes siguiente) ÷ total USD facturado. Fuerza
