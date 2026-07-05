@@ -1,0 +1,27 @@
+2026-07-01 * "Raquel Ventura Traspaso Banco Santander"
+  id: "6054"
+  je_num: "6014"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -2000000.00 CLP
+  Expenses:EAG:SraRaquelVentura-430021  2000000.00 CLP
+
+2026-07-01 * "Abono prestamo Jhonny"
+  id: "6055"
+  je_num: "6015"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoEdwards0162338082-111007  100000.00 CLP
+  Income:EAG:JhonnyGuerra-310045  -100000.00 CLP
+
+2026-07-01 * "Reembolso Cruz verde Eduardo Avayu"
+  id: "6056"
+  je_num: "6016"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -572391.00 CLP
+  Expenses:EAG:Remedios-430051  572391.00 CLP
+
+2026-07-01 * "Mariela Rubio de Sra Raquel Ventura"
+  id: "6057"
+  je_num: "6017"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -560000.00 CLP
+  Expenses:EAG:SraRaquelVentura-430021  560000.00 CLP
