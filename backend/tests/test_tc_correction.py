@@ -27,6 +27,7 @@ from pipeline.importers.tc_correction import (
     build_tc_correction_entries,
     correct_tc_cartola,
     derive_statement_fx,
+    inherit_statement_fx,
     parse_glosa_usd,
     tc_real_account,
 )
@@ -785,3 +786,142 @@ def test_slug_desambigua_tarjetas_mismo_last4(tmp_path):
     assert r1["status"] == "corrected" and r2["status"] == "corrected", (r1["reason"], r2["reason"])
     files = sorted(p.name for p in (root / "imports" / "cartolas").glob("*-tc.beancount"))
     assert len(files) == 2, files                             # dos archivos distintos, sin sobrescritura
+
+
+# ── FX heredado para meses revolving (brief Valentina 2026-07-06) ──────────────
+# Datos reales 8996 Mastercard USD: marzo cerró en US$2.234,84 SIN pago propio (rodó a abril);
+# abril (opening 2.234,84) se saldó el 08-05 a fx 899,64 → marzo hereda ese fx (costo real pagado).
+# BCCh marzo 2026 = 931,57 → desviación del heredado 3,4% < 5% (pasa el gate).
+
+_FX_ABRIL = "899.6399966540679816927715418"
+
+
+def _marzo_revolving_model():
+    # opening 1.387,63 (cierre de feb) − pago 1.387,63 (salda feb, 06-03) + movimientos 2.234,84
+    # = closing 2.234,84 (nadie lo pagó dentro de la ventana → revolving).
+    return _model([
+        ("2026-03-06", "MONTO CANCELADO", -1387.63, "pago"),
+        ("2026-03-15", "COMPRAS DEL MES", 2234.84, "compra"),
+    ], opening="1387.63", closing="2234.84", currency="USD", start="2026-02-25", end="2026-03-24")
+
+
+def _write_imported_tc(out_dir, *, period="2026-04", opening="2234.84", closing="57024.47",
+                       fx=_FX_ABRIL, fx_source=None, account=TC_REAL_ORCH, currency="USD"):
+    """Simula una cartola TC YA importada (metadata 6.6) para que `inherit_statement_fx` la escanee."""
+    stem = account.rsplit(":", 1)[-1]
+    lines = [
+        '2026-04-10 * "COMPRA PREVIA"',
+        '  source: "cartola-tc"',
+        '  bank_account_id: "tc-test"',
+        '  batch_id: "bprev"',
+        '  line: "1"',
+        '  operation_type: "compra"',
+        f'  period: "{period}"',
+        f'  opening: "{opening}"',
+        f'  closing: "{closing}"',
+        f'  currency: "{currency}"',
+        f'  fx: "{fx}"',
+    ]
+    if fx_source:
+        lines.append(f'  fx_source: "{fx_source}"')
+    lines += [f'  {account}  -89964.00 CLP', '  Expenses:EAG:Suspense  89964.00 CLP', '']
+    path = out_dir / f"Banco-1027-{stem}-{period}-tc.beancount"
+    path.write_text("\n".join(lines), encoding="utf-8")
+    return path
+
+
+def test_inherit_fx_hereda_del_estado_que_absorbe(tmp_path):
+    _write_imported_tc(tmp_path)
+    res = inherit_statement_fx(_marzo_revolving_model(), TC_REAL_ORCH, tmp_path,
+                               bcch_ref=Decimal("931.57"))
+    assert res["status"] == "ok"
+    assert res["fx"] == Decimal(_FX_ABRIL)
+    assert res["fx_source"] == "inherited:2026-04"            # origen = abril (pago real)
+    assert res["inherited_from"] == "2026-04"
+
+
+def test_inherit_fx_bloquea_sin_estado_siguiente(tmp_path):
+    res = inherit_statement_fx(_marzo_revolving_model(), TC_REAL_ORCH, tmp_path,
+                               bcch_ref=Decimal("931.57"))
+    assert res["status"] == "blocked"
+    assert "importá primero el mes siguiente" in res["reason"]
+
+
+def test_inherit_fx_bloquea_sin_contiguidad(tmp_path):
+    # El estado posterior existe pero su apertura NO es el cierre de este (no lo absorbió).
+    _write_imported_tc(tmp_path, opening="9999.99")
+    res = inherit_statement_fx(_marzo_revolving_model(), TC_REAL_ORCH, tmp_path,
+                               bcch_ref=Decimal("931.57"))
+    assert res["status"] == "blocked"
+
+
+def test_inherit_fx_gate_bcch_aplica(tmp_path):
+    # Sin BCCh de referencia → falla segura; con BCCh lejano (700 vs 899,64 = 28%) → bloquea.
+    _write_imported_tc(tmp_path)
+    m = _marzo_revolving_model()
+    assert inherit_statement_fx(m, TC_REAL_ORCH, tmp_path, bcch_ref=None)["status"] == "blocked"
+    res = inherit_statement_fx(m, TC_REAL_ORCH, tmp_path, bcch_ref=Decimal("700"))
+    assert res["status"] == "blocked"
+    assert "gate BCCh" in res["reason"]
+
+
+def test_inherit_fx_ignora_otra_moneda_y_periodo_anterior(tmp_path):
+    # Una cartola CLP contigua o un estado ANTERIOR no son fuentes de herencia.
+    _write_imported_tc(tmp_path, currency="CLP")
+    _write_imported_tc(tmp_path, period="2026-01")
+    res = inherit_statement_fx(_marzo_revolving_model(), TC_REAL_ORCH, tmp_path,
+                               bcch_ref=Decimal("931.57"))
+    assert res["status"] == "blocked"
+
+
+def test_inherit_fx_origen_propaga_y_acota_la_cadena(tmp_path):
+    # El estado que absorbe puede haber heredado a su vez: el ORIGEN (pago real) se propaga y la
+    # cadena se acota a 3 meses — deuda impaga más larga sigue bloqueada (revisión humana).
+    m = _marzo_revolving_model()
+    _write_imported_tc(tmp_path, fx_source="inherited:2026-05")
+    ok = inherit_statement_fx(m, TC_REAL_ORCH, tmp_path, bcch_ref=Decimal("931.57"))
+    assert ok["status"] == "ok" and ok["fx_source"] == "inherited:2026-05"   # propaga el origen
+    _write_imported_tc(tmp_path, fx_source="inherited:2026-07")              # origen a 4 meses
+    far = inherit_statement_fx(m, TC_REAL_ORCH, tmp_path, bcch_ref=Decimal("931.57"))
+    assert far["status"] == "blocked"
+    assert "cadena revolving" in far["reason"]
+
+
+def test_correct_usd_revolving_hereda_fx_end_to_end(tmp_path):
+    # El caso real completo: marzo staged + abril ya importado + el pago de feb en Laudus (consolidado
+    # Santander: la glosa nombra otro USD) → marzo postea con fx heredado de abril, apertura al CLP
+    # real del pago de feb, y metadata fx_source auditable.
+    laudus = ('2026-03-06 * "USD3.217,07 Visa Santander Febrero 2026"\n'
+              '  Assets:EAG:Bancos:Test  -1291675.00 CLP\n'
+              f'  {EXPENSE_TC}  1291675.00 CLP\n')
+    root = _make_ledger(tmp_path, laudus=laudus, bcch={"2026-03": Decimal("931.57")})
+    out_dir = root / "imports" / "cartolas"
+    _write_imported_tc(out_dir)
+    _stage(root, _marzo_revolving_model())
+    res = correct_tc_cartola("b1", _FakeImporter(), root, ts=_TS)
+
+    assert res["status"] == "corrected", res["reason"]
+    assert res["fx_source"] == "inherited:2026-04"
+    assert res["fx"] == _FX_ABRIL
+    (marzo_file,) = out_dir.glob("*-TcTest-2026-03-tc.beancount")
+    assert 'fx_source: "inherited:2026-04"' in marzo_file.read_text(encoding="utf-8")
+    from beancount import loader
+    entries, errors, _o = loader.load_file(str(root / "main.beancount"))
+    assert errors == []
+    # Apertura valorizada al CLP REAL del pago que la salda (1.291.675), no a opening×fx heredado.
+    aperturas = [e for e in entries if isinstance(e, data.Transaction)
+                 and (e.meta or {}).get("operation_type") == "apertura"]
+    assert len(aperturas) == 1
+    (tc_leg,) = [p for p in aperturas[0].postings if p.account == TC_REAL_ORCH]
+    assert tc_leg.units.number == Decimal("-1291675.00")
+
+
+def test_correct_usd_revolving_bloquea_sin_mes_siguiente(tmp_path):
+    # Revolving pero el estado que lo absorbió NO está importado → sigue bloqueando, con mensaje
+    # accionable (importá primero el mes siguiente).
+    root = _make_ledger(tmp_path, bcch={"2026-03": Decimal("931.57")})
+    _stage(root, _marzo_revolving_model())
+    res = correct_tc_cartola("b1", _FakeImporter(), root, ts=_TS)
+    assert res["status"] == "blocked"
+    assert "importá primero el mes siguiente" in res["reason"]
+    assert not list((root / "imports" / "cartolas").glob("*-tc.beancount"))  # no escribió nada

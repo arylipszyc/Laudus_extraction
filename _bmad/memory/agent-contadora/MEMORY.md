@@ -180,6 +180,27 @@ Piloto BCI Visa Infinity 1027 CLP (feb/mar/abr) posteado en prod, **cierra al pe
 - Re-importar una cartola sobrescribe el archivo y **resetea sus categorizaciones** → hay alarma que
   avisa antes de re-subir una ya importada.
 
+## ✅ Materialización TC completa + regla FX-revolving diseñada (2026-07-06)
+
+Las 13 cartolas quedaron en prod, verificadas al peso (1027 CLP/USD, 8996 CLP, 0858 CLP exactas;
+8996 USD feb+abr+may). **Único hueco: 8996 USD marzo (revolving — cerró US$2.234,84 sin pago propio,
+rodó a abril) → C1 rojo $718.919 en abril/mayo.** 0858 USD retirada (pago consolidado; mi story del
+fallback por monto sigue pendiente, problema DISTINTO).
+
+**Regla nueva diseñada (brief `valentina-story-brief-fx-revolving-tc-usd-2026-07-06.md`, Ary decide):
+un mes revolving hereda el fx del estado que ABSORBIÓ su saldo** (marzo hereda 899,64 de abril). No
+es estimación — es el costo real: el pago de mayo ($51.301.494) pagó abril Y marzo juntos a 899,64.
+La aritmética lo impone: es el ÚNICO fx que deja C1 verde en toda la cadena (C1-marzo es verde con
+cualquier fx por el telescopio; C1-abril exige exactamente el fx de abril). BCCh descartada con
+fundamento (rojo perpetuo ~$71k con un dólar que nadie pagó). Extensión transitiva de §12.1, no
+excepción. Guardas: heredar solo de estado contiguo ya importado, metadata `fx_source:"inherited:…"`,
+gate BCCh ±5% aplica igual, tope 3 meses, sin cadena de pago real → sigue bloqueando.
+
+**Resuelto un flag mío del 2026-06-29:** el posting de 51,3M a MasterUs que marqué "lump acumulado o
+misposteo, revisión humana" era el pago LEGÍTIMO del cierre de abril (abril absorbió marzo y creció a
+~57k USD). No era misposteo. Lección: un monto "muchísimo más grande que el closing de un mes" puede
+ser simplemente la cadena revolving mirada desde el mes equivocado.
+
 ## Reportes Aprobados
 _Reportes que el dueño ha aprobado desarrollar. Actualizar a medida que se aprueban._
 

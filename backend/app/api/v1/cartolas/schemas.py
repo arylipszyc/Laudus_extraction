@@ -88,6 +88,7 @@ class TcCorrectionResponse(BaseModel):
     unmapped: list = []
     fx_bcch: str | None = None
     fx_deviation_pct: float | None = None
+    fx_source: str | None = None      # "inherited:YYYY-MM" si el fx se heredó (mes revolving)
     git_commit_sha: str | None = None
     file: str | None = None
     reason: str | None = None

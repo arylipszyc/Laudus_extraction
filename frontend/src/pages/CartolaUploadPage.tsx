@@ -269,6 +269,12 @@ function CartolaReady({
           ✅ Cartola importada — {c.transactions.length} transacciones, {pending} pendientes de categorizar
           {validated.override && ' · (override con justificación registrado en git)'}
         </p>
+        {validated.fx_source?.startsWith('inherited:') && (
+          <p className="text-xs text-muted-foreground">
+            Mes sin pago propio (revolving): el dólar se heredó del estado que absorbió el saldo
+            ({validated.fx_source.split(':')[1]}) — es el costo real pagado, no una estimación.
+          </p>
+        )}
         {validated.cuadre && <CuadrePanel q={validated.cuadre} currency={c.currency} />}
         <Button variant="outline" onClick={onReset}>Subir otra</Button>
       </Card>

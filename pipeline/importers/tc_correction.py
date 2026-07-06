@@ -138,6 +138,95 @@ def derive_statement_fx(
             "reason": (f"sin pago Laudus que salde el estado (USD {total_usd}) en {window_days}d tras "
                        f"el cierre {end} — ¿falta un movimiento o el estado aún no se pagó?")}
 
+
+# ── FX heredado para meses revolving (brief Valentina 2026-07-06) ──────────────
+# Un estado sin pago propio (el cierre rodó al mes siguiente) SÍ tiene costo CLP real: el pago que
+# saldó el estado que lo ABSORBIÓ. Heredar ese fx es §12.1 aplicado transitivamente (el pago que
+# saldó marzo es el de abril), NO una estimación. La cadena se acota (deuda impaga muy larga debe
+# seguir bloqueada) y el gate BCCh aplica igual.
+_MAX_INHERIT_CHAIN_MONTHS = 3
+
+
+def _months_between(ym_from: str, ym_to: str) -> int:
+    """Meses de distancia entre dos períodos 'YYYY-MM' (positivo si ym_to es posterior)."""
+    fy, fm = (int(x) for x in ym_from.split("-"))
+    ty, tm = (int(x) for x in ym_to.split("-"))
+    return (ty * 12 + tm) - (fy * 12 + fm)
+
+
+def inherit_statement_fx(
+    model: CartolaCanonicalV1,
+    tc_real_account: str,
+    out_dir: Path,
+    *,
+    bcch_ref: Decimal | None = None,
+    exclude: Path | None = None,
+    max_chain_months: int = _MAX_INHERIT_CHAIN_MONTHS,
+) -> dict:
+    """FX heredado del estado contiguo posterior que absorbió el saldo rodado (revolving).
+
+    Busca en las cartolas TC ya importadas de ESTA cuenta (metadata 6.6) un estado con
+    `opening == closing` de este (contiguidad de la cadena) y período posterior, y hereda su `fx`
+    — que salió de un pago real de Laudus. `fx_source` propaga el período ORIGEN (el estado que
+    derivó el fx de un pago propio), lo que permite acotar cadenas multi-mes. El gate BCCh
+    ±tolerancia aplica igual que al fx derivado; sin BCCh de referencia → bloquea (falla segura).
+
+    Devuelve `{status, fx, fx_source, inherited_from, reason}`. `status ∈ {ok, blocked}`.
+    """
+    from beancount.core.data import Transaction
+    from beancount.parser import parser
+
+    closing = abs(model.balances.closing)
+    my_ym = model.period.end.strftime("%Y-%m")
+    out_dir = Path(out_dir)
+    exclude = Path(exclude).resolve() if exclude is not None else None
+    stem = tc_real_account.rsplit(":", 1)[-1]
+    best: tuple[str, Decimal, str] | None = None  # (period, fx, origin) — el período más cercano gana
+
+    if out_dir.is_dir():
+        for path in sorted(out_dir.glob(f"*-{stem}-*-tc.beancount")):
+            if exclude is not None and path.resolve() == exclude:
+                continue
+            entries, _err, _opt = parser.parse_file(str(path))
+            meta = next((e.meta for e in entries
+                         if isinstance(e, Transaction)
+                         and (e.meta or {}).get("source") == "cartola-tc"
+                         and any(p.account == tc_real_account for p in e.postings)), None)
+            if not meta or meta.get("currency") != model.currency or "fx" not in meta:
+                continue
+            period = str(meta.get("period") or "")
+            if not period or period <= my_ym:
+                continue
+            try:
+                opening = Decimal(str(meta["opening"]))
+                fx = Decimal(str(meta["fx"]))
+            except Exception:
+                continue
+            if abs(opening - closing) > _USD_MATCH_TOLERANCE:
+                continue  # no es el estado que absorbió ESTE cierre
+            src = str(meta.get("fx_source") or "")
+            origin = src.split(":", 1)[1] if src.startswith("inherited:") else period
+            if best is None or period < best[0]:
+                best = (period, fx, origin)
+
+    if best is None:
+        return {"status": "blocked", "fx": None, "fx_source": None, "inherited_from": None,
+                "reason": (f"el cierre (USD {closing}) no tiene pago propio y no hay un estado "
+                           f"posterior contiguo importado que lo haya absorbido — si el saldo rodó "
+                           f"(revolving), importá primero el mes siguiente y reintentá")}
+    period, fx, origin = best
+    if _months_between(my_ym, origin) > max_chain_months:
+        return {"status": "blocked", "fx": None, "fx_source": None, "inherited_from": None,
+                "reason": (f"cadena revolving de más de {max_chain_months} meses (el fx vendría de "
+                           f"{origin}) — deuda impaga demasiado larga para heredar fx; revisión humana")}
+    if not _fx_in_gate(fx, bcch_ref):
+        return {"status": "blocked", "fx": None, "fx_source": None, "inherited_from": None,
+                "reason": (f"fx heredado {fx} (de {period}) no pasa el gate BCCh "
+                           f"({bcch_ref if bcch_ref is not None else 'sin referencia'} ±{TOLERANCE_PCT}%)"
+                           f" — algo no cuadra en la cadena; revisión humana")}
+    return {"status": "ok", "fx": fx, "fx_source": f"inherited:{origin}",
+            "inherited_from": period, "reason": None}
+
 # ── Clasificación de operation_type (§10.1, cierra el drop silencioso) ──
 # Toda línea emite asiento (a) contra TC:Real; la contrapartida depende del tipo canónico.
 _CONSUMO_OPS = {"compra", "cuota", "abono"}        # → Expenses:<cat> vía categorizador 9.7
@@ -217,7 +306,7 @@ def _posting(account: str, number: Decimal) -> data.Posting:
 
 def _meta(*, line_no: int, bank_account_id: str, batch_id: str, op: str, fx: Decimal,
           year_month: str, opening: Decimal, closing: Decimal, currency: str,
-          category: "CategorizationResult | None" = None) -> dict:
+          category: "CategorizationResult | None" = None, fx_source: str | None = None) -> dict:
     m = data.new_metadata("<tc-correction>", line_no)
     m.update({
         "source": "cartola-tc",
@@ -237,6 +326,10 @@ def _meta(*, line_no: int, bank_account_id: str, batch_id: str, op: str, fx: Dec
     })
     if fx != Decimal(1):
         m["fx"] = str(fx)
+    # FX heredado (revolving): trazabilidad de dónde salió el dólar — el período ORIGEN cuyo pago
+    # real derivó el fx. Los estados con pago propio no llevan esta clave.
+    if fx_source is not None:
+        m["fx_source"] = fx_source
     # Goal B (§10.2): preserva la confianza+fuente del categorizador y su color advisory en el
     # asiento (a). El contador confirma SIEMPRE; el color solo le dice de un vistazo dónde fijarse.
     if category is not None:
@@ -262,6 +355,7 @@ def build_tc_correction_entries(
     bank_account_id: str,
     emit_opening: bool,
     unmapped: list | None = None,
+    fx_source: str | None = None,
 ) -> list:
     """Asientos de corrección de una cartola de TC (flujo Valentina §6). Lista de `data.Transaction`.
 
@@ -329,7 +423,7 @@ def build_tc_correction_entries(
         entries.append(data.Transaction(
             meta=_meta(line_no=tx.line_no, bank_account_id=bank_account_id, batch_id=batch_id,
                        op=meta_op, fx=fx, year_month=year_month, opening=opening, closing=closing,
-                       currency=currency, category=category),
+                       currency=currency, category=category, fx_source=fx_source),
             date=tx.date, flag="*", payee=None,
             narration=tx.description or f"line {tx.line_no}",
             tags=frozenset(), links=frozenset(), postings=postings,
@@ -341,7 +435,8 @@ def build_tc_correction_entries(
         # completa en esta cartola (opening parcial → posición de cambio abierta, se acepta el residuo).
         opening_clp = opening_settle_clp if opening_settle_clp is not None else model.balances.opening * fx
         meta = _meta(line_no=0, bank_account_id=bank_account_id, batch_id=batch_id, op="apertura", fx=fx,
-                     year_month=year_month, opening=opening, closing=closing, currency=currency)
+                     year_month=year_month, opening=opening, closing=closing, currency=currency,
+                     fx_source=fx_source)
         entries.append(data.Transaction(
             meta=meta, date=model.period.start, flag="*", payee=None,
             narration=f"Apertura TC {model.source.account_label}",
@@ -456,7 +551,7 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
 
     result = {"batch_id": batch_id, "status": "blocked", "currency": model.currency, "fx": None,
               "purchases": 0, "payments": 0, "opening_emitted": False, "unmapped": [],
-              "fx_bcch": None, "fx_deviation_pct": None,
+              "fx_bcch": None, "fx_deviation_pct": None, "fx_source": None,
               "git_commit_sha": None, "reason": None,
               # Plumbing para el cuadre post-confirmación (lo consume el endpoint desde el ledger
               # recargado; se saca antes de armar la respuesta).
@@ -495,10 +590,23 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
             laudus_dir, expense_tc, model.period.start - window, model.period.end + window)
         fx_res = derive_statement_fx(model, laudus_payments, bcch=bcch_at)
         if fx_res["status"] != "ok":
-            result["reason"] = fx_res["reason"]
-            return result
-        fx = fx_res["fx"]
-        settling_lump = fx_res["lump_clp"]
+            # Fallback revolving (brief Valentina 2026-07-06): el cierre rodó al mes siguiente sin
+            # pago propio → heredar el fx del estado contiguo posterior que lo absorbió (ya
+            # importado). Gate BCCh del mes de ESTE estado (mes exacto o último disponible).
+            inh = inherit_statement_fx(
+                model, tc_real, out_dir,
+                bcch_ref=lookup_bcch(bcch_path, ym) or latest_bcch(bcch_path),
+                exclude=out_file)
+            if inh["status"] != "ok":
+                result["reason"] = f"{fx_res['reason']} · {inh['reason']}"
+                return result
+            fx = inh["fx"]
+            fx_source = inh["fx_source"]
+            settling_lump = None   # sin pago propio: no hay lump que salde ESTE estado
+        else:
+            fx = fx_res["fx"]
+            fx_source = None
+            settling_lump = fx_res["lump_clp"]
         # Pre-resuelve el lump de cada MONTO CANCELADO (asiento b) por glosa, antes de construir.
         lumps: dict[int, Decimal] = {}
         for tx in model.transactions:
@@ -515,6 +623,7 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
             return lumps[tx.line_no]
     else:
         fx = Decimal(1)
+        fx_source = None
         settling_lump = None
         def lump_for(tx: CartolaTransaction) -> Decimal:
             return abs(tx.amount)
@@ -537,7 +646,8 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
     entries = build_tc_correction_entries(
         model=model, tc_real_account=tc_real, expense_tc_account=expense_tc, fx=fx,
         lump_for=lump_for, category_for=category_for, batch_id=batch_id,
-        bank_account_id=bank_account_id, emit_opening=emit_opening, unmapped=result["unmapped"])
+        bank_account_id=bank_account_id, emit_opening=emit_opening, unmapped=result["unmapped"],
+        fx_source=fx_source)
 
     # Validación de cordura del FX (solo USD). El FX se deriva del pago que salda el estado
     # (`lump/closing` — regla §12.1: NO se usa BCCh como tasa, eso descuadraría `Σ(compras × fx)`). Acá
@@ -545,7 +655,9 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
     # corresponden → bloqueante. Se valida contra el BCCh del MES DEL PAGO (no del cierre): el FX sale del
     # pago, que ocurre ~1 ciclo después del cierre y a la tasa de ESE mes. Sin BCCh ese mes → no bloquea
     # (mismo criterio que 9.6b). El saldo arrastrado se captura en el asiento (c) y NO descuadra este check.
-    if is_usd:
+    # Con fx heredado no hay pago propio (payment_date/settling_lump no existen); el gate BCCh ya se
+    # aplicó dentro de `inherit_statement_fx` contra el mes de este estado.
+    if is_usd and fx_source is None:
         from pipeline.importers.fx_calculator import calculate_fx
         pay_ym = fx_res["payment_date"].strftime("%Y-%m")
         fx_check = calculate_fx(model.balances.closing, settling_lump, lookup_bcch(bcch_path, pay_ym))
@@ -560,6 +672,7 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
             return result
 
     result["fx"] = str(fx)
+    result["fx_source"] = fx_source
     result["purchases"] = sum(1 for tx in model.transactions
                               if _normalize_op((tx.raw or {}).get("operation_type"), tx.amount) in _CONSUMO_OPS)
     result["payments"] = sum(1 for tx in model.transactions

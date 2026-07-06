@@ -131,6 +131,7 @@ export interface ValidateBalanceResult {
   git_sha?: string | null
   override?: boolean
   reason?: string | null     // por qué bloqueó (status 'blocked' — la TC no posteó nada)
+  fx_source?: string | null  // "inherited:YYYY-MM" si el fx se heredó (mes revolving sin pago propio)
   cuadre?: TcCuadre | null   // cuadre TC post-confirmación (C1 + pago vs Laudus)
 }
 
