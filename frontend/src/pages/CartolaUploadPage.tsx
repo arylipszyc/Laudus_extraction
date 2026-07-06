@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutationState, useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -44,6 +44,20 @@ export function CartolaUploadPage() {
   // retomamos el que quedó persistido (la extracción sigue corriendo en el backend).
   const activeBatchId = batchId ?? sessionStorage.getItem(ACTIVE_BATCH_KEY)
   const statusQuery = useCartolaStatus(activeBatchId)
+
+  // El staging del backend es efímero (cada redeploy lo limpia) y el navegador puede restaurar el
+  // sessionStorage al reabrir ("continuar donde lo dejaste") → un batch restaurado puede apuntar a
+  // nada. 404 → auto-limpiar y volver al formulario, sin exigir un click de rescate.
+  const statusErrorCode = (statusQuery.error as CartolaError | null)?.code
+  useEffect(() => {
+    if (statusErrorCode === 'NOT_FOUND') {
+      sessionStorage.removeItem(ACTIVE_BATCH_KEY)
+      setBatchId(null)
+      setClientError(
+        'La cartola que estaba en proceso ya no existe en el servidor (probablemente se reinició) — subila de nuevo.',
+      )
+    }
+  }, [statusErrorCode])
 
   const canSubmit =
     bankAccountId !== '' &&
