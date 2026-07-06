@@ -125,6 +125,12 @@ Como se importa **todo** 2026, cada pago cancelado por (b) tiene sus compras ite
 cartola del set. Sin diferido (todo se fecha en el mes del evento). Sin descuadre (cada asiento
 balancea por construcción).
 
+> **Matiz crítico (Valentina 2026-06-26):** esta prueba solo se sostiene si **TODA** línea del estado
+> se itemiza en (a). Si una línea se descarta (impuesto, comisión, avance…), el pasivo `TC:Real` deja
+> de cuadrar con el `closing` Y el gasto queda corto. El test de completitud es **`saldo TC:Real al
+> cierre == −closing del estado`** (verificado en sandbox: cuando se dropeaban impuesto+comisión el
+> pasivo quedaba corto exactamente esa suma). Ver §10.1 para el mapeo que garantiza que nada se cae.
+
 ## 8. Bordes
 
 - **Entrada (1-ene-2026):** resuelto por el asiento (c) → `Equity`. El consumo 2025 arrastrado es
@@ -209,11 +215,90 @@ Ary 2026-06-22).
 
 | Campo cartola | Uso |
 |---|---|
-| `transactions[].raw.operation_type == compra/cuota` | asiento (a) compra |
-| `transactions[].raw.operation_type == pago` (monto negativo) | asiento (b) reclasif. pago |
+| `transactions[].raw.operation_type` | **clasifica el asiento — ver tabla completa abajo (§10.1)** |
 | `balances.opening` (primera cartola del card) | asiento (c) apertura |
 | `transactions[].raw.card_suffix` | identifica la tarjeta física; **una cartola JSON puede traer varios suffixes** → separar por tarjeta |
 | `source.bank_account_id` → `bank_account_resolver` | resuelve la cuenta Beancount destino |
+
+### 10.1 — Mapeo COMPLETO de `operation_type` (Valentina 2026-06-26, cierra el drop silencioso)
+
+> **Origen:** la verificación end-to-end con la cartola BCI Visa Infinity 2026-04 real destapó que el
+> builder solo manejaba `{compra, cuota, abono, pago}` y **descartaba en silencio** todo lo demás
+> (`else: continue` en `tc_correction.py:151`). La BCI traía `impuesto` (timbres DL 3475, $781) y
+> `comision` ("COBRO ADM MENSUAL", $6.014) → se perdían **los dos lados** del asiento: el pasivo
+> `TC:Real` quedaba corto $6.795 Y ese gasto bancario desaparecía de los libros. `operation_type` es
+> **libre** en `raw` (sin constraint de schema) → el código DEBE tener un default seguro, no un drop.
+
+**Principio rector:** *toda* línea del estado emite asiento (a) y toca `Liabilities:EAG:TC:Real:<tarjeta>`
+por `-monto×fx` (así el pasivo cuadra con el `closing`). **La contrapartida depende del tipo** — y NO
+todo lo que sube la deuda es gasto (un avance es plata que entró, no consumo):
+
+| `operation_type` | Asiento | Contrapartida (lado +) | ¿Suma al gasto? |
+|---|---|---|---|
+| `compra`, `cuota` | (a) | `Expenses:<categoría>` vía categorizador 9.7 | Sí |
+| `impuesto`, `comision`, `interes`, `seguro`, `mantencion` | (a) | `Expenses:EAG:GastosBancarios-430003` (FIJO, **no** pasa por 9.7) | Sí |
+| `abono` / reverso / nota de crédito | (a) | compra invertida (signo del `amount`, §12.2) | Negativo |
+| `avance` (giro en efectivo) | (a) | `Assets:EAG:Caja-111001` (CLP) / `Assets:EAG:CajaUs-111003` (USD) | **No** — es préstamo, no consumo |
+| `pago` (monto negativo) | (b) | `Expenses:EAG:TC:<tarjeta>-<code>` (reclasif., §6b) | — |
+| `balances.opening` | (c) | `Equity:Apertura:TarjetasSinDetalle` | No |
+| **cualquier otro / no reconocido** | (a) | `Expenses:EAG:Suspense` **+ contar en el `result`** (count + razón) | revisar |
+
+**Normalización previa (barrido de 304 cartola.json ya extraídas, 2026-06-26).** Gemini NO es
+consistente con `operation_type`: emite ~6 sinónimos para "compra" + deja muchas líneas en `None`.
+Antes de despachar el asiento hay que **normalizar** a la columna canónica de arriba:
+
+| `operation_type` crudo (Gemini) | #tx barrido | Normaliza a | Por qué |
+|---|---|---|---|
+| `None` (sin etiqueta) | 630 | `compra` si monto + / `abono` si monto − | compras sin taggear (Uber Eats, Warner…); el signo decide |
+| `COMPRAS P.A.T.`, `pat`, `compra_automatica` | 69 | `compra` | pago automático de servicios (Aguas, Enel, Claro, DirecTV) = consumo |
+| `cargo_automatico` | 7 | `compra` | suscripciones/cargos (Netflix, Colmena) = consumo |
+| `nota_credito` | 1 | `abono` | nota de crédito = plata que volvió |
+
+> Band-aid en el builder (normalizar + red de seguridad), NO tocar el prompt 9.5 (capa riesgosa). La
+> normalización upstream queda como limitación conocida (§11). Lo no listado → Suspense + reportar.
+
+**Reglas de oro para el dev:**
+1. **Nunca descartar una línea.** Lo no mapeado → asiento (a) contra `Suspense` y se **reporta** en el
+   `result` (campo nuevo tipo `unmapped: [{line, op, monto}]`). Así `TC:Real = closing` se sostiene
+   SIEMPRE y lo desconocido queda visible, no perdido. (Esto es lo que el comentario del código
+   *prometía* y no hacía.)
+2. **Cargos bancarios son determinísticos** por `operation_type` → cuenta FIJA `GastosBancarios-430003`
+   (global, decisión Ary 2026-06-26: no per-tarjeta; la metadata `bank_account_id` del asiento conserva
+   el detalle si después se quiere cortar por tarjeta). NO los manda al categorizador 9.7 (eso es solo
+   para `compra`/`cuota`).
+3. **`avance` → Caja**, NO gasto. Default `Assets:EAG:Caja-111001` (USD → `CajaUs-111003`). Si un avance
+   real cayó a una cuenta corriente, la metadata `bank_account_id` deja la traza para reclasificar a
+   mano. Cuentas Caja **ya existen** (nativas Laudus), no hay que crear nada.
+4. **Cero cuentas nuevas.** `GastosBancarios-430003`, `Caja-111001`, `CajaUs-111003`, `Suspense` ya
+   están en el plan. Verificado 2026-06-26.
+
+### 10.2 — Recomendación + revisión del contador (regla de colores) (Ary 2026-06-27)
+
+**Decisión Ary: el contador confirma SIEMPRE. Nada va a automático (por ahora).** La confirmación es su
+chequeo rápido de que todo está ok. Lo que se afina NO es saltarse la confirmación, sino la **calidad de
+la recomendación** y una **señal de color** que le diga de un vistazo dónde fijarse.
+
+El categorizador 9.7 ya calcula una **confianza** por recomendación (`CategorizationResult.confidence` +
+`match_source`); hoy se pierde (el `predict()` público devuelve solo `(category, match_source, flag)` y el
+builder TC toma solo `[0]`). **Hay que exponer confianza + fuente y mapearlas a color:**
+
+| Color | Confianza / fuente | Qué hace el contador |
+|---|---|---|
+| 🟢 Verde | `historical-30+` o glosa recurrente ya muy confirmada (confianza alta) | ojeada y confirma |
+| 🟡 Amarillo | `smart_importer`, `historical` con pocas confirmaciones, cargo bancario/avance por keyword (confianza media) | mira y confirma |
+| 🔴 Rojo | Suspense, adivinanza de Gemini, monto raro, tipo no reconocido (confianza baja/nula) | **acá decide él** |
+
+**3 colores** (decisión Ary 2026-06-27; sin 🟠 naranja por ahora — se agrega si el contador pide el matiz).
+
+**El aprendizaje sin automatización:** como el umbral `SUPRA_THRESHOLD=30` ya NO es compuerta a auto
+(nada va a auto), pasa a ser **solo el termómetro del color**: la confianza de un ítem `historical` =
+`#confirmaciones / 30`, así que **la misma glosa se pone más verde con cada pasada** → el contador la
+confirma cada vez más rápido pero NUNCA deja de confirmar. Eso es "el sistema aprende y refina con el
+tiempo" + "confirmación siempre", sin contradicción. NO bajar el umbral, NO promover a auto.
+
+**Implica (modesto):** backend expone `confianza`+`fuente` y el builder TC preserva el flag (deja de
+hacer `[0]`); frontend pinta el badge de color en `/categorizacion` (ya existe) y ordena rojos arriba.
+Cero cambio al comportamiento global del 9.7 — solo señal visual.
 
 ## 11. Pendientes a confirmar / fuera de este diseño
 
@@ -221,6 +306,10 @@ Ary 2026-06-22).
   `Expenses:EAG:Suspense`. Story 9.7 lo reemplaza. La calidad del reporte de gastos depende de esto.
 - Verificar el diagnóstico contra el estado **corregido** del importer de Laudus (no contra el
   estado actual, que aún no es confiable).
+- **Normalización de `operation_type` en la extracción (limitación conocida, 2026-06-26):** Gemini emite
+  vocabulario sucio (sinónimos + `None`). El fix vive en el builder (band-aid, §10.1). Lo durable sería
+  normalizar en el prompt 9.5, pero es capa riesgosa → diferido. La red de seguridad (Suspense +
+  reportar + color rojo) cubre lo que se escape.
 
 ## 12. Decisiones contables para Story 6.2 (Valentina, 2026-06-22)
 
@@ -312,3 +401,33 @@ ambos son "plata que volvió" = gasto negativo. Mantener simple.
   suffix = metadata opcional, no bloquea ni toca el prompt 9.5. (Este punto sigue válido; lo que
   cambia es que CLP y USD NO se unifican.)
 - Metadata `laudus_categoria1: "PASIVO"`, creada vía flujo de cuentas pendientes (Story 10.3).
+
+### 12.4 — `operation_type` más allá de compra/cuota/pago (Valentina, 2026-06-26)
+
+Disparada por la verificación end-to-end (cartola BCI 2026-04 real, en sandbox). El builder descartaba
+en silencio toda op fuera de `{compra, cuota, abono, pago}` → perdía cargos bancarios reales (impuesto
+de timbres + comisión mensual), subvaluando **a la vez** el pasivo `TC:Real` y el gasto. **El mapeo
+completo y las reglas de oro están en §10.1** (tabla canónica para el dev). Decisiones de Ary:
+
+- **Cargos bancarios** (`impuesto`/`comision`/`interes`/`seguro`/`mantencion`) → cuenta existente
+  `Expenses:EAG:GastosBancarios-430003`, **global** (no per-tarjeta; la metadata del asiento conserva
+  el `bank_account_id` por si después se quiere el corte). Son gasto del período, sin tratamiento
+  especial (el impuesto DL 3475 para persona natural no se recupera ni difiere).
+- **`avance`** → `Assets:EAG:Caja-111001` (CLP) / `Assets:EAG:CajaUs-111003` (USD), NO gasto: es plata
+  que entró, no consumo. Cuentas ya existen (sirven para TC y débito — decisión Ary). Default Caja; si
+  un avance real cayó a una cuenta corriente, reclasificar a mano (la metadata deja la traza).
+- **Nunca descartar:** op no reconocida → asiento (a) contra `Suspense` + reportar en el `result`. Así
+  `TC:Real = closing` se sostiene siempre. Cero cuentas nuevas (todo verificado en el plan 2026-06-26).
+
+### 12.5 — Recomendación, revisión y aprendizaje (Ary 2026-06-27)
+
+El barrido de 304 cartolas ya extraídas mostró que `operation_type` es vocabulario sucio (630 `None` +
+sinónimos PAT/automática) → la normalización del §10.1 es obligatoria, no opcional. Sobre eso, Ary fijó:
+
+- **El contador confirma SIEMPRE. Nada va a automático.** La confirmación es el chequeo rápido de que
+  todo está ok. (Descartado: bajar `SUPRA_THRESHOLD`, promover a auto, regla permanente.)
+- **Regla de colores (3): 🟢 verde / 🟡 amarillo / 🔴 rojo** = confianza de la recomendación, para que el
+  contador vea de un vistazo dónde fijarse (rojos arriba). Detalle y mapeo en §10.2.
+- **Aprendizaje = el color se pone más verde con cada pasada** (la confianza `historical` sube con cada
+  confirmación, `#conf/30`), nunca "deja de preguntar". El umbral 30 deja de ser compuerta y pasa a ser
+  termómetro del color. NO tocar el comportamiento global del 9.7; solo exponer confianza+fuente y pintar.
