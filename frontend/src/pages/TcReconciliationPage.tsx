@@ -1,5 +1,5 @@
 import { Fragment, useMemo, useState, type ReactNode } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getTcReconciliation, getTcCartolas, type TcReconciliationRow } from '@/services/tcReconciliation'
@@ -21,6 +21,7 @@ const STATUS_WEIGHT: Record<string, number> = { red: 0, yellow: 1, green: 2 }
 export function TcReconciliationPage() {
   const [card, setCard] = useState('')
   const [expanded, setExpanded] = useState<string | null>(null)
+  const qc = useQueryClient()
 
   const { data: banks } = useQuery({ queryKey: ['bank-accounts'], queryFn: listBankAccounts })
   const tcCards = useMemo(
@@ -29,11 +30,20 @@ export function TcReconciliationPage() {
   )
   const selectedCard = card || tcCards[0]?.id || ''
 
+  // Los datos cambian cuando el contador sube una cartola (fuera de esta página) → refetch en cada
+  // visita y al volver el foco, y un botón manual. (El default global cachea 60s.)
   const { data, isLoading, error } = useQuery({
     queryKey: ['tc-reconciliation', selectedCard],
     queryFn: () => getTcReconciliation(selectedCard),
     enabled: !!selectedCard,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   })
+
+  const refrescar = () => {
+    qc.invalidateQueries({ queryKey: ['tc-cartolas'] })
+    qc.invalidateQueries({ queryKey: ['tc-reconciliation'] })
+  }
 
   // Rojos arriba (spec §UI): ordena por status y, dentro, mes descendente (el backend ya viene desc).
   const rows = useMemo(
@@ -43,12 +53,20 @@ export function TcReconciliationPage() {
 
   return (
     <div className="p-6 space-y-4 max-w-5xl">
-      <div>
-        <h1 className="text-xl font-semibold">Cuadre de tarjetas de crédito</h1>
-        <p className="text-sm text-muted-foreground">
-          ¿La deuda de cada tarjeta en la contabilidad coincide con lo que dice la cartola? Un mes está
-          🟢 cuando pasan los cinco chequeos. C1 y C3 (🔴) son críticos.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold">Cuadre de tarjetas de crédito</h1>
+          <p className="text-sm text-muted-foreground">
+            ¿La deuda de cada tarjeta en la contabilidad coincide con lo que dice la cartola? Un mes está
+            🟢 cuando pasan los cinco chequeos. C1 y C3 (🔴) son críticos.
+          </p>
+        </div>
+        <button
+          onClick={refrescar}
+          className="shrink-0 border rounded-md px-3 py-1 text-sm bg-background hover:bg-muted"
+        >
+          Actualizar
+        </button>
       </div>
 
       <CoverageMatrix banks={banks} onSelect={(c) => { setCard(c); setExpanded(null) }} />
@@ -129,7 +147,9 @@ export function TcReconciliationPage() {
 function CoverageMatrix({ banks, onSelect }: {
   banks?: BankAccount[]; onSelect: (card: string) => void
 }) {
-  const { data } = useQuery({ queryKey: ['tc-cartolas'], queryFn: getTcCartolas })
+  const { data } = useQuery({
+    queryKey: ['tc-cartolas'], queryFn: getTcCartolas, staleTime: 0, refetchOnWindowFocus: true,
+  })
   const cartolas = data ?? []
   if (cartolas.length === 0) return null
   const months = [...new Set(cartolas.map((c) => c.year_month))].sort()
