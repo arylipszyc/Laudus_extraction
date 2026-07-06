@@ -52,6 +52,18 @@ def _movements(entries: list, bank_account_id: str, year_month: str, tc_real_acc
     return movements, {"sum_compras": sum_compras, "sum_pagos": sum_pagos, "sum_cargos": sum_cargos}
 
 
+def distinct_tc_cards(entries: list) -> list[str]:
+    """`bank_account_id` de todas las tarjetas con cartolas TC importadas (source=cartola-tc)."""
+    cards = {
+        str((e.meta or {}).get("bank_account_id"))
+        for e in entries
+        if isinstance(e, data.Transaction)
+        and (e.meta or {}).get("source") == "cartola-tc"
+        and (e.meta or {}).get("bank_account_id")
+    }
+    return sorted(cards)
+
+
 def build_rows(
     entries: list,
     *,

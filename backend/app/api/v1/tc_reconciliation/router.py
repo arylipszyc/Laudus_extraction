@@ -11,8 +11,8 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from backend.app.api.v1.tc_reconciliation.schemas import TcReconciliationRow
-from backend.app.api.v1.tc_reconciliation.service import build_rows
+from backend.app.api.v1.tc_reconciliation.schemas import TcCartolaSummary, TcReconciliationRow
+from backend.app.api.v1.tc_reconciliation.service import build_rows, distinct_tc_cards
 from backend.app.auth.schemas import UserSession
 from backend.app.dependencies import get_ledger_service, require_role
 from backend.app.services.ledger_service import LedgerService
@@ -46,3 +46,27 @@ def get_tc_reconciliation(
     rows = build_rows(ledger.entries(), tc_real_account=tc_real, lump_account=expense_tc,
                       bank_account_id=card, year_month=year_month)
     return [TcReconciliationRow(**r) for r in rows]
+
+
+@router.get("/cartolas", response_model=list[TcCartolaSummary])
+def list_tc_cartolas(
+    _user: UserSession = Depends(require_role(["contador", "admin"])),
+    ledger: LedgerService = Depends(get_ledger_service),
+) -> list[TcCartolaSummary]:
+    """Historial de todas las cartolas TC importadas (tarjeta × mes) con su estado — para la matriz
+    de cobertura. READ-ONLY."""
+    entries = ledger.entries()
+    root = Path(ledger.main_path).parent
+    resolver = BankAccountResolver(root / "accounts.beancount")
+    out: list[TcCartolaSummary] = []
+    for card in distinct_tc_cards(entries):
+        try:
+            expense_tc = resolver.resolve(card)
+            tc_real = tc_real_account(expense_tc)
+        except (UnknownBankAccount, TcCorrectionBlocked):
+            continue                                     # tarjeta sin cuenta resoluble → se omite
+        for r in build_rows(entries, tc_real_account=tc_real, lump_account=expense_tc,
+                            bank_account_id=card):
+            out.append(TcCartolaSummary(card=card, year_month=r["year_month"],
+                                        currency=r["currency"], status=r["status"]))
+    return out

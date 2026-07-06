@@ -56,3 +56,17 @@ export async function getTcReconciliation(
   if (!res.ok) throw new Error(`Error cargando cuadre TC (${res.status})`)
   return res.json()
 }
+
+export interface TcCartolaSummary {
+  card: string
+  year_month: string
+  currency: string
+  status: 'green' | 'yellow' | 'red'
+}
+
+/** GET /api/v1/tc/cartolas — historial de cartolas TC subidas (matriz de cobertura). */
+export async function getTcCartolas(): Promise<TcCartolaSummary[]> {
+  const res = await fetch(`${api.baseUrl}/api/v1/tc/cartolas`, { credentials: 'include' })
+  if (!res.ok) throw new Error(`Error cargando cartolas TC (${res.status})`)
+  return res.json()
+}

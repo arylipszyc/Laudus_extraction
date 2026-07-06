@@ -17,6 +17,14 @@ class TcMovement(BaseModel):
     operation_type: str
 
 
+class TcCartolaSummary(BaseModel):
+    """Una cartola TC importada (para la matriz de cobertura tarjeta × mes)."""
+    card: str                # bank_account_id
+    year_month: str
+    currency: str
+    status: str              # green | yellow | red
+
+
 class TcReconciliationRow(BaseModel):
     """Cuadre C1–C5 de una cartola (tarjeta × mes), más los movimientos para el detalle expandible."""
     card: str                # bank_account_id

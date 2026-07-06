@@ -6,7 +6,7 @@ por período. El endpoint resuelve la cuenta desde accounts.beancount y aplica R
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from backend.app.api.v1.tc_reconciliation.service import build_rows
+from backend.app.api.v1.tc_reconciliation.service import build_rows, distinct_tc_cards
 from backend.app.auth.service import create_jwt
 from backend.app.dependencies import get_ledger_service
 from backend.app.middleware import add_middleware
@@ -126,3 +126,20 @@ def test_endpoint_unknown_card_404(tmp_path):
     resp = client.get("/api/v1/tc/reconciliation?card=NOPE",
                       cookies={"access_token": create_jwt(email="c@test.com", role="contador")})
     assert resp.status_code == 404
+
+
+def test_distinct_tc_cards():
+    assert distinct_tc_cards(_entries()) == ["BCI_1027"]
+
+
+def test_endpoint_cartolas_historial(tmp_path):
+    (tmp_path / "accounts.beancount").write_text(ACCOUNTS, encoding="utf-8")
+    ledger = _FakeLedger(str(tmp_path / "main.beancount"), _entries())
+    client = TestClient(_app(ledger), raise_server_exceptions=False)
+    resp = client.get("/api/v1/tc/cartolas",
+                      cookies={"access_token": create_jwt(email="c@test.com", role="contador")})
+    assert resp.status_code == 200
+    body = resp.json()
+    # las dos cartolas importadas (mar/abr) de la tarjeta, cada una con su estado
+    assert {(r["card"], r["year_month"]) for r in body} == {("BCI_1027", "2026-03"), ("BCI_1027", "2026-04")}
+    assert all(r["status"] in ("green", "yellow", "red") for r in body)

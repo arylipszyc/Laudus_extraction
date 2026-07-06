@@ -3,11 +3,11 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-vi.mock('@/services/tcReconciliation', () => ({ getTcReconciliation: vi.fn() }))
+vi.mock('@/services/tcReconciliation', () => ({ getTcReconciliation: vi.fn(), getTcCartolas: vi.fn() }))
 vi.mock('@/services/bankAccounts', () => ({ listBankAccounts: vi.fn() }))
 
 import { TcReconciliationPage } from './TcReconciliationPage'
-import { getTcReconciliation, type TcReconciliationRow } from '@/services/tcReconciliation'
+import { getTcReconciliation, getTcCartolas, type TcReconciliationRow } from '@/services/tcReconciliation'
 import { listBankAccounts } from '@/services/bankAccounts'
 
 const base = {
@@ -42,6 +42,7 @@ describe('<TcReconciliationPage /> (Story 6.6)', () => {
         bank_name: 'Banco BCI', active: true, account_name: 'Visa Infinity 1027' },
     ])
     vi.mocked(getTcReconciliation).mockResolvedValue([GREEN, RED])
+    vi.mocked(getTcCartolas).mockResolvedValue([])
   })
 
   it('muestra una fila por mes con semáforos; el mes rojo va arriba', async () => {

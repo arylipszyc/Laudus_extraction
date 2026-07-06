@@ -2,7 +2,7 @@ import { Fragment, useMemo, useState, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getTcReconciliation, type TcReconciliationRow } from '@/services/tcReconciliation'
+import { getTcReconciliation, getTcCartolas, type TcReconciliationRow } from '@/services/tcReconciliation'
 import { listBankAccounts, type BankAccount } from '@/services/bankAccounts'
 
 const fmt = (n: number | null | undefined, c?: string | null) => {
@@ -50,6 +50,8 @@ export function TcReconciliationPage() {
           🟢 cuando pasan los cinco chequeos. C1 y C3 (🔴) son críticos.
         </p>
       </div>
+
+      <CoverageMatrix banks={banks} onSelect={(c) => { setCard(c); setExpanded(null) }} />
 
       <div className="flex items-center gap-2">
         <label htmlFor="tc-card" className="text-sm text-muted-foreground">Tarjeta</label>
@@ -119,6 +121,51 @@ export function TcReconciliationPage() {
           🟢 pasa · 🟡 revisar el detalle (no crítico) · 🔴 crítico, parar y revisar. Un mes está verde cuando pasan los cinco.
         </p>
       </Card>
+    </div>
+  )
+}
+
+// Matriz de cobertura: tarjeta (fila) × mes (columna), estado por celda; vacío = falta subir.
+function CoverageMatrix({ banks, onSelect }: {
+  banks?: BankAccount[]; onSelect: (card: string) => void
+}) {
+  const { data } = useQuery({ queryKey: ['tc-cartolas'], queryFn: getTcCartolas })
+  const cartolas = data ?? []
+  if (cartolas.length === 0) return null
+  const months = [...new Set(cartolas.map((c) => c.year_month))].sort()
+  const cards = [...new Set(cartolas.map((c) => c.card))]
+  const byKey = new Map(cartolas.map((c) => [`${c.card}|${c.year_month}`, c.status]))
+  const label = (card: string) => {
+    const b = banks?.find((x) => x.id === card)
+    return b ? bankLabel(b) : card
+  }
+  const cell = (s?: string) => (s === 'green' ? '🟢' : s === 'yellow' ? '🟡' : s === 'red' ? '🔴' : '·')
+  return (
+    <div className="space-y-1">
+      <p className="text-sm font-medium">Cartolas subidas</p>
+      <Card className="overflow-x-auto">
+        <table className="text-sm w-full">
+          <thead className="bg-muted/50 text-muted-foreground">
+            <tr>
+              <th className="text-left px-3 py-2 font-medium">Tarjeta</th>
+              {months.map((m) => <th key={m} className="px-2 py-2 font-medium font-mono">{m}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {cards.map((card) => (
+              <tr key={card} className="border-t cursor-pointer hover:bg-muted/30" onClick={() => onSelect(card)}>
+                <td className="px-3 py-2">{label(card)}</td>
+                {months.map((m) => (
+                  <td key={m} className="text-center">{cell(byKey.get(`${card}|${m}`))}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+      <p className="text-xs text-muted-foreground">
+        🟢 cuadra · 🟡 revisar · 🔴 descuadre crítico · · falta subir. Click en una tarjeta para ver el detalle.
+      </p>
     </div>
   )
 }
