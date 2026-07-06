@@ -464,6 +464,18 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
               "year_month": model.period.end.strftime("%Y-%m"),
               "cuadre_bank_account_id": bank_account_id}  # Story 6.6: scope de C3 en el cuadre inline
 
+    # Guard: una cuenta USD (la TC:Real termina en `Us`, convención del stem) NO puede recibir una
+    # cartola CLP. Si la extracción etiquetó mal la moneda (caso real: la 1027 USD abril leída como CLP
+    # por Gemini), el desglose tomaría el camino CLP (fx=1) y postearía la deuda USD 1:1 = basura
+    # silenciosa. Bloquear (falla segura). El reverso (cuenta CLP + cartola USD) se auto-bloquea vía la
+    # derivación de FX (no hay pago USD que cuadre).
+    if tc_real.endswith("Us") and not is_usd:
+        result["reason"] = (
+            f"la cuenta {tc_real} es USD (…Us) pero la cartola se extrajo como {model.currency}: la "
+            f"moneda no coincide (posible error de extracción). No se postea para no corromper la deuda "
+            f"(se postearía a fx=1); revisá/re-importá la cartola.")
+        return result
+
     # Archivo de salida — determinista por tarjeta/moneda/mes (mismo slug → re-import sobrescribe).
     last4 = importer.resolver.get(bank_account_id).last4
     out_file = out_dir / tc_cartola_filename(model.source.bank_name, last4, tc_real, model.period.end)

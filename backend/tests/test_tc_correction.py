@@ -624,6 +624,19 @@ def test_correct_clp_apertura_idempotente(tmp_path):
     assert len(aperturas) == 1
 
 
+def test_correct_bloquea_si_moneda_no_coincide_con_la_cuenta(tmp_path):
+    # Cuenta USD (TC:Real ...Us) pero cartola extraída como CLP → guard bloquea (no postea la deuda a
+    # fx=1). Es el caso real de la 1027 USD abril leída como CLP por Gemini.
+    root = _make_ledger(tmp_path)
+    m = _model([("2026-03-10", "EBAY", 100, "compra")], currency="CLP")   # CLP...
+    _stage(root, m)
+    usd_resolver = _FakeResolver(account="Expenses:EAG:TC:TcTestUs-430200", last4="1027")  # ...cuenta USD
+    res = correct_tc_cartola("b1", _FakeImporter(resolver=usd_resolver), root, ts=_TS)
+    assert res["status"] == "blocked"
+    assert "moneda no coincide" in res["reason"]
+    assert list((root / "imports" / "cartolas").glob("*-tc.beancount")) == []  # no posteó nada
+
+
 # datos reales: estado 28/03→28/04 closing USD26.188,93, saldado 14/05 con 23.543.848 CLP;
 # el MONTO CANCELADO interno (paga el período anterior, USD5.000) se saldó con 4.500.000 CLP.
 _USD_LAUDUS = (
