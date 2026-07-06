@@ -130,6 +130,7 @@ export interface ValidateBalanceResult {
   file?: string
   git_sha?: string | null
   override?: boolean
+  reason?: string | null     // por qué bloqueó (status 'blocked' — la TC no posteó nada)
   cuadre?: TcCuadre | null   // cuadre TC post-confirmación (C1 + pago vs Laudus)
 }
 

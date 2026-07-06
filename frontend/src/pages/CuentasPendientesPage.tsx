@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useIsFetching, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import {
@@ -46,6 +46,7 @@ export function CuentasPendientesPage() {
 }
 
 function PendingRow({ pending, onDone }: { pending: PendingAccount; onDone: () => void }) {
+  const refreshing = useIsFetching({ queryKey: ['cuentas-pendientes'] }) > 0
   const [cat1, setCat1] = useState(pending.suggestion.categoria1)
   const [cat2, setCat2] = useState(pending.suggestion.categoria2)
   const [cat3, setCat3] = useState('')
@@ -118,7 +119,9 @@ function PendingRow({ pending, onDone }: { pending: PendingAccount; onDone: () =
             <p className="text-sm text-destructive">{(backfill.error as Error).message}</p>
           )}
           <div>
-            <Button variant="ghost" size="sm" onClick={onDone}>Actualizar lista</Button>
+            <Button variant="ghost" size="sm" onClick={onDone} disabled={refreshing}>
+              {refreshing ? 'Actualizando…' : 'Actualizar lista'}
+            </Button>
           </div>
         </div>
       ) : (
@@ -131,7 +134,9 @@ function PendingRow({ pending, onDone }: { pending: PendingAccount; onDone: () =
             {promote.isPending ? 'Reintentando…' : 'Reintentar promoción'}
           </Button>
           <div>
-            <Button variant="ghost" size="sm" onClick={onDone}>Actualizar lista</Button>
+            <Button variant="ghost" size="sm" onClick={onDone} disabled={refreshing}>
+              {refreshing ? 'Actualizando…' : 'Actualizar lista'}
+            </Button>
           </div>
         </div>
       )}

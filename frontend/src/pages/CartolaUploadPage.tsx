@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutationState, useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { listBankAccounts } from '@/services/bankAccounts'
 import {
+  ACTIVE_BATCH_KEY,
+  UPLOAD_MUTATION_KEY,
   useCartolaUploadMutation,
   useCartolaStatus,
 } from '@/hooks/useCartolaUpload'
@@ -31,13 +33,24 @@ export function CartolaUploadPage() {
   })
 
   const uploadMutation = useCartolaUploadMutation()
-  const statusQuery = useCartolaStatus(batchId)
+
+  // ¿Hay un POST de subida corriendo en otra instancia (el usuario navegó y volvió)?
+  // Suscribirse al cache hace que, cuando termine, este componente re-renderice y
+  // levante el batch_id que el hook persistió en sessionStorage.
+  const uploadInFlight =
+    useMutationState({ filters: { mutationKey: UPLOAD_MUTATION_KEY, status: 'pending' } }).length > 0
+
+  // El batch en proceso sobrevive al cambio de vista: si no hay uno en el estado local,
+  // retomamos el que quedó persistido (la extracción sigue corriendo en el backend).
+  const activeBatchId = batchId ?? sessionStorage.getItem(ACTIVE_BATCH_KEY)
+  const statusQuery = useCartolaStatus(activeBatchId)
 
   const canSubmit =
     bankAccountId !== '' &&
     pdfFile !== null &&
     !uploadMutation.isPending &&
-    batchId === null
+    !uploadInFlight &&
+    activeBatchId === null
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     setClientError(null)
@@ -68,6 +81,7 @@ export function CartolaUploadPage() {
   }
 
   function reset() {
+    sessionStorage.removeItem(ACTIVE_BATCH_KEY)
     setBatchId(null)
     setPdfFile(null)
     setBankAccountId('')
@@ -81,7 +95,18 @@ export function CartolaUploadPage() {
     <div className="p-6 space-y-6 max-w-3xl">
       <h1 className="text-2xl font-semibold">Cargar Cartola</h1>
 
-      {batchId === null && (
+      {/* El usuario navegó durante la subida y volvió: el POST original sigue vivo en el
+          cache de mutations — avisar en vez de mostrar el form vacío (evita re-subir). */}
+      {activeBatchId === null && uploadInFlight && !uploadMutation.isPending && (
+        <Card className="p-6 space-y-3">
+          <p className="text-sm">
+            ⏳ Hay una subida de cartola en curso — el proceso sigue aunque cambies de vista.
+          </p>
+          <Skeleton className="h-8 w-full" />
+        </Card>
+      )}
+
+      {activeBatchId === null && !(uploadInFlight && !uploadMutation.isPending) && (
         <Card className="p-6">
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
@@ -142,8 +167,8 @@ export function CartolaUploadPage() {
         </Card>
       )}
 
-      {batchId !== null && (
-        <CartolaResult batchId={batchId} statusQuery={statusQuery} onReset={reset} />
+      {activeBatchId !== null && (
+        <CartolaResult batchId={activeBatchId} statusQuery={statusQuery} onReset={reset} />
       )}
     </div>
   )
@@ -221,6 +246,22 @@ function CartolaReady({
   if (!c) return null
 
   if (validated) {
+    // La TC puede BLOQUEAR (status 'blocked'): el backend responde 200 pero NO posteó nada al
+    // ledger — mostrarlo como éxito haría creer que se importó (bug real: 8996 USD ×4).
+    if (validated.status === 'blocked') {
+      return (
+        <Card className="p-6 space-y-3">
+          <p className="text-sm text-destructive">
+            ⛔ <strong>La cartola NO se importó</strong> — el desglose quedó bloqueado y no se
+            escribió nada a la contabilidad.
+          </p>
+          {validated.reason && (
+            <p className="text-sm text-muted-foreground">Motivo: {validated.reason}</p>
+          )}
+          <Button variant="outline" onClick={onReset}>Volver</Button>
+        </Card>
+      )
+    }
     const pending = c.transactions.length  // todas pendientes de categorizar en v1 (Noop predictor)
     return (
       <Card className="p-6 space-y-3">

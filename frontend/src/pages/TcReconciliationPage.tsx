@@ -1,5 +1,5 @@
 import { Fragment, useMemo, useState, type ReactNode } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useIsFetching, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getTcReconciliation, getTcCartolas, type TcReconciliationRow } from '@/services/tcReconciliation'
@@ -45,6 +45,12 @@ export function TcReconciliationPage() {
     qc.invalidateQueries({ queryKey: ['tc-reconciliation'] })
   }
 
+  // Feedback del botón "Actualizar": cubre las dos queries que invalida.
+  const refreshing =
+    useIsFetching({
+      predicate: (q) => q.queryKey[0] === 'tc-cartolas' || q.queryKey[0] === 'tc-reconciliation',
+    }) > 0
+
   // Rojos arriba (spec §UI): ordena por status y, dentro, mes descendente (el backend ya viene desc).
   const rows = useMemo(
     () => [...(data ?? [])].sort((a, b) => (STATUS_WEIGHT[a.status] ?? 99) - (STATUS_WEIGHT[b.status] ?? 99)),
@@ -63,9 +69,10 @@ export function TcReconciliationPage() {
         </div>
         <button
           onClick={refrescar}
-          className="shrink-0 border rounded-md px-3 py-1 text-sm bg-background hover:bg-muted"
+          disabled={refreshing}
+          className="shrink-0 border rounded-md px-3 py-1 text-sm bg-background hover:bg-muted disabled:opacity-60 disabled:cursor-wait"
         >
-          Actualizar
+          {refreshing ? 'Actualizando…' : 'Actualizar'}
         </button>
       </div>
 
