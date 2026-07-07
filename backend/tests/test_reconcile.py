@@ -85,7 +85,7 @@ def test_append_y_dedup(tmp_path):
     disc = build_discrepancy(batch_id="b1", bank_account_id="acc1", state="value-mismatch", ts=TS,
                              cartola={"line_no": 12}, laudus={"journal_entry_id": "12345"})
     assert append_discrepancy(disc, p) is True
-    # Re-correr con la MISMA clave (batch, line_no, je_id) no duplica.
+    # Re-correr con la MISMA clave de contenido (cuenta, mes, line_no, je_id, state) no duplica.
     disc2 = build_discrepancy(batch_id="b1", bank_account_id="acc1", state="value-mismatch", ts=TS,
                               cartola={"line_no": 12}, laudus={"journal_entry_id": "12345"})
     assert append_discrepancy(disc2, p) is False
@@ -117,7 +117,7 @@ def test_resolution_se_appendea_sin_reescribir(tmp_path):
     # Una resolución nueva con la misma clave NO bloquea (la resolución no es discrepancia original).
     disc_b = build_discrepancy(batch_id="b2", bank_account_id="acc1", state="date-mismatch", ts=TS,
                                cartola={"line_no": 1}, laudus={"journal_entry_id": "9"})
-    assert append_discrepancy(disc_b, p) is True  # distinto batch → distinta clave
+    assert append_discrepancy(disc_b, p) is True  # distinto STATE → distinta clave (el batch ya no participa)
 
 
 def test_append_discrepancies_batch_una_lectura_y_mismo_dedup(tmp_path, monkeypatch):
@@ -153,7 +153,30 @@ def test_append_discrepancies_batch_una_lectura_y_mismo_dedup(tmp_path, monkeypa
     import json as _json
     parsed = [_json.loads(l) for l in lines]  # lanza si alguna línea quedó malformada
     assert [x["state"] for x in parsed] == ["value-mismatch", "date-mismatch"]
-    # Y una discrepancia nueva de otro batch sí entra (append clásico sigue vivo).
+    # B4 (review 2026-07-06): re-upload = batch_id NUEVO pero mismo contenido → NO duplica
+    # (la clave vieja llevaba batch_id y cada re-subida duplicaba las discrepancias abiertas).
     d3 = build_discrepancy(batch_id="b2", bank_account_id="acc1", state="value-mismatch", ts=TS,
                            cartola={"line_no": 1}, laudus={"journal_entry_id": "9"})
+    assert append_discrepancy(d3, p) is False
+    # Contenido realmente distinto (otro mes) sí entra:
+    d4 = build_discrepancy(batch_id="b2", bank_account_id="acc1", state="value-mismatch", ts=TS,
+                           cartola={"line_no": 1}, laudus={"journal_entry_id": "9"},
+                           year_month="2026-05")
+    assert append_discrepancy(d4, p) is True
+
+
+def test_dedup_reupload_mismo_mes_no_duplica_estados_distintos_si(tmp_path):
+    """B4: la clave de dedup es identidad de contenido (cuenta, mes, línea, je, estado) —
+    re-subir la misma cartola no duplica, pero estados DISTINTOS de la misma línea
+    coexisten (regresión 9.6b: la disc de FX no pisa la de estado)."""
+    p = tmp_path / "d.jsonl"
+    base = dict(bank_account_id="acc1", ts=TS, cartola={"line_no": 7},
+                laudus={"journal_entry_id": "42"}, year_month="2026-04")
+    d1 = build_discrepancy(batch_id="upload-1", state="value-mismatch", **base)
+    assert append_discrepancy(d1, p) is True
+    # Re-upload: batch nuevo, mismo contenido → dedup.
+    d2 = build_discrepancy(batch_id="upload-2", state="value-mismatch", **base)
+    assert append_discrepancy(d2, p) is False
+    # Mismo par línea/je pero OTRO estado (fx-out-of-tolerance) → entra.
+    d3 = build_discrepancy(batch_id="upload-2", state="fx-out-of-tolerance", **base)
     assert append_discrepancy(d3, p) is True

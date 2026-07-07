@@ -122,6 +122,9 @@ def _refresh_ledger_clone() -> None:
     sería non-fast-forward y fallaría. fetch + reset --hard deja el clon == main (el
     importer es determinista, así que resetear es seguro). No-op si LEDGER_DIR no apunta
     a un clon git (tests / local sin deploy key).
+
+    OJO: NUNCA agregar `git clean` acá — `.import.lock` (que nos protege mientras esto
+    corre, review batch 3) y los staging viven UNTRACKED en este working tree.
     """
     import subprocess
 
@@ -145,8 +148,10 @@ def _run_laudus_import(job_id: str, mode: str, from_date: str | None = None) -> 
     """Story 9.4: run the Beancount Laudus importer in this background thread."""
     try:
         from pipeline.importers.laudus_run import run_import
-        _refresh_ledger_clone()
-        result = run_import(mode=mode, from_date=from_date)
+        # refresh como callback: corre DENTRO del lock de run_import — el reset --hard
+        # fuera del lock podía pisar una escritura concurrente (categorización).
+        result = run_import(mode=mode, from_date=from_date,
+                            refresh_clone=_refresh_ledger_clone)
         with _job_lock:
             if _current_job["job_id"] != job_id:
                 return

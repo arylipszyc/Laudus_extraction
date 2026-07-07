@@ -404,8 +404,9 @@ def test_run_laudus_import_incremental_sets_done_with_stats(monkeypatch):
 
     captured = {}
 
-    def fake_run_import(mode="incremental", from_date=None):
+    def fake_run_import(mode="incremental", from_date=None, refresh_clone=None):
         captured["mode"] = mode
+        captured["refresh_clone"] = refresh_clone
         return {"success": True, "jes_added": 42, "error_msg": None}
 
     monkeypatch.setattr("pipeline.importers.laudus_run.run_import", fake_run_import)
@@ -419,6 +420,9 @@ def test_run_laudus_import_incremental_sets_done_with_stats(monkeypatch):
         assert svc._current_job["status"] == "done"
         assert svc._current_job["stats"]["ledger_added"] == 42
     assert captured["mode"] == "incremental"
+    # B5b (review batch 3): el refresh viaja como CALLBACK (corre dentro del lock de
+    # run_import) — una regresión a "_refresh_ledger_clone(); run_import(...)" fallaría acá.
+    assert captured["refresh_clone"] is svc._refresh_ledger_clone
     reset_job_state()
 
 
@@ -429,7 +433,7 @@ def test_run_laudus_import_backfill_passes_mode_and_from_date(monkeypatch):
 
     captured = {}
 
-    def fake_run_import(mode="incremental", from_date=None):
+    def fake_run_import(mode="incremental", from_date=None, refresh_clone=None):
         captured["mode"] = mode
         captured["from_date"] = from_date
         return {"success": True, "jes_added": 7, "error_msg": None}
@@ -456,7 +460,7 @@ def test_run_laudus_import_failure_sets_failed(monkeypatch):
 
     monkeypatch.setattr(
         "pipeline.importers.laudus_run.run_import",
-        lambda mode="incremental", from_date=None: {"success": False, "jes_added": 0, "error_msg": "bean-check failed: boom"},
+        lambda mode="incremental", from_date=None, refresh_clone=None: {"success": False, "jes_added": 0, "error_msg": "bean-check failed: boom"},
     )
 
     job_id = "laudus-fail-job"

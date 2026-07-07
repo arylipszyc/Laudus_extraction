@@ -6,6 +6,13 @@ logger = logging.getLogger(__name__)
 
 _token = None
 _REQUEST_TIMEOUT = 30  # segundos — evita cuelgues si Laudus no responde
+# Tope duro de paginación: una API que repite página (o miente hasMore) no puede
+# convertirse en un loop infinito sosteniendo el .import.lock (review 2026-07-06 B8).
+_MAX_PAGES = 500
+
+
+class PaginationError(RuntimeError):
+    """La paginación no avanza o superó _MAX_PAGES — abortar la corrida, no reintentar."""
 
 # Claves que indican que la API está paginando resultados
 _PAGINATION_KEYS = {"total", "count", "nextPage", "hasMore", "page", "totalPages", "pageSize", "offset"}
@@ -17,17 +24,20 @@ def login():
     """
     Autentica con la API de Laudus y obtiene un Bearer token.
     El token queda en caché para las peticiones siguientes.
+
+    Un fallo PROPAGA (review 2026-07-06 B8): antes se tragaba la excepción y el caller
+    reportaba el genérico "No hay token" en vez de la causa real (credenciales, red, 5xx).
     """
     global _token
     if _token is None:
-        try:
-            response = requests.post(
-                LOGIN_URL, json=payload, headers=default_headers, timeout=_REQUEST_TIMEOUT
-            )
-            response.raise_for_status()
-            _token = response.json()["token"]
-        except Exception as e:
-            logger.error("Error al iniciar sesión: %s", e)
+        response = requests.post(
+            LOGIN_URL, json=payload, headers=default_headers, timeout=_REQUEST_TIMEOUT
+        )
+        response.raise_for_status()
+        token = response.json().get("token")
+        if not token:  # 200 sin token = fallo de auth con otra forma; mejor que un KeyError pelado
+            raise RuntimeError(f"Login Laudus devolvió 200 sin token (keys: {list(response.json())})")
+        _token = token
     return _token
 
 
@@ -111,9 +121,20 @@ def get_info_API(url, params=None, retry=True):
             pages_fetched += 1
             if next_page_params is None:
                 break  # No hay más páginas
+            if pages_fetched >= _MAX_PAGES:
+                raise PaginationError(
+                    f"Paginación de {url} superó {_MAX_PAGES} páginas — abortando")
+            # str() en ambos lados: una API que alterna '2' (str) y 2 (int) no debe
+            # burlar el guard por tipo (review batch 3).
+            if str(next_page_params.get("page")) == str(current_params.get("page")):
+                raise PaginationError(
+                    f"Paginación de {url} no avanza (página {next_page_params.get('page')} "
+                    f"repetida) — abortando")
 
             current_params.update(next_page_params)
 
+        except PaginationError:
+            raise  # no reintentar: la API está rota, un retry repetiría el loop entero
         except Exception as e:
             if response is not None and response.status_code == 401:
                 _token = None

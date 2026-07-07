@@ -17,6 +17,7 @@ import json
 import logging
 import os
 import subprocess
+import threading
 import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -50,30 +51,115 @@ class LockTimeout(RuntimeError):
 
 
 @contextmanager
-def acquire_lock(lock_path, timeout: int = 60, max_age: int = 300, poll: int = 5):
+def acquire_lock(lock_path, timeout: int = 60, max_age: int = 300, poll: int = 5,
+                 heartbeat: float = 60.0):
     """Filesystem lock guarding against concurrent writers (AC8).
 
-    Waits while a fresh lock exists (polling); removes a stale lock (mtime older
-    than `max_age`); raises LockTimeout after `timeout` seconds. Always released.
+    Adquisición ATÓMICA vía `os.open(O_CREAT|O_EXCL)` — el exists()→write_text previo
+    era TOCTOU: dos procesos podían "adquirir" a la vez, y dos waiters podían robar el
+    mismo lock stale. El robo de un stale (mtime > max_age) va por RENAME atómico con
+    re-verificación. El OWNERSHIP es por token: heartbeat y release verifican que el
+    archivo siga siendo NUESTRO antes de tocarlo/borrarlo (un holder suspendido que
+    revive ya no puede borrar el lock de quien lo robó legítimamente). Un thread
+    heartbeat renueva el mtime cada `heartbeat`s mientras el holder vive — una
+    operación legítimamente larga (backfill) no puede ser robada a los 300s.
+    Residual documentado: con ≥3 contendientes + veredicto stale sobre un lock fresco
+    (heartbeat muerto 5 min con el holder vivo) + timing de μs, la devolución del robo
+    puede dejar un lock fantasma que se auto-sana en ≤max_age. Always released.
     """
+    import uuid
+
     lock_path = Path(lock_path)
-    waited = 0
-    while lock_path.exists():
-        age = time.time() - lock_path.stat().st_mtime
-        if age > max_age:
-            logger.warning("Removing stale import lock (age %.0fs)", age)
-            lock_path.unlink(missing_ok=True)
-            break
-        if waited >= timeout:
-            raise LockTimeout(f"Could not acquire {lock_path} within {timeout}s")
-        time.sleep(poll)
-        waited += poll
     lock_path.parent.mkdir(parents=True, exist_ok=True)
-    lock_path.write_text(str(os.getpid()), encoding="utf-8")
+    token = f"{os.getpid()}-{threading.get_ident()}-{uuid.uuid4().hex[:8]}"
+    heartbeat = max(heartbeat, 0.05)  # 0/negativo sería un busy-loop de utime
+
+    def _owns() -> bool:
+        try:
+            return lock_path.read_text(encoding="utf-8") == token
+        except OSError:
+            return False
+
+    # GC de steal-files huérfanos (crash a mitad del baile de robo): son inertes pero
+    # ensucian el working tree del repo del ledger.
+    for orphan in lock_path.parent.glob(f"{lock_path.name}.steal-*"):
+        try:
+            if time.time() - orphan.stat().st_mtime > max_age:
+                orphan.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+    deadline = time.monotonic() + timeout
+    while True:
+        try:
+            fd = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            try:
+                os.write(fd, token.encode("utf-8"))
+            finally:
+                os.close(fd)
+            break
+        except FileExistsError:
+            try:
+                age = time.time() - lock_path.stat().st_mtime
+            except FileNotFoundError:
+                continue  # se liberó entre el open y el stat → re-competir ya
+            if age > max_age:
+                # Robo por RENAME atómico (no unlink directo): un unlink con veredicto
+                # viejo podía borrar el lock FRESCO que otro waiter acababa de crear.
+                # os.replace lo gana uno solo; después se re-verifica lo movido.
+                steal = lock_path.with_name(
+                    f"{lock_path.name}.steal-{os.getpid()}-{threading.get_ident()}")
+                try:
+                    os.replace(lock_path, steal)
+                    stolen_age = time.time() - steal.stat().st_mtime
+                except OSError:
+                    # Otro waiter movió/liberó/recreó el lock en el medio — cualquier
+                    # rareza del filesystem acá significa "perdí la carrera": re-evaluar.
+                    steal.unlink(missing_ok=True)
+                    continue
+                if stolen_age > max_age:
+                    logger.warning("Removing stale import lock (age %.0fs)", stolen_age)
+                    steal.unlink(missing_ok=True)
+                else:
+                    # Era fresco (otro lo recreó en la ventana). Devolverlo SIN clobber:
+                    # os.link falla si ya hay un lock nuevo en el path (no se pisa a un
+                    # tercero, a diferencia de os.replace).
+                    try:
+                        os.link(steal, lock_path)
+                        logger.warning("Lock fresco robado por veredicto viejo — devuelto intacto")
+                    except OSError:
+                        logger.error(
+                            "Robé un lock FRESCO y no pude devolverlo (¿tercer writer en el "
+                            "path?) — su holder corre sin archivo de lock hasta terminar")
+                    steal.unlink(missing_ok=True)
+                continue
+            if time.monotonic() >= deadline:
+                raise LockTimeout(f"Could not acquire {lock_path} within {timeout}s")
+            time.sleep(poll)
+
+    stop = threading.Event()
+
+    def _beat() -> None:
+        while not stop.wait(heartbeat):
+            if not _owns():
+                continue  # ausente un instante (baile de robo) o robado: no renovar un lock AJENO
+            try:
+                now = time.time()
+                os.utime(lock_path, (now, now))
+            except OSError:
+                continue
+
+    beater = threading.Thread(target=_beat, daemon=True, name="import-lock-heartbeat")
+    beater.start()
     try:
         yield
     finally:
-        lock_path.unlink(missing_ok=True)
+        stop.set()
+        beater.join(timeout=heartbeat + 1)
+        if _owns():
+            lock_path.unlink(missing_ok=True)
+        else:  # nos lo robaron (proceso suspendido >max_age): NO borrar el lock del ladrón
+            logger.warning("Release sin ownership del lock %s — no se borra (¿robado?)", lock_path)
 
 
 # Tope para cada subprocess de git. fetch/rebase/push van por red: sin timeout, un
@@ -257,8 +343,13 @@ def run_import(
     from_date: str | None = None,
     fetch_fn=default_fetch,
     ledger_root: Path | None = None,
+    refresh_clone=None,
 ) -> dict:
-    """Run one import. Returns a result dict (also appended to import-log)."""
+    """Run one import. Returns a result dict (also appended to import-log).
+
+    `refresh_clone`: callable opcional que trae el clon a origin/main; corre DENTRO
+    del lock (patrón beancount_promote) — antes corría afuera y un `reset --hard`
+    podía pisar una escritura concurrente de categorización."""
     root = Path(ledger_root) if ledger_root else _ledger_root()
     target_dir = root / "imports" / "laudus"
     accounts_path = root / "accounts.beancount"
@@ -291,6 +382,8 @@ def run_import(
 
     try:
         with acquire_lock(lock_path):
+            if refresh_clone is not None:
+                refresh_clone()  # dentro del lock → nadie escribe entre el reset y el import
             existing_jes = None
             if not replace:
                 existing_jes = _parse_existing_jes(target_dir)

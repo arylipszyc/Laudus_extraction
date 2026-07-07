@@ -1,5 +1,11 @@
 # Deferred Work
 
+## Deferred from: code review de spec-fase3-locks-robustez (2026-07-06)
+
+- **El validador de edits de Fava ESPERA el `.import.lock` pero no lo SOSTIENE** ([hallazgo del Edge Hunter batch 3]) — `fava_edit_validator` hace wait-for-lock antes de escribir, pero no adquiere: el `reset --hard` del sync (ya dentro del lock) igual puede pisar un edit de Fava en vuelo. Los writers del backend/pipeline sí sostienen el lock; el gap es solo Fava. Fix: que el validador adquiera `acquire_lock` alrededor de snapshot+write+bean-check.
+- **Discrepancia con mismas coordenadas pero montos corregidos queda con payload stale** ([pipeline/importers/discrepancy_writer.py](../../pipeline/importers/discrepancy_writer.py)) — la clave B4 es por coordenadas (cuenta, mes, línea, je, estado), no por contenido: si una re-extracción corrige el monto pero la línea sigue en `value-mismatch`, el JSONL conserva los montos del primer upload. Menor (el estado sigue siendo correcto); si molesta: incluir el monto cartola en la clave — con el costo de duplicar cuando Gemini re-extrae con centavos distintos.
+- **Lock fantasma residual ≤300s** — con ≥3 contendientes + veredicto stale sobre un lock fresco (requiere heartbeat muerto 5 min con holder vivo) + timing de μs, la devolución del robo puede dejar un lock sin dueño que se auto-sana al próximo stale-timeout. Logueado con warning/error cuando ocurre (greppear "devuelto intacto" / "no pude devolverlo"). Perfección requeriría fcntl/msvcrt byte-locks — no vale el costo hoy.
+
 ## Deferred from: code review de spec-fase3-confirm-async (2026-07-06)
 
 - **Respuesta de poll fuera de orden puede congelar el spinner del confirm** ([frontend/src/pages/CartolaUploadPage.tsx](../../frontend/src/pages/CartolaUploadPage.tsx)) — un GET de status en vuelo (ej. refetch-on-focus) que salió ANTES del PATCH puede resolver `ready` DESPUÉS del refetch que vio `confirming` → `shouldKeepPolling('ready')` corta el poll con la ConfirmingCard local montada. Ventana angosta (ms), recuperable con reload. Fix si aparece: comparar un sequence/updatedAt del job, o re-invalidar al montar la ConfirmingCard.

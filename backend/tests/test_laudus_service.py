@@ -111,3 +111,43 @@ def test_paginacion_completa_acumula_todo(monkeypatch):
 
     monkeypatch.setattr(laudus_service.requests, "get", fake_get)
     assert laudus_service.get_info_API("https://api.test/jes", retry=False) == [{"id": 1}, {"id": 2}]
+
+
+def test_paginacion_que_no_avanza_lanza_sin_reintentar(monkeypatch):
+    """B8: una API que repite la misma página → PaginationError inmediato (antes: loop
+    infinito sosteniendo .import.lock)."""
+    calls = {"n": 0}
+
+    def fake_get(url, headers=None, params=None, timeout=None):
+        calls["n"] += 1
+        return _FakeResponse({"data": [{"id": calls["n"]}], "page": 2, "totalPages": 3})
+
+    monkeypatch.setattr(laudus_service.requests, "get", fake_get)
+    with pytest.raises(laudus_service.PaginationError, match="no avanza"):
+        laudus_service.get_info_API("https://api.test/jes")
+    assert calls["n"] <= 3, "no debe reintentar el loop entero"
+
+
+def test_paginacion_supera_max_pages_lanza(monkeypatch):
+    """B8: tope duro de páginas."""
+    monkeypatch.setattr(laudus_service, "_MAX_PAGES", 5)
+
+    def fake_get(url, headers=None, params=None, timeout=None):
+        page = int((params or {}).get("page", 1))
+        return _FakeResponse({"data": [{"id": page}], "page": page, "totalPages": 99})
+
+    monkeypatch.setattr(laudus_service.requests, "get", fake_get)
+    with pytest.raises(laudus_service.PaginationError, match="super"):
+        laudus_service.get_info_API("https://api.test/jes")
+
+
+def test_login_propaga_la_causa_real(monkeypatch):
+    """B8: login() ya no traga la excepción (antes: None → genérico 'No hay token')."""
+    monkeypatch.setattr(laudus_service, "_token", None)
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        raise laudus_service.requests.ConnectionError("DNS no resuelve api.laudus.cl")
+
+    monkeypatch.setattr(laudus_service.requests, "post", fake_post)
+    with pytest.raises(laudus_service.requests.ConnectionError, match="DNS"):
+        laudus_service.login()

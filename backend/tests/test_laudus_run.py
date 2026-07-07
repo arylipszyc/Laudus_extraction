@@ -438,3 +438,136 @@ def test_incremental_parsea_existing_jes_una_sola_vez(tmp_path, monkeypatch):
     assert r2["success"] is True
     assert calls["n"] == 1, f"_parse_existing_jes corrió {calls['n']} veces (debe ser 1)"
     assert r2["from_date"] == expected_from  # misma ventana solapada que antes
+
+
+# ── Lock atómico + heartbeat (review 2026-07-06 B5) ─────────────────────────
+
+
+def test_lock_contencion_solo_uno_adquiere(tmp_path):
+    """B5a: con el lock tomado, un segundo intento con timeout=0 recibe LockTimeout
+    (la adquisición es O_CREAT|O_EXCL, no exists()→write TOCTOU)."""
+    import threading as th
+
+    lock = tmp_path / ".import.lock"
+    holding = th.Event()
+    release = th.Event()
+    results = []
+
+    def holder():
+        with laudus_run.acquire_lock(lock, timeout=0):
+            holding.set()
+            release.wait(timeout=10)
+
+    t = th.Thread(target=holder)
+    t.start()
+    assert holding.wait(timeout=10)
+    try:
+        with pytest.raises(laudus_run.LockTimeout):
+            with laudus_run.acquire_lock(lock, timeout=0):
+                results.append("no debería entrar")
+    finally:
+        release.set()
+        t.join(timeout=10)
+    assert results == []
+    assert not lock.exists()  # liberado por el holder
+
+
+def test_lock_stale_robado_por_uno_solo(tmp_path):
+    """B5a: dos waiters compiten por un lock stale — el unlink puede correr dos veces
+    pero el O_EXCL del retry lo gana exactamente UNO; el otro ve el lock fresco del
+    ganador y recibe LockTimeout (antes: ambos 'adquirían')."""
+    import threading as th
+
+    lock = tmp_path / ".import.lock"
+    lock.write_text("999999", encoding="utf-8")
+    old = time.time() - 600
+    import os as _os
+    _os.utime(lock, (old, old))
+
+    barrier = th.Barrier(2)
+    outcomes = []
+    inside = th.Event()
+
+    def waiter():
+        barrier.wait(timeout=10)
+        try:
+            with laudus_run.acquire_lock(lock, timeout=0, max_age=300):
+                inside.set()
+                time.sleep(0.5)  # mantener el lock fresco mientras el otro reintenta
+                outcomes.append("acquired")
+        except laudus_run.LockTimeout:
+            outcomes.append("timeout")
+        except Exception as exc:  # noqa: BLE001 — visibilidad: un thread no puede morir mudo
+            outcomes.append(f"error: {exc!r}")
+
+    threads = [th.Thread(target=waiter) for _ in range(2)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join(timeout=15)
+    assert sorted(outcomes) == ["acquired", "timeout"], outcomes
+
+
+def test_lock_heartbeat_renueva_mtime(tmp_path):
+    """B5a: el heartbeat toca el mtime mientras el holder vive — una operación más
+    larga que max_age ya no es 'stale' para un waiter."""
+    lock = tmp_path / ".import.lock"
+    with laudus_run.acquire_lock(lock, timeout=0, heartbeat=0.2):
+        mtime_0 = lock.stat().st_mtime
+        time.sleep(0.7)
+        mtime_1 = lock.stat().st_mtime
+        assert mtime_1 > mtime_0, "el heartbeat debe renovar el mtime del lock"
+        # Y un waiter con max_age menor a lo dormido NO lo considera stale:
+        age = time.time() - mtime_1
+        assert age < 0.5
+    assert not lock.exists()
+
+
+def test_run_import_refresh_clone_corre_dentro_del_lock(tmp_path):
+    """B5b: refresh_clone corre DENTRO del lock y ANTES del fetch — un reset --hard
+    ya no puede pisar una escritura concurrente ni correr fuera de la sección crítica."""
+    root = _ledger_root(tmp_path)
+    lock = root / ".import.lock"
+    events = []
+
+    def refresh():
+        events.append(("refresh", lock.exists()))
+
+    def fetch(f, t):
+        events.append(("fetch", lock.exists()))
+        return _balanced()
+
+    result = laudus_run.run_import(mode="incremental", fetch_fn=fetch,
+                                   ledger_root=root, refresh_clone=refresh)
+    assert result["success"] is True
+    assert events == [("refresh", True), ("fetch", True)], events
+
+
+def test_lock_release_no_borra_lock_ajeno(tmp_path):
+    """Ownership por token (review batch 3): si el lock fue robado (proceso suspendido
+    >max_age que revive), el release del holder original NO borra el lock del ladrón."""
+    lock = tmp_path / ".import.lock"
+    with laudus_run.acquire_lock(lock, timeout=0, heartbeat=30):
+        # Simular el robo: otro writer reemplazó el lock con SU token.
+        lock.write_text("otro-proceso-lock-ajeno", encoding="utf-8")
+    assert lock.exists(), "el release sin ownership no debe borrar el lock del ladrón"
+    assert lock.read_text(encoding="utf-8") == "otro-proceso-lock-ajeno"
+    lock.unlink()
+
+
+def test_lock_gc_de_steal_files_huerfanos(tmp_path):
+    """Un crash a mitad del baile de robo deja `.import.lock.steal-*` huérfanos; la
+    próxima adquisición los limpia si son viejos."""
+    lock = tmp_path / ".import.lock"
+    orphan = tmp_path / ".import.lock.steal-999-888"
+    orphan.write_text("crash", encoding="utf-8")
+    old = time.time() - 600
+    import os as _os
+    _os.utime(orphan, (old, old))
+    fresh_orphan = tmp_path / ".import.lock.steal-777-666"
+    fresh_orphan.write_text("reciente", encoding="utf-8")
+
+    with laudus_run.acquire_lock(lock, timeout=0):
+        pass
+    assert not orphan.exists(), "steal viejo debe limpiarse"
+    assert fresh_orphan.exists(), "steal reciente (baile en curso) no se toca"

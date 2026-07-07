@@ -4,8 +4,12 @@
 reconciliación (sin mirror Supabase). Append-only: la resolución (Story 9.12) se appendea
 como línea nueva referenciando el `discrepancy_id` original (audit trail completo).
 
-Dedup por `(batch_id, cartola_line_no, laudus_je_id)` → re-correr el matching no duplica
-entradas (AC7).
+Dedup por IDENTIDAD DEL CONTENIDO `(bank_account_id, year_month, cartola_line_no,
+laudus_je_id, state)` — re-correr el matching no duplica (AC7) Y re-subir la misma
+cartola (batch_id NUEVO) tampoco (review 2026-07-06 B4: la clave vieja llevaba batch_id
+y cada re-upload duplicaba todas las discrepancias abiertas). Residuales documentados:
+entradas legacy sin year_month (clave con None) y líneas re-numeradas por una
+re-extracción distinta pueden dupear una vez.
 """
 from __future__ import annotations
 
@@ -16,8 +20,8 @@ from pathlib import Path
 SCHEMA_VERSION = "1.0"
 
 
-def _dedup_key(batch_id, cartola_line_no, laudus_je_id, state) -> tuple:
-    return (str(batch_id), cartola_line_no, laudus_je_id, state)
+def _dedup_key(bank_account_id, year_month, cartola_line_no, laudus_je_id, state) -> tuple:
+    return (bank_account_id, year_month, cartola_line_no, laudus_je_id, state)
 
 
 def build_discrepancy(
@@ -70,18 +74,16 @@ def _existing_dedup_keys(path: Path) -> set[tuple]:
             continue
         if entry.get("resolution") is not None and entry.get("ref_discrepancy_id"):
             continue  # línea de resolución, no es una discrepancia original
-        cart = entry.get("cartola") or {}
-        laud = entry.get("laudus") or {}
-        keys.add(_dedup_key(entry.get("batch_id"), cart.get("line_no"),
-                            laud.get("journal_entry_id"), entry.get("state")))
+        keys.add(_key_of(entry))
     return keys
 
 
 def _key_of(discrepancy: dict) -> tuple:
     cart = discrepancy.get("cartola") or {}
     laud = discrepancy.get("laudus") or {}
-    return _dedup_key(discrepancy.get("batch_id"), cart.get("line_no"),
-                      laud.get("journal_entry_id"), discrepancy.get("state"))
+    return _dedup_key(discrepancy.get("bank_account_id"), discrepancy.get("year_month"),
+                      cart.get("line_no"), laud.get("journal_entry_id"),
+                      discrepancy.get("state"))
 
 
 def append_discrepancy(discrepancy: dict, jsonl_path: str | Path) -> bool:
