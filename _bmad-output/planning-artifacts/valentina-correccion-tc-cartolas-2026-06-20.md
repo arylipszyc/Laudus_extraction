@@ -224,7 +224,8 @@ Ary 2026-06-22).
 
 > **Origen:** la verificación end-to-end con la cartola BCI Visa Infinity 2026-04 real destapó que el
 > builder solo manejaba `{compra, cuota, abono, pago}` y **descartaba en silencio** todo lo demás
-> (`else: continue` en `tc_correction.py:151`). La BCI traía `impuesto` (timbres DL 3475, $781) y
+> (`else: continue` en `tc_correction.py:151` — código PRE-fix, ya corregido en `e395c17`; la línea
+> citada no corresponde al código actual). La BCI traía `impuesto` (timbres DL 3475, $781) y
 > `comision` ("COBRO ADM MENSUAL", $6.014) → se perdían **los dos lados** del asiento: el pasivo
 > `TC:Real` quedaba corto $6.795 Y ese gasto bancario desaparecía de los libros. `operation_type` es
 > **libre** en `raw` (sin constraint de schema) → el código DEBE tener un default seguro, no un drop.

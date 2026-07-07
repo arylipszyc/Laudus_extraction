@@ -4,7 +4,7 @@
 **Objetivo:** recabar de una sola vez todo lo necesario para replicar el family office para un 2º RUT (relacionado a EAG, entidad hermana en el mismo ledger). Evitar pedirle al contador cosas de a poco.
 **Arquitectura decidida:** un solo sistema, un solo ledger, RUT2 como entidad hermana de EAG. Ver `_bmad/memory` → `project_segundo_rut_multientidad`.
 
-> **Cómo leer este doc:** la **Sección 1** es reenviable al contador tal cual. Las Secciones 2–4 son decisiones/tareas internas (no molestar al contador con ellas).
+> **Cómo leer este doc:** la **Sección 1** es la base del mensaje al contador — ⚠️ al reenviarla, **quitá antes los bloques de nota interna** (los citados `>` dentro de B y G, y el aviso de colisión de códigos: son deliberaciones nuestras, no preguntas para él). Las Secciones 2–5 son decisiones/tareas internas (no molestar al contador con ellas).
 
 ---
 
@@ -16,6 +16,7 @@
 3. **¿Desde qué fecha está la contabilidad cargada y al día en Laudus?** ¿Desde qué período quieres que importemos el histórico? (EAG arrancó en 2021.)
 
 ### B. Plan de cuentas — **lo sacamos nosotros de Laudus, NO se lo pedimos al contador**
+> (Los ítems 4–5 originales de esta sección quedaron absorbidos por la corrección de abajo; la numeración sigue en 6.)
 > **Corrección 2026-06-30 (verificada con la sonda):** Laudus solo expone `accountId, accountNumber, name, notes` (`bootstrap/sources.py:19`). **No hay "categorías" que exportar** — las `categoria1/2/3` de EAG fueron una clasificación MANUAL (Supabase, hoy deprecada). Los códigos + nombres del plan de RUT2 los traemos directo de `/accounting/accounts/list`. Lo que NO existe y hay que **crear** es la clasificación (ver ítem G).
 >
 > ⚠️ **Colisión de códigos:** RUT2 reusa los mismos códigos que EAG (111001, 111005…). El importador rutea por `code`; hay que scopearlo a `(entidad, code)` y pre-crear el subárbol de RUT2 antes de importar. Trabajo interno (ítem #4 del plan), no del contador.
@@ -56,7 +57,7 @@
 - Rutas de cuenta Beancount (`Assets:RUT2:...`) — se derivan del export + convención.
 - Afinamiento del extractor de PDF por banco.
 
-## Sección 5 — Hallazgos de la sonda de lectura (2026-06-30, verificado)
+## Sección 4 — Hallazgos de la sonda de lectura (2026-06-30, verificado)
 
 Sonda read-only contra Laudus (`probe_laudus_rut2.py`, `pull_rut2_plan.py` en scratchpad). No tocó `ledger/` ni git.
 
@@ -66,6 +67,6 @@ Sonda read-only contra Laudus (`probe_laudus_rut2.py`, `pull_rut2_plan.py` en sc
 - **Reporte (ítem #5) más chico de lo temido:** la jerarquía ya está en la numeración (8→81→811; encabezados = grupos: Casas/Aviones/Yates/G.Personales). Clasificación mayormente mecánica, no ~300 decisiones a mano.
 - **Pendiente confirmar (Valentina/contador):** raíz 8 (196 hojas) → Expenses/P&L; qué son raíces 6 y 7; grupo top-level del reporte.
 
-## Sección 4 — Precondición interna (nuestra, antes de importar data de RUT2)
+## Sección 5 — Precondición interna (nuestra, antes de importar data de RUT2)
 
 - **Guardrail de consolidación por grupos** (`bql_queries.py`): reemplazar el supuesto "EAG = todas las cuentas" por grupos explícitos, para que los reportes de EAG no absorban a RUT2. Ítem #1 del work breakdown. **Hacer antes de meter cualquier dato de RUT2.**

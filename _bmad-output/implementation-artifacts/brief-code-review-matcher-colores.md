@@ -1,5 +1,11 @@
 # Brief — Code review adversarial: matcher FX consolidado + Goal B colores
 
+> ✅ **EL REVIEW YA CORRIÓ** — patches aplicados en `8bf60a4` (anotado en code-review 2026-07-06).
+> Si se re-corre, hacerlo **contra HEAD** (no `8fab632` aislado, o vas a re-reportar cosas ya
+> arregladas). Dos hipótesis de abajo quedaron OBSOLETAS en main: la **#1** (BCCh SÍ está poblado
+> desde `0955d1e` y la banda [850,1000] fue removida — sin BCCh el matcher bloquea) y la **#7**
+> (el corte verde es **0.85**, commit `b8ed549`, no 0.5).
+
 **Para correr en otra ventana** (sesión limpia). Pegá este brief y pedí un code-review adversarial.
 Sugerido: skill `bmad-code-review` o `/code-review high` sobre el commit indicado.
 

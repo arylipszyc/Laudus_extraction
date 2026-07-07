@@ -1,5 +1,13 @@
 # Brief — Poblar el dólar BCCh (destraba la automatización del matcher FX)
 
+> ✅ **EJECUTADO — NO CORRER DE NUEVO** (anotado en code-review 2026-07-06). El archivo
+> `ledger/_meta/fx-bcch-eom.jsonl` **existe y está poblado** 2025-12→2026-05 (commit `0955d1e`,
+> fuente mindicador dólar observado). Además la premisa quedó obsoleta: la banda [850,1000] fue
+> **removida del código** — hoy sin BCCh el matcher **bloquea** (no adivina), que es exactamente la
+> regla fail-safe del diseño de Valentina. Lo único aún abierto de este brief: script idempotente de
+> actualización mensual + tests (alcance 2 y 4). Ojo: el ejemplo `958.34` de abajo es **ficticio**
+> (el fx real de 2026-04 fue ~899) — no copiarlo como dato.
+
 **Para correr en otra ventana.** Objetivo: poblar `ledger/_meta/fx-bcch-eom.jsonl` con el tipo de cambio
 CLP/USD de cierre de mes, para que el matcher FX de tarjetas use el dólar real en vez de la banda de
 plausibilidad [850,1000] que hoy es un stopgap.

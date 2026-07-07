@@ -5,6 +5,13 @@
 **Para:** Ary + Moishe/dev
 **Severidad:** ALTA — corrupción silenciosa de datos del pasivo TC
 
+> ✅ **RESUELTO el mismo día** (anotado en code-review 2026-07-06): fix en commit `9f0c2f3` — categorizar
+> reescribe solo la pata de resultado y preserva las patas `Assets:`/`Liabilities:`, exactamente el fix
+> recomendado abajo (`_resolve_bank_target` fue eliminado del código en el proceso). Feb+mar
+> re-importados y re-categorizados; C1 verificado: `TC:Real:Tc1027VisaInfinity == −3.219.948` exacto.
+> La vista de cuadre (spec de la 2ª mitad) se implementó como story **6.6** (commit `2e17b45`, deployada).
+> El análisis de abajo queda como registro histórico — los "Próximos pasos" ya se ejecutaron todos.
+
 ---
 
 ## TL;DR

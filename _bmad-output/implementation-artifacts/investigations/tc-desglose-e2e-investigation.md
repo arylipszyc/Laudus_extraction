@@ -1,5 +1,11 @@
 # Investigation: Desglose de TC end-to-end con cartola 2026 real
 
+> ✅ **Nota post-cierre (code-review 2026-07-06):** la causa raíz de abajo ya se **arregló** (commits
+> `e395c17`/`26aacf4`: mapeo `operation_type`→cuenta + surfacing de toda op `unmapped`; los `path:line`
+> citados corresponden al código PREVIO al fix y ya no calzan con `tc_correction.py` actual). Los 5 paths
+> del Investigation Backlog marcados "Open" quedaron **superados** por la materialización real
+> (2026-06-29→07-06, todas las tarjetas cuadradas al peso) y no se cerraron individualmente.
+
 ## Hand-off Brief
 
 1. **What happened.** El desglose de TC corre end-to-end correctamente para el camino feliz (asientos a/b/c, apertura idempotente, bean-check verde), PERO el builder **descarta en silencio** los `operation_type` que no sean `compra/cuota/abono/pago` — en la cartola BCI 2026-04 real perdió `impuesto` (781) + `comisión` (6.014), subvaluando el pasivo `TC:Real` en exactamente 6.795 CLP y perdiendo ese gasto.
