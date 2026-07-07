@@ -196,20 +196,24 @@ def _rollback(target_dir: Path, snapshot: dict[Path, str | None]) -> None:
 # ── from_date resolution ────────────────────────────────────────────────────
 
 
-def _incremental_from_date(target_dir: Path) -> str:
-    """Primer día a re-pedir en modo incremental.
+def _incremental_start(jes: dict) -> str:
+    """Primer día a re-pedir en modo incremental, desde JEs YA parseados.
 
     NO es forward-only: retrocede por la ventana solapada (misma lógica que el path Sheets,
     `pipeline.utils.dates.get_date_range`) para recuperar asientos posteados-tarde / con fecha
     contable retroactiva. Sin JEs previos → fecha de inicio por defecto (backfill completo).
     """
-    jes = _parse_existing_jes(target_dir)
     dates = [je.date for je in jes.values() if je.date]
     if not dates:
         return _DEFAULT_FROM_DATE
     from pipeline.utils.dates import get_date_range
     date_from, _ = get_date_range(max(dates))
     return date_from.isoformat()
+
+
+def _incremental_from_date(target_dir: Path) -> str:
+    """Wrapper que parsea y delega (lo usan tests; `run_import` parsea una sola vez)."""
+    return _incremental_start(_parse_existing_jes(target_dir))
 
 
 # ── default fetch (real Laudus) ─────────────────────────────────────────────
@@ -266,10 +270,10 @@ def run_import(
     target_dir.mkdir(parents=True, exist_ok=True)
     to_date = datetime.now(timezone.utc).date().isoformat()
     replace = mode == "backfill"
-    if mode == "backfill":
-        start = from_date or _DEFAULT_FROM_DATE
-    else:
-        start = _incremental_from_date(target_dir)
+    # El from_date incremental sale de parsear los JEs existentes — eso ocurre DENTRO
+    # del lock (abajo): un solo parse compartido con write_jes, y sin TOCTOU con otro
+    # writer (antes se parseaba acá afuera y write_jes re-parseaba adentro).
+    start = (from_date or _DEFAULT_FROM_DATE) if replace else None
 
     result = {
         "importer": "laudus",
@@ -287,6 +291,11 @@ def run_import(
 
     try:
         with acquire_lock(lock_path):
+            existing_jes = None
+            if not replace:
+                existing_jes = _parse_existing_jes(target_dir)
+                start = _incremental_start(existing_jes)
+                result["from_date"] = start
             if start > to_date:
                 logger.info("No new dates to sync (%s > %s)", start, to_date)
                 result["success"] = True
@@ -297,7 +306,8 @@ def run_import(
             logger.info("Fetched %d Laudus ledger rows (%s → %s)", len(rows), start, to_date)
 
             snapshot = _snapshot(list(target_dir.glob("*.beancount")) + [pending_path])
-            write_result = write_jes(rows, target_dir, accounts_path, pending_path, replace=replace)
+            write_result = write_jes(rows, target_dir, accounts_path, pending_path,
+                                     replace=replace, existing_jes=existing_jes)
             result.update(
                 jes_added=write_result.jes_added,
                 jes_dedup=write_result.jes_dedup,

@@ -12,11 +12,20 @@ el match se decide por fecha + descripción y la FX se deriva después.
 from __future__ import annotations
 
 import difflib
+import re
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 
 DATE_TOLERANCE_DAYS = 3
+# El atajo del ranking (ganador siempre en el subset amount-match) exige que el peor
+# score con monto (100 − DATE_TOLERANCE_DAYS) supere al mejor sin monto (sim máx 1×10).
+# Si alguna vez se agranda la tolerancia hacia ≥90, hay que volver al score global.
+assert 100 - DATE_TOLERANCE_DAYS > 10
+
+# Stems de archivos mensuales del importer (ASCII: un dígito unicode no debe colarse
+# al filtro y saltarse el fallback conservador).
+_MONTH_STEM = re.compile(r"[0-9]{4}-[0-9]{2}")
 DESC_SIMILARITY_THRESHOLD = 0.85
 USD_FX_EPOCH = date(2026, 1, 1)  # AC9: pre-2026 es CLP-only, sin lógica FX
 
@@ -73,8 +82,19 @@ def load_laudus_entries(target_dir, account: str, period_start: date, period_end
     target_dir = Path(target_dir)
     if not target_dir.is_dir():
         return out
+    # Los archivos se llaman YYYY-MM.beancount: filtrar por nombre ANTES de parsear
+    # (parsear los ~68 meses para quedarse con 1-2 era el grueso del costo de cada
+    # reconciliación). Comparación de strings funciona por el formato ISO, incluso
+    # cruzando año. Se apoya en que el writer bucketea cada JE en el archivo de SU mes
+    # (`write_jes`/_month_of lo garantizan para todo lo generado); una tx movida a mano
+    # al archivo de otro mes quedaría invisible. Stems que no calzan el patrón se
+    # parsean igual (fallback conservador).
+    month_lo = period_start.strftime("%Y-%m")
+    month_hi = period_end.strftime("%Y-%m")
     for path in sorted(target_dir.glob("*.beancount")):
         if path.name.startswith("_"):
+            continue
+        if _MONTH_STEM.fullmatch(path.stem) and not (month_lo <= path.stem <= month_hi):
             continue
         entries, _err, _opt = parser.parse_file(str(path))
         for e in entries:
@@ -96,16 +116,17 @@ def load_laudus_entries(target_dir, account: str, period_start: date, period_end
     return out
 
 
-def _similarity(a: str, b: str) -> float:
-    return difflib.SequenceMatcher(None, (a or "").lower().strip(), (b or "").lower().strip()).ratio()
+def _norm(s: str) -> str:
+    return (s or "").lower().strip()
 
 
-def _classify(cl: CartolaLine, le: LaudusEntry, fx_era: bool) -> tuple[str, float, str]:
-    """Estado del par (cl, le) ya elegido como mejor candidato aceptable."""
+def _classify(cl: CartolaLine, le: LaudusEntry, fx_era: bool, sim: float) -> tuple[str, float, str]:
+    """Estado del par (cl, le) ya elegido como mejor candidato aceptable.
+
+    `sim` viene precomputada del matching (una sola corrida de SequenceMatcher por par)."""
     is_usd = fx_era and cl.currency != "CLP"
     amount_match = True if is_usd else (cl.amount == le.amount)
     date_match = cl.date == le.date
-    sim = _similarity(cl.description, le.description)
     desc_match = sim >= DESC_SIMILARITY_THRESHOLD
 
     if not amount_match:
@@ -119,23 +140,6 @@ def _classify(cl: CartolaLine, le: LaudusEntry, fx_era: bool) -> tuple[str, floa
     return "perfect", 1.0, ""
 
 
-def _acceptable(cl: CartolaLine, le: LaudusEntry, fx_era: bool) -> bool:
-    """Un candidato (dentro de ±3 días) es 'el mismo movimiento' si coincide el monto
-    (CLP) o la descripción es suficientemente parecida — si no, es otro movimiento."""
-    is_usd = fx_era and cl.currency != "CLP"
-    amount_match = True if is_usd else (cl.amount == le.amount)
-    desc_match = _similarity(cl.description, le.description) >= DESC_SIMILARITY_THRESHOLD
-    return amount_match or desc_match
-
-
-def _score(cl: CartolaLine, le: LaudusEntry, fx_era: bool) -> float:
-    is_usd = fx_era and cl.currency != "CLP"
-    amount_match = True if is_usd else (cl.amount == le.amount)
-    sim = _similarity(cl.description, le.description)
-    dd = abs((cl.date - le.date).days)
-    return (100 if amount_match else 0) + sim * 10 - dd
-
-
 def match(
     cartola_lines: list[CartolaLine],
     laudus_entries: list[LaudusEntry],
@@ -145,27 +149,52 @@ def match(
     """Un MatchResult por cada línea de cartola + los Laudus sobrantes (missing-in-cartola).
 
     Matching greedy: para cada línea de cartola se elige el mejor Laudus aceptable dentro de
-    ±3 días (sin reusar un asiento Laudus ya consumido). `period_start >= 2026-01-01` habilita
-    la era FX (USD); antes es CLP-only (AC9).
+    ±3 días (sin reusar un asiento Laudus ya consumido). Aceptable = monto exacto (CLP) o
+    descripción ≥ umbral; score = (100 si monto) + sim×10 − |Δdías|. `period_start >=
+    2026-01-01` habilita la era FX (USD); antes es CLP-only (AC9).
+
+    Performance (review 2026-07-06 D3), sin cambiar resultados: descripciones normalizadas
+    una vez, similitud computada ≤1 vez por par (cache por línea), y si hay candidatos con
+    monto exacto la similitud de los demás ni se computa — el peor amount-match puntúa
+    100 − DATE_TOLERANCE_DAYS y el mejor no-match ≤10 (garantizado por el assert del
+    módulo), así que el ganador siempre está en el subset de monto y el orden de
+    desempate (primero-en-orden entre iguales) se preserva.
     """
     fx_era = period_start >= USD_FX_EPOCH
     used: set[int] = set()
     results: list[MatchResult] = []
+    le_norms = [_norm(le.description) for le in laudus_entries]
 
     for cl in cartola_lines:
-        candidates = [
-            (i, le) for i, le in enumerate(laudus_entries)
-            if i not in used
-            and abs((cl.date - le.date).days) <= DATE_TOLERANCE_DAYS
-            and _acceptable(cl, le, fx_era)
-        ]
+        cl_norm = _norm(cl.description)
+        is_usd = fx_era and cl.currency != "CLP"
+        sims: dict[int, float] = {}
+
+        def _sim(i: int) -> float:
+            if i not in sims:
+                sims[i] = difflib.SequenceMatcher(None, cl_norm, le_norms[i]).ratio()
+            return sims[i]
+
+        window = [(i, le) for i, le in enumerate(laudus_entries)
+                  if i not in used and abs((cl.date - le.date).days) <= DATE_TOLERANCE_DAYS]
+        amount_ok = [(i, le) for i, le in window
+                     if (True if is_usd else cl.amount == le.amount)]
+        candidates = amount_ok or [(i, le) for i, le in window
+                                   if _sim(i) >= DESC_SIMILARITY_THRESHOLD]
         if not candidates:
             results.append(MatchResult("missing-in-laudus", cl, None, 0.0,
                                        "sin candidato Laudus aceptable en ±3 días"))
             continue
-        best_idx, best_le = max(candidates, key=lambda c: _score(cl, c[1], fx_era))
+        # `candidates` es o TODO amount-match o TODO desc-match; el bono se aplica igual
+        # que en el score original (100 + sim×10 − |Δdías|) para que la aritmética float
+        # sea BIT-idéntica a la previa (omitir el +100 podía distinguir scores que antes
+        # empataban por absorción de bits y cambiar el desempate primero-gana).
+        bonus = 100 if candidates is amount_ok else 0
+        best_idx, best_le = max(
+            candidates,
+            key=lambda c: bonus + _sim(c[0]) * 10 - abs((cl.date - c[1].date).days))
         used.add(best_idx)
-        state, conf, notes = _classify(cl, best_le, fx_era)
+        state, conf, notes = _classify(cl, best_le, fx_era, _sim(best_idx))
         results.append(MatchResult(state, cl, best_le, conf, notes))
 
     for i, le in enumerate(laudus_entries):

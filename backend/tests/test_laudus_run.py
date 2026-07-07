@@ -407,3 +407,34 @@ def test_git_commit_push_timeout_en_rebase_aborta_antes_de_propagar(tmp_path, mo
         laudus_run.git_commit_push(repo / "ledger", ["ledger/imports/laudus/"], "msg")
 
     assert aborts, "TimeoutExpired en el rebase debe disparar `git rebase --abort`"
+
+
+def test_incremental_parsea_existing_jes_una_sola_vez(tmp_path, monkeypatch):
+    """Review 2026-07-06 D4b: el run incremental parseaba los JEs existentes DOS veces
+    (from_date fuera del lock + write_jes adentro). Ahora: UN parse, dentro del lock,
+    compartido con write_jes — y el from_date resultante no cambia."""
+    from pipeline.writers import beancount_writer
+
+    root = _ledger_root(tmp_path)
+    # Primer run siembra JEs (parsea 1 vez un dir vacío).
+    r1 = laudus_run.run_import(mode="incremental", fetch_fn=lambda f, t: _balanced(), ledger_root=root)
+    assert r1["success"] is True
+
+    calls = {"n": 0}
+    real = beancount_writer._parse_existing_jes
+
+    def counting(target_dir):
+        calls["n"] += 1
+        return real(target_dir)
+
+    # Un solo símbolo real: laudus_run lo importó por nombre y write_jes usa el del módulo.
+    monkeypatch.setattr(beancount_writer, "_parse_existing_jes", counting)
+    monkeypatch.setattr(laudus_run, "_parse_existing_jes", counting)
+
+    expected_from = laudus_run._incremental_from_date(root / "imports" / "laudus")
+    calls["n"] = 0
+    r2 = laudus_run.run_import(mode="incremental", fetch_fn=lambda f, t: _balanced(je_id=2, date="2024-04-10"),
+                               ledger_root=root)
+    assert r2["success"] is True
+    assert calls["n"] == 1, f"_parse_existing_jes corrió {calls['n']} veces (debe ser 1)"
+    assert r2["from_date"] == expected_from  # misma ventana solapada que antes

@@ -118,3 +118,42 @@ def test_resolution_se_appendea_sin_reescribir(tmp_path):
     disc_b = build_discrepancy(batch_id="b2", bank_account_id="acc1", state="date-mismatch", ts=TS,
                                cartola={"line_no": 1}, laudus={"journal_entry_id": "9"})
     assert append_discrepancy(disc_b, p) is True  # distinto batch → distinta clave
+
+
+def test_append_discrepancies_batch_una_lectura_y_mismo_dedup(tmp_path, monkeypatch):
+    """Review 2026-07-06 D5: el batch lee el JSONL UNA vez y deduplica igual que el loop
+    de append_discrepancy (vs disco e intra-batch); re-corrida no duplica."""
+    from pipeline.importers import discrepancy_writer as dw
+
+    p = tmp_path / "disc.jsonl"
+    d1 = build_discrepancy(batch_id="b1", bank_account_id="acc1", state="value-mismatch", ts=TS,
+                           cartola={"line_no": 1}, laudus={"journal_entry_id": "9"})
+    d2 = build_discrepancy(batch_id="b1", bank_account_id="acc1", state="date-mismatch", ts=TS,
+                           cartola={"line_no": 2}, laudus={"journal_entry_id": "10"})
+    d2_dup = build_discrepancy(batch_id="b1", bank_account_id="acc1", state="date-mismatch", ts=TS,
+                               cartola={"line_no": 2}, laudus={"journal_entry_id": "10"})
+
+    reads = {"n": 0}
+    real = dw._existing_dedup_keys
+
+    def counting(path):
+        reads["n"] += 1
+        return real(path)
+
+    monkeypatch.setattr(dw, "_existing_dedup_keys", counting)
+
+    # Batch con un duplicado intra-batch → escribe 2, lee el archivo 1 vez.
+    assert dw.append_discrepancies([d1, d2, d2_dup], p) == 2
+    assert reads["n"] == 1
+    # Re-corrida del mismo batch → 0 nuevas (dedup vs disco).
+    assert dw.append_discrepancies([d1, d2], p) == 0
+    # El archivo quedó bien formado: 2 líneas JSON parseables.
+    lines = [l for l in p.read_text(encoding="utf-8").splitlines() if l.strip()]
+    assert len(lines) == 2
+    import json as _json
+    parsed = [_json.loads(l) for l in lines]  # lanza si alguna línea quedó malformada
+    assert [x["state"] for x in parsed] == ["value-mismatch", "date-mismatch"]
+    # Y una discrepancia nueva de otro batch sí entra (append clásico sigue vivo).
+    d3 = build_discrepancy(batch_id="b2", bank_account_id="acc1", state="value-mismatch", ts=TS,
+                           cartola={"line_no": 1}, laudus={"journal_entry_id": "9"})
+    assert append_discrepancy(d3, p) is True

@@ -1,5 +1,10 @@
 # Deferred Work
 
+## Deferred from: code review de spec-fase3-perf-pipeline (2026-07-06)
+
+- **Escritores que no honran `.import.lock` pueden quedar stale durante el fetch del import** ([pipeline/importers/laudus_run.py:293-310](../../pipeline/importers/laudus_run.py#L293-L310)) — el parse único de JEs ocurre al inicio del lock y el fetch (red, potencialmente minutos) corre después; un writer que NO tome el lock (edit manual, Fava save directo al clon) durante ese lapso sería pisado por el merge. Los writers del sistema todos toman el lock (reconcile, promote, tc_correction, run_import); el riesgo es solo para edits fuera de contrato — que ya eran racy antes (write_jes regeneraba archivos completos). Fix durable si duele: re-verificar mtimes de los month files antes de escribir, o documentar el lock como contrato duro en el runbook del contador.
+- **JSONL de discrepancias: última línea sin newline (crash-truncada) pega el próximo append** ([pipeline/importers/discrepancy_writer.py](../../pipeline/importers/discrepancy_writer.py)) — paridad con el comportamiento pre-existente de `append_discrepancy` (no regresión); ambas líneas quedan ilegibles y la clave de dedup se pierde → re-corrida duplica. Fix de una línea si aparece en la práctica: chequear `endswith(b"\n")` y anteponer un `\n`.
+
 ## Deferred from: code review de spec-fase1-estabilidad-quick-wins (2026-07-06)
 
 - **Torn reads en LedgerService** ([backend/app/services/ledger_service.py:75](../../backend/app/services/ledger_service.py#L75) vs `:110-130`) — `load()` asigna `_entries/_errors/_options` como 3 stores separados bajo su lock, pero los READERS (`entries()`, `connection()`, `available`) no toman el lock → un request puede leer entries nuevas con errors/options viejos a mitad de recarga. PRE-EXISTENTE (los endpoints sync siempre corrieron en threads del pool mientras otro thread cargaba); el watcher off-loop de Fase 1 lo hace apenas más visible para handlers async. Fix durable: empaquetar el triple en un snapshot inmutable y swappear UNA referencia (readers toman snapshot bajo el lock). Es parte del ítem estructural de Fase 3 del review 2026-07-06.

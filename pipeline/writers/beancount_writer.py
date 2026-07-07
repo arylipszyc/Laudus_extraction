@@ -219,6 +219,7 @@ def write_jes(
     accounts_path: str | os.PathLike,
     pending_path: str | os.PathLike,
     replace: bool = False,
+    existing_jes: dict[str, JournalEntry] | None = None,
 ) -> WriteResult:
     """Emit `imports/laudus/YYYY-MM.beancount` from normalized Laudus rows.
 
@@ -229,6 +230,10 @@ def write_jes(
         pending_path: `ledger/imports/_new-accounts-pending.beancount`.
         replace: True (backfill) regenerates from `rows` only; False (incremental)
             merges with already-written JEs by `id` (new overrides existing).
+        existing_jes: JEs ya parseados por el caller (review 2026-07-06 D4b: el run
+            incremental los parsea una vez para el from_date y los pasa acá — evita
+            el segundo parse completo). None → se parsean acá (comportamiento previo).
+            Ignorado con replace=True.
     """
     target_dir = Path(target_dir)
     pending_path = Path(pending_path)
@@ -237,7 +242,10 @@ def write_jes(
     account_index = load_account_index(accounts_path)
     new_jes, pending_codes = _rows_to_jes(rows, account_index)
 
-    existing_jes = {} if replace else _parse_existing_jes(target_dir)
+    if replace:
+        existing_jes = {}
+    elif existing_jes is None:
+        existing_jes = _parse_existing_jes(target_dir)
     existing_ids = set(existing_jes.keys())
 
     merged: dict[str, JournalEntry] = dict(existing_jes)

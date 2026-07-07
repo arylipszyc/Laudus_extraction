@@ -77,19 +77,50 @@ def _existing_dedup_keys(path: Path) -> set[tuple]:
     return keys
 
 
+def _key_of(discrepancy: dict) -> tuple:
+    cart = discrepancy.get("cartola") or {}
+    laud = discrepancy.get("laudus") or {}
+    return _dedup_key(discrepancy.get("batch_id"), cart.get("line_no"),
+                      laud.get("journal_entry_id"), discrepancy.get("state"))
+
+
 def append_discrepancy(discrepancy: dict, jsonl_path: str | Path) -> bool:
     """Appendea una discrepancia si su clave de dedup no existe. Devuelve True si escribió."""
     path = Path(jsonl_path)
-    cart = discrepancy.get("cartola") or {}
-    laud = discrepancy.get("laudus") or {}
-    key = _dedup_key(discrepancy.get("batch_id"), cart.get("line_no"),
-                     laud.get("journal_entry_id"), discrepancy.get("state"))
-    if key in _existing_dedup_keys(path):
+    if _key_of(discrepancy) in _existing_dedup_keys(path):
         return False
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(discrepancy, ensure_ascii=False) + "\n")
     return True
+
+
+def append_discrepancies(discrepancies: list[dict], jsonl_path: str | Path) -> int:
+    """Appendea un batch con UNA lectura del JSONL (review 2026-07-06 D5).
+
+    Equivale al loop de `append_discrepancy` (dedup vs disco E intra-batch — el loop
+    re-leía el archivo incluyendo lo recién escrito) pero sin releer/re-parsear el
+    archivo completo por cada discrepancia. Asume el contrato de escritores del repo:
+    quien escribe discrepancias lo hace bajo `.import.lock` (hoy solo reconcile_cartola),
+    así el snapshot de claves no puede quedar stale a mitad del batch. Devuelve cuántas
+    escribió."""
+    if not discrepancies:
+        return 0
+    path = Path(jsonl_path)
+    seen = _existing_dedup_keys(path)
+    lines: list[str] = []
+    for d in discrepancies:
+        key = _key_of(d)
+        if key in seen:
+            continue
+        seen.add(key)
+        lines.append(json.dumps(d, ensure_ascii=False))
+    if lines:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as fh:
+            for line in lines:  # línea por línea: misma granularidad ante crash que el loop previo
+                fh.write(line + "\n")
+    return len(lines)
 
 
 def append_resolution(

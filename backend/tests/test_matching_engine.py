@@ -107,3 +107,90 @@ def test_load_laudus_entries_filtra_por_cuenta_y_periodo(tmp_path):
     assert out[0].je_id == "J1"
     assert out[0].amount == Decimal("-45000")
     assert out[0].category_account == "Expenses:EAG:Super"
+
+
+# ── Performance sin cambio de resultados (review 2026-07-06 D3/D4a) ──────────
+
+
+def test_load_laudus_entries_no_parsea_meses_fuera_del_periodo(tmp_path):
+    """D4a: los archivos `YYYY-MM.beancount` fuera del rango de meses del período NO se
+    parsean. Prueba: un archivo de mes lejano contiene una tx fechada DENTRO del período —
+    si se parseara, el filtro por fecha la dejaría pasar; con el filtro por filename, no
+    aparece. Un stem no conforme (`laudus.beancount`) se parsea igual (fallback)."""
+    d = tmp_path / "laudus"
+    d.mkdir()
+    tx = ('2026-04-15 * "EN PERIODO"\n'
+          '  Assets:EAG:Bancos:Test  -45000 CLP\n'
+          '  Expenses:EAG:Varios      45000 CLP\n')
+    (d / "2026-04.beancount").write_text(tx, encoding="utf-8")
+    # Mes lejano con una tx EN el período (solo visible si el archivo se parsea):
+    (d / "2020-01.beancount").write_text(tx.replace("EN PERIODO", "COLADA"), encoding="utf-8")
+    # Stem no conforme → se parsea (conservador):
+    (d / "laudus.beancount").write_text(tx.replace("EN PERIODO", "NO-CONFORME"), encoding="utf-8")
+
+    out = load_laudus_entries(d, "Assets:EAG:Bancos:Test",
+                              date(2026, 3, 29), date(2026, 5, 3))
+    descs = sorted(e.description for e in out)
+    assert descs == ["EN PERIODO", "NO-CONFORME"]  # sin "COLADA": 2020-01 no se parseó
+
+
+def test_load_laudus_entries_padding_cruza_anio(tmp_path):
+    """D4a: padding que cruza de enero al diciembre del año ANTERIOR — la comparación
+    lexicográfica de stems ISO también ordena bien entre años."""
+    d = tmp_path / "laudus"
+    d.mkdir()
+    tx = ('2025-12-30 * "FIN DE ANIO"\n'
+          '  Assets:EAG:Bancos:Test  -1000 CLP\n'
+          '  Expenses:EAG:Varios      1000 CLP\n')
+    (d / "2025-12.beancount").write_text(tx, encoding="utf-8")
+    (d / "2025-06.beancount").write_text(tx.replace("2025-12-30", "2025-06-15"), encoding="utf-8")
+    out = load_laudus_entries(d, "Assets:EAG:Bancos:Test",
+                              date(2025, 12, 29), date(2026, 2, 3))
+    assert [e.description for e in out] == ["FIN DE ANIO"]  # 2025-06 filtrado, 2025-12 incluido
+
+
+def test_load_laudus_entries_padding_cruza_mes(tmp_path):
+    """D4a: el padding ±3d que cruza al mes anterior incluye ese archivo."""
+    d = tmp_path / "laudus"
+    d.mkdir()
+    (d / "2026-03.beancount").write_text(
+        '2026-03-30 * "BORDE"\n'
+        '  Assets:EAG:Bancos:Test  -1000 CLP\n'
+        '  Expenses:EAG:Varios      1000 CLP\n', encoding="utf-8")
+    out = load_laudus_entries(d, "Assets:EAG:Bancos:Test",
+                              date(2026, 3, 29), date(2026, 5, 3))
+    assert [e.description for e in out] == ["BORDE"]
+
+
+def test_match_computa_similitud_a_lo_mas_una_vez_por_par(monkeypatch):
+    """D3: SequenceMatcher corre ≤1 vez por par (antes: 2-3 veces vía
+    _acceptable/_score/_classify), y con candidatos de monto exacto ni se computa
+    la similitud de los que no lo son."""
+    import difflib as _difflib
+
+    from pipeline.importers import matching_engine as mod
+
+    calls: list[tuple] = []
+    real = _difflib.SequenceMatcher
+
+    class Counting(real):
+        def __init__(self, isjunk, a, b, *args, **kwargs):
+            calls.append((a, b))
+            super().__init__(isjunk, a, b, *args, **kwargs)
+
+    monkeypatch.setattr(mod.difflib, "SequenceMatcher", Counting)
+
+    lines = [_cl(line_no=1, desc="JUMBO COMPRA"), _cl(line_no=2, desc="LIDER COMPRA", amount="-9999")]
+    entries = [_le(je="1", desc="JUMBO COMPRA"), _le(je="2", desc="OTRA COSA"),
+               _le(je="3", desc="LIDER", amount="-9999")]
+    r = match(lines, entries, period_start=P2026)
+
+    # Exactamente 3: línea 1 rankea sus 2 amount-matches (e1,e2); línea 2 clasifica su
+    # único candidato (e3). Los amount-no-match jamás pasan por SequenceMatcher.
+    assert len(calls) == 3, f"{len(calls)} corridas de SequenceMatcher (esperadas 3)"
+    assert len(calls) == len(set(calls)), "similitud recomputada para el mismo par"
+    # Los resultados siguen siendo los de siempre, incluidos los GANADORES por línea:
+    assert _states(r) == ["perfect", "description-mismatch", "missing-in-cartola"]
+    assert r[0].laudus_entry.je_id == "1"   # JUMBO ganó sobre OTRA COSA (sim)
+    assert r[1].laudus_entry.je_id == "3"   # único amount-match de la línea 2
+    assert r[2].laudus_entry.je_id == "2"   # el sobrante

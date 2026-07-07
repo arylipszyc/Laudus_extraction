@@ -377,7 +377,7 @@ def reconcile_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict:
     from backend.app.integrations.cartola_schema import CartolaCanonicalV1
     from pipeline.importers.cartola_pdf_importer import _LIABILITY_ROOT
     from pipeline.importers.category_predictor import SUSPENSE_ACCOUNT
-    from pipeline.importers.discrepancy_writer import append_discrepancy, append_run, build_run
+    from pipeline.importers.discrepancy_writer import append_discrepancies, append_run, build_run
     from pipeline.importers.laudus_run import acquire_lock, git_commit_push
     from pipeline.importers.matching_engine import load_laudus_entries
 
@@ -439,10 +439,9 @@ def reconcile_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict:
 
         discrepancies = [d for d in discrepancies if _in_core(d)]
 
-        new = 0
-        for d in discrepancies:
-            if append_discrepancy(d, disc_path):
-                new += 1
+        # D5 (review 2026-07-06): batch con UNA lectura del JSONL — el loop de
+        # append_discrepancy releía el archivo completo por cada discrepancia.
+        new = append_discrepancies(discrepancies, disc_path)
         result["differences"] = len(discrepancies)
         result["new"] = new
         result["blocking"] = len([d for d in discrepancies if d.get("state") in _BLOCKING])
