@@ -57,7 +57,8 @@
 
 ## 5. Hallazgos de infra/config
 
-- **Build filter del dashboard de Render está mal**: observa solo `backend/`, pero la imagen también copia `pipeline/` y `bootstrap/` (`backend/Dockerfile:19-22`) → cambios ahí **no deployan** (trampa silenciosa activa hoy).
+- ~~**Build filter del dashboard de Render está mal**~~ **CORREGIDO 2026-07-06 (verificado por API)**: el filtro real usa `ignoredPaths` (`ledger/**, _bmad/**, _bmad-output/**, samples/**, frontend/**`), NO "solo backend/" — cambios en `pipeline/` y `bootstrap/` SÍ deployan. El hallazgo original venía de docs viejas; falso.
+- **VERIFICADO por API 2026-07-06: el backend está en plan `free`** (no Starter como se presumía, y Ary creía tener Standard). Free = 512MB/0.1 CPU **+ spin-down tras ~15 min sin tráfico** → cada primer uso del día paga ~1 min de cold start (clone + parse) y el OOM es aún más probable. Esto explica buena parte de "se cae / es lento". El cron está en `starter` (pago); el frontend es static (free, OK).
 - Clone completo del monorepo (sin `--depth 1`) en cada arranque + primer request paga el parse frío → deploys lentos y primer uso post-restart pegajoso (`backend/entrypoint.sh:16`).
 - Config drift: plan, cron, build filter y varios env vars viven solo en el dashboard, no en `render.yaml`.
 - Puerto 8000 hardcodeado en vez de `$PORT` (frágil).
