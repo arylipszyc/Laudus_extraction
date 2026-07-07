@@ -132,8 +132,11 @@ def _refresh_ledger_clone() -> None:
     if not os.path.isdir(os.path.join(repo_root, ".git")):
         return
     try:
-        subprocess.run(["git", "-C", repo_root, "fetch", "origin", "main"], check=True, capture_output=True)
-        subprocess.run(["git", "-C", repo_root, "reset", "--hard", "origin/main"], check=True, capture_output=True)
+        # timeout: el fetch va por red — sin tope, un stall de SSH colgaría el thread de sync.
+        subprocess.run(["git", "-C", repo_root, "fetch", "origin", "main"],
+                       check=True, capture_output=True, timeout=60)
+        subprocess.run(["git", "-C", repo_root, "reset", "--hard", "origin/main"],
+                       check=True, capture_output=True, timeout=60)
     except Exception as exc:  # noqa: BLE001 — refresh best-effort; el push de git_commit_push falla ruidoso si quedó atrás
         logger.warning("No pude refrescar el clon del ledger antes de importar: %s", exc)
 

@@ -1,0 +1,113 @@
+"""Tests de `get_info_API` — fix review 2026-07-06 (B2): descarga parcial NUNCA es éxito.
+
+Un fallo a mitad de paginación devolvía la acumulación parcial como si fuera el dataset
+completo; en modo backfill (`write_jes(..., replace=True)`) eso regeneraba los month files
+solo con esas filas y BORRABA en silencio el resto del mes.
+"""
+import pytest
+
+from pipeline.services import laudus_service
+
+
+class _FakeResponse:
+    def __init__(self, payload, status_code=200):
+        self._payload = payload
+        self.status_code = status_code
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise laudus_service.requests.HTTPError(f"HTTP {self.status_code}")
+
+    def json(self):
+        return self._payload
+
+
+@pytest.fixture(autouse=True)
+def _fake_token(monkeypatch):
+    """Evita el login real: token en caché."""
+    monkeypatch.setattr(laudus_service, "_token", "fake-token")
+    yield
+    monkeypatch.setattr(laudus_service, "_token", None)
+
+
+def test_fallo_a_mitad_de_paginacion_lanza_no_devuelve_parcial(monkeypatch):
+    """Página 1 OK, página 2 explota → raise (la corrida se marca failed), no parcial."""
+    calls = {"n": 0}
+
+    def fake_get(url, headers=None, params=None, timeout=None):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return _FakeResponse({"data": [{"id": 1}], "page": 1, "totalPages": 3})
+        raise laudus_service.requests.ConnectionError("timeout en página 2")
+
+    monkeypatch.setattr(laudus_service.requests, "get", fake_get)
+
+    with pytest.raises(RuntimeError, match="parcial"):
+        laudus_service.get_info_API("https://api.test/jes", retry=False)
+
+
+def test_fallo_a_mitad_de_paginacion_con_retry_reintenta_completo(monkeypatch):
+    """Con retry=True el primer parcial dispara el re-request completo; si el segundo
+    intento también queda parcial → raise igual (nunca se propaga un dataset a medias)."""
+    calls = {"n": 0}
+
+    def fake_get(url, headers=None, params=None, timeout=None):
+        calls["n"] += 1
+        # Cada intento: página 1 OK, página 2 rota.
+        if calls["n"] % 2 == 1:
+            return _FakeResponse({"data": [{"id": 1}], "page": 1, "totalPages": 2})
+        raise laudus_service.requests.ConnectionError("boom")
+
+    monkeypatch.setattr(laudus_service.requests, "get", fake_get)
+
+    with pytest.raises(RuntimeError, match="parcial"):
+        laudus_service.get_info_API("https://api.test/jes")
+    assert calls["n"] >= 3  # hubo reintento completo antes de rendirse
+
+
+def test_fallo_sin_registros_acumulados_sigue_devolviendo_none(monkeypatch):
+    """Contrato actual: si NO hay nada acumulado (falla la página 1), devuelve None."""
+    def fake_get(url, headers=None, params=None, timeout=None):
+        raise laudus_service.requests.ConnectionError("no responde")
+
+    monkeypatch.setattr(laudus_service.requests, "get", fake_get)
+    assert laudus_service.get_info_API("https://api.test/jes", retry=False) is None
+
+
+def test_formato_inesperado_en_pagina_2_no_devuelve_parcial(monkeypatch):
+    """Patch del review Fase 1: la rama de formato-inesperado en página >1 devolvía el
+    dict crudo DESCARTANDO lo acumulado — misma clase de bug parcial-como-éxito."""
+    calls = {"n": 0}
+
+    def fake_get(url, headers=None, params=None, timeout=None):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return _FakeResponse({"data": [{"id": 1}], "page": 1, "totalPages": 2})
+        return _FakeResponse({"raro": True})
+
+    monkeypatch.setattr(laudus_service.requests, "get", fake_get)
+    with pytest.raises(RuntimeError, match="parcial"):
+        laudus_service.get_info_API("https://api.test/jes", retry=False)
+
+
+def test_formato_inesperado_en_primera_pagina_retorna_tal_cual(monkeypatch):
+    """Contrato preservado: formato no reconocido SIN nada acumulado se retorna tal cual."""
+    def fake_get(url, headers=None, params=None, timeout=None):
+        return _FakeResponse({"raro": True})
+
+    monkeypatch.setattr(laudus_service.requests, "get", fake_get)
+    assert laudus_service.get_info_API("https://api.test/jes", retry=False) == {"raro": True}
+
+
+def test_paginacion_completa_acumula_todo(monkeypatch):
+    """Happy path intacto: 2 páginas OK → lista completa."""
+    calls = {"n": 0}
+
+    def fake_get(url, headers=None, params=None, timeout=None):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return _FakeResponse({"data": [{"id": 1}], "page": 1, "totalPages": 2})
+        return _FakeResponse({"data": [{"id": 2}], "page": 2, "totalPages": 2})
+
+    monkeypatch.setattr(laudus_service.requests, "get", fake_get)
+    assert laudus_service.get_info_API("https://api.test/jes", retry=False) == [{"id": 1}, {"id": 2}]

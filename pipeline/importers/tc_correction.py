@@ -680,10 +680,17 @@ def correct_tc_cartola(batch_id: str, importer, ledger_root, *, ts: str) -> dict
     result["opening_emitted"] = emit_opening and model.balances.opening != 0
 
     with acquire_lock(lock_path):
+        # Re-import: mismo slug → sobrescribe. Snapshot del contenido previo para
+        # restaurarlo si bean-check falla — un unlink acá destruía la cartola BUENA
+        # ya importada (mismo patrón que commit_reconciliation).
+        original = out_file.read_text(encoding="utf-8") if out_file.exists() else None
         out_file.write_text(render_entries(entries), encoding="utf-8")
         ok, detail = bean_check(main_path)
         if not ok:
-            out_file.unlink(missing_ok=True)
+            if original is None:
+                out_file.unlink(missing_ok=True)
+            else:
+                out_file.write_text(original, encoding="utf-8")
             result["reason"] = f"bean-check failed: {detail}"
             return result
         staging.unlink(missing_ok=True)

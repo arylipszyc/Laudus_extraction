@@ -295,3 +295,115 @@ def test_bean_check_ok_and_fail(tmp_path):
     ok2, detail = laudus_run.bean_check(bad)
     assert ok2 is False
     assert detail
+
+
+def test_bean_check_ignores_stale_picklecache(tmp_path):
+    """Fix review 2026-07-06 (B1): un archivo nuevo que entra por glob-include no invalida
+    el picklecache de beancount → bean_check validaba el ledger VIEJO y aprobaba cualquier
+    cosa (misma clase de bug que el fixture de d71f0fe, pero en el gate de producción)."""
+    from beancount import loader as bean_loader
+
+    import pickle
+
+    root = _ledger_root(tmp_path)
+    main = root / "main.beancount"
+    # Prime del cache con el ledger válido. beancount solo escribe el picklecache
+    # cuando el load tarda >1s (PICKLE_CACHE_THRESHOLD), así que lo fabricamos con
+    # el MISMO contenido que escribiría la lib: el triple (entries, errors, options).
+    result = bean_loader.load_file(str(main))
+    assert "input_hash" in result[2], "precondición: el options_map debe traer input_hash"
+    cache = root / ".main.beancount.picklecache"
+    cache.write_bytes(pickle.dumps(result))
+    # Sanity: sin cambios en los includes CONOCIDOS, el cache se consideraría fresco.
+    assert bean_loader.needs_refresh(result[2]) is False
+
+    # Archivo NUEVO y ROTO que entra por el glob `imports/laudus/*.beancount` sin
+    # tocar el mtime de main.beancount → invisible para el cache.
+    (root / "imports" / "laudus" / "zz-broken.beancount").write_text(
+        '2024-05-01 * "desbalanceada"\n  Assets:EAG:Bancos:BancoBci-111005  100 CLP\n',
+        encoding="utf-8",
+    )
+
+    # Control negativo: un load_file crudo CONSUME el cache stale y devuelve 0 errores
+    # (no ve el archivo roto) — prueba que el escenario reproduce el bug de verdad.
+    _e, cached_errors, _o = bean_loader.load_file(str(main))
+    assert cached_errors == [], "precondición: sin el fix, el cache stale oculta el archivo roto"
+    assert cache.exists(), "precondición: el cache stale sigue ahí para bean_check"
+
+    ok, detail = laudus_run.bean_check(main)
+    assert ok is False, "bean_check debe ver el archivo nuevo, no el cache viejo"
+    assert detail
+
+
+def test_git_commit_push_manda_timeout_en_todos_los_subprocess(tmp_path, monkeypatch):
+    """Fix review 2026-07-06 (C1/D1): cada subprocess de git lleva timeout — sin él, un
+    stall de red en fetch/push colgaba el request para siempre reteniendo .import.lock.
+    El remote se siembra con un commit para que fetch SUCEDA y la rama del rebase
+    (la más riesgosa) también se ejecute y quede cubierta por el assert."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_git_repo(repo)
+    remote = tmp_path / "remote.git"
+    subprocess.run(["git", "init", "--bare", "-b", "main", str(remote)], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(repo), "remote", "add", "origin", str(remote)], check=True)
+    (repo / "seed.txt").write_text("seed\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo), "add", "-A"], check=True)
+    subprocess.run(["git", "-C", str(repo), "commit", "-m", "seed"], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(repo), "push", "origin", "main"], check=True, capture_output=True)
+    target = repo / "ledger" / "imports" / "laudus"
+    target.mkdir(parents=True)
+    (target / "2024-03.beancount").write_text("; data\n", encoding="utf-8")
+    monkeypatch.setenv("IMPORTER_GIT_ENABLED", "true")
+
+    real_run = subprocess.run
+    seen: list[tuple[tuple, object]] = []
+
+    def recording_run(cmd, *args, **kwargs):
+        if cmd[0] == "git":
+            seen.append((tuple(cmd), kwargs.get("timeout")))
+        return real_run(cmd, *args, **kwargs)
+
+    monkeypatch.setattr(laudus_run.subprocess, "run", recording_run)
+    sha = laudus_run.git_commit_push(repo / "ledger", ["ledger/imports/laudus/"], "msg")
+
+    assert sha
+    assert any("rebase" in cmd for cmd, _ in seen), "el escenario debe ejercitar la rama del rebase"
+    sin_timeout = [cmd for cmd, t in seen if t != laudus_run.GIT_TIMEOUT]
+    assert not sin_timeout, f"subprocess git sin timeout: {sin_timeout}"
+
+
+def test_git_commit_push_timeout_en_rebase_aborta_antes_de_propagar(tmp_path, monkeypatch):
+    """Patch del review Fase 1: un rebase matado por timeout deja .git/rebase-merge y
+    TODO git posterior falla — git_commit_push debe correr `rebase --abort` antes de
+    propagar el TimeoutExpired."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_git_repo(repo)
+    remote = tmp_path / "remote.git"
+    subprocess.run(["git", "init", "--bare", "-b", "main", str(remote)], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(repo), "remote", "add", "origin", str(remote)], check=True)
+    (repo / "seed.txt").write_text("seed\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo), "add", "-A"], check=True)
+    subprocess.run(["git", "-C", str(repo), "commit", "-m", "seed"], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(repo), "push", "origin", "main"], check=True, capture_output=True)
+    target = repo / "ledger" / "imports" / "laudus"
+    target.mkdir(parents=True)
+    (target / "2024-03.beancount").write_text("; data\n", encoding="utf-8")
+    monkeypatch.setenv("IMPORTER_GIT_ENABLED", "true")
+
+    real_run = subprocess.run
+    aborts: list[tuple] = []
+
+    def faking_run(cmd, *args, **kwargs):
+        if cmd[0] == "git" and "rebase" in cmd:
+            if "--abort" in cmd:
+                aborts.append(tuple(cmd))
+                return real_run(cmd, *args, **kwargs)
+            raise subprocess.TimeoutExpired(cmd, laudus_run.GIT_TIMEOUT)
+        return real_run(cmd, *args, **kwargs)
+
+    monkeypatch.setattr(laudus_run.subprocess, "run", faking_run)
+    with pytest.raises(subprocess.TimeoutExpired):
+        laudus_run.git_commit_push(repo / "ledger", ["ledger/imports/laudus/"], "msg")
+
+    assert aborts, "TimeoutExpired en el rebase debe disparar `git rebase --abort`"

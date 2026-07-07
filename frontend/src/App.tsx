@@ -11,12 +11,26 @@ import { ReconciliationPage } from '@/pages/ReconciliationPage'
 import { TcReconciliationPage } from '@/pages/TcReconciliationPage'
 import { CategorizacionPage } from '@/pages/CategorizacionPage'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { useHasRole } from '@/hooks/useHasRole'
+import { ServerUnavailableError } from '@/services/auth'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { data: user, isLoading } = useAuth()
+  const { data: user, isLoading, error, refetch } = useAuth()
   if (isLoading) return <Skeleton className="h-screen w-screen" />
+  // Backend arrancando (cold start) → esperar, NO botar al login (fix 6a Fase 1).
+  if (error instanceof ServerUnavailableError) {
+    return (
+      <div className="flex h-screen w-screen flex-col items-center justify-center gap-4 p-6 text-center">
+        <h1 className="text-xl font-semibold">El servidor está arrancando…</h1>
+        <p className="text-sm text-muted-foreground">
+          Esto puede tardar unos segundos. Reintentando automáticamente.
+        </p>
+        <Button onClick={() => refetch()}>Reintentar</Button>
+      </div>
+    )
+  }
   if (!user) return <Navigate to="/login" replace />
   return <>{children}</>
 }

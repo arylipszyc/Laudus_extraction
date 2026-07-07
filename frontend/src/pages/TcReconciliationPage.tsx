@@ -4,12 +4,7 @@ import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getTcReconciliation, getTcCartolas, type TcReconciliationRow } from '@/services/tcReconciliation'
 import { listBankAccounts, type BankAccount } from '@/services/bankAccounts'
-
-const fmt = (n: number | null | undefined, c?: string | null) => {
-  if (n == null) return '—'
-  const cur = c && /^[A-Z]{3}$/.test(c) ? c : 'CLP'
-  return new Intl.NumberFormat('es-CL', { style: 'currency', currency: cur }).format(n)
-}
+import { fmt } from '@/lib/format'
 
 const bankLabel = (b: BankAccount) => b.account_name || b.bank_name || b.account_number || b.id
 

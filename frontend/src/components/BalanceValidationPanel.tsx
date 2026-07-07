@@ -7,11 +7,9 @@ import {
   type BalanceDiscrepancyError,
   type ValidateBalanceResult,
 } from '@/services/cartolas'
+import { fmt } from '@/lib/format'
 
 const MIN_JUSTIFICATION = 20
-
-const fmt = (n: number, currency: string) =>
-  new Intl.NumberFormat('es-CL', { style: 'currency', currency }).format(n)
 
 /**
  * Story 9.9 — panel de validación de balance.

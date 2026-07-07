@@ -248,11 +248,18 @@ def promote(
         if override:
             entries = convert_balance_to_pad(
                 entries, override["justification"], override["user"], override["at"])
+        # Re-import: mismo slug → sobrescribe. Snapshot del contenido previo para
+        # restaurarlo si bean-check falla — un unlink acá destruía la cartola BUENA
+        # ya importada (mismo patrón que commit_reconciliation).
+        original = out_file.read_text(encoding="utf-8") if out_file.exists() else None
         out_file.write_text(render_entries(entries), encoding="utf-8")
 
         ok, detail = bean_check(main_path)
         if not ok:
-            out_file.unlink(missing_ok=True)
+            if original is None:
+                out_file.unlink(missing_ok=True)
+            else:
+                out_file.write_text(original, encoding="utf-8")
             result["error_msg"] = f"bean-check failed: {detail}"
             logger.error(result["error_msg"])
             return result

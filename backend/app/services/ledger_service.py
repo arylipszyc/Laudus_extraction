@@ -129,17 +129,39 @@ class LedgerService:
             options=self._options,
         )
 
-    async def watch_and_reload(self) -> None:
+    async def watch_and_reload(self, debounce_ms: int = 2000) -> None:
         """Background task: reload when any `.beancount` file in the ledger dir changes.
 
         No-op if the ledger directory does not exist (pre-bootstrap). Wired into
         the FastAPI lifespan in `backend/main.py`.
+
+        El parse corre en un thread (`asyncio.to_thread`) — un load sincrónico acá
+        congelaba el event loop entero (incluido /health) y Render reiniciaba el
+        servicio. `debounce` de awatch agrupa la ráfaga de un `git reset --hard`
+        (92 archivos) en una tanda; los cambios que lleguen mientras un load está
+        en curso quedan acumulados y salen como la tanda siguiente (una sola
+        recarga extra, no una por archivo).
         """
+        import asyncio
+
         watch_dir = os.path.dirname(self._main_path) or "."
         if not os.path.isdir(watch_dir):
             logger.warning("LedgerService: watch dir %s missing — watcher disabled", watch_dir)
             return
-        async for changes in awatch(watch_dir, recursive=True):
-            if any(str(path).endswith(".beancount") for _, path in changes):
-                logger.info("LedgerService: ledger change detected — reloading")
-                self.load()
+        while True:
+            try:
+                async for changes in awatch(watch_dir, recursive=True, debounce=debounce_ms):
+                    if not any(str(path).endswith(".beancount") for _, path in changes):
+                        continue
+                    logger.info("LedgerService: ledger change detected — reloading")
+                    try:
+                        await asyncio.to_thread(self.load)
+                    except Exception:  # noqa: BLE001 — el watcher nunca debe morir por un load roto
+                        logger.exception("LedgerService: reload failed — keeping previous ledger")
+            except asyncio.CancelledError:
+                raise
+            except Exception:  # noqa: BLE001 — si awatch mismo explota (inotify/OSError), reintentar
+                logger.exception("LedgerService: watcher crashed — reiniciando en 5s")
+                await asyncio.sleep(5)
+            else:
+                return  # awatch terminó (solo pasa en tests con fakes finitos)

@@ -226,17 +226,30 @@ def test_client_requires_api_key(monkeypatch):
 
 
 def test_client_accepts_explicit_key():
+    from unittest.mock import ANY
+
     with patch("google.genai.Client") as mock_genai_client:
         client = GeminiClient(api_key="test-key", model="gemini-2.5-flash")
         assert client.model == "gemini-2.5-flash"
-        mock_genai_client.assert_called_once_with(api_key="test-key")
+        mock_genai_client.assert_called_once_with(api_key="test-key", http_options=ANY)
 
 
 def test_client_reads_env_key(monkeypatch):
+    from unittest.mock import ANY
+
     monkeypatch.setenv("GEMINI_API_KEY", "env-key")
     with patch("google.genai.Client") as mock_genai_client:
         GeminiClient()
-        mock_genai_client.assert_called_once_with(api_key="env-key")
+        mock_genai_client.assert_called_once_with(api_key="env-key", http_options=ANY)
+
+
+def test_client_sets_http_timeout():
+    """Fix review 2026-07-06 (D2): sin timeout el default del SDK es ilimitado — un
+    cuelgue de red dejaba el job de extracción en "processing" para siempre."""
+    with patch("google.genai.Client") as mock_genai_client:
+        GeminiClient(api_key="test-key")
+        http_options = mock_genai_client.call_args.kwargs["http_options"]
+        assert http_options.timeout == GeminiClient.HTTP_TIMEOUT_MS
 
 
 # ── extract_pdf behaviour with mocked SDK ─────────────────────────────────

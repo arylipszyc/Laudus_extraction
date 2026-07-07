@@ -12,13 +12,14 @@ import {
 } from '@/hooks/useCartolaUpload'
 import type { CartolaError, CartolaCanonical, ValidateBalanceResult, TcCuadre } from '@/services/cartolas'
 import { BalanceValidationPanel } from '@/components/BalanceValidationPanel'
+import { fmt } from '@/lib/format'
 
 const MAX_PDF_BYTES = 20 * 1024 * 1024
 
 function formatAmount(value: string, currency: string): string {
   const n = Number.parseFloat(value)
   if (Number.isNaN(n)) return value
-  return new Intl.NumberFormat('es-CL', { style: 'currency', currency }).format(n)
+  return fmt(n, currency)
 }
 
 export function CartolaUploadPage() {

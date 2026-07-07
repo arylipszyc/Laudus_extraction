@@ -76,13 +76,29 @@ def acquire_lock(lock_path, timeout: int = 60, max_age: int = 300, poll: int = 5
         lock_path.unlink(missing_ok=True)
 
 
+# Tope para cada subprocess de git. fetch/rebase/push van por red: sin timeout, un
+# stall de SSH deja el request colgado para siempre reteniendo `.import.lock`.
+GIT_TIMEOUT = 60
+
 # ── bean-check (AC7) ────────────────────────────────────────────────────────
 
 
 def bean_check(main_path) -> tuple[bool, str]:
     """Validate the ledger. Returns (ok, detail). Programmatic equivalent of the
     `bean-check` CLI — same loader/validation engine."""
-    _entries, errors, _options = loader.load_file(str(main_path))
+    # beancount cachea por mtime del top-file + includes CONOCIDOS: un archivo recién
+    # escrito que entra por glob (`include imports/cartolas/*.beancount`) es INVISIBLE
+    # para el cache → bean_check validaría el ledger viejo y aprobaría cualquier cosa.
+    # Mismo workaround que LedgerService.load().
+    main_path = str(main_path)
+    d, base = os.path.split(main_path)
+    try:
+        os.remove(os.path.join(d, "." + base + ".picklecache"))
+    except FileNotFoundError:
+        pass
+    except OSError as exc:  # ej. PermissionError si otro thread lo está escribiendo (Windows)
+        logger.warning("bean_check: no pude borrar el picklecache (%s) — sigo sin cache fresco", exc)
+    _entries, errors, _options = loader.load_file(main_path)
     if not errors:
         return True, ""
     detail = "; ".join(str(getattr(e, "message", e)) for e in errors[:10])
@@ -119,33 +135,41 @@ def git_commit_push(repo_root, paths: list[str], message: str) -> str | None:
         return None
     toplevel = subprocess.run(
         ["git", "-C", str(repo_root), "rev-parse", "--show-toplevel"],
-        check=True, capture_output=True, text=True,
+        check=True, capture_output=True, text=True, timeout=GIT_TIMEOUT,
     ).stdout.strip()
-    subprocess.run(["git", "-C", toplevel, "add", *paths], check=True)
+    subprocess.run(["git", "-C", toplevel, "add", *paths], check=True, timeout=GIT_TIMEOUT)
     # Nada staged → corrida idempotente (el writer es determinista; un re-fetch de la
     # ventana solapada regenera archivos bit-idénticos). No es un error: se omite el commit.
-    if subprocess.run(["git", "-C", toplevel, "diff", "--cached", "--quiet"]).returncode == 0:
+    if subprocess.run(["git", "-C", toplevel, "diff", "--cached", "--quiet"],
+                      timeout=GIT_TIMEOUT).returncode == 0:
         logger.info("git: nada que commitear (corrida idempotente) — se omite commit/push")
         return None
-    subprocess.run(["git", "-C", toplevel, "commit", "-m", message], check=True)
+    subprocess.run(["git", "-C", toplevel, "commit", "-m", message], check=True, timeout=GIT_TIMEOUT)
     # Sincroniza con el remoto ANTES de pushear: el ledger y el código viven en el MISMO repo/branch
     # (`main`), así que cualquier push de código mueve `origin` y dejaría este push rechazado
     # (non-fast-forward → "failed to fetch" en el import). Un fetch + rebase trae esos commits (tocan
     # archivos distintos → sin conflicto) y replaya el commit del ledger encima. Si el remoto no tiene
     # `main` todavía (primer push) el fetch falla → se omite el rebase y el push lo crea.
-    fetched = subprocess.run(["git", "-C", toplevel, "fetch", "origin", "main"]).returncode == 0
+    fetched = subprocess.run(["git", "-C", toplevel, "fetch", "origin", "main"],
+                             timeout=GIT_TIMEOUT).returncode == 0
     if fetched:
-        rebase = subprocess.run(["git", "-C", toplevel, "rebase", "origin/main"])
+        try:
+            rebase = subprocess.run(["git", "-C", toplevel, "rebase", "origin/main"], timeout=GIT_TIMEOUT)
+        except subprocess.TimeoutExpired:
+            # Un rebase matado a mitad deja .git/rebase-merge → todo git posterior fallaría
+            # para siempre. Abortar el rebase ANTES de propagar el timeout.
+            subprocess.run(["git", "-C", toplevel, "rebase", "--abort"], timeout=GIT_TIMEOUT)
+            raise
         if rebase.returncode != 0:
-            subprocess.run(["git", "-C", toplevel, "rebase", "--abort"])
+            subprocess.run(["git", "-C", toplevel, "rebase", "--abort"], timeout=GIT_TIMEOUT)
             raise RuntimeError(
                 "git rebase sobre origin/main falló (conflicto inesperado — ledger y código deberían "
                 "tocar archivos distintos); no se pushea para no corromper el remoto")
     sha = subprocess.run(   # tras el rebase el HEAD puede tener otro sha → capturarlo acá
         ["git", "-C", toplevel, "rev-parse", "HEAD"],
-        check=True, capture_output=True, text=True,
+        check=True, capture_output=True, text=True, timeout=GIT_TIMEOUT,
     ).stdout.strip()
-    subprocess.run(["git", "-C", toplevel, "push", "origin", "main"], check=True)
+    subprocess.run(["git", "-C", toplevel, "push", "origin", "main"], check=True, timeout=GIT_TIMEOUT)
     return sha
 
 

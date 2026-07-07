@@ -257,3 +257,68 @@ def test_promote_writes_file_and_removes_staging(tmp_path):
     assert not staging.exists()                       # staging removed
     out_files = list((root / "imports" / "cartolas").glob("BancoBci-1027-2026-03.beancount"))
     assert len(out_files) == 1
+
+
+def test_promote_re_import_bean_check_rojo_restaura_archivo_previo(tmp_path):
+    """Fix review 2026-07-06 (B3): re-import con mismo slug sobrescribe el archivo; si
+    bean-check falla (ej. un sibling roto), el contenido BUENO previo debe restaurarse —
+    antes se hacía unlink y desaparecía la cartola ya importada."""
+    root = tmp_path
+    (root / "imports" / "cartolas").mkdir(parents=True, exist_ok=True)
+    _accounts(root)
+    (root / "main.beancount").write_text(
+        'option "operating_currency" "CLP"\n1900-01-01 commodity CLP\n'
+        'include "accounts.beancount"\ninclude "imports/cartolas/*.beancount"\n',
+        encoding="utf-8",
+    )
+    (root / "imports" / "cartolas" / "_init.beancount").write_text(";; init\n", encoding="utf-8")
+
+    imp = CartolaPdfImporter(BankAccountResolver(root / "accounts.beancount"), NoopCategoryPredictor())
+    _write_cartola(root, _cartola(TC_ID, "tarjeta_credito",
+                                  [("ENEL", 852689), ("PAGO", -100000)], opening="0"), batch_id="b9")
+    r1 = promote("b9", imp, root)
+    assert r1["success"] is True
+    out_file = next((root / "imports" / "cartolas").glob("BancoBci-1027-2026-03.beancount"))
+    good_content = out_file.read_text(encoding="utf-8")
+
+    # Sibling ROTO → el próximo bean-check del ledger completo falla. El re-import trae
+    # una tx DISTINTA (FARMACIA) para que el assert de restore no sea vacuo: si el restore
+    # no corriera, el archivo quedaría con el contenido nuevo, no con el bueno.
+    (root / "imports" / "cartolas" / "zz-roto.beancount").write_text(
+        '2026-01-01 * "desbalanceada"\n  Assets:Nope  1 CLP\n', encoding="utf-8")
+    _write_cartola(root, _cartola(TC_ID, "tarjeta_credito",
+                                  [("FARMACIA", 999999), ("PAGO", -100000)], opening="0"),
+                   batch_id="b10")
+    r2 = promote("b10", imp, root)
+
+    assert r2["success"] is False
+    assert "bean-check failed" in r2["error_msg"]
+    assert out_file.exists(), "el archivo previo NO debe borrarse en un re-import fallido"
+    restored = out_file.read_text(encoding="utf-8")
+    assert restored == good_content
+    assert "FARMACIA" not in restored  # el contenido nuevo NO quedó
+
+
+def test_promote_import_nuevo_bean_check_rojo_hace_unlink(tmp_path):
+    """Contrapartida del restore: si el archivo NO existía antes (import nuevo fallido),
+    el rollback sigue siendo unlink (no debe quedar un archivo huérfano roto)."""
+    root = tmp_path
+    (root / "imports" / "cartolas").mkdir(parents=True, exist_ok=True)
+    _accounts(root)
+    (root / "main.beancount").write_text(
+        'option "operating_currency" "CLP"\n1900-01-01 commodity CLP\n'
+        'include "accounts.beancount"\ninclude "imports/cartolas/*.beancount"\n',
+        encoding="utf-8",
+    )
+    (root / "imports" / "cartolas" / "_init.beancount").write_text(";; init\n", encoding="utf-8")
+    # Sibling roto DESDE el principio → el primer promote ya falla bean-check.
+    (root / "imports" / "cartolas" / "zz-roto.beancount").write_text(
+        '2026-01-01 * "desbalanceada"\n  Assets:Nope  1 CLP\n', encoding="utf-8")
+
+    imp = CartolaPdfImporter(BankAccountResolver(root / "accounts.beancount"), NoopCategoryPredictor())
+    _write_cartola(root, _cartola(TC_ID, "tarjeta_credito",
+                                  [("ENEL", 852689)], opening="0"), batch_id="b11")
+    r = promote("b11", imp, root)
+
+    assert r["success"] is False
+    assert not list((root / "imports" / "cartolas").glob("BancoBci-1027-2026-03.beancount"))

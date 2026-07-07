@@ -133,3 +133,93 @@ def test_watch_and_reload_no_op_on_missing_dir(tmp_path):
     svc = LedgerService(str(tmp_path / "missing" / "main.beancount"))
     # Should complete near-instantly, not block on awatch.
     asyncio.run(asyncio.wait_for(svc.watch_and_reload(), timeout=5))
+
+
+def _fake_awatch(batches, seen_kwargs=None):
+    """awatch de mentira: emite las tandas dadas y termina (el real nunca termina).
+    Si se pasa `seen_kwargs`, captura los kwargs con que el watcher invoca a awatch."""
+    async def _gen(*_args, **kwargs):
+        if seen_kwargs is not None:
+            seen_kwargs.update(kwargs)
+        for batch in batches:
+            yield batch
+    return _gen
+
+
+def test_watch_and_reload_load_runs_off_loop(tmp_path, monkeypatch):
+    """Fix review 2026-07-06 (C1): el load corre vía asyncio.to_thread — un load
+    sincrónico acá congelaba el event loop (incluido /health) y Render reiniciaba.
+    Una tanda de N archivos = UNA sola recarga."""
+    import threading
+
+    from backend.app.services import ledger_service as mod
+
+    main_path = tmp_path / "main.beancount"
+    _write(main_path, VALID_LEDGER)
+    svc = LedgerService(str(main_path))
+
+    load_threads: list[int] = []
+    real_load = svc.load
+
+    def tracking_load():
+        load_threads.append(threading.get_ident())
+        real_load()
+
+    seen_kwargs: dict = {}
+    monkeypatch.setattr(svc, "load", tracking_load)
+    monkeypatch.setattr(mod, "awatch", _fake_awatch([
+        {(1, str(tmp_path / "imports" / "a.beancount")),
+         (1, str(tmp_path / "imports" / "b.beancount"))},
+    ], seen_kwargs))
+
+    loop_thread = threading.get_ident()
+    asyncio.run(asyncio.wait_for(svc.watch_and_reload(), timeout=10))
+
+    assert len(load_threads) == 1, "una tanda de cambios debe producir UNA recarga"
+    assert load_threads[0] != loop_thread, "load debe correr en thread, no sobre el event loop"
+    # Wire-up real hacia awatch: agrupación de ráfagas + recursividad (un typo acá shippearía verde).
+    assert seen_kwargs.get("debounce") == 2000
+    assert seen_kwargs.get("recursive") is True
+
+
+def test_watch_and_reload_survives_load_error(tmp_path, monkeypatch):
+    """Fix review 2026-07-06 (C1): un load que explota no mata el watcher — la
+    tanda siguiente vuelve a recargar."""
+    from backend.app.services import ledger_service as mod
+
+    main_path = tmp_path / "main.beancount"
+    _write(main_path, VALID_LEDGER)
+    svc = LedgerService(str(main_path))
+
+    calls: list[int] = []
+
+    def broken_load():
+        calls.append(1)
+        raise RuntimeError("parse roto")
+
+    monkeypatch.setattr(svc, "load", broken_load)
+    monkeypatch.setattr(mod, "awatch", _fake_awatch([
+        {(1, str(tmp_path / "a.beancount"))},
+        {(1, str(tmp_path / "b.beancount"))},
+    ]))
+
+    asyncio.run(asyncio.wait_for(svc.watch_and_reload(), timeout=10))
+    assert len(calls) == 2, "el watcher debe sobrevivir al load roto y procesar la tanda siguiente"
+
+
+def test_watch_and_reload_ignores_non_beancount_changes(tmp_path, monkeypatch):
+    """Cambios que no tocan `.beancount` (ej. .git durante un reset) no recargan."""
+    from backend.app.services import ledger_service as mod
+
+    main_path = tmp_path / "main.beancount"
+    _write(main_path, VALID_LEDGER)
+    svc = LedgerService(str(main_path))
+
+    calls: list[int] = []
+    monkeypatch.setattr(svc, "load", lambda: calls.append(1))
+    monkeypatch.setattr(mod, "awatch", _fake_awatch([
+        {(1, str(tmp_path / ".git" / "index"))},
+    ]))
+
+    asyncio.run(asyncio.wait_for(svc.watch_and_reload(), timeout=10))
+    assert calls == []

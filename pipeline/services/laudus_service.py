@@ -101,8 +101,12 @@ def get_info_API(url, params=None, retry=True):
 
             if isinstance(records, list):
                 all_records.extend(records)
+            elif all_records:
+                # Formato inesperado en una página >1: devolverlo descartaría lo acumulado
+                # (misma clase de bug parcial-como-éxito). Que lo maneje el except de abajo.
+                raise ValueError(f"Formato inesperado en página {pages_fetched + 1} de {url}")
             else:
-                return records  # Formato inesperado, retornar tal cual
+                return records  # Formato inesperado en la primera página, retornar tal cual
 
             pages_fetched += 1
             if next_page_params is None:
@@ -120,7 +124,16 @@ def get_info_API(url, params=None, retry=True):
                 logger.warning("Error en request a %s, reintentando: %s", url, e)
                 return get_info_API(url, params, retry=False)
             logger.error("Error al obtener datos de %s: %s", url, e)
-            return all_records if all_records else None
+            # Fallo a mitad de paginación: NUNCA devolver la acumulación parcial como
+            # éxito — un backfill con replace=True regeneraría los month files solo con
+            # estas filas y borraría en silencio el resto del mes. Mejor que la corrida
+            # entera falle (run_import la marca failed) y se reintente completa.
+            if all_records:
+                raise RuntimeError(
+                    f"Descarga parcial de {url}: fallo en la página {pages_fetched + 1} "
+                    f"con {len(all_records)} registros acumulados — se descarta el parcial"
+                ) from e
+            return None
 
     if pages_fetched > 1:
         logger.info(

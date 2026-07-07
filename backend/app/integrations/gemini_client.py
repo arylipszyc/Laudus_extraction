@@ -284,8 +284,13 @@ con transactions=[] y un warning LOW_CONFIDENCE explicando la razón.
 class GeminiClient:
     """Thin wrapper around `google.genai` for cartola PDF extraction."""
 
+    # Timeout HTTP por request (ms). Sin esto el default del SDK es ilimitado y un
+    # cuelgue de red deja el job de extracción en "processing" para siempre.
+    HTTP_TIMEOUT_MS = 120_000
+
     def __init__(self, api_key: str | None = None, model: str = DEFAULT_MODEL) -> None:
         from google import genai  # imported lazily so tests can mock it
+        from google.genai import types
 
         self._model = model
         key = api_key or os.getenv("GEMINI_API_KEY")
@@ -293,7 +298,10 @@ class GeminiClient:
             raise RuntimeError(
                 "GEMINI_API_KEY env var is required for GeminiClient"
             )
-        self._client = genai.Client(api_key=key)
+        self._client = genai.Client(
+            api_key=key,
+            http_options=types.HttpOptions(timeout=self.HTTP_TIMEOUT_MS),
+        )
 
     @property
     def model(self) -> str:

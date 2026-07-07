@@ -925,3 +925,34 @@ def test_correct_usd_revolving_bloquea_sin_mes_siguiente(tmp_path):
     assert res["status"] == "blocked"
     assert "importá primero el mes siguiente" in res["reason"]
     assert not list((root / "imports" / "cartolas").glob("*-tc.beancount"))  # no escribió nada
+
+
+def test_correct_re_import_bean_check_rojo_restaura_archivo_previo(tmp_path):
+    """Fix review 2026-07-06 (B3): re-import TC con mismo slug sobrescribe; si bean-check
+    falla (ej. sibling roto), el desglose BUENO previo debe restaurarse — antes se hacía
+    unlink y un mes entero de TC desaparecía del ledger hasta un git restore manual."""
+    root = _make_ledger(tmp_path)
+    m = _model([("2026-03-10", "JUMBO", 45000, "compra")], opening="500000",
+               start="2026-03-01", end="2026-03-31")
+    _stage(root, m, "b1")
+    r1 = correct_tc_cartola("b1", _FakeImporter(), root, ts=_TS)
+    assert r1["status"] == "corrected", r1["reason"]
+    out_file = next((root / "imports" / "cartolas").glob("*-tc.beancount"))
+    good_content = out_file.read_text(encoding="utf-8")
+
+    # Sibling ROTO → el bean-check del ledger completo falla en el re-import. El re-stage
+    # trae una tx DISTINTA (FARMACIA) para que el assert de restore no sea vacuo: si el
+    # restore no corriera, el archivo quedaría con el contenido nuevo, no con el bueno.
+    (root / "imports" / "cartolas" / "zz-roto.beancount").write_text(
+        '2026-01-01 * "desbalanceada"\n  Assets:Nope  1 CLP\n', encoding="utf-8")
+    m2 = _model([("2026-03-10", "FARMACIA", 45000, "compra")], opening="500000",
+                start="2026-03-01", end="2026-03-31")
+    _stage(root, m2, "b1")
+    r2 = correct_tc_cartola("b1", _FakeImporter(), root, ts=_TS)
+
+    assert r2["status"] == "blocked"
+    assert "bean-check failed" in r2["reason"]
+    assert out_file.exists(), "el archivo previo NO debe borrarse en un re-import fallido"
+    restored = out_file.read_text(encoding="utf-8")
+    assert restored == good_content
+    assert "FARMACIA" not in restored  # el contenido nuevo NO quedó
