@@ -5,6 +5,10 @@ services:
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: .
+    # Standard (2GB/1CPU): el ledger Beancount vive parseado en memoria (~100-250MB,
+    # ×2 durante reload) y el plan free (512MB + spin-down 15min) causaba OOM y cold
+    # starts de ~1min — decisión Ary 2026-07-06 (review estabilidad).
+    plan: standard
     healthCheckPath: /api/v1/health
     envVars:
       # Generated automatically by Render — never commit this value
