@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useHasRole } from '@/hooks/useHasRole'
 import { getPendingCategorization } from '@/services/categorizacion'
+import { errorAwareInterval } from '@/lib/pollInterval'
 
 /**
  * Story 9.8 AC10 — chip global de categorías pendientes (smart_importer flag `!`).
@@ -14,7 +15,7 @@ export function PendingCategorizationChip() {
   const { data } = useQuery({
     queryKey: ['categorization-pending'],
     queryFn: getPendingCategorization,
-    refetchInterval: 60 * 1000,
+    refetchInterval: errorAwareInterval(60 * 1000),
     enabled: canSee,
   })
 

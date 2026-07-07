@@ -1,4 +1,4 @@
-import { api } from './api'
+import { api, apiFetch } from './api'
 
 export interface PendingTx {
   tx_id: string
@@ -16,14 +16,14 @@ export interface PendingTx {
 
 /** GET /api/v1/categorization/pending — tx con category_status ∈ (suggested, pending) (Story 9.7 AC9). */
 export async function getPendingCategorization(): Promise<PendingTx[]> {
-  const res = await fetch(`${api.baseUrl}/api/v1/categorization/pending`, { credentials: 'include' })
+  const res = await apiFetch(`${api.baseUrl}/api/v1/categorization/pending`, { credentials: 'include' })
   if (!res.ok) throw new Error(`Error cargando pendientes (${res.status})`)
   return res.json()
 }
 
 /** PATCH /api/v1/transactions/{tx_id}/category — corrige/confirma (Story 9.7 AC7). */
 export async function confirmCategory(txId: string, categoryAccount: string): Promise<void> {
-  const res = await fetch(`${api.baseUrl}/api/v1/transactions/${txId}/category`, {
+  const res = await apiFetch(`${api.baseUrl}/api/v1/transactions/${txId}/category`, {
     method: 'PATCH',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -39,7 +39,7 @@ export async function confirmCategory(txId: string, categoryAccount: string): Pr
 export async function bulkCategorize(
   items: { tx_id: string; category_account: string }[],
 ): Promise<{ confirmed: number; git_sha: string | null }> {
-  const res = await fetch(`${api.baseUrl}/api/v1/transactions/bulk-categorize`, {
+  const res = await apiFetch(`${api.baseUrl}/api/v1/transactions/bulk-categorize`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },

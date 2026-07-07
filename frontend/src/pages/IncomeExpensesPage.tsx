@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useLedger } from '@/hooks/useLedger'
+import { ApiTimeoutError, ApiNetworkError } from '@/services/api'
 import { useChartFilters } from '@/hooks/useChartFilters'
 import { useFilters } from '@/contexts/FilterContext'
 import { getLedgerCategory, buildTimeline, filterByEntity } from '@/utils/ledgerAnalytics'
@@ -12,6 +13,9 @@ import type { LedgerEntryRecord } from '@/types'
 function formatAmount(amount: number): string {
   return amount.toLocaleString('es-CL')
 }
+
+// Referencia estable para los memos mientras `data` aún no llega.
+const EMPTY_RECORDS: LedgerEntryRecord[] = []
 
 function applyDrillFilter(
   records: LedgerEntryRecord[],
@@ -29,7 +33,7 @@ function applyDrillFilter(
 
 export function IncomeExpensesPage() {
   const { entity } = useFilters()
-  const { data, isLoading, isError } = useLedger()
+  const { data, isLoading, isError, error } = useLedger()
   const filters = useChartFilters()
 
   // Pie drill state — controlled here so parent can reset them
@@ -37,6 +41,51 @@ export function IncomeExpensesPage() {
   const [expDrillCat3, setExpDrillCat3] = useState<string | null>(null)
   const [incDrillCat2, setIncDrillCat2] = useState<string | null>(null)
   const [incDrillCat3, setIncDrillCat3] = useState<string | null>(null)
+
+  // ── Aggregation chain (memoizada — F7) ─────────────────────────────────────
+  // Pesada con el año completo: solo recomputa cuando cambian data/entidad/filtros/drill.
+  // Va antes de los early returns (rules of hooks); con data ausente opera sobre [].
+
+  const records = data?.data ?? EMPTY_RECORDS
+
+  // Apply entity filter client-side
+  const allRecords = useMemo(() => filterByEntity(records, entity), [records, entity])
+
+  // Period-filtered records (base for all charts and totals)
+  const periodFiltered = useMemo(
+    () => filters.applyFilters(allRecords),
+    [filters.applyFilters, allRecords],
+  )
+
+  const timelineData = useMemo(() => buildTimeline(allRecords), [allRecords])
+
+  // Pie charts see period-filtered records and compute Cat2/Cat3 data internally
+  // Drilldown tables are further filtered by pie drill state (per type)
+  const expenseRecords = useMemo(
+    () => applyDrillFilter(periodFiltered, expDrillCat2, expDrillCat3),
+    [periodFiltered, expDrillCat2, expDrillCat3],
+  )
+  const incomeRecords = useMemo(
+    () => applyDrillFilter(periodFiltered, incDrillCat2, incDrillCat3),
+    [periodFiltered, incDrillCat2, incDrillCat3],
+  )
+
+  // Totals (reflect both period filter and pie drill)
+  const totalIncome = useMemo(
+    () => incomeRecords
+      .filter(r => getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) === 'income')
+      .reduce((s, r) => s + (r.credit - r.debit), 0),
+    [incomeRecords],
+  )
+
+  const totalExpenses = useMemo(
+    () => expenseRecords
+      .filter(r => getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) === 'expenses')
+      .reduce((s, r) => s + (r.debit - r.credit), 0),
+    [expenseRecords],
+  )
+
+  const netResult = totalIncome - totalExpenses
 
   // ── Loading / error / empty ─────────────────────────────────────────────────
 
@@ -51,7 +100,9 @@ export function IncomeExpensesPage() {
   }
 
   if (isError) {
-    return <p className="text-destructive text-sm">Error al cargar datos.</p>
+    const detail =
+      error instanceof ApiTimeoutError || error instanceof ApiNetworkError ? ` ${error.message}` : ''
+    return <p className="text-destructive text-sm">Error al cargar datos.{detail}</p>
   }
 
   if (!data || data.data.length === 0) {
@@ -61,32 +112,6 @@ export function IncomeExpensesPage() {
       </div>
     )
   }
-
-  // Apply entity filter client-side
-  const allRecords = filterByEntity(data.data, entity)
-
-  // ── Period-filtered records (base for all charts and totals) ──────────────
-
-  const periodFiltered = filters.applyFilters(allRecords)
-
-  const timelineData = buildTimeline(allRecords)
-
-  // Pie charts see period-filtered records and compute Cat2/Cat3 data internally
-  // Drilldown tables are further filtered by pie drill state (per type)
-  const expenseRecords = applyDrillFilter(periodFiltered, expDrillCat2, expDrillCat3)
-  const incomeRecords  = applyDrillFilter(periodFiltered, incDrillCat2, incDrillCat3)
-
-  // ── Totals (reflect both period filter and pie drill) ───────────────────────
-
-  const totalIncome = incomeRecords
-    .filter(r => getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) === 'income')
-    .reduce((s, r) => s + (r.credit - r.debit), 0)
-
-  const totalExpenses = expenseRecords
-    .filter(r => getLedgerCategory(r.accountnumber, r.Categoria1, r.Categoria2) === 'expenses')
-    .reduce((s, r) => s + (r.debit - r.credit), 0)
-
-  const netResult = totalIncome - totalExpenses
 
   // ── Active filter chips ─────────────────────────────────────────────────────
 

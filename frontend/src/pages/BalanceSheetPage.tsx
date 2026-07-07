@@ -1,5 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import { useBalanceSheet } from '@/hooks/useBalanceSheet'
+import { ApiTimeoutError, ApiNetworkError } from '@/services/api'
 import type { BalanceSheetRecord } from '@/types'
 
 function getCategory(record: BalanceSheetRecord): 'assets' | 'liabilities' | 'equity' | 'other' {
@@ -79,7 +80,7 @@ function RecordTable({ records, title }: { records: BalanceSheetRecord[]; title:
 }
 
 export function BalanceSheetPage() {
-  const { data, isLoading, isError } = useBalanceSheet()
+  const { data, isLoading, isError, error } = useBalanceSheet()
 
   if (isLoading) {
     return (
@@ -92,7 +93,9 @@ export function BalanceSheetPage() {
   }
 
   if (isError) {
-    return <p className="text-destructive text-sm">Error al cargar datos.</p>
+    const detail =
+      error instanceof ApiTimeoutError || error instanceof ApiNetworkError ? ` ${error.message}` : ''
+    return <p className="text-destructive text-sm">Error al cargar datos.{detail}</p>
   }
 
   if (!data || data.data.length === 0) {

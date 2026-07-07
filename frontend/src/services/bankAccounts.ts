@@ -1,4 +1,4 @@
-import { api } from './api'
+import { api, apiFetch } from './api'
 
 // Mirrors backend `backend.app.api.v1.bank_accounts.schemas.BankAccount`.
 export interface BankAccount {
@@ -13,7 +13,7 @@ export interface BankAccount {
 
 /** GET /api/v1/bank-accounts/ — used by CartolaUploadPage dropdown. */
 export async function listBankAccounts(): Promise<BankAccount[]> {
-  const res = await fetch(`${api.baseUrl}/api/v1/bank-accounts/`, {
+  const res = await apiFetch(`${api.baseUrl}/api/v1/bank-accounts/`, {
     credentials: 'include',
   })
   if (!res.ok) throw new Error(`Failed to list bank accounts: HTTP ${res.status}`)

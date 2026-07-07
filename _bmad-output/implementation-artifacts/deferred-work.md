@@ -1,5 +1,10 @@
 # Deferred Work
 
+## Deferred from: code review de spec-fase3-frontend-fluido (2026-07-07)
+
+- **`auth.ts` sigue con fetch crudo — un backend que acepta TCP pero nunca responde deja el splash de auth colgado para siempre** ([frontend/src/services/auth.ts](../../frontend/src/services/auth.ts)) — el retry/pantalla-de-espera de Fase 1 solo se dispara cuando el fetch RECHAZA; un socket colgado no rechaza nunca. El fix es migrar `getMe` a `apiFetch` mapeando `ApiTimeoutError`→`ServerUnavailableError`, pero el spec del batch 4 lo puso bajo "Never" (no tocar el flujo auth) → requiere renegociación explícita en un batch propio. Hallazgo del Edge Hunter batch 4.
+- **Upload de un PDF grande por uplink lento puede superar los 120s de timeout** ([frontend/src/services/cartolas.ts](../../frontend/src/services/cartolas.ts)) — 20MB (el máximo) a <1.4 Mbps no llega. Si aparece en la práctica: escalar el timeout por `pdfFile.size`. Nota: si el server ya stageó el batch cuando el cliente abortó, queda huérfano (TTL 1h lo limpia).
+
 ## Deferred from: code review de spec-fase3-locks-robustez (2026-07-06)
 
 - **El validador de edits de Fava ESPERA el `.import.lock` pero no lo SOSTIENE** ([hallazgo del Edge Hunter batch 3]) — `fava_edit_validator` hace wait-for-lock antes de escribir, pero no adquiere: el `reset --hard` del sync (ya dentro del lock) igual puede pisar un edit de Fava en vuelo. Los writers del backend/pipeline sí sostienen el lock; el gap es solo Fava. Fix: que el validador adquiera `acquire_lock` alrededor de snapshot+write+bean-check.

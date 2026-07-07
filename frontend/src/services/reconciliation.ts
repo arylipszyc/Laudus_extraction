@@ -1,4 +1,4 @@
-import { api } from './api'
+import { api, apiFetch } from './api'
 
 export interface Discrepancy {
   discrepancy_id: string
@@ -65,25 +65,25 @@ export async function getDiscrepancies(params: {
   state?: string; year_month?: string; bank_account_id?: string; discrepancy_id?: string
 } = {}): Promise<DiscrepanciesResponse> {
   const q = new URLSearchParams(Object.entries(params).filter(([, v]) => v) as [string, string][])
-  const res = await fetch(`${base}/discrepancies?${q}`, { credentials: 'include' })
+  const res = await apiFetch(`${base}/discrepancies?${q}`, { credentials: 'include' })
   if (!res.ok) throw new Error(`Error cargando discrepancias (${res.status})`)
   return res.json()
 }
 
 export async function getReconciliationCount(): Promise<{ total: number; blocking: number }> {
-  const res = await fetch(`${base}/count`, { credentials: 'include' })
+  const res = await apiFetch(`${base}/count`, { credentials: 'include' })
   if (!res.ok) throw new Error(`Error (${res.status})`)
   return res.json()
 }
 
 export async function getPeriods(): Promise<PeriodStatus[]> {
-  const res = await fetch(`${base}/periods`, { credentials: 'include' })
+  const res = await apiFetch(`${base}/periods`, { credentials: 'include' })
   if (!res.ok) throw new Error(`Error cargando períodos (${res.status})`)
   return res.json()
 }
 
 export async function getHistory(id: string): Promise<{ discrepancy_id: string; entries: HistoryEntry[] }> {
-  const res = await fetch(`${base}/history/${id}`, { credentials: 'include' })
+  const res = await apiFetch(`${base}/history/${id}`, { credentials: 'include' })
   if (!res.ok) throw new Error(`Error (${res.status})`)
   return res.json()
 }
@@ -92,7 +92,7 @@ export async function resolveDiscrepancy(
   id: string,
   body: { action: string; justification: string | null; category_account?: string | null },
 ): Promise<{ status: string; git_commit_sha?: string | null }> {
-  const res = await fetch(`${base}/discrepancies/${id}/resolve`, {
+  const res = await apiFetch(`${base}/discrepancies/${id}/resolve`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },

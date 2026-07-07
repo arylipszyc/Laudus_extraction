@@ -1,4 +1,4 @@
-import { api } from './api'
+import { api, apiFetch } from './api'
 
 // Mirrors backend `backend.app.api.v1.tc_reconciliation.schemas.TcReconciliationRow` (Story 6.6).
 export interface TcMovement {
@@ -52,7 +52,7 @@ export async function getTcReconciliation(
 ): Promise<TcReconciliationRow[]> {
   const q = new URLSearchParams({ card })
   if (yearMonth) q.set('year_month', yearMonth)
-  const res = await fetch(`${api.baseUrl}/api/v1/tc/reconciliation?${q}`, { credentials: 'include' })
+  const res = await apiFetch(`${api.baseUrl}/api/v1/tc/reconciliation?${q}`, { credentials: 'include' })
   if (!res.ok) throw new Error(`Error cargando cuadre TC (${res.status})`)
   return res.json()
 }
@@ -66,7 +66,7 @@ export interface TcCartolaSummary {
 
 /** GET /api/v1/tc/cartolas — historial de cartolas TC subidas (matriz de cobertura). */
 export async function getTcCartolas(): Promise<TcCartolaSummary[]> {
-  const res = await fetch(`${api.baseUrl}/api/v1/tc/cartolas`, { credentials: 'include' })
+  const res = await apiFetch(`${api.baseUrl}/api/v1/tc/cartolas`, { credentials: 'include' })
   if (!res.ok) throw new Error(`Error cargando cartolas TC (${res.status})`)
   return res.json()
 }

@@ -1,4 +1,4 @@
-import { api } from './api'
+import { api, apiFetch } from './api'
 
 // Espeja backend `cuentas_pendientes.schemas`.
 export interface Suggestion {
@@ -25,7 +25,7 @@ export interface PromoteResponse {
 
 /** GET /api/v1/cuentas-pendientes/ — cuentas en cuarentena + sugerencia (contador/admin). */
 export async function listCuentasPendientes(): Promise<PendingAccount[]> {
-  const res = await fetch(`${api.baseUrl}/api/v1/cuentas-pendientes/`, { credentials: 'include' })
+  const res = await apiFetch(`${api.baseUrl}/api/v1/cuentas-pendientes/`, { credentials: 'include' })
   if (!res.ok) throw new Error(`Error listando cuentas pendientes (${res.status})`)
   return res.json()
 }
@@ -35,7 +35,7 @@ export async function promoverCuenta(
   code: string,
   body: { categoria1: string; categoria2: string; categoria3: string; laudus_account_name?: string; account?: string },
 ): Promise<PromoteResponse> {
-  const res = await fetch(`${api.baseUrl}/api/v1/cuentas-pendientes/${code}/promover`, {
+  const res = await apiFetch(`${api.baseUrl}/api/v1/cuentas-pendientes/${code}/promover`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useLedger } from '@/hooks/useLedger'
@@ -191,7 +191,8 @@ interface Props {
 }
 
 export function IncomeExpensesDrilldown({ records, type, title, selectedPeriods = [] }: Props) {
-  const groups = groupByCategoria1(records, type)
+  // F7: agrupación pesada — solo recomputa cuando cambian los records o el tipo.
+  const groups = useMemo(() => groupByCategoria1(records, type), [records, type])
   const amountClass = type === 'income' ? 'text-green-600' : 'text-destructive'
 
   if (groups.length === 0) {

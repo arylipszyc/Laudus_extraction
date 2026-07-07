@@ -1,4 +1,4 @@
-import { api } from './api'
+import { api, apiFetch } from './api'
 
 // Mirrors backend `CartolaCanonicalV1` (architecture-c4 §4.1).
 // Numeric fields arrive as strings (Pydantic Decimal serialisation) — the UI
@@ -81,11 +81,11 @@ export async function uploadCartola(
   const form = new FormData()
   form.append('pdf_file', pdfFile)
   form.append('bank_account_id', bankAccountId)
-  const res = await fetch(`${api.baseUrl}/api/v1/cartolas/upload`, {
+  const res = await apiFetch(`${api.baseUrl}/api/v1/cartolas/upload`, {
     method: 'POST',
     credentials: 'include',
     body: form,
-  })
+  }, { timeoutMs: 120_000 })
   if (!res.ok) {
     const body = await res.json().catch(() => null)
     throw normalizeApiError(body?.error, {
@@ -157,7 +157,7 @@ export async function validateBalance(
   batchId: string,
   body: { opening: string; closing: string; override_justification: string | null },
 ): Promise<ValidateBalanceResult | ConfirmAccepted> {
-  const res = await fetch(`${api.baseUrl}/api/v1/cartolas/${batchId}/validate-balance`, {
+  const res = await apiFetch(`${api.baseUrl}/api/v1/cartolas/${batchId}/validate-balance`, {
     method: 'PATCH',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -172,7 +172,7 @@ export async function validateBalance(
 
 /** GET /api/v1/cartolas/{batch_id} — polled by useCartolaUpload. */
 export async function getCartolaStatus(batchId: string): Promise<CartolaStatus> {
-  const res = await fetch(`${api.baseUrl}/api/v1/cartolas/${batchId}`, {
+  const res = await apiFetch(`${api.baseUrl}/api/v1/cartolas/${batchId}`, {
     credentials: 'include',
   })
   if (!res.ok) {

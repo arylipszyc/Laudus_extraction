@@ -9,6 +9,7 @@ import {
   UPLOAD_MUTATION_KEY,
   useCartolaUploadMutation,
   useCartolaStatus,
+  shouldKeepPolling,
 } from '@/hooks/useCartolaUpload'
 import type { CartolaError, CartolaCanonical, ValidateBalanceResult, TcCuadre } from '@/services/cartolas'
 import { BalanceValidationPanel } from '@/components/BalanceValidationPanel'
@@ -208,6 +209,22 @@ function CartolaResult({
   }, [data?.status])
 
   if (error) {
+    // Un blip transitorio del poll con el backend aún trabajando NO es terminal: el poll
+    // sigue corriendo (refetchInterval mira data.status) — mantener la card de espera en
+    // vez de la de error con "Volver" (que descarta el batch en curso).
+    if (data && shouldKeepPolling(data.status)) {
+      return (
+        <Card className="p-6 space-y-3">
+          <p className="text-sm">
+            {data.status === 'confirming'
+              ? `Confirmando cartola… esto puede tardar un minuto (batch_id: ${batchId})`
+              : `Procesando cartola… (batch_id: ${batchId})`}
+          </p>
+          <p className="text-xs text-muted-foreground">(reintentando conexión…)</p>
+          <Skeleton className="h-32 w-full" />
+        </Card>
+      )
+    }
     return (
       <Card className="p-6 space-y-3">
         <p className="text-sm text-destructive">

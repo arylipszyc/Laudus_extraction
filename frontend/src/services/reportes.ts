@@ -1,9 +1,10 @@
-import { api } from './api'
+import { api, apiFetch } from './api'
 
 /** Descarga el reporte de gastos (.xlsx) para el rango dado. */
 export async function downloadReporteGastos(start: string, end: string): Promise<void> {
   const url = `${api.baseUrl}/api/v1/reportes/gastos?start=${start}&end=${end}`
-  const res = await fetch(url, { credentials: 'include' })
+  // Generar el xlsx es legítimamente lento → timeout extendido.
+  const res = await apiFetch(url, { credentials: 'include' }, { timeoutMs: 120_000 })
   if (!res.ok) throw new Error(`Error generando reporte (${res.status})`)
   const blob = await res.blob()
   const href = URL.createObjectURL(blob)

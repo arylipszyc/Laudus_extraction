@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useHasRole } from '@/hooks/useHasRole'
 import { getReconciliationCount } from '@/services/reconciliation'
+import { errorAwareInterval } from '@/lib/pollInterval'
 
 /**
  * Story 9.12 AC9 — chip global de reconciliaciones pendientes.
@@ -14,7 +15,7 @@ export function PendingReconciliationBadge() {
   const { data, isError } = useQuery({
     queryKey: ['reconciliation-count'],
     queryFn: getReconciliationCount,
-    refetchInterval: 5 * 60 * 1000,
+    refetchInterval: errorAwareInterval(5 * 60 * 1000),
     enabled: canSee,
   })
 

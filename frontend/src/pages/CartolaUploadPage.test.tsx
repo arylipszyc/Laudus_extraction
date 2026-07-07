@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 vi.mock('@/services/cartolas', async (orig) => {
@@ -37,11 +37,12 @@ function status(overrides: Partial<CartolaStatus>): CartolaStatus {
 
 function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return render(
+  render(
     <QueryClientProvider client={client}>
       <CartolaUploadPage />
     </QueryClientProvider>,
   )
+  return client
 }
 
 describe('<CartolaUploadPage /> — confirm async (Fase 3 batch 2)', () => {
@@ -105,5 +106,25 @@ describe('<CartolaUploadPage /> — confirm async (Fase 3 batch 2)', () => {
       }),
     )
     expect(await screen.findByText(/Confirmando cartola… esto puede tardar un minuto/)).toBeInTheDocument()
+  })
+
+  it("blip del poll con extracción en curso → card de espera con 'reintentando', NO 'Volver'", async () => {
+    let fail = false
+    vi.mocked(getCartolaStatus).mockImplementation(async () => {
+      if (fail) throw { code: 'NETWORK', message: 'Sin conexión con el servidor' }
+      return status({ status: 'processing', canonical: null })
+    })
+    const client = renderPage()
+    expect(await screen.findByText(/Procesando cartola…/)).toBeInTheDocument()
+
+    // Forzar el siguiente poll sin esperar los 3s del interval.
+    fail = true
+    await act(async () => {
+      await client.invalidateQueries({ queryKey: ['cartolas', 'status', BATCH] })
+    })
+
+    expect(await screen.findByText(/reintentando conexión/)).toBeInTheDocument()
+    expect(screen.getByText(/Procesando cartola…/)).toBeInTheDocument()
+    expect(screen.queryByText('Volver')).not.toBeInTheDocument()
   })
 })
