@@ -175,3 +175,39 @@ def test_endpoint_404_staging_inexistente(tmp_path, monkeypatch):
                         json={"opening": "0", "closing": "0"},
                         cookies={"access_token": create_jwt(email="c@test.com", role="contador")})
     assert resp.status_code == 404
+
+
+# ── Cheap-checks sincrónicos del PATCH (batch 2 Fase 3: precheck_balance real, sin mocks) ──
+
+
+def test_endpoint_400_justificacion_corta_sincrono(tmp_path, monkeypatch):
+    """El 400 JUSTIFICATION_TOO_SHORT sigue llegando sincrónico y con el shape de siempre,
+    ejercitando precheck_balance de verdad (los tests del router lo mockean)."""
+    root = _root(tmp_path)
+    monkeypatch.setenv("LEDGER_DIR", str(root))
+    _staging(root, "0", "100", [("JUMBO", 50)])  # descuadra (100 ≠ 0+50)
+    client = _app()
+    resp = client.patch("/api/v1/cartolas/b1/validate-balance",
+                        json={"opening": "0", "closing": "100", "override_justification": "corta"},
+                        cookies={"access_token": create_jwt(email="c@test.com", role="contador")})
+    assert resp.status_code == 400
+    body = resp.json()
+    assert body["error"]["code"] == "JUSTIFICATION_TOO_SHORT"
+    assert "20" in body["error"]["message"]
+
+
+def test_endpoint_400_discrepancia_sincrono_con_diff(tmp_path, monkeypatch):
+    """El 400 VALIDATION_FAILED sigue sincrónico con diff/calculated/stated exactos."""
+    root = _root(tmp_path)
+    monkeypatch.setenv("LEDGER_DIR", str(root))
+    _staging(root, "0", "100", [("JUMBO", 50)])
+    client = _app()
+    resp = client.patch("/api/v1/cartolas/b1/validate-balance",
+                        json={"opening": "0", "closing": "100"},
+                        cookies={"access_token": create_jwt(email="c@test.com", role="contador")})
+    assert resp.status_code == 400
+    body = resp.json()
+    assert body["error"]["code"] == "VALIDATION_FAILED"
+    assert body["error"]["diff"] == 50.0
+    assert body["error"]["calculated"] == 50.0
+    assert body["error"]["stated"] == 100.0

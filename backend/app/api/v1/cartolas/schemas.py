@@ -104,7 +104,17 @@ class UploadAcceptedResponse(BaseModel):
 class StatusResponse(BaseModel):
     """GET /api/v1/cartolas/{batch_id}."""
     batch_id: str
-    status: Literal["processing", "ready", "failed"]
+    # processing/ready/failed = fase de extracción; confirming/confirmed/confirm_failed =
+    # fase de confirm (batch 2 Fase 3: el PATCH devuelve 202 y el resultado llega por acá).
+    status: Literal["processing", "ready", "failed",
+                    "confirming", "confirmed", "confirm_failed"]
     canonical: CartolaCanonicalV1 | None = None
     error: dict | None = None
+    result: dict | None = None  # payload del confirm (el que devolvía el PATCH sincrónico)
     already_imported: bool = False  # ya existe una cartola para esta tarjeta/mes (avisar antes de sobrescribir)
+
+
+class ConfirmAcceptedResponse(BaseModel):
+    """202 del PATCH /validate-balance — el confirm quedó corriendo en background."""
+    status: Literal["confirming"] = "confirming"
+    batch_id: str

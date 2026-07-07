@@ -20,11 +20,13 @@ export function BalanceValidationPanel({
   canonical,
   batchId,
   onValidated,
+  onConfirming,
   alreadyImported = false,
 }: {
   canonical: CartolaCanonical
   batchId: string
   onValidated: (r: ValidateBalanceResult) => void
+  onConfirming: () => void
   alreadyImported?: boolean
 }) {
   const currency = canonical.currency
@@ -33,6 +35,9 @@ export function BalanceValidationPanel({
   const [overrideMode, setOverrideMode] = useState(false)
   const [justification, setJustification] = useState('')
   const [ack, setAck] = useState(false)  // gate de sobrescritura cuando la cartola ya existe
+  // 202 aceptado: el confirm corre en background — el botón queda deshabilitado hasta que
+  // el poll de la página resuelva (confirmed/confirm_failed).
+  const [confirming, setConfirming] = useState(false)
 
   const sumTx = canonical.transactions.reduce((acc, t) => acc + Number.parseFloat(t.amount || '0'), 0)
   const discrepancy = Number.parseFloat(closing || '0') - Number.parseFloat(opening || '0') - sumTx
@@ -45,11 +50,19 @@ export function BalanceValidationPanel({
         closing,
         override_justification: overrideMode ? justification.trim() : null,
       }),
-    onSuccess: onValidated,
+    onSuccess: (r) => {
+      if (r.status === 'confirming') {
+        setConfirming(true)
+        onConfirming()
+      } else {
+        onValidated(r as ValidateBalanceResult)
+      }
+    },
   })
 
   const canConfirm =
     !mutation.isPending &&
+    !confirming &&
     (balanced || (overrideMode && justification.trim().length >= MIN_JUSTIFICATION)) &&
     (!alreadyImported || ack)
 
@@ -110,7 +123,7 @@ export function BalanceValidationPanel({
       )}
 
       <Button onClick={() => mutation.mutate()} disabled={!canConfirm}>
-        {mutation.isPending
+        {mutation.isPending || confirming
           ? 'Confirmando…'
           : alreadyImported
             ? 'Sobrescribir cartola'

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useMutationState, useQuery } from '@tanstack/react-query'
+import { useMutationState, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -199,6 +199,13 @@ function CartolaResult({
   onReset: () => void
 }) {
   const { data, error } = statusQuery
+  // Tras un confirm_failed, "Reintentar" vuelve al panel de validación SIN re-subir el PDF
+  // (la extracción sigue staged; re-uploadear costaba una pasada de Gemini de más).
+  const [retryAfterFail, setRetryAfterFail] = useState(false)
+  useEffect(() => {
+    // Un nuevo confirm en vuelo re-arma la card de error para un eventual 2º fallo.
+    if (data?.status === 'confirming') setRetryAfterFail(false)
+  }, [data?.status])
 
   if (error) {
     return (
@@ -241,9 +248,65 @@ function CartolaResult({
     )
   }
 
-  // status === 'ready'
+  // El confirm corre en background (202): el poll retoma este estado aunque el usuario
+  // haya navegado y vuelto — el batch_id persiste en sessionStorage.
+  if (data.status === 'confirming') {
+    return <ConfirmingCard batchId={batchId} />
+  }
+
+  if (data.status === 'confirm_failed' && !retryAfterFail) {
+    return (
+      <Card className="p-6 space-y-3">
+        <p className="text-sm text-destructive">
+          <strong>La confirmación falló</strong>
+          {data.error && (
+            <span>
+              {' '}
+              ({data.error.code}: {data.error.message})
+            </span>
+          )}
+        </p>
+        {data.error?.detail != null && (
+          <pre className="text-xs bg-muted rounded p-2 overflow-x-auto whitespace-pre-wrap">
+            {typeof data.error.detail === 'string'
+              ? data.error.detail
+              : JSON.stringify(data.error.detail, null, 2)}
+          </pre>
+        )}
+        <div className="flex gap-2">
+          {data.canonical && (
+            <Button onClick={() => setRetryAfterFail(true)}>Reintentar confirmación</Button>
+          )}
+          <Button variant="outline" onClick={onReset}>
+            Volver
+          </Button>
+        </div>
+      </Card>
+    )
+  }
+
+  // status === 'ready' | 'confirmed'
   const c = data.canonical!
-  return <CartolaReady c={c} batchId={batchId} onReset={onReset} alreadyImported={!!data.already_imported} />
+  return (
+    <CartolaReady
+      c={c}
+      batchId={batchId}
+      onReset={onReset}
+      alreadyImported={!!data.already_imported}
+      polledResult={data.status === 'confirmed' ? (data.result ?? null) : null}
+    />
+  )
+}
+
+function ConfirmingCard({ batchId }: { batchId: string }) {
+  return (
+    <Card className="p-6 space-y-3">
+      <p className="text-sm">
+        Confirmando cartola… esto puede tardar un minuto (batch_id: {batchId})
+      </p>
+      <Skeleton className="h-32 w-full" />
+    </Card>
+  )
 }
 
 function CartolaReady({
@@ -251,14 +314,26 @@ function CartolaReady({
   batchId,
   onReset,
   alreadyImported,
+  polledResult = null,
 }: {
   c: CartolaCanonical | null
   batchId: string
   onReset: () => void
   alreadyImported: boolean
+  polledResult?: ValidateBalanceResult | null
 }) {
-  const [validated, setValidated] = useState<ValidateBalanceResult | null>(null)
+  // El resultado puede venir del PATCH sincrónico de siempre (setValidated) o del poll
+  // (status 'confirmed' → data.result) — mismo rendering path en ambos casos.
+  const [localValidated, setValidated] = useState<ValidateBalanceResult | null>(null)
+  // 202 aceptado pero el poll todavía no reporta 'confirming' → mostrar el estado de espera ya.
+  const [confirming, setConfirming] = useState(false)
+  const queryClient = useQueryClient()
+  const validated = localValidated ?? polledResult
   if (!c) return null
+
+  if (!validated && confirming) {
+    return <ConfirmingCard batchId={batchId} />
+  }
 
   if (validated) {
     // La TC puede BLOQUEAR (status 'blocked'): el backend responde 200 pero NO posteó nada al
@@ -379,6 +454,11 @@ function CartolaReady({
       </details>
 
       <BalanceValidationPanel canonical={c} batchId={batchId} onValidated={setValidated}
+        onConfirming={() => {
+          setConfirming(true)
+          // El poll se frenó al llegar a 'ready' — invalidar lo relanza para que vea 'confirming'.
+          queryClient.invalidateQueries({ queryKey: ['cartolas', 'status', batchId] })
+        }}
         alreadyImported={alreadyImported} />
 
       <p className="text-xs text-muted-foreground">

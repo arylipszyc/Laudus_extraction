@@ -144,20 +144,68 @@ class _JobStore:
                 "status": "processing",
                 "canonical": None,
                 "error": None,
+                "result": None,
                 "created_at": time.monotonic(),
             }
 
     def set_ready(self, batch_id: str, canonical: CartolaCanonicalV1) -> None:
         with self._lock:
-            if batch_id in self._jobs:
-                self._jobs[batch_id]["status"] = "ready"
-                self._jobs[batch_id]["canonical"] = canonical
+            job = self._jobs.get(batch_id)
+            # Guard de transición: el epílogo de extracción solo aplica sobre "processing" —
+            # sin esto podía pisar un confirm que ganó la carrera del fin de extracción.
+            if job is not None and job["status"] == "processing":
+                job["status"] = "ready"
+                job["canonical"] = canonical
 
     def set_failed(self, batch_id: str, code: str, message: str) -> None:
         with self._lock:
+            job = self._jobs.get(batch_id)
+            if job is not None and job["status"] == "processing":
+                job["status"] = "failed"
+                job["error"] = {"code": code, "message": message}
+
+    # ── Fase confirm (batch 2 Fase 3): el confirm corre como job 202+polling ──
+
+    def set_confirming(self, batch_id: str,
+                       canonical: CartolaCanonicalV1 | None = None) -> bool:
+        """Adquiere el confirm para este batch. False si ya hay uno en vuelo (double-submit).
+
+        Revive el entry si expiró por TTL (el staging puede sobrevivir al job de extracción)
+        y renueva `created_at` para que el TTL no evicte un confirm en curso. `canonical`
+        (el modelo que precheck ya parseó del staging) rellena un entry revivido — sin él,
+        un confirm exitoso post-restart/TTL devolvía canonical=null y la UI quedaba en blanco."""
+        with self._lock:
+            self._evict_expired_locked()
+            job = self._jobs.get(batch_id)
+            if job is None:
+                job = {"status": "ready", "canonical": None, "error": None,
+                       "result": None, "created_at": time.monotonic()}
+                self._jobs[batch_id] = job
+            if job["status"] == "confirming":
+                return False
+            if job["canonical"] is None and canonical is not None:
+                job["canonical"] = canonical
+            job.update(status="confirming", error=None, result=None,
+                       created_at=time.monotonic())
+            return True
+
+    def set_confirmed(self, batch_id: str, result: dict) -> None:
+        with self._lock:
             if batch_id in self._jobs:
-                self._jobs[batch_id]["status"] = "failed"
-                self._jobs[batch_id]["error"] = {"code": code, "message": message}
+                self._jobs[batch_id]["status"] = "confirmed"
+                self._jobs[batch_id]["result"] = result
+            else:  # evicted mid-job (>TTL): el ledger YA se modificó — dejar rastro en logs
+                logger.warning("confirm result descartado: job %s expiró durante el confirm", batch_id)
+
+    def set_confirm_failed(self, batch_id: str, code: str, message: str,
+                           detail: str | None = None) -> None:
+        with self._lock:
+            if batch_id in self._jobs:
+                self._jobs[batch_id]["status"] = "confirm_failed"
+                self._jobs[batch_id]["error"] = {"code": code, "message": message,
+                                                 "detail": detail}
+            else:
+                logger.warning("confirm error descartado: job %s expiró durante el confirm", batch_id)
 
     def get(self, batch_id: str) -> dict[str, Any] | None:
         with self._lock:
@@ -515,12 +563,127 @@ def validate_balance(
                 "opening_emitted": res["opening_emitted"], "fx_bcch": res["fx_bcch"],
                 "fx_deviation_pct": res["fx_deviation_pct"],
                 "reason": res["reason"], "git_sha": res["git_commit_sha"], "batch_id": batch_id,
+                # fx heredado (f100c8f): sin esto el banner de fx_source nunca se mostraba
+                # (el mapping lo dropeaba — hallazgo del review batch 2, pre-existente).
+                "fx_source": res.get("fx_source"),
                 # Plumbing del cuadre post-confirmación (el endpoint lo usa y lo saca de la respuesta).
                 "tc_real_account": res.get("tc_real_account"),
                 "expense_tc_account": res.get("expense_tc_account"),
-                "year_month": res.get("year_month")}
+                "year_month": res.get("year_month"),
+                # Scope de C3 (Story 6.6): sin esta clave el cuadre corría con bank_account_id=None
+                # y C3 no detectaba la pata TC:Real destruida (review batch 2, pre-existente).
+                "cuadre_bank_account_id": res.get("cuadre_bank_account_id")}
 
     res = reconcile_cartola(batch_id, importer, root, ts=ts)
     return {"status": res["status"], "differences": res["differences"], "blocking": res["blocking"],
             "matched": res["matched"], "git_sha": res["git_commit_sha"],
             "override": override is not None, "batch_id": batch_id}
+
+
+def precheck_balance(
+    batch_id: str,
+    opening,
+    closing,
+    override_justification: str | None,
+    *,
+    ledger_root: Path | None = None,
+) -> CartolaCanonicalV1:
+    """Validaciones BARATAS del confirm (solo lee el staging, sin tocar el ledger).
+
+    Corre sincrónica en el PATCH antes del 202 para que los errores tipados de siempre
+    (404 staging, 400 justificación, 400 discrepancia) sigan llegando inmediatos.
+    Devuelve el modelo parseado (el router lo usa para rellenar un job revivido).
+    `validate_balance` repite estos checks en el job (belt para razas staging↔job)."""
+    from decimal import Decimal
+
+    from pipeline.importers.laudus_run import _ledger_root
+
+    root = Path(ledger_root) if ledger_root else _ledger_root()
+    staging = root / "imports" / "cartolas" / "_staging" / f"{batch_id}.cartola.json"
+    if not staging.exists():
+        raise StagingNotFound(batch_id)
+
+    model = CartolaCanonicalV1.model_validate_json(staging.read_text(encoding="utf-8"))
+    justification = (override_justification or "").strip()
+    if justification and len(justification) < MIN_JUSTIFICATION:
+        raise OverrideJustificationTooShort(MIN_JUSTIFICATION)
+
+    new_open, new_close = Decimal(str(opening)), Decimal(str(closing))
+    calculated = new_open + sum((t.amount for t in model.transactions), Decimal(0))
+    diff = new_close - calculated
+    if diff != 0 and not justification:
+        raise BalanceDiscrepancy(float(diff), float(calculated), float(new_close),
+                                 "closing ≠ opening + Σ transacciones")
+    return model
+
+
+def run_confirm_job(
+    batch_id: str,
+    opening,
+    closing,
+    override_justification: str | None,
+    *,
+    user_email: str,
+    ledger,
+    ledger_root: Path | None = None,
+    importer=None,
+) -> None:
+    """Camino pesado del confirm (matching + bean_check + git push + reload + cuadre TC).
+
+    Corre como background task tras el 202 (patrón del upload). Todo desenlace queda en
+    el job store: `confirmed` con el MISMO payload que devolvía el PATCH sincrónico, o
+    `confirm_failed` con el código tipado de siempre."""
+    store = get_job_store()
+    try:
+        result = validate_balance(
+            batch_id, opening, closing, override_justification,
+            user_email=user_email, ledger_root=ledger_root, importer=importer)
+        if result.get("status") in ("corrected", "blocked"):
+            # Plumbing del cuadre (lo agregó correct_tc_cartola); se saca del payload.
+            tc_real = result.pop("tc_real_account", None)
+            lump = result.pop("expense_tc_account", None)
+            year_month = result.pop("year_month", None)
+            cuadre_baid = result.pop("cuadre_bank_account_id", None)
+            if result.get("status") == "corrected":
+                # El desglose ya está en disco; refrescar el ledger en memoria para que la
+                # cola de categorización lo vea sin depender del file-watcher.
+                ledger.load()
+                if tc_real and lump and year_month:
+                    try:
+                        from backend.app.services.tc_cuadre import compute_tc_cuadre
+                        result["cuadre"] = compute_tc_cuadre(
+                            ledger.entries(), tc_real_account=tc_real, lump_account=lump,
+                            year_month=year_month, closing=closing,
+                            bank_account_id=cuadre_baid)
+                    except Exception:  # noqa: BLE001 — informativo, nunca rompe el posteo
+                        logger.exception("cuadre TC falló (no bloquea el posteo)")
+            # Round-trip por el modelo de respuesta: misma validación/defaults que tenía
+            # el PATCH sincrónico (unmapped=[], cuadre coercionado, extra keys afuera).
+            from backend.app.api.v1.cartolas.schemas import TcCorrectionResponse
+            result = TcCorrectionResponse(**result).model_dump()
+        else:
+            from backend.app.api.v1.cartolas.schemas import ValidateBalanceResponse
+            result = ValidateBalanceResponse(**result).model_dump()
+        store.set_confirmed(batch_id, result)
+    except StagingNotFound:
+        store.set_confirm_failed(batch_id, "NOT_FOUND",
+                                 f"staging {batch_id} no existe o expiró")
+    except OverrideJustificationTooShort as exc:
+        store.set_confirm_failed(
+            batch_id, "JUSTIFICATION_TOO_SHORT",
+            f"La justificación del override debe tener al menos {exc.min_chars} caracteres")
+    except BalanceDiscrepancy as exc:
+        store.set_confirm_failed(
+            batch_id, "VALIDATION_FAILED",
+            "Discrepancia detectada — provea override_justification para confirmar",
+            detail=f"diff={exc.diff}, calculated={exc.calculated}, stated={exc.stated}")
+    except BeanCheckFailed as exc:
+        store.set_confirm_failed(
+            batch_id, "BEAN_CHECK_FAILED",
+            "La validación contable falló por un motivo distinto al balance enviado",
+            detail=str(exc))
+    except Exception:  # noqa: BLE001 — el job nunca puede quedar colgado en confirming
+        logger.exception("confirm job failed: batch_id=%s", batch_id)
+        # Mensaje genérico al browser: str(exc) de git puede traer URLs/paths del server.
+        store.set_confirm_failed(batch_id, "INTERNAL_ERROR",
+                                 "Error interno al confirmar — el detalle quedó en los logs del backend")

@@ -25,16 +25,18 @@ export function useCartolaUploadMutation() {
   })
 }
 
-/** Polls GET /cartolas/{batch_id} every 3s while status === 'processing'. */
+/** El poll sigue mientras el backend trabaja: extracción ('processing') o confirm async ('confirming'). */
+export function shouldKeepPolling(status: CartolaStatus['status'] | undefined): boolean {
+  return status === 'processing' || status === 'confirming'
+}
+
+/** Polls GET /cartolas/{batch_id} every 3s while status === 'processing' | 'confirming'. */
 export function useCartolaStatus(batchId: string | null) {
   return useQuery<CartolaStatus, CartolaError>({
     queryKey: ['cartolas', 'status', batchId],
     queryFn: () => getCartolaStatus(batchId!),
     enabled: batchId !== null,
-    refetchInterval: (query) => {
-      const data = query.state.data
-      return data && data.status === 'processing' ? POLL_INTERVAL_MS : false
-    },
+    refetchInterval: (query) => (shouldKeepPolling(query.state.data?.status) ? POLL_INTERVAL_MS : false),
     retry: false,
   })
 }

@@ -128,25 +128,124 @@ def _family_cookie() -> dict[str, str]:
     return {"access_token": create_jwt(email="eduardo@eag.cl", role="family")}
 
 
-def test_validate_balance_tc_corrected_serializes_200(tmp_path):
-    # Regresión (bug hallado en el smoke por navegador): una cartola de TARJETA devuelve
-    # status='corrected' (forma distinta al modelo A 'reconciled'). El endpoint debe serializar 200 con
-    # TcCorrectionResponse, NO reventar el ValidateBalanceResponse (que pedía differences/blocking/matched).
-    client = _make_app(index_entry=None, gemini_mock=MagicMock(), staging_dir=tmp_path)
-    tc_result = {
+def _tc_result() -> dict:
+    return {
         "batch_id": "b1", "status": "corrected", "currency": "USD", "fx": "930.85",
-        "purchases": 40, "payments": 1, "opening_emitted": True, "unmapped": [],
-        "fx_bcch": "861.19", "fx_deviation_pct": 8.1, "git_commit_sha": None,
-        "file": "imports/cartolas/x-tc.beancount", "reason": None,
+        "purchases": 40, "payments": 1, "opening_emitted": True,
+        "fx_bcch": "861.19", "fx_deviation_pct": 8.1, "git_sha": None, "reason": None,
+        "tc_real_account": None, "expense_tc_account": None, "year_month": None,
+        "cuadre_bank_account_id": None,
     }
-    with patch("backend.app.api.v1.cartolas.router.validate_balance", return_value=tc_result):
+
+
+def test_validate_balance_tc_corrected_202_y_resultado_por_polling(tmp_path):
+    # Batch 2 Fase 3: el PATCH devuelve 202 (antes 200 sincrónico de 30-120s) y el payload
+    # TcCorrectionResponse llega vía GET /{batch_id} cuando el job termina. TestClient corre
+    # el background task antes de devolver → el poll inmediato ya lo ve confirmed.
+    from backend.app.dependencies import get_ledger_service
+
+    client = _make_app(index_entry=None, gemini_mock=MagicMock(), staging_dir=tmp_path)
+    client.app.dependency_overrides[get_ledger_service] = lambda: MagicMock()
+
+    with patch("backend.app.api.v1.cartolas.router.precheck_balance", return_value=None),          patch("backend.app.api.v1.cartolas.service.validate_balance",
+               return_value=_tc_result()):
         r = client.patch("/api/v1/cartolas/b1/validate-balance",
                          json={"opening": "0", "closing": "0"}, cookies=_contador_cookie())
-    assert r.status_code == 200, r.text
-    body = r.json()
-    assert body["status"] == "corrected"
-    assert body["fx"] == "930.85"
-    assert body["purchases"] == 40 and body["unmapped"] == []
+    assert r.status_code == 202, r.text
+    assert r.json() == {"status": "confirming", "batch_id": "b1"}
+
+    s = client.get("/api/v1/cartolas/b1", cookies=_contador_cookie())
+    assert s.status_code == 200, s.text
+    body = s.json()
+    assert body["status"] == "confirmed"
+    assert body["result"]["status"] == "corrected"
+    assert body["result"]["fx"] == "930.85"
+    assert body["result"]["purchases"] == 40
+    # El plumbing del cuadre no se filtra al payload:
+    assert "tc_real_account" not in body["result"]
+
+
+def test_validate_balance_double_submit_no_relanza_el_job(tmp_path):
+    # Un confirm en vuelo: el 2º PATCH devuelve 202 idempotente SIN lanzar otro job.
+    from backend.app.api.v1.cartolas.service import get_job_store
+
+    client = _make_app(index_entry=None, gemini_mock=MagicMock(), staging_dir=tmp_path)
+    get_job_store().create("b2")
+    assert get_job_store().set_confirming("b2") is True    # 1er confirm adquiere
+    calls = {"n": 0}
+
+    def counting_job(*args, **kwargs):
+        calls["n"] += 1
+
+    with patch("backend.app.api.v1.cartolas.router.precheck_balance", return_value=None),          patch("backend.app.api.v1.cartolas.router.run_confirm_job", side_effect=counting_job):
+        r = client.patch("/api/v1/cartolas/b2/validate-balance",
+                         json={"opening": "0", "closing": "0"}, cookies=_contador_cookie())
+    assert r.status_code == 202
+    assert calls["n"] == 0, "con un confirm en vuelo NO debe lanzarse un segundo job"
+
+
+def test_validate_balance_excepcion_en_job_deja_confirm_failed(tmp_path):
+    # Una excepción no tipada en el camino pesado → poll ve confirm_failed INTERNAL_ERROR
+    # (el job jamás queda colgado en confirming).
+    from backend.app.dependencies import get_ledger_service
+
+    client = _make_app(index_entry=None, gemini_mock=MagicMock(), staging_dir=tmp_path)
+    client.app.dependency_overrides[get_ledger_service] = lambda: MagicMock()
+
+    with patch("backend.app.api.v1.cartolas.router.precheck_balance", return_value=None),          patch("backend.app.api.v1.cartolas.service.validate_balance",
+               side_effect=RuntimeError("git push murió")):
+        r = client.patch("/api/v1/cartolas/b3/validate-balance",
+                         json={"opening": "0", "closing": "0"}, cookies=_contador_cookie())
+    assert r.status_code == 202
+
+    s = client.get("/api/v1/cartolas/b3", cookies=_contador_cookie())
+    body = s.json()
+    assert body["status"] == "confirm_failed"
+    assert body["error"]["code"] == "INTERNAL_ERROR"
+    # Mensaje GENÉRICO: el str(exc) de git puede traer URLs/paths del server (patch review).
+    assert "git push murió" not in body["error"]["message"]
+    assert "logs" in body["error"]["message"]
+
+
+def test_validate_balance_tc_blocked_llega_como_confirmed_blocked(tmp_path):
+    # Matriz row 7: blocked es un RESULTADO (no un error) → poll ve confirmed con status blocked.
+    from backend.app.dependencies import get_ledger_service
+
+    client = _make_app(index_entry=None, gemini_mock=MagicMock(), staging_dir=tmp_path)
+    client.app.dependency_overrides[get_ledger_service] = lambda: MagicMock()
+    blocked = dict(_tc_result(), status="blocked", fx=None,
+                   reason="FX derivado no cuadra vs BCCh")
+
+    with patch("backend.app.api.v1.cartolas.router.precheck_balance", return_value=None),          patch("backend.app.api.v1.cartolas.service.validate_balance", return_value=blocked):
+        r = client.patch("/api/v1/cartolas/b4/validate-balance",
+                         json={"opening": "0", "closing": "0"}, cookies=_contador_cookie())
+    assert r.status_code == 202
+
+    body = client.get("/api/v1/cartolas/b4", cookies=_contador_cookie()).json()
+    assert body["status"] == "confirmed"
+    assert body["result"]["status"] == "blocked"
+    assert "BCCh" in body["result"]["reason"]
+
+
+def test_validate_balance_bean_check_failed_mapea_su_codigo(tmp_path):
+    # Matriz row 6 (belt: BeanCheckFailed está inerte desde 6.1 — el flujo real devuelve
+    # blocked — pero el mapping del código se fija sintéticamente por si revive).
+    from backend.app.api.v1.cartolas.service import BeanCheckFailed
+    from backend.app.dependencies import get_ledger_service
+
+    client = _make_app(index_entry=None, gemini_mock=MagicMock(), staging_dir=tmp_path)
+    client.app.dependency_overrides[get_ledger_service] = lambda: MagicMock()
+
+    with patch("backend.app.api.v1.cartolas.router.precheck_balance", return_value=None),          patch("backend.app.api.v1.cartolas.service.validate_balance",
+               side_effect=BeanCheckFailed("cuenta sin abrir: Expenses:X")):
+        r = client.patch("/api/v1/cartolas/b5/validate-balance",
+                         json={"opening": "0", "closing": "0"}, cookies=_contador_cookie())
+    assert r.status_code == 202
+
+    body = client.get("/api/v1/cartolas/b5", cookies=_contador_cookie()).json()
+    assert body["status"] == "confirm_failed"
+    assert body["error"]["code"] == "BEAN_CHECK_FAILED"
+    assert "cuenta sin abrir" in body["error"]["detail"]
 
 
 def _pdf_payload(content: bytes = b"%PDF-1.4 fake content") -> dict:

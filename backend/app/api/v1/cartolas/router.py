@@ -21,24 +21,23 @@ from fastapi import (
 from fastapi.responses import JSONResponse
 
 from backend.app.api.v1.cartolas.schemas import (
+    ConfirmAcceptedResponse,
     StatusResponse,
-    TcCorrectionResponse,
     UploadAcceptedResponse,
     ValidateBalanceRequest,
-    ValidateBalanceResponse,
 )
 from backend.app.api.v1.cartolas.service import (
     BalanceDiscrepancy,
-    BeanCheckFailed,
     CartolaValidationError,
     MAX_PDF_SIZE_BYTES,
     OverrideJustificationTooShort,
     StagingNotFound,
     get_job_store,
     new_batch_id,
+    precheck_balance,
+    run_confirm_job,
     run_job,
     tc_cartola_already_imported,
-    validate_balance,
     validate_upload_inputs,
 )
 from backend.app.auth.schemas import UserSession
@@ -152,28 +151,31 @@ def get_cartola_status(
         status=job["status"],
         canonical=job["canonical"],
         error=job["error"],
+        result=job.get("result"),
         already_imported=already,
     )
 
 
-@router.patch("/{batch_id}/validate-balance",
-              response_model=ValidateBalanceResponse | TcCorrectionResponse)
+@router.patch("/{batch_id}/validate-balance", status_code=202,
+              response_model=ConfirmAcceptedResponse)
 def validate_balance_endpoint(
     batch_id: str,
     request: ValidateBalanceRequest,
+    background_tasks: BackgroundTasks,
     user: UserSession = Depends(require_role(["contador", "admin"])),
     ledger: LedgerService = Depends(get_ledger_service),
 ):
-    """Promueve el staging a archivo final con validación de balance (Story 9.9).
+    """Confirma la cartola staged — 202 + job en background (batch 2 Fase 3).
 
-    OK → 200 validated. Discrepancia sin override → 400 VALIDATION_FAILED con el diff.
-    Con `override_justification` → re-promote con pad+balance (la pad absorbe).
+    El trabajo pesado (matching + bean_check + git push + cuadre TC) tardaba 30-120s
+    dentro del request; ahora corre como job y el frontend pollea GET /{batch_id}
+    hasta `confirmed`/`confirm_failed`. Los errores BARATOS mantienen su semántica
+    sincrónica: 404 staging, 400 justificación corta, 400 discrepancia sin override.
+    Re-PATCH con un confirm en vuelo → 202 idempotente (sin segundo job).
     """
     try:
-        result = validate_balance(
-            batch_id, request.opening, request.closing, request.override_justification,
-            user_email=user.email,
-        )
+        canonical = precheck_balance(batch_id, request.opening, request.closing,
+                                     request.override_justification)
     except StagingNotFound:
         raise HTTPException(status_code=404, detail={
             "code": "NOT_FOUND", "message": f"staging {batch_id} no existe o expiró"})
@@ -188,35 +190,16 @@ def validate_balance_endpoint(
             "message": "Discrepancia detectada — provea override_justification para confirmar",
             "diff": exc.diff, "calculated": exc.calculated, "stated": exc.stated,
         }})
-    except BeanCheckFailed as exc:
-        return JSONResponse(status_code=422, content={"error": {
-            "code": "BEAN_CHECK_FAILED",
-            "message": "La validación contable falló por un motivo distinto al balance enviado",
-            "detail": str(exc),
-        }})
-    # La TC POSTEA (status corrected/blocked, otra forma) vs el modelo A reconcilia (status reconciled).
-    if result.get("status") in ("corrected", "blocked"):
-        # Plumbing del cuadre (lo agregó correct_tc_cartola); se saca de la respuesta.
-        tc_real = result.pop("tc_real_account", None)
-        lump = result.pop("expense_tc_account", None)
-        year_month = result.pop("year_month", None)
-        cuadre_baid = result.pop("cuadre_bank_account_id", None)
-        # `corrected` escribió el desglose al ledger; refrescamos el ledger en memoria para que la
-        # cola de categorización lo vea sin depender del file-watcher (poco fiable en el contenedor).
-        if result.get("status") == "corrected":
-            ledger.load()
-            # Cuadre post-confirmación (C1 + pago vs Laudus) — informativo, nunca rompe el posteo.
-            if tc_real and lump and year_month:
-                try:
-                    from backend.app.services.tc_cuadre import compute_tc_cuadre
-                    result["cuadre"] = compute_tc_cuadre(
-                        ledger.entries(), tc_real_account=tc_real, lump_account=lump,
-                        year_month=year_month, closing=request.closing,
-                        bank_account_id=cuadre_baid)
-                except Exception:  # noqa: BLE001
-                    logger.exception("cuadre TC falló (no bloquea el posteo)")
-        return TcCorrectionResponse(**result).model_dump()
-    return ValidateBalanceResponse(**result).model_dump()
+
+    # `canonical` rellena un entry revivido (job expirado/restart con staging vivo) para
+    # que el confirmed no llegue con canonical=null y la UI en blanco.
+    if get_job_store().set_confirming(batch_id, canonical=canonical):
+        background_tasks.add_task(
+            run_confirm_job,
+            batch_id, request.opening, request.closing, request.override_justification,
+            user_email=user.email, ledger=ledger,
+        )
+    return ConfirmAcceptedResponse(batch_id=batch_id).model_dump()
 
 
 # Re-export for tests/runtime introspection.

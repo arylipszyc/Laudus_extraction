@@ -1,5 +1,10 @@
 # Deferred Work
 
+## Deferred from: code review de spec-fase3-confirm-async (2026-07-06)
+
+- **Respuesta de poll fuera de orden puede congelar el spinner del confirm** ([frontend/src/pages/CartolaUploadPage.tsx](../../frontend/src/pages/CartolaUploadPage.tsx)) — un GET de status en vuelo (ej. refetch-on-focus) que salió ANTES del PATCH puede resolver `ready` DESPUÉS del refetch que vio `confirming` → `shouldKeepPolling('ready')` corta el poll con la ConfirmingCard local montada. Ventana angosta (ms), recuperable con reload. Fix si aparece: comparar un sequence/updatedAt del job, o re-invalidar al montar la ConfirmingCard.
+- **Staging JSON corrupto → 500 crudo en precheck** ([backend/app/api/v1/cartolas/service.py:586](../../backend/app/api/v1/cartolas/service.py#L586)) — `model_validate_json` sin handler; paridad exacta con el path sincrónico viejo (misma exposición, nueva ubicación). Fix de 3 líneas si aparece: catch ValidationError → 422 tipado + limpiar el staging roto.
+
 ## Deferred from: code review de spec-fase3-perf-pipeline (2026-07-06)
 
 - **Escritores que no honran `.import.lock` pueden quedar stale durante el fetch del import** ([pipeline/importers/laudus_run.py:293-310](../../pipeline/importers/laudus_run.py#L293-L310)) — el parse único de JEs ocurre al inicio del lock y el fetch (red, potencialmente minutos) corre después; un writer que NO tome el lock (edit manual, Fava save directo al clon) durante ese lapso sería pisado por el merge. Los writers del sistema todos toman el lock (reconcile, promote, tc_correction, run_import); el riesgo es solo para edits fuera de contrato — que ya eran racy antes (write_jes regeneraba archivos completos). Fix durable si duele: re-verificar mtimes de los month files antes de escribir, o documentar el lock como contrato duro en el runbook del contador.

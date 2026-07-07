@@ -37,10 +37,11 @@ export interface UploadAccepted {
 
 export interface CartolaStatus {
   batch_id: string
-  status: 'processing' | 'ready' | 'failed'
+  status: 'processing' | 'ready' | 'failed' | 'confirming' | 'confirmed' | 'confirm_failed'
   canonical: CartolaCanonical | null
   error: { code: string; message: string; detail?: unknown } | null
   already_imported?: boolean   // ya existe una cartola para esta tarjeta/mes → avisar antes de sobrescribir
+  result?: ValidateBalanceResult | null  // payload del confirm asíncrono (status 'confirmed')
 }
 
 export interface CartolaError {
@@ -141,11 +142,21 @@ export interface BalanceDiscrepancyError extends CartolaError {
   stated?: number
 }
 
-/** PATCH /api/v1/cartolas/{batch_id}/validate-balance — Story 9.9. */
+/** 202 del PATCH: el confirm quedó corriendo en background — el resultado llega por el poll. */
+export interface ConfirmAccepted {
+  status: 'confirming'
+  batch_id: string
+}
+
+/**
+ * PATCH /api/v1/cartolas/{batch_id}/validate-balance — Story 9.9.
+ * Los cheap-checks (404/400) siguen sincrónicos y tiran el error tipado de siempre;
+ * el trabajo pesado responde 202 `{status:'confirming'}` y se resuelve vía polling.
+ */
 export async function validateBalance(
   batchId: string,
   body: { opening: string; closing: string; override_justification: string | null },
-): Promise<ValidateBalanceResult> {
+): Promise<ValidateBalanceResult | ConfirmAccepted> {
   const res = await fetch(`${api.baseUrl}/api/v1/cartolas/${batchId}/validate-balance`, {
     method: 'PATCH',
     credentials: 'include',
