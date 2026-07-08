@@ -15,16 +15,15 @@ _PAYMENT_OPS = {"pago"}
 _SKIP_MOVEMENT_OPS = {"apertura"}  # la apertura es saldo inicial, no un movimiento del mes
 
 
-def _movements(entries: list, bank_account_id: str, year_month: str, tc_real_account: str):
+def _movements(txns: list, bank_account_id: str, year_month: str, tc_real_account: str):
     """Movimientos de la cartola `year_month` (para el detalle expandible) + Σs por tipo.
 
     El monto de cada movimiento = la pata a `tc_real_account` (CLP posteado); la apertura se excluye.
+    Recibe `txns` ya filtrado a Transactions (D7 — single-pass desde `build_rows`).
     """
     movements: list[dict] = []
     sum_compras = sum_pagos = sum_cargos = 0.0
-    for e in entries:
-        if not isinstance(e, data.Transaction):
-            continue
+    for e in txns:
         meta = e.meta or {}
         if (meta.get("source") != "cartola-tc"
                 or meta.get("bank_account_id") != bank_account_id
@@ -77,10 +76,12 @@ def build_rows(
     `lump_account` = la cuenta-gasto de Laudus (`Expenses:EAG:TC:<stem>-<code>`, = `resolver.resolve`).
     `year_month` opcional filtra a un solo mes.
     """
+    # D7: filtra a Transactions UNA vez y reusa el mismo `txns` para el descubrimiento de períodos,
+    # cada `compute_tc_cuadre` y cada `_movements` (antes cada uno re-escaneaba el ledger completo).
+    txns = [e for e in entries if isinstance(e, data.Transaction)]
+
     periods: set[str] = set()
-    for e in entries:
-        if not isinstance(e, data.Transaction):
-            continue
+    for e in txns:
         meta = e.meta or {}
         if (meta.get("source") == "cartola-tc"
                 and meta.get("bank_account_id") == bank_account_id
@@ -92,9 +93,9 @@ def build_rows(
     rows: list[dict] = []
     for ym in sorted(periods, reverse=True):
         cuadre = compute_tc_cuadre(
-            entries, tc_real_account=tc_real_account, lump_account=lump_account,
+            txns, tc_real_account=tc_real_account, lump_account=lump_account,
             year_month=ym, bank_account_id=bank_account_id)
-        movements, sums = _movements(entries, bank_account_id, ym, tc_real_account)
+        movements, sums = _movements(txns, bank_account_id, ym, tc_real_account)
         rows.append({
             **cuadre,
             "card": bank_account_id,

@@ -73,3 +73,26 @@ class BankAccountResolver:
     def resolve(self, bank_account_id: str) -> str:
         """Full Beancount account name for the bank account."""
         return self.get(bank_account_id).account
+
+
+# ── Resolver cacheado por request (D7) ────────────────────────────────────────
+# El router de cuadre TC instanciaba un BankAccountResolver nuevo por request → re-parseaba
+# accounts.beancount cada vez. Cache keyed por path, invalidado por (mtime, size) del archivo:
+# cuando accounts.beancount cambia (edit vía Fava / flujo 10.3) el resolver se reconstruye solo.
+_RESOLVER_CACHE: dict[str, tuple[tuple[float, int], "BankAccountResolver"]] = {}
+
+
+def resolver_for(accounts_path: str | os.PathLike) -> "BankAccountResolver":
+    """BankAccountResolver cacheado (parseado una vez, invalidado por cambio de archivo)."""
+    key = str(accounts_path)
+    try:
+        stat = os.stat(key)
+        stamp = (stat.st_mtime, stat.st_size)
+    except OSError:
+        stamp = (-1.0, -1)
+    cached = _RESOLVER_CACHE.get(key)
+    if cached is not None and cached[0] == stamp:
+        return cached[1]
+    resolver = BankAccountResolver(key)  # lazy: parsea en el primer .resolve() (preserva el path viejo)
+    _RESOLVER_CACHE[key] = (stamp, resolver)
+    return resolver

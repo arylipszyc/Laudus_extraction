@@ -40,16 +40,15 @@ def _native_tol(currency: str) -> Decimal:
     return _TOL_USD if (currency or "CLP") != "CLP" else _TOL_CLP
 
 
-def _statement_meta(entries: list, tc_real_account: str, year_month: str) -> dict | None:
+def _statement_meta(txns: list, tc_real_account: str, year_month: str) -> dict | None:
     """opening/closing/fx/currency de la cartola `year_month` de esta tarjeta, desde la metadata
     persistida (Story 6.6). `None` si no hay asientos de esa cartola en el ledger.
 
     Busca el primer asiento `source=cartola-tc` con `period == year_month` que toca `tc_real_account`
     y trae `opening`/`closing` en la meta. Todos los asientos del batch llevan los mismos valores.
+    Recibe `txns` ya filtrado a Transactions (D7 — single-pass desde el caller).
     """
-    for e in entries:
-        if not isinstance(e, data.Transaction):
-            continue
+    for e in txns:
         meta = e.meta or {}
         if meta.get("source") != "cartola-tc" or meta.get("period") != year_month:
             continue
@@ -83,7 +82,11 @@ def compute_tc_cuadre(
     (opcional): scope de C3; si se pasa, C3 evalúa las compras/cuotas de ESA tarjeta (detecta la pata
     `TC:Real` destruida aunque ya no toque la cuenta); si no, C3 scopea por la cuenta.
     """
-    stmt = _statement_meta(entries, tc_real_account, year_month)
+    # D7: filtra a Transactions UNA vez; los ~6 chequeos (C1–C5) iteran solo asientos, no los 255+
+    # `open`/prices/balances del ledger. Conjunto y orden idénticos → salida byte-a-byte igual.
+    txns = [e for e in entries if isinstance(e, data.Transaction)]
+
+    stmt = _statement_meta(txns, tc_real_account, year_month)
     fx = stmt["fx"] if stmt else Decimal(1)
     currency = stmt["currency"] if stmt else "CLP"
     opening = stmt["opening"] if stmt else None
@@ -100,9 +103,7 @@ def compute_tc_cuadre(
     # (mismo CLP) → se anulan y sobrevive −closing_M×fx_M, con la apertura ya valorizada al CLP del pago
     # que la salda (fix en tc_correction). Verificado sobre 1027 USD feb/mar: diff 0,00. Tolerancia CLP.
     tc_real_balance = Decimal(0)
-    for e in entries:
-        if not isinstance(e, data.Transaction):
-            continue
+    for e in txns:
         period = (e.meta or {}).get("period") or _month(e.date)   # fallback a la fecha (6.5b)
         if period > year_month:
             continue
@@ -113,7 +114,7 @@ def compute_tc_cuadre(
     c1_ok = abs(tc_real_balance + closing_clp) <= _TOL_CLP
 
     # ── C2 — contigüidad: apertura[M] == cierre[M−1] (misma tarjeta, moneda nativa) ──
-    prev = _statement_meta(entries, tc_real_account, _prev_month(year_month))
+    prev = _statement_meta(txns, tc_real_account, _prev_month(year_month))
     if prev is None or opening is None:
         c2_ok = False
         c2_reason = "sin cartola anterior" if prev is None else "sin apertura persistida"
@@ -127,9 +128,7 @@ def compute_tc_cuadre(
     # Caza el bug de categorización (reescribía ambas patas a Expenses → pata de deuda destruida).
     # Junta la LISTA de los corruptos (fecha/glosa/monto) para que el contador vea CUÁLES arreglar.
     c3_corrupted_list: list[dict] = []
-    for e in entries:
-        if not isinstance(e, data.Transaction):
-            continue
+    for e in txns:
         meta = e.meta or {}
         if (meta.get("source") != "cartola-tc"
                 or meta.get("period") != year_month
@@ -153,9 +152,7 @@ def compute_tc_cuadre(
 
     # ── C4 — pago de la cartola vs pago que registró Laudus (idéntico a la v1) ──
     pago_cartola = Decimal(0)
-    for e in entries:
-        if not isinstance(e, data.Transaction):
-            continue
+    for e in txns:
         meta = e.meta or {}
         if meta.get("source") == "cartola-tc" and meta.get("operation_type") == "pago" \
                 and _month(e.date) == year_month:
@@ -164,8 +161,8 @@ def compute_tc_cuadre(
                     pago_cartola += p.units.number
 
     laudus_payments: list[dict] = []
-    for e in entries:
-        if not isinstance(e, data.Transaction) or _month(e.date) != year_month:
+    for e in txns:
+        if _month(e.date) != year_month:
             continue
         if (e.meta or {}).get("source") == "cartola-tc":
             continue
@@ -185,8 +182,8 @@ def compute_tc_cuadre(
 
     # ── C5 — lump residual: el gasto lumpeado del mes quedó neteado (≈0) tras la cartola ──
     lump_residual = Decimal(0)
-    for e in entries:
-        if isinstance(e, data.Transaction) and _month(e.date) == year_month:
+    for e in txns:
+        if _month(e.date) == year_month:
             for p in e.postings:
                 if p.account == lump_account and p.units:
                     lump_residual += p.units.number

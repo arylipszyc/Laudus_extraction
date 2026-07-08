@@ -16,7 +16,7 @@ from backend.app.api.v1.tc_reconciliation.service import build_rows, distinct_tc
 from backend.app.auth.schemas import UserSession
 from backend.app.dependencies import get_ledger_service, require_role
 from backend.app.services.ledger_service import LedgerService
-from pipeline.importers.bank_account_resolver import BankAccountResolver, UnknownBankAccount
+from pipeline.importers.bank_account_resolver import UnknownBankAccount, resolver_for
 from pipeline.importers.tc_correction import TcCorrectionBlocked, tc_real_account
 
 router = APIRouter(prefix="/tc", tags=["tc-reconciliation"])
@@ -31,7 +31,7 @@ def get_tc_reconciliation(
 ) -> list[TcReconciliationRow]:
     """Cuadre C1–C5 por mes de la tarjeta `card` (= `bank_account_id`)."""
     root = Path(ledger.main_path).parent
-    resolver = BankAccountResolver(root / "accounts.beancount")
+    resolver = resolver_for(root / "accounts.beancount")
     try:
         expense_tc = resolver.resolve(card)          # cuenta-gasto Laudus (lump)
     except UnknownBankAccount:
@@ -57,7 +57,7 @@ def list_tc_cartolas(
     de cobertura. READ-ONLY."""
     entries = ledger.entries()
     root = Path(ledger.main_path).parent
-    resolver = BankAccountResolver(root / "accounts.beancount")
+    resolver = resolver_for(root / "accounts.beancount")
     out: list[TcCartolaSummary] = []
     for card in distinct_tc_cards(entries):
         try:
