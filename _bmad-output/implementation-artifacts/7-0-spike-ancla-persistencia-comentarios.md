@@ -1,6 +1,6 @@
 # Story 7.0: Spike/decisión — ancla estable de comentarios + capa de persistencia (`owner_comments`)
 
-Status: ready-for-dev
+Status: done  <!-- 2026-07-08 dev (agente) + review (mío): ancla 3 capas correcta, _tx_id_of idéntico al canónico de transactions/service.py, orphaned conservador, persistencia bajo lock sin bean-check. 17 tests, 729 passed/1 xfailed, 0 regresiones. Nits menores (copia de _tx_id_of; path git hardcodeado) no bloquean. -->
 
 <!-- Story HABILITADORA del Epic 7 "Colaboración Owner-Contador". Bloquea 7.1–7.5.
      No entrega UI de usuario final; entrega la decisión de arquitectura + el módulo base
@@ -168,12 +168,53 @@ Un re-import de cartola **sobrescribe el archivo completo con el mismo slug** (i
 
 ### Agent Model Used
 
-_(pendiente — story no implementada)_
+Claude Opus 4.8 (1M context) — dev-story 7.0.
 
 ### Completion Notes List
 
-_(pendiente)_
+- **Módulo único `pipeline/importers/owner_comments_writer.py`** (opción por defecto del spike: writer +
+  lógica pura + persistencia bajo lock juntos, cohesión con `discrepancy_writer.py`). Reusa
+  `compute_tx_id` de `transactions/service.py` (import liviano: ese módulo solo trae hashlib/logging/
+  datetime/pathlib/beancount, sin FastAPI → no hay ciclo ni peso extra) y `acquire_lock`/
+  `git_commit_push`/`_ledger_root` de `laudus_run.py`.
+- **Ancla de 3 capas (`resolve_anchor`, AC3):** (1) índice por `tx_id` (`_tx_id_of`) → exactamente uno =
+  `resolved`; (2) fallback: recomputa `anchor_key` sobre cada `entry` vivo (`_anchor_key_of`) → exactamente
+  uno = `re-anchored` con el **nuevo** `tx_id`; (3) cero o >1 = `orphaned`, `entry=None`. Devuelve
+  `{status, tx_id, entry}`.
+- **Degradado (`orphaned`):** `resolve_anchor` nunca lanza ni descarta; devuelve `entry=None` y el llamador
+  (7.2/7.4) renderiza el hilo con el `tx_snapshot` congelado. Cubre tx borrada **y** `anchor_key` ambigua
+  (dos tx idénticas → >1 match → orphaned conservador, no re-ancla al azar).
+- **Decisión Ary aplicada:** re-resolución EN CALIENTE, sin "sanar" el JSONL. El evento `anchor-heal` está
+  modelado en el schema (`read_threads` lo ignora explícitamente) pero **no se emite** en 7.0.
+- **`compute_anchor_key` (AC2):** `sha256(date · amount · account · narration_normalizada)[:12]`.
+  Normalización NFKD→ASCII + lower + colapso de espacios (misma técnica que `camel_leaf`). Acepta
+  `date`/Decimal/str. Test de invariante: dos renders con distinto filename/lineno → **distinto `tx_id`,
+  idéntica `anchor_key`**.
+- **`persist_and_commit` (AC6):** `acquire_lock(.import.lock)` → `mutate(path)` (el append) →
+  `git_commit_push(["ledger/_meta/owner-comments.jsonl"])`. **Sin `bean-check`** (el JSONL no es cargable
+  por beancount — diferencia deliberada con `apply_to_accounts`). Es la única vía de escritura para 7.1–7.4.
+- **`read_threads` pliega por `thread_id`** a `{thread_id, root, replies[], resolution|None}`; la última
+  línea `resolution` gana (patrón "último run gana" de `list_periods`).
+- **ADR:** `_bmad-output/planning-artifacts/adr-owner-comments-ancla-persistencia.md` con las 5 secciones
+  de AC7 (riesgo `tx_id` volátil, estrategia 3 capas + snapshot, JSONL+git vs DB, postura RBAC de `family`,
+  diferidos).
+- **Tests:** 17 nuevos (8 writer/persistencia, 9 anchor). Suite completa `PYTHONUTF8=1 pytest backend/tests -q`
+  → **729 passed, 1 xfailed** (baseline 712 + 17 nuevos, **0 regresiones**). Nota: los 2 rojos históricos de
+  `test_fava_edit_validator` no aparecen en esta corrida (0 failed).
+- **Sin git commit/push** (pendiente de review, como pidió el brief). Working tree tiene: el módulo nuevo,
+  los 2 archivos de test y el ADR.
+- **Desvío menor:** `_normalize_narration` se hizo helper privado en vez de inline dentro de
+  `compute_anchor_key` (legibilidad; sin impacto funcional).
 
 ### File List
 
-_(pendiente)_
+- `pipeline/importers/owner_comments_writer.py` (nuevo) — writer JSONL + ancla 3 capas + `persist_and_commit`.
+- `backend/tests/test_owner_comments_writer.py` (nuevo) — `build_comment`/`append_*`/`read_threads` round-trip + `persist_and_commit` (con y sin git).
+- `backend/tests/test_owner_comments_anchor.py` (nuevo) — `compute_anchor_key` (AC2) + `resolve_anchor` 3 caminos (AC3) + `build_anchor`/`ledger_head_sha` (AC4/AC5).
+- `_bmad-output/planning-artifacts/adr-owner-comments-ancla-persistencia.md` (nuevo) — ADR (AC7).
+
+### Change Log
+
+- 2026-07-08 — Story 7.0 implementada (spike/enabler Epic 7). Módulo `owner_comments_writer`, ancla de 3
+  capas resistente a re-imports, persistencia append-only bajo lock, ADR. 17 tests nuevos, suite 729
+  passed/1 xfailed sin regresiones. Status → review. Sin commit (a pedido).
