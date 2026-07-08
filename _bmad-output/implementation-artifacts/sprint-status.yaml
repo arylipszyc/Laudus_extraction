@@ -110,9 +110,12 @@ development_status:
   # ── Epic 6 tail (hardening — reabre epic-6 `done`, NO feature nueva) ──
   6-7-batch-resolve-discrepancias: done  # 2026-07-08 dev (agente) + review 3 capas (Blind+Edge+D7-guard, mío) → DONE. Batch endpoint 1 bean_check+1 commit para N + cierra los 2 defers de atomicidad de 6.3 (render-all→lock→write-único→bean_check→push try/except→rollback total→append_resolution solo tras push OK + dedup por ref_discrepancy_id). 0 bloqueantes; 4 patches (G1 ambiguos se escalan / dedup single / G2 selectableIds / G6 aviso 400) + 4 defers (G3/G4/G5/G7) en deferred-work. Decisiones Ary (técnicas, delegadas): tope 50/mixto/justificación común/no-JSONL/no-migra-single. Suite 712 passed/1 xfailed, tsc+vitest verdes. SIN COMMIT.
 
+  # ── Cross-cutting (hardening balance-sheet, gated) ───────────────────
+  story-b6-saldos-usd-balance: draft  # 2026-07-08 story-izada desde el veredicto de Valentina (doc valentina-tratamiento-saldos-usd-balance-2026-07-08). Saldos USD-nativos colapsan a 0 en el balance (_clp descarta la pata USD, bql_queries.py:46-53). LATENTE (0 postings USD hoy). Política híbrida: guardar USD nativo + convertir a CLP al BCCh-EOM en capa de presentación (dual US$/CLP), dif de cambio se muestra no se bookea. GATED: 2 decisiones de Valentina p/Ary + hacer ANTES de cargar el 1er saldo USD (si no, sale en 0 = descuadre silencioso).
+
   # ── Epic 7: Colaboración Owner-Contador (FR36–41) ────────────────────
   epic-7: in-progress  # 2026-07-08: 6 stories redactadas (backlog → planning). Sin dev todavía.
-  7-0-spike-ancla-persistencia-comentarios: ready-for-dev  # habilitadora: ancla 3 capas (tx_id+ledger_git_sha+anchor_key semántico+tx_snapshot) resistente a re-import + writer owner-comments.jsonl en _meta/ (commit+push, NO DB, NO al .beancount). Bloquea al resto.
+  7-0-spike-ancla-persistencia-comentarios: done  # 2026-07-08 dev (agente) + review (mío) → DONE. Módulo owner_comments_writer.py: ancla 3 capas (tx_id+ledger_git_sha+anchor_key semántico+tx_snapshot) resistente a re-import, resolve_anchor en caliente (tx_id→anchor_key→orphaned degradado, decisión Ary=no sanar el JSONL), persist_and_commit bajo .import.lock SIN bean-check (no es asiento), read_threads pliega el JSONL (última resolución gana). ADR en planning-artifacts. _tx_id_of idéntico al canónico de transactions/service.py (build_anchor no rechaza tx_ids válidos). 17 tests, suite 729/1 xfailed, 0 regresiones. SIN COMMIT→commiteado 2026-07-08.
   7-1-owner-crea-comentario: draft  # FR36. Primer endpoint de ESCRITURA para rol family (solo comentarios).
   7-2-inbox-contador-respuesta: draft  # FR38, FR39.
   7-3-resolver-thread: draft  # FR40.
