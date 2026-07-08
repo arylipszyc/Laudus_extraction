@@ -103,6 +103,31 @@ def test_confirm_cartola_only_anota_y_cierra(tmp_path):
     assert len(_resolution_lines(root)) == 1
 
 
+# ── Story 6.7 (review): dedup del path single — no re-escribe una tx ya anotada ──
+
+
+def test_single_dedup_no_reescribe_tx_ya_anotada(tmp_path):
+    """Ventana crash: el batch commiteó la tx pero no cerró la discrepancia; cerrarla luego por el
+    path single NO debe re-escribir la tx (doble-conteo). `annotate_discrepancy` dedup por ref."""
+    from pipeline.importers.reconcile import annotate_discrepancy
+
+    root = _root(tmp_path)
+    did = _missing_in_laudus(root)
+    disc = read_discrepancies(path=_jsonl(root), discrepancy_id=did)["discrepancies"][0]
+    imp = _importer(root)
+    r1 = annotate_discrepancy(disc, category_account="Expenses:EAG:Super",
+                              importer=imp, ledger_root=root, ts=_TS)
+    assert r1["success"]
+    content1 = _manual_files(root)[0].read_text(encoding="utf-8")
+    # segunda anotación del MISMO id (la tx ya está en el archivo) → no duplica
+    r2 = annotate_discrepancy(disc, category_account="Expenses:EAG:Super",
+                              importer=imp, ledger_root=root, ts=_TS)
+    assert r2["success"]
+    content2 = _manual_files(root)[0].read_text(encoding="utf-8")
+    assert content1 == content2                                  # no re-escribió (dedup)
+    assert content2.count(f'ref_discrepancy_id: "{did}"') == 1
+
+
 # ── AC2: bean-check rojo → 422, discrepancia sigue abierta, sin resolución ─────
 
 

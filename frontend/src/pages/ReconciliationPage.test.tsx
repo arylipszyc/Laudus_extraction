@@ -5,13 +5,16 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 vi.mock('@/services/reconciliation', async (orig) => {
   const actual = await orig<typeof import('@/services/reconciliation')>()
-  return { ...actual, getDiscrepancies: vi.fn(), getHistory: vi.fn(), resolveDiscrepancy: vi.fn(), getPeriods: vi.fn() }
+  return { ...actual, getDiscrepancies: vi.fn(), getHistory: vi.fn(), resolveDiscrepancy: vi.fn(),
+    resolveBatch: vi.fn(), getPeriods: vi.fn() }
 })
 vi.mock('@/services/bankAccounts', () => ({ listBankAccounts: vi.fn() }))
 vi.mock('@/services/accounts', () => ({ listAccounts: vi.fn() }))
 
 import { ReconciliationPage } from './ReconciliationPage'
-import { getDiscrepancies, getHistory, getPeriods, resolveDiscrepancy } from '@/services/reconciliation'
+import {
+  getDiscrepancies, getHistory, getPeriods, resolveBatch, resolveDiscrepancy, ResolveHttpError,
+} from '@/services/reconciliation'
 import { listBankAccounts } from '@/services/bankAccounts'
 import { listAccounts } from '@/services/accounts'
 
@@ -43,6 +46,10 @@ describe('<ReconciliationPage /> (Story 6.4)', () => {
     ])
     vi.mocked(listAccounts).mockResolvedValue(['Expenses:EAG:Super', 'Expenses:EAG:Luz'])
     vi.mocked(resolveDiscrepancy).mockResolvedValue({ status: 'resolved', git_commit_sha: 'abc1234567' })
+    vi.mocked(resolveBatch).mockResolvedValue({
+      git_commit_sha: 'abc1234567',
+      results: [{ discrepancy_id: 'd1', status: 'resolved', action: 'confirm-cartola-only', git_commit_sha: 'abc1234567' }],
+    })
     vi.mocked(getPeriods).mockResolvedValue([])
   })
 
@@ -91,6 +98,77 @@ describe('<ReconciliationPage /> (Story 6.4)', () => {
     await waitFor(() => expect(resolveDiscrepancy).toHaveBeenCalledWith('d1', expect.objectContaining({
       action: 'confirm-cartola-only', category_account: null,
     })))
+  })
+
+  // ── Story 6.7 — multiselect + batch-resolve (AC8) ──────────────────────────
+
+  it('AC8: marca una fila → aparece la barra de acción y envía el request batch', async () => {
+    renderPage()
+    await screen.findByText('GASTO REAL')
+    // marcar la fila (checkbox por fila)
+    fireEvent.click(screen.getByLabelText('Seleccionar d1'))
+    // la barra de acción aparece
+    expect(await screen.findByText('1 seleccionada')).toBeInTheDocument()
+    // justificación común + resolver
+    fireEvent.change(screen.getByPlaceholderText(/Justificación común/), {
+      target: { value: 'cierre de mes verificado contra el banco' },
+    })
+    fireEvent.click(screen.getByText('Resolver 1 seleccionada'))
+    await waitFor(() => expect(resolveBatch).toHaveBeenCalledWith(
+      [{ discrepancy_id: 'd1', action: 'confirm-cartola-only' }],
+      'cierre de mes verificado contra el banco',
+    ))
+    // resultado agregado
+    expect(await screen.findByText(/1 diferencia\(s\) resuelta\(s\)/)).toBeInTheDocument()
+  })
+
+  it('AC8: "seleccionar todo" marca todas las filas', async () => {
+    vi.mocked(getDiscrepancies).mockResolvedValue({
+      discrepancies: [DISC, { ...DISC, discrepancy_id: 'd2' }],
+      summary: { total: 2, by_state: { 'missing-in-laudus': 2 } },
+    })
+    renderPage()
+    await screen.findAllByText('GASTO REAL')
+    fireEvent.click(screen.getByLabelText('Seleccionar todo'))
+    expect(await screen.findByText('2 seleccionadas')).toBeInTheDocument()
+    fireEvent.change(screen.getByPlaceholderText(/Justificación común/), {
+      target: { value: 'cierre de mes verificado contra el banco' },
+    })
+    fireEvent.click(screen.getByText('Resolver 2 seleccionadas'))
+    await waitFor(() => expect(resolveBatch).toHaveBeenCalledWith(
+      [{ discrepancy_id: 'd1', action: 'confirm-cartola-only' },
+       { discrepancy_id: 'd2', action: 'confirm-cartola-only' }],
+      'cierre de mes verificado contra el banco',
+    ))
+  })
+
+  it('AC8: 422 muestra el aviso "siguen ABIERTAS"', async () => {
+    vi.mocked(resolveBatch).mockRejectedValue(new ResolveHttpError(422, 'd1: bean-check failed'))
+    renderPage()
+    await screen.findByText('GASTO REAL')
+    fireEvent.click(screen.getByLabelText('Seleccionar d1'))
+    fireEvent.change(await screen.findByPlaceholderText(/Justificación común/), {
+      target: { value: 'cierre de mes verificado contra el banco' },
+    })
+    fireEvent.click(screen.getByText('Resolver 1 seleccionada'))
+    expect(await screen.findByText(/siguen ABIERTAS/)).toBeInTheDocument()
+  })
+
+  it('AC8/G1: estado ambiguo (value-mismatch) se ESCALA, no acepta una cara en silencio', async () => {
+    vi.mocked(getDiscrepancies).mockResolvedValue({
+      discrepancies: [{ ...DISC, discrepancy_id: 'dv', state: 'value-mismatch',
+        laudus: { date: '2026-04-15', amount: -40000, currency: 'CLP' } }],
+      summary: { total: 1, by_state: { 'value-mismatch': 1 } },
+    })
+    renderPage()
+    await screen.findByText('GASTO REAL')
+    fireEvent.click(screen.getByLabelText('Seleccionar dv'))
+    // avisa que se escalará (no elige accept-cartola/accept-laudus en silencio) y no pide justificación
+    expect(await screen.findByText(/se escalarán/)).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Resolver 1 seleccionada'))
+    await waitFor(() => expect(resolveBatch).toHaveBeenCalledWith(
+      [{ discrepancy_id: 'dv', action: 'escalate' }], null,
+    ))
   })
 
   it('Story 6.5 AC6: el indicador muestra períodos complete y pending (cuenta como nombre)', async () => {

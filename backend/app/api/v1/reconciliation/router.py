@@ -5,6 +5,7 @@ GET  /api/v1/reconciliation/history/{id}           — audit trail de una discre
 GET  /api/v1/reconciliation/count                  — {total, blocking} para el chip (AC9)
 GET  /api/v1/reconciliation/periods                — estado por (cuenta, mes) (Story 6.5 AC3)
 POST /api/v1/reconciliation/discrepancies/{id}/resolve — resuelve/escala (AC3/AC4)
+POST /api/v1/reconciliation/discrepancies/resolve-batch — batch-resolve todo-o-nada (Story 6.7)
 RBAC: contador/admin (family no accede).
 """
 from __future__ import annotations
@@ -14,6 +15,8 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.app.api.v1.reconciliation.models import (
+    BatchResolveRequest,
+    BatchResolveResponse,
     CountResponse,
     PeriodStatus,
     ResolveRequest,
@@ -27,6 +30,7 @@ from backend.app.api.v1.reconciliation.service import (
     pending_count,
     read_discrepancies,
     resolve,
+    resolve_batch,
 )
 from backend.app.auth.schemas import UserSession
 from backend.app.dependencies import require_role
@@ -83,3 +87,21 @@ def resolve_discrepancy(
     except AnnotationFailed as exc:
         raise HTTPException(status_code=422, detail=str(exc))
     return ResolveResponse(**result)
+
+
+@router.post("/discrepancies/resolve-batch", response_model=BatchResolveResponse)
+def resolve_discrepancies_batch(
+    request: BatchResolveRequest,
+    user: UserSession = Depends(require_role(["contador", "admin"])),
+) -> BatchResolveResponse:
+    """Batch-resolve (Story 6.7): N diferencias en un `bean_check` + un commit, todo-o-nada."""
+    try:
+        result = resolve_batch(
+            [it.model_dump() for it in request.items],
+            justification=request.justification,
+            user_email=user.email, now_iso=datetime.now(timezone.utc).isoformat())
+    except ResolveError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except AnnotationFailed as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    return BatchResolveResponse(**result)

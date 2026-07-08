@@ -9,6 +9,7 @@ import {
   getDiscrepancies,
   getHistory,
   getPeriods,
+  resolveBatch,
   resolveDiscrepancy,
   ResolveHttpError,
   type Discrepancy,
@@ -30,6 +31,10 @@ export function ReconciliationPage() {
   const [bankFilter, setBankFilter] = useState('')
   const [manualSelected, setManualSelected] = useState<Discrepancy | null>(null)
   const [deepLinkDismissed, setDeepLinkDismissed] = useState(false)
+  // Story 6.7 — multiselect para batch-resolve.
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [batchJustification, setBatchJustification] = useState('')
+  const [batchOk, setBatchOk] = useState<string | null>(null)
   const qc = useQueryClient()
 
   const { data, isLoading, error } = useQuery({
@@ -65,6 +70,55 @@ export function ReconciliationPage() {
 
   const hasFilters = stateFilter !== null || monthFilter !== '' || bankFilter !== ''
   const clearFilters = () => { setStateFilter(null); setMonthFilter(''); setBankFilter('') }
+
+  // Story 6.7 — batch-resolve. La acción por item se auto-deriva SOLO cuando el estado tiene una única
+  // acción no-escalate (missing-in-laudus→confirm-cartola-only, missing-in-cartola→confirm-laudus-only).
+  // Los estados ambiguos (value/date/description/category-mismatch, fx-out-of-tolerance) tienen 2+
+  // decisiones opuestas (accept-cartola vs accept-laudus) → NO se elige una en silencio: se ESCALAN para
+  // revisión individual en el drill-down (fix review G1: evita registrar accept-cartola silenciosamente).
+  const rows = data?.discrepancies ?? []
+  const discById = useMemo(() => Object.fromEntries(rows.map((d) => [d.discrepancy_id, d])), [rows])
+  const batchAction = (state: string) => {
+    const acts = (ACTIONS_BY_STATE[state] ?? []).filter((a) => a !== 'escalate')
+    return acts.length === 1 ? acts[0] : 'escalate'
+  }
+  const toggleRow = (id: string) => setSelectedIds((prev) => {
+    const next = new Set(prev)
+    if (next.has(id)) next.delete(id); else next.add(id)
+    return next
+  })
+  const allSelected = rows.length > 0 && rows.every((d) => selectedIds.has(d.discrepancy_id))
+  const toggleAll = () => setSelectedIds(allSelected ? new Set() : new Set(rows.map((d) => d.discrepancy_id)))
+  // Sólo los ids todavía visibles son accionables (selectedIds sobrevive a cambios de filtro) —
+  // evita el TypeError por discById[id] undefined en el mutationFn (fix review G2).
+  const selectableIds = [...selectedIds].filter((id) => discById[id])
+  const selectedActions = selectableIds.map((id) => batchAction(discById[id].state))
+  const escalateCount = selectedActions.filter((a) => a === 'escalate').length
+  const resolveCount = selectedActions.length - escalateCount
+  const allEscalate = selectedActions.length > 0 && escalateCount === selectedActions.length
+  const needsBatchJust = !allEscalate
+
+  const batchMutation = useMutation({
+    mutationFn: () => resolveBatch(
+      selectableIds.map((id) => ({ discrepancy_id: id, action: batchAction(discById[id].state) })),
+      needsBatchJust ? batchJustification : null,
+    ),
+    onSuccess: (res) => {
+      const annotated = res.results.filter((r) => r.git_commit_sha).length
+      setBatchOk(`✓ ${res.results.length} diferencia(s) resuelta(s)`
+        + (annotated ? ` — ${annotated} anotada(s)${res.git_commit_sha ? ` (${res.git_commit_sha.slice(0, 7)})` : ''}.` : '.'))
+      setSelectedIds(new Set())
+      setBatchJustification('')
+      qc.invalidateQueries({ queryKey: ['reconciliation'] })
+      qc.invalidateQueries({ queryKey: ['reconciliation-count'] })
+    },
+  })
+  const batchErr = batchMutation.error
+  // Tanto 400 (preflight: id inexistente/ya-resuelto/duplicado/excede-tope) como 422 (bean-check/push
+  // con rollback total) significan que NADA se escribió → mismo aviso "siguen ABIERTAS" (fix review G6).
+  const batchFailedClosed = batchErr instanceof ResolveHttpError && (batchErr.status === 400 || batchErr.status === 422)
+  const canBatch = selectableIds.length > 0 && !batchMutation.isPending
+    && (!needsBatchJust || batchJustification.trim().length >= 10)
 
   return (
     <div className="p-6 space-y-6 max-w-6xl">
@@ -122,11 +176,40 @@ export function ReconciliationPage() {
         </Card>
       )}
 
+      {/* Barra de acción del batch (Story 6.7 AC8): aparece cuando hay filas seleccionadas. */}
+      {selectedIds.size > 0 && (
+        <Card className="p-4 space-y-3 border-primary/40">
+          <p className="text-sm font-medium">
+            {selectableIds.length} seleccionada{selectableIds.length === 1 ? '' : 's'}
+            {escalateCount > 0 && ` — ${resolveCount} se resolverán, ${escalateCount} se escalarán (revisar individualmente)`}
+          </p>
+          {needsBatchJust && (
+            <textarea value={batchJustification} onChange={(e) => setBatchJustification(e.target.value)} rows={2}
+              placeholder="Justificación común (≥10 caracteres)"
+              className="w-full border rounded-md px-3 py-2 bg-background text-sm" />
+          )}
+          {batchErr && (
+            <div className="text-sm rounded-md px-3 py-2 bg-red-50 text-red-600">
+              <p>{(batchErr as Error).message}</p>
+              {batchFailedClosed && <p className="font-medium mt-1">Las diferencias siguen ABIERTAS — no se contabilizó nada.</p>}
+            </div>
+          )}
+          <div className="flex gap-2">
+            <Button size="sm" onClick={() => { setBatchOk(null); batchMutation.mutate() }} disabled={!canBatch}>
+              {batchMutation.isPending ? 'Resolviendo…' : `Resolver ${selectedIds.size} seleccionada${selectedIds.size === 1 ? '' : 's'}`}
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setSelectedIds(new Set())}>Cancelar</Button>
+          </div>
+        </Card>
+      )}
+      {batchOk && <p className="text-sm rounded-md px-3 py-2 bg-green-50 text-green-700">{batchOk}</p>}
+
       {data && data.discrepancies.length > 0 && (
         <Card className="p-0 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b text-left">
+                <th className="p-2"><input type="checkbox" aria-label="Seleccionar todo" checked={allSelected} onChange={toggleAll} /></th>
                 <th className="p-2">Fecha</th><th className="p-2">Estado</th><th className="p-2">Cuenta</th>
                 <th className="p-2 text-right">Cartola</th><th className="p-2 text-right">Laudus</th>
                 <th className="p-2">Descripción</th><th className="p-2">FX dev%</th><th className="p-2" />
@@ -135,6 +218,8 @@ export function ReconciliationPage() {
             <tbody>
               {data.discrepancies.map((d) => (
                 <tr key={d.discrepancy_id} className="border-b hover:bg-accent/40">
+                  <td className="p-2"><input type="checkbox" aria-label={`Seleccionar ${d.discrepancy_id}`}
+                    checked={selectedIds.has(d.discrepancy_id)} onChange={() => toggleRow(d.discrepancy_id)} /></td>
                   <td className="p-2">{d.cartola?.date ?? d.laudus?.date ?? '—'}</td>
                   <td className="p-2"><StateBadge state={d.state} /></td>
                   <td className="p-2 text-xs">{d.bank_account_id ? (bankNameById[d.bank_account_id] ?? d.bank_account_id) : '—'}</td>

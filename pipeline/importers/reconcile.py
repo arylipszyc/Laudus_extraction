@@ -227,53 +227,46 @@ def commit_reconciliation(file_path, new_content: str, discrepancy_id: str, acti
 # ── Anotación de una diferencia aprobada → tx al ledger (Story 6.3, modelo A) ──
 
 
-def annotate_discrepancy(
-    discrepancy: dict,
-    *,
-    category_account: str | None,
-    importer,
-    ledger_root,
-    ts: str,
-) -> dict:
-    """Anota una diferencia `missing-in-laudus` aprobada: renderiza la tx de la cartola y la escribe
-    a la zona `manual/` (Story 6.3, modelo A — cierra el lazo "aprobar → contabilizar").
+class AnnotationRenderError(Exception):
+    """El render de la tx de una diferencia aprobada falló (datos/cuenta/FX) → no se puede anotar.
 
-    Append puro (la línea existe en la cartola, no en Laudus → es un gasto real que falta), por eso
-    NO toca `imports/laudus/*`. Escribe a `manual/reconciliation-<cuenta>-<YYYY-MM>.beancount` (incluido
-    por `main.beancount`), vía `commit_reconciliation` (write-and-replace + bean-check + rollback + git).
+    Helper compartido single+batch (Story 6.7): el single la traduce a su `fail` dict; el batch la
+    usa como falla de preflight (nada escrito). El mensaje es idéntico al que usaba `annotate_discrepancy`
+    inline, para no cambiar el 422 del path single (anti-regresión AC7)."""
 
-    Categoría (decisión Ary Q2): si el contador no fija una cuenta destino → `Suspense` + `category_status
-    "pending"` (lo levanta `/categorizacion` 9.7); si fija una `Expenses:...` real → `confirmed`.
 
-    Devuelve el mismo shape que `commit_reconciliation`: `{success, git_commit_sha, error_msg, file, ...}`.
+def _render_annotation_entry(discrepancy: dict, category_account: str | None, importer):
+    """Render PURO de la tx de un `missing-in-laudus` aprobado (`confirm-cartola-only`).
+
+    Extraído de `annotate_discrepancy` (Story 6.7) para que el path single y el motor batch compartan
+    la construcción de signo/FX/meta sin duplicarla. No escribe nada. Devuelve `(entry, account_target,
+    when)`; lanza `AnnotationRenderError` (mismo mensaje que antes) si faltan datos de cartola, la cuenta
+    no resuelve, la moneda no es CLP/USD, o el FX USD no es > 0.
+
+    Categoría (decisión Ary Q2): sin cuenta destino → `Suspense` + `category_status "pending"` (lo levanta
+    `/categorizacion` 9.7); una `Expenses:...` real → `confirmed`.
     """
     from datetime import date as _date
-    from pathlib import Path
 
     from beancount.core import data
 
     from pipeline.importers.bank_account_resolver import UnknownBankAccount
     from pipeline.importers.category_predictor import SUSPENSE_ACCOUNT
     from pipeline.importers.cartola_pdf_importer import (
-        _LIABILITY_ROOT, _build_postings, build_usd_postings, render_entries,
+        _LIABILITY_ROOT, _build_postings, build_usd_postings,
     )
 
-    root = Path(ledger_root)
     disc_id = discrepancy.get("discrepancy_id")
     cartola = discrepancy.get("cartola") or {}
     bank_account_id = discrepancy.get("bank_account_id")
 
-    fail = {"discrepancy_id": disc_id, "action": "confirm-cartola-only", "file": None,
-            "success": False, "error_msg": None, "git_commit_sha": None}
     if not cartola or cartola.get("amount") is None or not cartola.get("date"):
-        fail["error_msg"] = "la discrepancia no tiene datos de cartola para anotar"
-        return fail
+        raise AnnotationRenderError("la discrepancia no tiene datos de cartola para anotar")
 
     try:  # fail-closed: id desconocido/None → 422 limpio (AC2), no 500 con la discrepancia abierta
         account_target = importer.resolver.resolve(bank_account_id)
     except UnknownBankAccount as exc:
-        fail["error_msg"] = f"no se puede anotar: {exc}"
-        return fail
+        raise AnnotationRenderError(f"no se puede anotar: {exc}")
     is_liability = account_target.startswith(_LIABILITY_ROOT)
     category = category_account or SUSPENSE_ACCOUNT
     is_suspense = category == SUSPENSE_ACCOUNT
@@ -286,12 +279,10 @@ def annotate_discrepancy(
     meta_extra: dict = {}
     if currency != "CLP":
         if currency != "USD":  # fail-closed: build_usd_postings hardcodea USD/CLP → no rutear EUR etc.
-            fail["error_msg"] = f"moneda {currency!r} no soportada para anotar (sólo CLP/USD)"
-            return fail
+            raise AnnotationRenderError(f"moneda {currency!r} no soportada para anotar (sólo CLP/USD)")
         fx_implied = (discrepancy.get("fx") or {}).get("implied")
         if fx_implied is None or Decimal(str(fx_implied)) <= 0:
-            fail["error_msg"] = "no se puede anotar la línea USD: FX ausente o no-positivo (BCCh)"
-            return fail
+            raise AnnotationRenderError("no se puede anotar la línea USD: FX ausente o no-positivo (BCCh)")
         fx_implied = Decimal(str(fx_implied))
         postings = build_usd_postings(account_target, category, amount, fx_implied, is_liability)
         meta_extra["fx_implied"] = str(fx_implied)
@@ -314,14 +305,156 @@ def annotate_discrepancy(
         narration=cartola.get("description") or f"line {line_no}",
         tags=frozenset(), links=frozenset(), postings=postings,
     )
+    return entry, account_target, when
+
+
+def annotate_discrepancy(
+    discrepancy: dict,
+    *,
+    category_account: str | None,
+    importer,
+    ledger_root,
+    ts: str,
+) -> dict:
+    """Anota una diferencia `missing-in-laudus` aprobada: renderiza la tx de la cartola y la escribe
+    a la zona `manual/` (Story 6.3, modelo A — cierra el lazo "aprobar → contabilizar").
+
+    Append puro (la línea existe en la cartola, no en Laudus → es un gasto real que falta), por eso
+    NO toca `imports/laudus/*`. Escribe a `manual/reconciliation-<cuenta>-<YYYY-MM>.beancount` (incluido
+    por `main.beancount`), vía `commit_reconciliation` (write-and-replace + bean-check + rollback + git).
+
+    Devuelve el mismo shape que `commit_reconciliation`: `{success, git_commit_sha, error_msg, file, ...}`.
+    """
+    from pathlib import Path
+
+    from pipeline.importers.cartola_pdf_importer import render_entries
+
+    root = Path(ledger_root)
+    disc_id = discrepancy.get("discrepancy_id")
+    fail = {"discrepancy_id": disc_id, "action": "confirm-cartola-only", "file": None,
+            "success": False, "error_msg": None, "git_commit_sha": None}
+    try:
+        entry, account_target, when = _render_annotation_entry(discrepancy, category_account, importer)
+    except AnnotationRenderError as exc:
+        fail["error_msg"] = str(exc)
+        return fail
 
     acct_leaf = account_target.rsplit(":", 1)[-1]
     out_dir = root / "manual"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_file = out_dir / f"reconciliation-{acct_leaf}-{when.strftime('%Y-%m')}.beancount"
     existing = out_file.read_text(encoding="utf-8") if out_file.exists() else ""
+    # Dedup por ref_discrepancy_id (mismo criterio que el motor batch): si la tx YA está en el archivo
+    # —p.ej. el batch la commiteó y un crash impidió cerrar la discrepancia, y ahora se la cierra por
+    # este path single— NO la re-escribimos (evita el doble-conteo que 10.2 tapó). El caller igual
+    # appendea la resolución que falta. Normal path (ref ausente) → escribe como siempre.
+    if disc_id and f'ref_discrepancy_id: "{disc_id}"' in existing:
+        return {"discrepancy_id": disc_id, "action": "confirm-cartola-only", "file": str(out_file),
+                "success": True, "error_msg": None, "git_commit_sha": None}
     new_content = existing + render_entries([entry])
     return commit_reconciliation(out_file, new_content, disc_id, "confirm-cartola-only", root)
+
+
+def annotate_discrepancies_batch(items, *, importer, ledger_root, ts: str) -> dict:
+    """Motor batch (Story 6.7): renderiza N anotaciones, un solo `bean_check` + un solo commit/push,
+    rollback TOTAL. Cierra los 2 defers de atomicidad de 6.3.
+
+    `items` = lista de `(discrepancy, category_account)` (solo `missing-in-laudus` + `confirm-cartola-only`).
+    Secuencia todo-o-nada:
+      1. Render-all PRIMERO (sin escribir): si algún item no rinde → aborta antes de tocar el lock/disco.
+      2. Agrupa entries por archivo destino `manual/reconciliation-<leaf>-<YYYY-MM>.beancount`.
+      3. DENTRO del lock: por archivo lee `existing` UNA vez (mata el lost-update RMW, defer #2),
+         saltea las entries cuyo `ref_discrepancy_id` ya está en `existing` (dedup AC5), concatena,
+         guarda snapshot y escribe UNA vez.
+      4. `bean_check(main.beancount)` UNA vez → rojo: restaura TODOS los snapshots, `success=False`.
+      5. `git_commit_push` UNA vez, ENVUELTO en try/except (mata el commit parcial, defer #1) → si
+         lanza: restaura TODOS los snapshots, `success=False`.
+    NO appendea resoluciones (eso lo hace el service tras el push OK — simetría con 6.3).
+    Devuelve `{success, git_commit_sha, per_id, error_msg, failed_id?}`.
+    """
+    from pathlib import Path
+
+    from pipeline.importers.cartola_pdf_importer import render_entries
+    from pipeline.importers.laudus_run import acquire_lock, bean_check, git_commit_push
+
+    root = Path(ledger_root)
+    out_dir = root / "manual"
+    result = {"success": False, "git_commit_sha": None, "per_id": {}, "error_msg": None}
+
+    # 1. Render-all (sin escribir): un solo item fallido aborta el batch antes de cualquier efecto.
+    rendered: list[tuple[str, object, Path]] = []
+    for discrepancy, category_account in items:
+        disc_id = discrepancy.get("discrepancy_id")
+        try:
+            entry, account_target, when = _render_annotation_entry(discrepancy, category_account, importer)
+        except AnnotationRenderError as exc:
+            result["error_msg"] = f"{disc_id}: {exc}"
+            result["failed_id"] = disc_id
+            return result
+        acct_leaf = account_target.rsplit(":", 1)[-1]
+        out_file = out_dir / f"reconciliation-{acct_leaf}-{when.strftime('%Y-%m')}.beancount"
+        rendered.append((disc_id, entry, out_file))
+
+    # 2. Agrupar por archivo destino.
+    by_file: dict[Path, list[tuple[str, object]]] = {}
+    for disc_id, entry, out_file in rendered:
+        by_file.setdefault(out_file, []).append((disc_id, entry))
+
+    main_path = root / "main.beancount"
+    lock_path = root / ".import.lock"
+
+    with acquire_lock(lock_path):
+        out_dir.mkdir(parents=True, exist_ok=True)
+        snapshots: dict[Path, str | None] = {}
+        written_paths: list[Path] = []
+        # 3. Un solo read + un solo write por archivo, DENTRO del lock.
+        for out_file, entries in by_file.items():
+            existing = out_file.read_text(encoding="utf-8") if out_file.exists() else ""
+            snapshots[out_file] = existing if out_file.exists() else None
+            # dedup AC5: si el ref ya está en el archivo, no re-appendear (idempotente ante retry).
+            new_entries = [e for did, e in entries
+                           if f'ref_discrepancy_id: "{did}"' not in existing]
+            if not new_entries:
+                continue
+            out_file.write_text(existing + render_entries(new_entries), encoding="utf-8")
+            written_paths.append(out_file)
+
+        def _restore():
+            for p, content in snapshots.items():
+                if content is None:
+                    p.unlink(missing_ok=True)
+                else:
+                    p.write_text(content, encoding="utf-8")
+
+        if not written_paths:
+            # Todo era dedup (retry tras la ventana crash-entre-push-y-append): nada nuevo al ledger.
+            # No hay bean_check/commit nuevo; el service igual appendea las resoluciones que falten.
+            result["success"] = True
+            result["per_id"] = {did: None for did, _, _ in rendered}
+            return result
+
+        # 4. Un solo bean_check para TODAS las anotaciones.
+        ok, detail = bean_check(main_path)
+        if not ok:
+            _restore()
+            result["error_msg"] = f"bean-check failed: {detail}"
+            return result
+
+        # 5. Un solo commit/push, ENVUELTO en try/except → rollback total si lanza (defer #1).
+        rels = [str(p.relative_to(root.parent)) if root.parent in p.parents else p.name
+                for p in written_paths]
+        try:
+            sha = git_commit_push(
+                root, rels, f"[reconciliation] batch resolve {len(rendered)} discrepancia(s)")
+        except Exception as exc:  # noqa: BLE001 — cualquier fallo de git debe disparar rollback total
+            _restore()
+            result["error_msg"] = f"git push falló: {exc}"
+            return result
+
+        result["success"] = True
+        result["git_commit_sha"] = sha
+        result["per_id"] = {did: sha for did, _, _ in rendered}
+        return result
 
 
 # ── Conciliación en el promote: el SEAM del upload (Story 6.1, modelo A) ──────

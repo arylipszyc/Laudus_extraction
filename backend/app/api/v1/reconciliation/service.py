@@ -26,6 +26,11 @@ ACTIONS_BY_STATE = {
 }
 
 
+# Tope defensivo de ids por batch (Story 6.7 — decisión Ary): el costo real no escala con N
+# (un solo bean_check/push), pero se acota payload/render/tamaño del commit. 422 si se excede.
+MAX_BATCH = 50
+
+
 class ResolveError(Exception):
     """Acción inválida o justificación faltante (HTTP 400)."""
 
@@ -233,3 +238,89 @@ def resolve(discrepancy_id: str, action: str, justification: str | None,
     append_resolution(discrepancy_id, resolution, path)
     return {"status": "escalated" if action == "escalate" else "resolved",
             "discrepancy_id": discrepancy_id, "action": action, "git_commit_sha": git_commit_sha}
+
+
+def resolve_batch(items: list[dict], *, justification: str | None, user_email: str, now_iso: str,
+                  path: Path | None = None, ledger_root=None, importer=None) -> dict:
+    """Resuelve N discrepancias como UNA unidad transaccional (Story 6.7) — un `bean_check` + un commit.
+
+    `items` = `[{discrepancy_id, action, category_account?}]`. `justification` es COMÚN al batch
+    (decisión Ary): se valida ≥10 (salvo que TODAS las acciones sean `escalate`) y se registra igual en
+    cada resolución. Orden todo-o-nada, heredado de 6.3 AC2:
+      1. Preflight (AC6): mismos guards que `resolve` — existe / ya-resuelta / `ACTIONS_BY_STATE` /
+         justificación — con UNA lectura del JSONL; ids duplicados intra-batch → rechazo; tope `MAX_BATCH`.
+         Si CUALQUIER item falla → nada se escribe ni se cierra.
+      2. Anotaciones (`missing-in-laudus` + `confirm-cartola-only`) → `annotate_discrepancies_batch`
+         (render-all valida datos/cuenta/FX antes de escribir; un solo bean_check + commit; rollback total).
+      3. Solo si el motor devolvió `success` (o no había nada que anotar) → `append_resolution` de TODAS.
+    """
+    from pipeline.importers.discrepancy_writer import append_resolution
+
+    path = path or _jsonl_path()
+    if not items:
+        raise ResolveError("el batch no tiene items")
+    if len(items) > MAX_BATCH:
+        raise ResolveError(f"el batch excede el máximo de {MAX_BATCH} items ({len(items)})")
+
+    ids = [it["discrepancy_id"] for it in items]
+    if len(set(ids)) != len(ids):  # todo-o-nada también en la validación: ids repetidos → rechazo
+        raise ResolveError("hay discrepancy_id duplicados en el batch")
+
+    # UNA lectura del JSONL: originales por id + set de resueltas (mismo criterio que `_resolved_ids`).
+    lines = list(_iter_lines(path))
+    originals = {e["discrepancy_id"]: e for e in lines if _is_original(e)}
+    resolved: set[str] = set()
+    for e in lines:
+        res = e.get("resolution")
+        if e.get("ref_discrepancy_id") and res is not None and res.get("action") != "escalate":
+            resolved.add(e["ref_discrepancy_id"])
+
+    all_escalate = all(it["action"] == "escalate" for it in items)
+    if not all_escalate and (not justification or len(justification.strip()) < 10):
+        raise ResolveError("justification ≥ 10 caracteres requerida (excepto batch todo-escalate)")
+
+    # Preflight por item (AC6): un id inválido aborta el batch entero antes de escribir nada.
+    annotate_items: list[tuple[dict, str | None]] = []
+    for it in items:
+        did, action = it["discrepancy_id"], it["action"]
+        original = originals.get(did)
+        if original is None:
+            raise ResolveError(f"discrepancy_id {did} no existe")
+        if did in resolved:  # AC6/AC5: guard ANTES de escribir al ledger
+            raise ResolveError(f"discrepancy_id {did} ya fue resuelta")
+        state = original.get("state")
+        if action != "escalate" and action not in ACTIONS_BY_STATE.get(state, set()):
+            raise ResolveError(f"acción '{action}' no permitida para estado '{state}'")
+        if state == "missing-in-laudus" and action == "confirm-cartola-only":
+            annotate_items.append((original, it.get("category_account")))
+
+    # Motor batch para las anotaciones: un solo bean_check + un solo commit, rollback total.
+    git_commit_sha = None
+    if annotate_items:
+        from pipeline.importers.laudus_run import _ledger_root
+        from pipeline.importers.reconcile import annotate_discrepancies_batch
+
+        root = ledger_root or _ledger_root()
+        if importer is None:
+            from backend.app.api.v1.cartolas.service import _build_importer
+            importer = _build_importer(root)
+        res = annotate_discrepancies_batch(annotate_items, importer=importer, ledger_root=root, ts=now_iso)
+        if not res.get("success"):
+            raise AnnotationFailed(res.get("error_msg") or "no se pudo anotar el batch")
+        git_commit_sha = res.get("git_commit_sha")
+
+    # Solo tras el push OK (o si no había nada que anotar) → cerrar TODAS (anotadas + baratas).
+    results = []
+    for it in items:
+        did, action = it["discrepancy_id"], it["action"]
+        resolution = {"action": action, "resolved_by": user_email, "resolved_at": now_iso,
+                      "justification": (justification or "").strip()}
+        if action == "escalate":
+            resolution["escalated_at"] = now_iso  # no cierra la discrepancia
+        append_resolution(did, resolution, path)
+        annotated = (originals[did].get("state") == "missing-in-laudus"
+                     and action == "confirm-cartola-only")
+        results.append({"status": "escalated" if action == "escalate" else "resolved",
+                        "discrepancy_id": did, "action": action,
+                        "git_commit_sha": git_commit_sha if annotated else None})
+    return {"git_commit_sha": git_commit_sha, "results": results}

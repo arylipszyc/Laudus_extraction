@@ -104,3 +104,32 @@ export async function resolveDiscrepancy(
   }
   return res.json()
 }
+
+// Story 6.7 — batch-resolve: N diferencias en un solo request (un bean_check + un commit, todo-o-nada).
+export interface BatchResolveItem {
+  discrepancy_id: string
+  action: string
+  category_account?: string | null
+}
+
+export interface BatchResolveResponse {
+  git_commit_sha?: string | null
+  results: { discrepancy_id: string; status: string; action: string; git_commit_sha?: string | null }[]
+}
+
+export async function resolveBatch(
+  items: BatchResolveItem[],
+  justification: string | null,
+): Promise<BatchResolveResponse> {
+  const res = await apiFetch(`${base}/discrepancies/resolve-batch`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ items, justification }),
+  })
+  if (!res.ok) {
+    const d = await res.json().catch(() => null)
+    throw new ResolveHttpError(res.status, d?.detail ?? `Error resolviendo (${res.status})`)
+  }
+  return res.json()
+}
