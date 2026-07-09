@@ -202,6 +202,20 @@ def append_import_log(meta_dir, record: dict) -> None:
         fh.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
+def _rewrite_last_import_log(meta_dir, record: dict) -> None:
+    """Reemplaza la ÚLTIMA línea del import-log por `record`.
+
+    Se usa cuando un fallo de commit/push invalida una entrada `success=True` ya
+    appendeada ANTES del commit: sin esto el lector (`_read_import_log_last_sync`, que
+    toma el max-timestamp de las corridas success) leería la línea fantasma como un sync
+    fresco aunque a origin no llegó nada. Reescribir en el working-tree —lo que el lector
+    consume— la deja como `success=False` → el indicador no avanza."""
+    path = Path(meta_dir) / "import-log.jsonl"
+    lines = path.read_text(encoding="utf-8").splitlines()
+    lines[-1] = json.dumps(record, ensure_ascii=False)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 # ── git commit/push (AC9) — guarded ─────────────────────────────────────────
 
 
@@ -379,6 +393,10 @@ def run_import(
         "error_msg": None,
         "git_commit_sha": None,
     }
+    # ¿Ya appendeamos una línea `success=True` (antes del commit)? Si sí y luego el
+    # commit/push falla, el except REESCRIBE esa línea en vez de appendear otra —
+    # así el indicador no lee la entrada fantasma como sync fresco.
+    success_logged = False
 
     try:
         with acquire_lock(lock_path):
@@ -393,6 +411,13 @@ def run_import(
                 logger.info("No new dates to sync (%s > %s)", start, to_date)
                 result["success"] = True
                 append_import_log(meta_dir, result)
+                success_logged = True
+                # Commitear el import-log aun sin datos nuevos → el indicador refleja el último
+                # CHEQUEO de Laudus (lo que el usuario espera), no el último sync con cambios.
+                result["git_commit_sha"] = git_commit_push(
+                    root, ["ledger/_meta/import-log.jsonl"],
+                    f"[importer-laudus] check {to_date}: sin cambios",
+                )
                 return result
 
             rows = fetch_fn(start, to_date)
@@ -420,11 +445,21 @@ def run_import(
                 f"+{write_result.jes_added} JE, {write_result.jes_dedup} dedup, "
                 f"{write_result.pending_accounts} pending account"
             )
-            result["git_commit_sha"] = git_commit_push(
-                root, ["ledger/imports/laudus/", "ledger/imports/_new-accounts-pending.beancount"], message,
-            )
             result["success"] = True
+            # Appendear ANTES del commit para que la entrada entre en el MISMO commit que los
+            # datos: así sobrevive el fetch+rebase de git_commit_push (antes appendeaba después
+            # → la línea quedaba working-tree, el rebase la revertía y origin/import-log se
+            # congelaba → el indicador "Datos de Laudus al:" mostraba una fecha vieja). El sha
+            # queda null en la línea (chicken-egg: el commit aún no existe); el lector solo usa
+            # timestamp/importer/success, así que no importa.
             append_import_log(meta_dir, result)
+            success_logged = True
+            result["git_commit_sha"] = git_commit_push(
+                root,
+                ["ledger/imports/laudus/", "ledger/imports/_new-accounts-pending.beancount",
+                 "ledger/_meta/import-log.jsonl"],
+                message,
+            )
             logger.info(message)
             return result
     except LockTimeout as exc:
@@ -432,10 +467,19 @@ def run_import(
         logger.error("Import aborted: %s", exc)
         append_import_log(meta_dir, result)
         return result
-    except Exception as exc:  # fetch/write failure → report, don't mask as success
+    except Exception as exc:  # fetch/write/push failure → report, don't mask as success
+        # success ya pudo quedar True (se setea antes de appendear el log para commitearlo en
+        # el mismo commit); revertir para que un fallo de commit/push NO reporte éxito.
+        result["success"] = False
         result["error_msg"] = str(exc)
         logger.error("Import failed: %s", exc, exc_info=True)
-        append_import_log(meta_dir, result)
+        if success_logged:
+            # El fallo fue en el commit/push, DESPUÉS de appendear la línea success=True.
+            # Reescribirla como success=False para que el lector no la cuente como sync fresco
+            # (en vez de dejar dos líneas contradictorias con el mismo timestamp).
+            _rewrite_last_import_log(meta_dir, result)
+        else:
+            append_import_log(meta_dir, result)
         return result
 
 

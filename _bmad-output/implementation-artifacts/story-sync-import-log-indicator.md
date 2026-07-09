@@ -1,6 +1,6 @@
 # Story: Indicador "Datos de Laudus al:" muestra fecha real (pushear el import-log)
 
-Status: ready-for-dev
+Status: done
 
 <!-- Hardening de sync/importer (reabre Epic 2 en espíritu, sin feature nueva). No gated — 1 sola decisión de diseño (path no-op) tiene default recomendado. -->
 
@@ -83,13 +83,25 @@ Al appendear **antes** del commit, el registro del import-log no puede contener 
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1 — Reordenar + extender el commit del path de éxito** (AC1, AC4)
-  - [ ] En [laudus_run.py:418-428](pipeline/importers/laudus_run.py#L418): mover `append_import_log(meta_dir, result)` **antes** de `git_commit_push`, y agregar `"ledger/_meta/import-log.jsonl"` a la lista de paths. Dejar `git_commit_sha=null` en el registro (chicken-egg, aceptable).
-- [ ] **Task 2 — Commitear el import-log en el path no-op** (AC3, default recomendado)
-  - [ ] En [laudus_run.py:392-396](pipeline/importers/laudus_run.py#L392): tras `append_import_log`, llamar `git_commit_push(root, ["ledger/_meta/import-log.jsonl"], f"[importer-laudus] check {to_date}: sin cambios")` antes del `return`. (Si se elige no hacerlo, documentar en Dev Notes y ajustar AC3.)
-- [ ] **Task 3 — Tests** (AC5)
-  - [ ] Test con repo git temporal (init + config user + remote fake o `IMPORTER_GIT_ENABLED=true` local sin push real — ver cómo lo hacen los tests de sync existentes): `run_import` con `fetch_fn` que devuelve filas → verificar `import-log.jsonl` en `git show --stat HEAD` + entrada `success=true`. Test del path no-op. No-regresión de los paths de datos.
-  - [ ] Reusar el patrón de `backend/tests/test_sync.py` (fake spreadsheet/fetch en memoria).
+- [x] **Task 1 — Reordenar + extender el commit del path de éxito** (AC1, AC4)
+  - [x] En [laudus_run.py:418-428](pipeline/importers/laudus_run.py#L418): mover `append_import_log(meta_dir, result)` **antes** de `git_commit_push`, y agregar `"ledger/_meta/import-log.jsonl"` a la lista de paths. Dejar `git_commit_sha=null` en el registro (chicken-egg, aceptable).
+  - [x] Guard destapado por el fix: el `except Exception` ahora resetea `result["success"] = False` — al setear `success=True` antes del commit, un fallo de push habría reportado éxito silencioso (lo cachó el test pre-existente `test_run_import_marks_failure_when_push_fails`).
+- [x] **Task 2 — Commitear el import-log en el path no-op** (AC3, default recomendado)
+  - [x] En [laudus_run.py:392-396](pipeline/importers/laudus_run.py#L392): tras `append_import_log`, llamar `git_commit_push(root, ["ledger/_meta/import-log.jsonl"], f"[importer-laudus] check {to_date}: sin cambios")` antes del `return`. Se eligió el default (commitear no-ops).
+- [x] **Task 3 — Tests** (AC5)
+  - [x] `test_import_log_commiteado_en_sync_con_cambios` (repo git temporal + remote bare seedeado): `run_import` con `fetch_fn` que devuelve 1 JE → verifica `ledger/_meta/import-log.jsonl` en `git diff-tree HEAD` (sobrevive el fetch+rebase) + entrada `success=true` en `HEAD:...import-log.jsonl` + los paths de datos siguen en el commit (AC4).
+  - [x] `test_import_log_commiteado_en_sync_noop`: path no-op (backfill `from_date=2099`) → commit de SOLO el import-log con mensaje "sin cambios", sin fetch.
+  - [x] Helpers `_seed_repo_with_remote` / `_head_files` reusan el patrón git de los tests existentes de `test_laudus_run.py`.
+
+### Review Findings
+
+_Code review 2026-07-09 (Blind Hunter + Edge Case Hunter + Acceptance Auditor — las 3 capas convergieron en el mismo hallazgo; verificado contra el lector `sync/service.py:33-57`)._
+
+- [x] **[Review][Patch aplicado] El reorden introducía una regresión: un fallo de push dejaba una línea `success:true` que el indicador leía como sync fresco** [pipeline/importers/laudus_run.py:436](pipeline/importers/laudus_run.py#L436) — **RESUELTO (opción 1):** el `except` ahora, si ya se appendeó una línea `success=True` (`success_logged`), la REESCRIBE como `success=False` vía `_rewrite_last_import_log` en vez de appendear una segunda contradictoria. El working-tree (lo que lee el indicador) queda sin la línea fantasma. Test de regresión `test_push_fallido_no_deja_linea_success_fantasma`. Suite verde (28 laudus + 82 sync/import-log).
+  Con el append **antes** del commit, en el path de éxito: `append_import_log` escribe la línea `success:true` (timestamp T) → `git_commit_push` hace `commit` local (con esa línea) y luego `push`; si el **push/rebase falla** (deploy key sin permiso, non-fast-forward, red), lanza → el `except` setea `result["success"]=False` y appendea una **segunda** línea `success:false` (mismo timestamp T). El lector `_read_import_log_last_sync` recorre TODO el working-tree, ignora la línea `success:false` y toma el **max timestamp de las success truthy** → devuelve T → el indicador "Datos de Laudus al:" muestra fecha **fresca** aunque a origin **no llegó nada**. El guard `success=False` solo corrige el `result` en memoria (job status), NO la línea ya escrita que lee el indicador. Durante una caída sostenida de push, cada corrida re-appendea una línea fresca `success:true` (tras el `reset --hard` del `refresh_clone`) → el indicador queda perpetuamente "fresco" con origin congelado. **Es exactamente el "parece OK pero está roto" que la story quería matar, invertido.** Antes del cambio (append DESPUÉS de un push exitoso) un push fallido solo dejaba `success:false`, así que es una regresión nueva. `test_run_import_marks_failure_when_push_fails` no lo caza (solo assert sobre `result["success"]`, nunca inspecciona el log commiteado). Consecuencia secundaria misma causa: el path no-op, antes infalible, ahora marca el job como `failed` ante cualquier hiccup transitorio de git.
+  **Requiere decisión de diseño** (ver opciones en la conversación): (A) en el `except`, reescribir/truncar la línea `success:true` pendiente en vez de appendear una segunda; (B) mover el append de la línea `success` a DESPUÉS del push confirmado y commitearla en un segundo commit (rompe "una sola commit"); (C) que el lector confíe solo en origin, no en working-tree; (D) aceptar y documentar el riesgo.
+
+- [x] **[Review][Dismiss] Un commit "sin cambios" por cada sync no-op + crecimiento del historial** — por diseño (AC3: el indicador refleja el último chequeo). Sin acción; nota de visibilidad: la garantía de "syncs idempotentes silenciosos" desaparece (el append siempre stagea el log).
 
 ## Dev Notes
 
@@ -119,3 +131,28 @@ Al appendear **antes** del commit, el registro del import-log no puede contener 
 - [Source: frontend/src/pages/ReportesPage.tsx:19-21] — render de `"Datos de Laudus al:"` (sin cambio).
 - [Source: _bmad-output/implementation-artifacts/deferred-work.md — residual "import-log no se pushea"] — origen conocido del bug.
 - [Source: logs Render srv-d7dk4hv41pts73a35aqg 2026-07-09 16:08] — evidencia de que el sync corre y pushea; solo el indicador falla.
+
+## Dev Agent Record
+
+### Implementation Plan
+
+1. Path de éxito ([laudus_run.py](pipeline/importers/laudus_run.py) `run_import`, ~418-437): `result["success"] = True` → `append_import_log` → `git_commit_push` con los 3 paths (datos + pending + `ledger/_meta/import-log.jsonl`). El log entra en el MISMO commit → sobrevive el `fetch+rebase` interno del push.
+2. Path no-op (~392-401): tras `append_import_log`, `git_commit_push(["ledger/_meta/import-log.jsonl"], "…check {to_date}: sin cambios")`.
+3. Guard en `except Exception`: revertir `result["success"] = False` (necesario porque ahora `success` se setea antes del commit).
+
+### Completion Notes
+
+- **Núcleo (AC1/AC2/AC4):** en el path de éxito, el import-log se appendea ANTES de `git_commit_push` y su ruta se suma a los paths commiteados. La entrada queda dentro del commit y el `fetch+rebase` ya no la revierte → origin avanza → `_read_import_log_last_sync` (sin cambios) empieza a devolver la fecha real. Los paths de datos (`imports/laudus/`, `_new-accounts-pending.beancount`) siguen commiteando igual; el mensaje de commit no cambia. `git_commit_sha` queda `null` en la línea del log (chicken-egg, aceptable — el lector no lo usa).
+- **No-op (AC3, default recomendado):** un sync sin movimientos nuevos igual commitea/pushea un commit de solo el import-log ("…check {date}: sin cambios") → el indicador refleja el último chequeo de Laudus.
+- **Guard anti silent-success:** al mover `success=True` antes del commit, un fallo de push habría reportado éxito. El `except Exception` ahora resetea `success=False`. Lo cachó el test pre-existente `test_run_import_marks_failure_when_push_fails` (rojo → verde con el guard). Consecuencia benigna: en un push fallido, el commit local (con la línea `success=True`) y las líneas working-tree las limpia el `refresh_clone` (reset --hard origin/main) del próximo run.
+- **Sin cambios** en `sync/service.py` (lector) ni frontend, como preveía la story.
+- **Verificación:** `test_laudus_run.py` 27/27; suite completa `backend/tests pipeline` = **731 passed / 1 xfailed / 0 failed**, sin regresiones nuevas (los 2 rojos `test_fava_edit_validator` pre-existentes no aparecieron en esta corrida).
+
+### File List
+
+- `pipeline/importers/laudus_run.py` — modificado (`run_import`: reorden del append + path extra en el commit de éxito; `git_commit_push` en el path no-op; `except` resetea `success=False`).
+- `backend/tests/test_laudus_run.py` — modificado (2 tests nuevos + helpers `_seed_repo_with_remote`/`_head_files`).
+
+## Change Log
+
+- 2026-07-09 — Dev (Amelia): implementada la story. Import-log commiteado dentro del commit de datos (path de éxito) + commit propio en el path no-op → el indicador "Datos de Laudus al:" muestra la fecha real. Guard `success=False` en el except (anti silent-success al push fallido). 2 tests nuevos; suite 731 passed/1 xfailed, 0 regresiones. Status → review.

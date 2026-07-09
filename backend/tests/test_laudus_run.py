@@ -174,6 +174,103 @@ def test_run_import_marks_failure_when_push_fails(tmp_path, monkeypatch):
     assert result["error_msg"]
 
 
+# ── import-log commiteado (story indicador "Datos de Laudus al:") ────────────
+
+
+def _seed_repo_with_remote(tmp_path):
+    """Repo git con `origin/main` seedeado — ejercita el fetch+rebase de git_commit_push."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_git_repo(repo)
+    remote = tmp_path / "remote.git"
+    subprocess.run(["git", "init", "--bare", "-b", "main", str(remote)], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(repo), "remote", "add", "origin", str(remote)], check=True)
+    (repo / "seed.txt").write_text("seed\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo), "add", "-A"], check=True)
+    subprocess.run(["git", "-C", str(repo), "commit", "-m", "seed"], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(repo), "push", "origin", "main"], check=True, capture_output=True)
+    return repo
+
+
+def _head_files(repo):
+    return subprocess.run(
+        ["git", "-C", str(repo), "diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD"],
+        check=True, capture_output=True, text=True,
+    ).stdout.split()
+
+
+def test_import_log_commiteado_en_sync_con_cambios(tmp_path, monkeypatch):
+    """AC1/AC4: un sync con ≥1 JE deja `_meta/import-log.jsonl` DENTRO del commit (sobrevive
+    el fetch+rebase interno del push) junto a los paths de datos de siempre."""
+    repo = _seed_repo_with_remote(tmp_path)
+    root = _ledger_root(repo)
+    monkeypatch.setenv("IMPORTER_GIT_ENABLED", "true")
+
+    result = laudus_run.run_import(fetch_fn=lambda f, t: _balanced(), ledger_root=root)
+
+    assert result["success"] is True
+    files = _head_files(repo)
+    assert "ledger/_meta/import-log.jsonl" in files                 # AC1: el log quedó commiteado
+    assert "ledger/imports/laudus/2024-03.beancount" in files       # AC4: los datos siguen commiteando
+    # el import-log commiteado (en HEAD, tras el rebase) trae la entrada success de esta corrida
+    committed = subprocess.run(
+        ["git", "-C", str(repo), "show", "HEAD:ledger/_meta/import-log.jsonl"],
+        check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    rec = json.loads(committed.splitlines()[-1])
+    assert rec["importer"] == "laudus"
+    assert rec["success"] is True
+
+
+def test_import_log_commiteado_en_sync_noop(tmp_path, monkeypatch):
+    """AC3: un sync sin movimientos nuevos (start > to_date) igual commitea/pushea el import-log
+    (commit de SOLO ese archivo) → el indicador refleja el último chequeo, no el último con datos."""
+    repo = _seed_repo_with_remote(tmp_path)
+    root = _ledger_root(repo)
+    monkeypatch.setenv("IMPORTER_GIT_ENABLED", "true")
+
+    called = []
+    result = laudus_run.run_import(
+        mode="backfill", from_date="2099-01-01",
+        fetch_fn=lambda f, t: called.append(1) or _balanced(), ledger_root=root,
+    )
+
+    assert result["success"] is True
+    assert called == []                                             # path no-op: no hubo fetch
+    assert _head_files(repo) == ["ledger/_meta/import-log.jsonl"]   # commit de SOLO el import-log
+    msg = subprocess.run(
+        ["git", "-C", str(repo), "log", "-1", "--pretty=%s"],
+        check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    assert "sin cambios" in msg
+
+
+def test_push_fallido_no_deja_linea_success_fantasma(tmp_path, monkeypatch):
+    """Regresión (code-review 2026-07-09): con el append ANTES del commit, un push fallido dejaba
+    una línea `success=True` que el lector (max-timestamp de corridas success) leía como sync
+    fresco aunque a origin no llegó nada. El except debe REESCRIBIR esa línea como success=False,
+    no appendear una segunda contradictoria → el indicador no avanza."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_git_repo(repo)
+    root = _ledger_root(repo)  # sin 'origin' → el push dentro de git_commit_push falla
+    monkeypatch.setenv("IMPORTER_GIT_ENABLED", "true")
+
+    result = laudus_run.run_import(fetch_fn=lambda f, t: _balanced(), ledger_root=root)
+
+    assert result["success"] is False
+    records = [
+        json.loads(l)
+        for l in (root / "_meta" / "import-log.jsonl").read_text(encoding="utf-8").splitlines()
+        if l.strip()
+    ]
+    laudus = [r for r in records if r["importer"] == "laudus"]
+    # Ninguna entrada success=True (la fantasma) sobrevive → el lector no reporta sync fresco.
+    assert all(r["success"] is False for r in laudus)
+    # Y no se duplicó la entrada de esta corrida (reescrita en el lugar, no appendeada de nuevo).
+    assert len(laudus) == 1
+
+
 # ── incremental from_date resolution (AC2) ───────────────────────────────────
 
 
