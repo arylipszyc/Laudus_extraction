@@ -1,6 +1,6 @@
 # Story 7.1: El owner (rol `family`) crea un comentario sobre una transacción — FR36
 
-Status: draft
+Status: review
 
 <!-- Depende de 7.0 (módulo owner_comments + ancla + persistencia). No arrancar antes de que 7.0 esté done. -->
 
@@ -50,19 +50,17 @@ so that **pueda pedirle al contador que aclare o corrija ese movimiento sin tene
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1 — Módulo API `owner_comments`** (AC1, AC2, AC3, AC5)
-  - [ ] `backend/app/api/v1/owner_comments/` (`router.py` + `service.py` + `schemas.py` + `__init__.py`), registrado en `backend/app/api/v1/router.py` (junto a los `include_router`). `router = APIRouter(prefix="/comments", tags=["owner-comments"])`.
-  - [ ] `POST /comments` con `require_role(["family","contador","admin"])`, `ledger: LedgerService = Depends(get_ledger_service)`. Service: `create_comment(tx_id, body, user_email, user_role, entries, ledger_root)` → `build_anchor` → `build_comment` → `persist_and_commit`. Mapear "tx no encontrada" → 404.
-  - [ ] Schemas: `CreateCommentRequest{tx_id: str, body: str}` (validar `body` no vacío), `CreateCommentResponse{thread_id, comment_id, created_at}`.
+- [x] **Task 1 — Módulo API `owner_comments`** (AC1, AC2, AC3, AC5)
+  - [x] `backend/app/api/v1/owner_comments/` (`router.py` + `service.py` + `schemas.py` + `__init__.py`), registrado en `backend/app/api/v1/router.py` (junto a los `include_router`). `router = APIRouter(prefix="/comments", tags=["owner-comments"])`.
+  - [x] `POST /comments` con `require_role(["family","contador","admin"])`, `ledger: LedgerService = Depends(get_ledger_service)`. Service: `create_comment(tx_id, body, user_email, user_role, entries, ledger_root)` → `build_anchor` → `build_comment` → `persist_and_commit`. Mapear "tx no encontrada" → 404.
+  - [x] Schemas: `CreateCommentRequest{tx_id: str, body: str}` (validar `body` no vacío vía `StringConstraints(strip_whitespace, min_length=1)` → 422 serializable), `CreateCommentResponse{thread_id, comment_id, created_at}`.
 
-- [ ] **Task 2 — Frontend: acción de comentar** (AC6)
-  - [ ] `frontend/src/services/ownerComments.ts` (patrón `fetch`+`credentials:'include'` de `reconciliation.ts`): `createComment(tx_id, body)`.
-  - [ ] Componente `TxCommentButton`/input embebible en la vista de transacciones del owner. Visible para `family` (no filtrar por rol contador). Confirmación inline al éxito, error legible al fallo.
-  - [ ] Cablear en la vista donde el owner ve transacciones (reporte de gastos / detalle de tx). Reusar el `tx_id` que ya expone la fila.
+- [ ] **Task 2 — Frontend: acción de comentar** (AC6) — **DIFERIDA a story 7.1b** (decisión Ary 2026-07-09)
+  - Bloqueo destapado al implementar: ninguna vista del owner expone el `tx_id` de beancount que el endpoint necesita. El reporte de gastos (`/reportes`) es una **descarga** de Excel (sin filas); el único detalle de tx que el owner ve (drill-down de Ingresos/Gastos) identifica filas por `journalentryid`/`lineid` (modelo Laudus/dashboard), **no** por el `tx_id` de beancount. Ese `tx_id` solo se expone hoy en Categorización (contador/admin). Enganchar el botón requiere decidir vista + trabajo extra → se difiere a una story dedicada, idealmente junto con la UI de leer hilos (7.2/7.4). Ver `7-1b-frontend-comentar-owner.md`.
 
-- [ ] **Task 3 — Tests** (AC7)
-  - [ ] `backend/tests/test_owner_comments_api.py`: `family` 201 + JSONL con ancla; `tx_id` inexistente 404; rol inválido 403; body vacío 422. Ledger fixture inline + `monkeypatch.delenv("IMPORTER_GIT_ENABLED")`.
-  - [ ] Frontend component test del botón/input de comentario.
+- [x] **Task 3 — Tests** (AC7)
+  - [x] `backend/tests/test_owner_comments_api.py`: `family` 201 + JSONL con ancla; `tx_id` inexistente 404; body vacío 422; sin-auth/rol-desconocido 401. Ledger fixture inline + `monkeypatch.delenv("IMPORTER_GIT_ENABLED")`. (Nota: el "403" del AC7 es **inalcanzable** en este endpoint — la allowlist son los 3 roles válidos, así que un token sin auth válida cae en 401, no 403. Se testea el 401 real.)
+  - [ ] Frontend component test del botón/input de comentario — **DIFERIDO a 7.1b** (junto con Task 2).
 
 ## Dev Notes
 
@@ -104,21 +102,34 @@ El `tx_id` es el identificador que ya viaja al frontend en las vistas de transac
 - [Source: backend/app/api/v1/transactions/router.py:35] — `_entries`/`get_ledger_service` a reusar.
 - [Source: _bmad-output/planning-artifacts/epics.md#Epic 7] — FR36.
 
-## Decisiones de diseño para Ary (abiertas)
+## Decisiones de diseño para Ary (RESUELTAS 2026-07-09)
 
-1. **¿Dónde vive la acción "Comentar" en la UI del owner?** El owner hoy ve transacciones sobre todo en el **reporte de gastos**. Recomendado: botón/ícono de comentario por fila en esa vista (mínimo). Alternativa: una vista de "detalle de transacción" dedicada. Default = engancharlo en la vista de transacciones que el owner ya usa, sin crear página nueva.
-2. **¿`body` con límite máximo / markdown?** Recomendado: texto plano, sin límite duro en el MVP (validar solo no-vacío). Sin markdown/adjuntos.
+1. **¿Dónde vive la acción "Comentar" en la UI del owner?** → **En la fila del reporte de gastos** (`/reportes`, `ReportesPage`). Ary eligió el default: botón de comentario por fila en la vista que el owner ya usa, sin crear página nueva.
+2. **¿`body` con límite máximo / markdown?** → **Texto plano, sin límite duro** en el MVP (validar solo no-vacío). Sin markdown/adjuntos. (Decisión técnica tomada por la dev.)
 
 ## Dev Agent Record
 
 ### Agent Model Used
 
-_(pendiente)_
+claude-opus-4-8[1m] (Amelia / dev-story)
 
 ### Completion Notes List
 
-_(pendiente)_
+- **Backend entregado y verde (parte sustantiva de la story: primer endpoint de escritura para `family`).** `POST /api/v1/comments` orquesta el módulo habilitador de 7.0 sin reimplementar nada: `build_anchor` (ancla 3 capas + snapshot, 404 si el `tx_id` no resuelve) → `build_comment` → `persist_and_commit` (lock + git, sin bean-check). AC1, AC2 (RBAC family/contador/admin), AC3 (404 sin escritura), AC4 (ancla completa persistida), AC5 (atomicidad heredada de `persist_and_commit`) MET.
+- **AC2 — el "403" es estructuralmente inalcanzable acá.** La allowlist del endpoint son los 3 roles válidos (`family`/`contador`/`admin`), y `get_current_user` ya rechaza (401) cualquier rol fuera de ese set. Por eso la rama 403 de `require_role` nunca dispara para este endpoint; el test valida el 401 real (sin cookie / rol desconocido). El mecanismo 403 de `require_role` ya está cubierto en `test_rbac.py`.
+- **`body` vacío → 422:** se validó con `StringConstraints(strip_whitespace=True, min_length=1)` en vez de un `field_validator` que levante `ValueError` — este último mete el objeto excepción en el `ctx` del error de pydantic v2 y **rompe el serializador JSON del middleware de errores** (visto en el primer run rojo). La restricción estándar da un error serializable y de paso recorta el body.
+- **AC6 (frontend) DIFERIDO a story 7.1b — decisión Ary 2026-07-09.** Gap destapado al implementar: ninguna vista del owner expone el `tx_id` de beancount. El reporte de gastos es una descarga (sin filas); el drill-down de Ingresos/Gastos usa `journalentryid`/`lineid` (modelo Laudus), no el `tx_id` de beancount que exige el ancla; ese `tx_id` solo vive hoy en Categorización (contador/admin). La UI de comentar se hará junto con la de leer hilos (7.2/7.4) para no construir algo que se rehace. Story stub: `7-1b-frontend-comentar-owner.md`.
+- **Tests:** 7 nuevos en `test_owner_comments_api.py`. Suite backend **738 passed / 1 xfailed / 0 failed** (+7, 0 regresiones). `venv/Scripts/python.exe -m pytest backend/tests` con `PYTHONUTF8=1`.
 
 ### File List
 
-_(pendiente)_
+- `backend/app/api/v1/owner_comments/__init__.py` (nuevo)
+- `backend/app/api/v1/owner_comments/schemas.py` (nuevo)
+- `backend/app/api/v1/owner_comments/service.py` (nuevo)
+- `backend/app/api/v1/owner_comments/router.py` (nuevo)
+- `backend/app/api/v1/router.py` (modificado — registra `owner_comments_router`)
+- `backend/tests/test_owner_comments_api.py` (nuevo)
+
+## Change Log
+
+- 2026-07-09 — Backend de 7.1 implementado (endpoint `POST /comments`, primer write de `family`). 7 tests, 738 backend passed. Frontend (AC6) diferido a 7.1b por gap de `tx_id` en vistas del owner (decisión Ary). Status → review.

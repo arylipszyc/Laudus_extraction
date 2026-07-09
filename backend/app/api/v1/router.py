@@ -15,6 +15,7 @@ from backend.app.api.v1.categorization.router import router as categorization_ro
 from backend.app.api.v1.reconciliation.router import router as reconciliation_router
 from backend.app.api.v1.tc_reconciliation.router import router as tc_reconciliation_router
 from backend.app.api.v1.accounts.router import router as accounts_router
+from backend.app.api.v1.owner_comments.router import router as owner_comments_router
 
 router = APIRouter()
 router.include_router(health_router)
@@ -30,4 +31,5 @@ router.include_router(tc_reconciliation_router)
 router.include_router(accounts_router)
 router.include_router(cartolas_router)
 router.include_router(reportes_router)
+router.include_router(owner_comments_router)
 router.include_router(admin_router)
