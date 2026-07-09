@@ -27,9 +27,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -14177.0 CLP
-  Expenses:EAG:Suspense                        14177.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017           14177.0 CLP
 2025-11-30 * "MERCADO PAGO 4 TCOM TASA INT. 0,00% (cuota 3/3)"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -43,9 +43,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -1000000.0 CLP
-  Expenses:EAG:Suspense                        1000000.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017           1000000.0 CLP
 2026-01-05 * "MP *MERCADO LIB TASA INT. 0,00% (cuota 2/6)"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -59,9 +59,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -16186.0 CLP
-  Expenses:EAG:Suspense                        16186.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017           16186.0 CLP
 2026-01-05 * "MERPAGO*MERCADOLIBR TASA INT. (cuota 2/12)"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -75,9 +75,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -999.0 CLP
-  Expenses:EAG:Suspense                        999.0 CLP
+  Expenses:EAG:TC:TcVariasEag-430017           999.0 CLP
 2026-01-29 * "Apertura TC T/C: 1027 - Visa Infinity - $"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
