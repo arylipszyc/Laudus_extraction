@@ -155,9 +155,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -683378.0 CLP
-  Expenses:EAG:Suspense                             683378.0 CLP
+  Expenses:EAG:Contribuciones-411069                683378.0 CLP
 2026-03-26 * "PAYU *UBER EATS"
   source: "cartola-tc"
   bank_account_id: "b635a31b-6169-4eb4-92a5-33ec478a6119"
@@ -187,7 +187,7 @@
   match_source: "historical"
   confidence: "0.03333333333333333"
   color: "yellow"
-  category_status: "suggested"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc8996MastercardLanpass  -47000.0 CLP
   Expenses:EAG:TvCableInternet-413009               47000.0 CLP
 2026-03-29 * "MERCADOPAGO *MERCADOL"
