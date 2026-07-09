@@ -25,3 +25,59 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -560000.00 CLP
   Expenses:EAG:SraRaquelVentura-430021  560000.00 CLP
+
+2026-07-01 * "Rol 323-54 Contribucion Zapallar EAG 2/4"
+  id: "6071"
+  je_num: "6031"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  1497256.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  -1497256.00 CLP
+
+2026-07-06 * "Full Plagas B#5914 Desratizacion EAG"
+  id: "6059"
+  je_num: "6019"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -98532.00 CLP
+  Expenses:EAG:FumigacionesDesratizacin-413059  98532.00 CLP
+
+2026-07-06 * "Pedro Leon Pozo - Examenes EAG"
+  id: "6060"
+  je_num: "6020"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -96548.00 CLP
+  Expenses:EAG:ClnicasBonosMdicosExmenes-430053  96548.00 CLP
+
+2026-07-06 * "F#412 Gomez Calefaccion Mant equipos EAG"
+  id: "6061"
+  je_num: "6021"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -3120299.00 CLP
+  Expenses:EAG:MantencinAireCalefaccin-413055  3120299.00 CLP
+
+2026-07-06 * "Traspaso Jael Avayyu de Johanna Avayu"
+  id: "6062"
+  je_num: "6022"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -233646.00 CLP
+  Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  233646.00 CLP
+
+2026-07-06 * "UF734,64 Mandato mutuo Inv. Tecnion"
+  id: "6074"
+  je_num: "6034"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  360000222.00 CLP
+  Assets:EAG:InvTecnionLimitada-113018  -360000222.00 CLP
+
+2026-07-07 * "Inv. Tecnion Ltda - Novación hijas EAG"
+  id: "6072"
+  je_num: "6032"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  918885375.00 CLP
+  Assets:EAG:InvTecnionLimitada-113018  -918885375.00 CLP
+
+2026-07-08 * "Victoria Svigilisky Previred Junio 2026"
+  id: "6075"
+  je_num: "6035"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -142928.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  142928.00 CLP

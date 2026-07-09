@@ -35,6 +35,13 @@
   Expenses:EAG:GastosLegalesNotara-430071  11093.00 CLP
   Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  18594.00 CLP
 
+2026-06-03 * "Zita Miranda de Sra Raquel Ventura"
+  id: "6073"
+  je_num: "6033"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -285000.00 CLP
+  Expenses:EAG:SraRaquelVentura-430021  285000.00 CLP
+
 2026-06-04 * "Mariela Mendez de Sra Raquel Ventura"
   id: "6001"
   je_num: "5961"
@@ -446,9 +453,89 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -157156.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  157156.00 CLP
 
+2026-06-25 * "UF735,18 Mandato mutuo Inv. Tecnion"
+  id: "6063"
+  je_num: "6023"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  30000284.00 CLP
+  Assets:EAG:InvTecnionLimitada-113018  -30000284.00 CLP
+
+2026-06-25 * "Reposición Raquel V. traspaso Banco Sant"
+  id: "6064"
+  je_num: "6024"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -2000000.00 CLP
+  Assets:EAG:Bancos:BancoEdwards0162338082-111007  2000000.00 CLP
+
+2026-06-25 * "Jorge Zamora de Raquel Ventura"
+  id: "6065"
+  je_num: "6025"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -27000.00 CLP
+  Expenses:EAG:SraRaquelVentura-430021  27000.00 CLP
+
+2026-06-25 * "Gloria Palma - Inscripcion destinatario"
+  id: "6066"
+  je_num: "6026"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -1.00 CLP
+  Assets:EAG:Bancos:BancoEdwards0162338082-111007  -100000.00 CLP
+  Expenses:EAG:SueldosRopaRegalias-413001  100000.00 CLP
+  Expenses:EAG:GastosBancarios-430003  1.00 CLP
+
+2026-06-25 * "Sandra Caceres de Raquel Ventura"
+  id: "6067"
+  je_num: "6027"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -105000.00 CLP
+  Expenses:EAG:SraRaquelVentura-430021  105000.00 CLP
+
+2026-06-25 * "Contribuciones Jose A. Delano 2/4 EAG"
+  id: "6068"
+  je_num: "6028"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -5281532.00 CLP
+  Expenses:EAG:Contribuciones-411069  4779360.00 CLP
+  Expenses:EAG:Contribuciones-411069  208574.00 CLP
+  Expenses:EAG:Contribuciones-411069  208574.00 CLP
+  Expenses:EAG:Contribuciones-411069  85024.00 CLP
+
+2026-06-25 * "Rol 323-54 Contribucion Zapallar EAG 2/4"
+  id: "6069"
+  je_num: "6029"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -1497256.00 CLP
+  Assets:EAG:ControlYLiquidacin-115099  1497256.00 CLP
+
 2026-06-26 * "Sra. Jacqueline Deutsch Junio 2026"
   id: "6053"
   je_num: "6013"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4020000.00 CLP
   Expenses:EAG:SraJacquelineDeutsch-430023  4020000.00 CLP
+
+2026-06-26 * "Patricia Deutsch - Junio 2026"
+  id: "6070"
+  je_num: "6030"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -800000.00 CLP
+  Assets:EAG:Bancos:BancoEdwards0162338082-111007  -362000.00 CLP
+  Assets:EAG:Bancos:BancoEdwards0162338082-111007  -1002697.00 CLP
+  Assets:EAG:Bancos:BancoEdwards0162338082-111007  -847355.00 CLP
+  Assets:EAG:Bancos:BancoEdwards0162338082-111007  -215691.00 CLP
+  Assets:EAG:Bancos:BancoEdwards0162338082-111007  -756961.00 CLP
+  Assets:EAG:Bancos:BancoEdwards0162338082-111007  -700000.00 CLP
+  Assets:EAG:Bancos:BancoEdwards0162338082-111007  -600000.00 CLP
+  Assets:EAG:Bancos:BancoEdwards0162338082-111007  -497064.00 CLP
+  Assets:EAG:CuentasCorrientesDelPersonal-115001  -200000.00 CLP
+  Assets:EAG:CuentasCorrientesDelPersonal-115001  -100000.00 CLP
+  Expenses:EAG:SueldosRopaRegalas-411001  1002697.00 CLP
+  Expenses:EAG:SueldosRopaRegalias-413001  350000.00 CLP
+  Expenses:EAG:SueldosRopaRegalias-413001  12000.00 CLP
+  Expenses:EAG:SueldosRopaRegalias-413001  847355.00 CLP
+  Expenses:EAG:SueldosRopaRegalias-413001  215691.00 CLP
+  Expenses:EAG:SueldosRopaRegalias-413001  756961.00 CLP
+  Expenses:EAG:SueldosRopaRegalias-413001  700000.00 CLP
+  Expenses:EAG:SueldosRopaRegalias-413001  800000.00 CLP
+  Expenses:EAG:SueldosRopaRegalias-413001  597064.00 CLP
+  Expenses:EAG:SraPatriciaDeutsch-430024  800000.00 CLP
