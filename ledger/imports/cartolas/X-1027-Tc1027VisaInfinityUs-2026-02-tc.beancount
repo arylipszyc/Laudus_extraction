@@ -1,16 +1,3 @@
-2026-02-12 * "MONTO CANCELADO"
-  source: "cartola-tc"
-  bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
-  batch_id: "93f2834c-33b8-4e67-8078-a9886098167a"
-  line: "1"
-  operation_type: "pago"
-  period: "2026-02"
-  opening: "1448.79"
-  closing: "465.59"
-  currency: "USD"
-  fx: "931.0509246332610236474151077"
-  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006   -1250161.00 CLP
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs   1250161.00 CLP
 2026-01-28 * "UBER *TRIP HELP.UBE"
   source: "cartola-tc"
   bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
@@ -25,9 +12,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -9822.587254880903799480229386 CLP
-  Expenses:EAG:Suspense                          9822.587254880903799480229386 CLP
+  Expenses:EAG:TC:TcVariasEag-430017             9822.587254880903799480229386 CLP
 2026-01-28 * "UBER *TRIP HELP.UBE"
   source: "cartola-tc"
   bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
@@ -42,9 +29,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -7988.416933353379582894821624 CLP
-  Expenses:EAG:Suspense                          7988.416933353379582894821624 CLP
+  Expenses:EAG:TC:TcVariasEag-430017             7988.416933353379582894821624 CLP
 2026-01-28 * "UBER *TRIP HELP.UBE"
   source: "cartola-tc"
   bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
@@ -59,9 +46,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -11032.95345690414313022186903 CLP
-  Expenses:EAG:Suspense                          11032.95345690414313022186903 CLP
+  Expenses:EAG:TC:TcVariasEag-430017             11032.95345690414313022186903 CLP
 2026-01-28 * "ROD LAVER ARENA"
   source: "cartola-tc"
   bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
@@ -76,9 +63,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -11321.57924354045404755256771 CLP
-  Expenses:EAG:Suspense                          11321.57924354045404755256771 CLP
+  Expenses:EAG:TC:TcVariasEag-430017             11321.57924354045404755256771 CLP
 2026-01-28 * "UBER *TRIP HELP.UBE"
   source: "cartola-tc"
   bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
@@ -93,9 +80,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -9850.518782619901630189651839 CLP
-  Expenses:EAG:Suspense                          9850.518782619901630189651839 CLP
+  Expenses:EAG:TC:TcVariasEag-430017             9850.518782619901630189651839 CLP
 2026-01-29 * "UBER *TRIP HELP.UBE"
   source: "cartola-tc"
   bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
@@ -127,9 +114,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -33620.24888850705556390815954 CLP
-  Expenses:EAG:Suspense                          33620.24888850705556390815954 CLP
+  Expenses:EAG:TC:TcVariasEag-430017             33620.24888850705556390815954 CLP
 2026-01-29 * "UBER *TRIP HELP.UBE"
   source: "cartola-tc"
   bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
@@ -144,9 +131,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -14012.31641573057840589359737 CLP
-  Expenses:EAG:Suspense                          14012.31641573057840589359737 CLP
+  Expenses:EAG:TC:TcVariasEag-430017             14012.31641573057840589359737 CLP
 2026-01-29 * "JIE YANG"
   source: "cartola-tc"
   bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
@@ -161,9 +148,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -4040.761012908352842629781567 CLP
-  Expenses:EAG:Suspense                          4040.761012908352842629781567 CLP
+  Expenses:EAG:TC:TcVariasEag-430017             4040.761012908352842629781567 CLP
 2026-01-29 * "SP ROYAL BOTANIC GD"
   source: "cartola-tc"
   bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
@@ -178,9 +165,39 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -83952.86187418114650228742026 CLP
-  Expenses:EAG:Suspense                          83952.86187418114650228742026 CLP
+  Expenses:EAG:TC:TcVariasEag-430017             83952.86187418114650228742026 CLP
+2026-01-29 * "APPLE.COM/BILL"
+  source: "cartola-tc"
+  bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
+  batch_id: "93f2834c-33b8-4e67-8078-a9886098167a"
+  line: "18"
+  operation_type: "compra"
+  period: "2026-02"
+  opening: "1448.79"
+  closing: "465.59"
+  currency: "USD"
+  fx: "931.0509246332610236474151077"
+  match_source: "pending"
+  confidence: "0.0"
+  color: "red"
+  category_status: "confirmed"
+  Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -11610.20503017676496488326639 CLP
+  Expenses:EAG:TC:TcVariasEag-430017             11610.20503017676496488326639 CLP
+2026-01-29 * "Apertura TC T/C: 1027 - Visa Infinity - US$"
+  source: "cartola-tc"
+  bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
+  batch_id: "93f2834c-33b8-4e67-8078-a9886098167a"
+  line: "0"
+  operation_type: "apertura"
+  period: "2026-02"
+  opening: "1448.79"
+  closing: "465.59"
+  currency: "USD"
+  fx: "931.0509246332610236474151077"
+  Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -1250161.00 CLP
+  Equity:Apertura:TarjetasSinDetalle             1250161.00 CLP
 2026-01-30 * "AO RLAR VENDING HAW"
   source: "cartola-tc"
   bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
@@ -195,9 +212,9 @@
   match_source: "pending"
   confidence: "0.0"
   color: "red"
-  category_status: "pending"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -14868.88326639317854764921927 CLP
-  Expenses:EAG:Suspense                          14868.88326639317854764921927 CLP
+  Expenses:EAG:TC:TcVariasEag-430017             14868.88326639317854764921927 CLP
 2026-01-30 * "ROD LAVER ARENA"
   source: "cartola-tc"
   bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
@@ -266,40 +283,6 @@
   category_status: "pending"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -10008.79743980755600420971241 CLP
   Expenses:EAG:Suspense                          10008.79743980755600420971241 CLP
-2026-02-02 * "UBER *TRIP HELP.UBE"
-  source: "cartola-tc"
-  bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
-  batch_id: "93f2834c-33b8-4e67-8078-a9886098167a"
-  line: "17"
-  operation_type: "compra"
-  period: "2026-02"
-  opening: "1448.79"
-  closing: "465.59"
-  currency: "USD"
-  fx: "931.0509246332610236474151077"
-  match_source: "pending"
-  confidence: "0.0"
-  color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -78506.21396507656951395004188 CLP
-  Expenses:EAG:Suspense                          78506.21396507656951395004188 CLP
-2026-01-29 * "APPLE.COM/BILL"
-  source: "cartola-tc"
-  bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
-  batch_id: "93f2834c-33b8-4e67-8078-a9886098167a"
-  line: "18"
-  operation_type: "compra"
-  period: "2026-02"
-  opening: "1448.79"
-  closing: "465.59"
-  currency: "USD"
-  fx: "931.0509246332610236474151077"
-  match_source: "pending"
-  confidence: "0.0"
-  color: "red"
-  category_status: "pending"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -11610.20503017676496488326639 CLP
-  Expenses:EAG:Suspense                          11610.20503017676496488326639 CLP
 2026-01-31 * "APPLE.COM/BILL"
   source: "cartola-tc"
   bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
@@ -317,6 +300,23 @@
   category_status: "pending"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -3323.851800940741854421271934 CLP
   Expenses:EAG:Suspense                          3323.851800940741854421271934 CLP
+2026-02-02 * "UBER *TRIP HELP.UBE"
+  source: "cartola-tc"
+  bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
+  batch_id: "93f2834c-33b8-4e67-8078-a9886098167a"
+  line: "17"
+  operation_type: "compra"
+  period: "2026-02"
+  opening: "1448.79"
+  closing: "465.59"
+  currency: "USD"
+  fx: "931.0509246332610236474151077"
+  match_source: "pending"
+  confidence: "0.0"
+  color: "red"
+  category_status: "pending"
+  Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -78506.21396507656951395004188 CLP
+  Expenses:EAG:Suspense                          78506.21396507656951395004188 CLP
 2026-02-03 * "APPLE.COM/BILL"
   source: "cartola-tc"
   bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
@@ -368,6 +368,19 @@
   category_status: "pending"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -2997.983977319100496144676647 CLP
   Expenses:EAG:Suspense                          2997.983977319100496144676647 CLP
+2026-02-12 * "MONTO CANCELADO"
+  source: "cartola-tc"
+  bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
+  batch_id: "93f2834c-33b8-4e67-8078-a9886098167a"
+  line: "1"
+  operation_type: "pago"
+  period: "2026-02"
+  opening: "1448.79"
+  closing: "465.59"
+  currency: "USD"
+  fx: "931.0509246332610236474151077"
+  Expenses:EAG:TC:Tc1027VisaInfinityUs-430006   -1250161.00 CLP
+  Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs   1250161.00 CLP
 2026-02-12 * "APPLE.COM/BILL"
   source: "cartola-tc"
   bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
@@ -436,16 +449,3 @@
   category_status: "pending"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -8751.878691552653622285702012 CLP
   Expenses:EAG:Suspense                          8751.878691552653622285702012 CLP
-2026-01-29 * "Apertura TC T/C: 1027 - Visa Infinity - US$"
-  source: "cartola-tc"
-  bank_account_id: "3f0349c0-b004-4168-942a-4a12b2da7385"
-  batch_id: "93f2834c-33b8-4e67-8078-a9886098167a"
-  line: "0"
-  operation_type: "apertura"
-  period: "2026-02"
-  opening: "1448.79"
-  closing: "465.59"
-  currency: "USD"
-  fx: "931.0509246332610236474151077"
-  Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs  -1250161.00 CLP
-  Equity:Apertura:TarjetasSinDetalle             1250161.00 CLP
