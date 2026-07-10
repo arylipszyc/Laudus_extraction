@@ -19,14 +19,18 @@ from backend.app.api.v1.owner_comments.schemas import (
     CreateCommentResponse,
     ReplyRequest,
     ReplyResponse,
+    ResolveThreadRequest,
+    ResolveThreadResponse,
     ThreadView,
 )
 from backend.app.api.v1.owner_comments.service import (
     NotParticipant,
+    ThreadAlreadyResolved,
     ThreadNotFound,
     create_comment,
     list_threads,
     reply,
+    resolve_thread,
 )
 from backend.app.auth.schemas import UserSession
 from backend.app.dependencies import get_ledger_service, require_role
@@ -107,3 +111,29 @@ def reply_endpoint(
         # Mismo mapeo de errores de persistencia que el POST de 7.1 (AC3).
         raise HTTPException(status_code=500, detail=f"COMMENT_PERSIST_FAILED: {exc}")
     return ReplyResponse(**result)
+
+
+@router.post("/{thread_id}/resolve", response_model=ResolveThreadResponse)
+def resolve_endpoint(
+    thread_id: str,
+    request: ResolveThreadRequest,
+    user: UserSession = Depends(require_role(["family", "contador", "admin"])),
+    ledger: LedgerService = Depends(get_ledger_service),
+):
+    """Resuelve un hilo (Story 7.3, FR40). Ambos roles pueden cerrar; el guard de idempotencia
+    corre ANTES de escribir (doble resolución → 400, patrón ResolveError de reconciliación)."""
+    root = Path(ledger.main_path).parent
+    try:
+        result = resolve_thread(
+            thread_id, request.note,
+            user_email=user.email, user_role=user.role, ledger_root=root,
+        )
+    except ThreadNotFound:
+        raise HTTPException(status_code=404, detail=f"hilo {thread_id} no existe")
+    except ThreadAlreadyResolved:
+        raise HTTPException(status_code=400, detail=f"hilo {thread_id} ya está resuelto")
+    except NotParticipant:
+        raise HTTPException(status_code=403, detail="no participás de este hilo")
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, RuntimeError) as exc:
+        raise HTTPException(status_code=500, detail=f"COMMENT_PERSIST_FAILED: {exc}")
+    return ResolveThreadResponse(**result)

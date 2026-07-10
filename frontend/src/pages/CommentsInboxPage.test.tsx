@@ -3,12 +3,14 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 
-vi.mock('@/services/ownerComments', () => ({ listThreads: vi.fn(), replyThread: vi.fn() }))
+vi.mock('@/services/ownerComments', () => ({
+  listThreads: vi.fn(), replyThread: vi.fn(), resolveThread: vi.fn(),
+}))
 vi.mock('@/hooks/useAuth', () => ({ useAuth: vi.fn() }))
 vi.mock('@/hooks/useHasRole', () => ({ useHasRole: vi.fn() }))
 
 import { CommentsInboxPage } from './CommentsInboxPage'
-import { listThreads, replyThread, type Thread } from '@/services/ownerComments'
+import { listThreads, replyThread, resolveThread, type Thread } from '@/services/ownerComments'
 import { useAuth } from '@/hooks/useAuth'
 import { useHasRole } from '@/hooks/useHasRole'
 
@@ -81,6 +83,29 @@ describe('<CommentsInboxPage /> (Story 7.2)', () => {
     // ary es autor de t1 (COMPRA X) pero NO de t2 (TX VIEJA, autor otro@eag.cl)
     expect(await screen.findByText('COMPRA X')).toBeInTheDocument()
     expect(screen.queryByText('TX VIEJA')).not.toBeInTheDocument()
+  })
+
+  // ── 7.3 AC6: marcar resuelto ──────────────────────────────────────────────
+
+  it('7.3 AC6: "Marcar resuelto" llama resolveThread y refresca la lista', async () => {
+    vi.mocked(resolveThread).mockResolvedValue({ thread_id: 't1', resolved_at: '2026-07-10T10:00:00Z' })
+    renderPage()
+    await screen.findByText('COMPRA X')
+    const callsBefore = vi.mocked(listThreads).mock.calls.length
+    fireEvent.click(screen.getAllByText('Marcar resuelto')[0])
+    await waitFor(() => expect(resolveThread).toHaveBeenCalledWith('t1'))
+    // refetch de la lista (invalidación) — el estado "resuelto" lo define el backend
+    await waitFor(() =>
+      expect(vi.mocked(listThreads).mock.calls.length).toBeGreaterThan(callsBefore))
+  })
+
+  it('7.3 AC6: un hilo ya resuelto no muestra el botón', async () => {
+    vi.mocked(listThreads).mockResolvedValue([
+      { ...THREAD_RESOLVED, resolution: { action: 'resolve', resolved_by: 'c@eag.cl' } },
+    ])
+    renderPage()
+    await screen.findByText('COMPRA X')
+    expect(screen.queryByText('Marcar resuelto')).not.toBeInTheDocument()
   })
 
   // ── 7.1b AC5: deep-link ?thread=<id> ──────────────────────────────────────

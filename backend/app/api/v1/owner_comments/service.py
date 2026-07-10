@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from pipeline.importers.owner_comments_writer import (
     append_comment,
     append_reply,
+    append_resolution,
     build_anchor,
     build_comment,
     default_jsonl_path,
@@ -62,6 +63,10 @@ class ThreadNotFound(Exception):
 
 class NotParticipant(Exception):
     """Un `family` intenta responder un hilo del que no es participante → prohibido (HTTP 403)."""
+
+
+class ThreadAlreadyResolved(Exception):
+    """El hilo ya tiene línea de resolución → no se resuelve dos veces (HTTP 400, Story 7.3 AC3)."""
 
 
 def _tx_context(anchor_status: str, entry, root: dict) -> dict:
@@ -153,11 +158,7 @@ def reply(
     if not threads:
         raise ThreadNotFound(thread_id)
     if user_role == "family":
-        thread = threads[0]
-        participants = {(thread.get("root") or {}).get("author_email")}
-        participants |= {r.get("author_email") for r in thread.get("replies", [])}
-        if user_email not in participants:
-            raise NotParticipant(thread_id)
+        _require_participant(threads[0], user_email)
     reply_id = str(uuid.uuid4())
     record = {
         "reply_id": reply_id,
@@ -172,3 +173,59 @@ def reply(
         ledger_root=ledger_root,
     )
     return {"comment_id": reply_id, "created_at": ts}
+
+
+# ── Story 7.3: resolver un hilo (FR40) ───────────────────────────────────────
+
+
+def _require_participant(thread: dict, user_email: str) -> None:
+    """Un `family` solo actúa sobre hilos donde participa (raíz o alguna respuesta suya).
+
+    Misma postura que el patch del review de 7.2 en `reply`: el scoping del inbox ya le esconde
+    los hilos ajenos, esto cierra el acceso directo por id."""
+    participants = {(thread.get("root") or {}).get("author_email")}
+    participants |= {r.get("author_email") for r in thread.get("replies", [])}
+    if user_email not in participants:
+        raise NotParticipant(thread["thread_id"])
+
+
+def resolve_thread(
+    thread_id: str,
+    note: str | None,
+    *,
+    user_email: str,
+    user_role: str,
+    ledger_root,
+    now_iso: str | None = None,
+) -> dict:
+    """Marca el hilo como resuelto appendeando la línea de resolución (AC1). Espejo del patrón
+    de reconciliación (`resolve()` + guard antes de escribir):
+
+    - hilo inexistente → `ThreadNotFound` (404), nada se escribe (AC4);
+    - ya resuelto → `ThreadAlreadyResolved` (400) ANTES del append — nunca dos resoluciones (AC3);
+    - `family` solo resuelve hilos donde participa (postura de `reply`); contador/admin cualquiera.
+
+    "Resuelto" se deriva de UNA sola cosa: la línea de resolución en el JSONL (misma definición
+    que usa el filtro `status` del inbox de 7.2 — sin flag paralelo)."""
+    ts = now_iso or datetime.now(timezone.utc).isoformat()
+    threads = read_threads(default_jsonl_path(ledger_root), thread_id=thread_id)
+    if not threads:
+        raise ThreadNotFound(thread_id)
+    thread = threads[0]
+    if thread.get("resolution") is not None:
+        raise ThreadAlreadyResolved(thread_id)
+    if user_role == "family":
+        _require_participant(thread, user_email)
+    resolution = {
+        "action": "resolve",
+        "resolved_by": user_email,
+        "resolved_by_role": user_role,
+        "resolved_at": ts,
+        "note": note,
+    }
+    persist_and_commit(
+        lambda p: append_resolution(thread_id, resolution, p),
+        f"[owner-comment] resolve {user_role} hilo {thread_id[:8]}",
+        ledger_root=ledger_root,
+    )
+    return {"thread_id": thread_id, "resolved_at": ts}

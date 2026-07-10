@@ -1,6 +1,6 @@
 # Story 7.3: Resolver un hilo de comentario (ambos roles) — FR40
 
-Status: draft
+Status: review
 
 <!-- Depende de 7.0 (writer + append_resolution de hilos) y 7.2 (inbox donde se resuelve). -->
 
@@ -47,16 +47,16 @@ so that **el hilo salga del inbox de pendientes y no siga apareciendo como algo 
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1 — Endpoint de resolución** (AC1, AC2, AC3, AC4)
-  - [ ] `POST /comments/{thread_id}/resolve` en `owner_comments/router.py` (RBAC family/contador/admin). Service `resolve_thread(thread_id, note, user_email, user_role, ledger_root)`: (1) `read_threads(thread_id=...)` → 404 si no existe; (2) guard "ya resuelto" (si `resolution is not None`) → error → 409/400 **antes** de escribir; (3) `append_resolution(thread_id, {...}, path)` → `persist_and_commit`.
-  - [ ] Schema `ResolveThreadRequest{note: str | None = None}` / `ResolveThreadResponse{thread_id, resolved_at}`. Excepción `ThreadResolveError` → 409/400 (patrón `ResolveError`→400 de reconciliación).
+- [x] **Task 1 — Endpoint de resolución** (AC1, AC2, AC3, AC4)
+  - [x] `POST /comments/{thread_id}/resolve` en `owner_comments/router.py` (RBAC family/contador/admin). Service `resolve_thread(thread_id, note, user_email, user_role, ledger_root)`: (1) `read_threads(thread_id=...)` → 404 si no existe; (2) guard "ya resuelto" (si `resolution is not None`) → error → 409/400 **antes** de escribir; (3) `append_resolution(thread_id, {...}, path)` → `persist_and_commit`.
+  - [x] Schema `ResolveThreadRequest{note: str | None = None}` / `ResolveThreadResponse{thread_id, resolved_at}`. Excepción `ThreadAlreadyResolved` → 400 (patrón `ResolveError`→400 de reconciliación).
 
-- [ ] **Task 2 — Acción de resolver en el inbox** (AC6)
-  - [ ] `ownerComments.ts`: `resolveThread(thread_id, note?)`.
-  - [ ] Botón "Marcar resuelto" en `CommentsInboxPage` (7.2), visible para ambos roles. Al éxito, refetch o quita el hilo de la lista de abiertos.
+- [x] **Task 2 — Acción de resolver en el inbox** (AC6)
+  - [x] `ownerComments.ts`: `resolveThread(thread_id, note?)`.
+  - [x] Botón "Marcar resuelto" en `CommentsInboxPage` (7.2), visible para ambos roles. Al éxito, refetch o quita el hilo de la lista de abiertos.
 
-- [ ] **Task 3 — Tests** (AC7)
-  - [ ] `backend/tests/test_owner_comments_resolve.py`: resolver abierto + sale de open; `family` 200; doble resolución rechazada; 404. Frontend component test.
+- [x] **Task 3 — Tests** (AC7)
+  - [x] `backend/tests/test_owner_comments_resolve.py`: resolver abierto + sale de open; `family` 200; doble resolución rechazada; 404. Frontend component test.
 
 ## Dev Notes
 
@@ -95,22 +95,38 @@ El `resolve()` de reconciliación (`reconciliation/service.py`) ya hace exactame
 - [Source: backend/app/api/v1/reconciliation/router.py:81] — mapeo `ResolveError`→400.
 - [Source: _bmad-output/planning-artifacts/epics.md#Epic 7] — FR40.
 
-## Decisiones de diseño para Ary (abiertas)
+## Decisiones de diseño (resueltas con los defaults — mandato Ary 2026-07-10 "para preguntas técnicas sigue tu recomendación")
 
-1. **¿Resolver requiere una nota obligatoria?** Recomendado: **nota opcional** (cerrar rápido sin fricción; el hilo ya tiene el historial). Default = opcional.
-2. **¿Código HTTP para doble-resolución?** Reconciliación usa 400 (`ResolveError`). ¿Mantener 400 por consistencia, o 409 (más semántico para "conflicto de estado")? Default = **400** por consistencia con reconciliación; cambiar a 409 es trivial si Ary prefiere.
-3. **¿Reabrir en el MVP?** Recomendado: **no** (diferido). Confirmar que "resuelto es final" es aceptable para el owner.
+1. **Nota al resolver = OPCIONAL** (cerrar rápido sin fricción; el hilo ya tiene el historial). Tope defensivo 10k como el body.
+2. **Doble-resolución → 400** por consistencia con reconciliación (`ResolveError`→400).
+3. **Sin reabrir en el MVP** (diferido; una respuesta post-resolución appendea sin reabrir, decisión de 7.2).
+4. **[Agregada en dev] Family solo resuelve hilos donde participa** (403 si no): misma postura que el patch del review de 7.2 sobre `reply` — el scoping del inbox esconde hilos ajenos, esto cierra el acceso directo por id. Contador/admin sin restricción (AC2 intacto: no está restringido al AUTOR). Helper `_require_participant` compartido con `reply`.
 
 ## Dev Agent Record
 
 ### Agent Model Used
 
-_(pendiente)_
+Claude Fable 5 (claude-fable-5) — Amelia (dev-story), 2026-07-10.
 
 ### Completion Notes List
 
-_(pendiente)_
+- Ciclo red-green: 7 tests backend nuevos escritos primero (6 rojos + 1 pass vacuo por ruta inexistente), luego implementación.
+- **Backend:** `resolve_thread()` en `owner_comments/service.py` — guards en orden 404 (inexistente) → 400 (ya resuelto) → 403 (family no participante), TODOS antes de escribir; luego `append_resolution` (writer 7.0) vía `persist_and_commit`. Línea de resolución: `{action, resolved_by, resolved_by_role, resolved_at, note}`. "Resuelto" se deriva SOLO de la línea de resolución (misma definición que el filtro `status` del inbox — sin flag paralelo, AC5 verificado por test). Router `POST /{thread_id}/resolve` espeja el mapeo de errores de reply/create.
+- **Frontend:** `resolveThread()` en `ownerComments.ts` (reusa `errorMessage`); botón "Marcar resuelto" (outline) junto a "Responder" en `ThreadCard`, oculto si ya está resuelto; éxito → invalida `['owner-comments']` + `['comment-threads']` (el hilo sale de Abiertos vía refetch, sin estado local).
+- **Tests:** backend 7 nuevos (`test_owner_comments_resolve.py`: resolver+sale-de-open+bloque resolution, nota opcional, family participante 200, family ajeno 403 sin escritura, doble 400 con UNA sola línea, 404 sin escritura, 401); frontend 2 nuevos (botón llama servicio + refetch; hilo resuelto no muestra botón). Suites: backend **763 passed / 1 xfailed**, frontend **114 passed**, tsc + eslint (tocados) limpios, 0 regresiones.
 
 ### File List
 
-_(pendiente)_
+- backend/app/api/v1/owner_comments/service.py (M — resolve_thread + ThreadAlreadyResolved + _require_participant compartido con reply)
+- backend/app/api/v1/owner_comments/schemas.py (M — ResolveThreadRequest/Response)
+- backend/app/api/v1/owner_comments/router.py (M — POST /{thread_id}/resolve)
+- backend/tests/test_owner_comments_resolve.py (NUEVO — 7 tests)
+- frontend/src/services/ownerComments.ts (M — resolveThread)
+- frontend/src/pages/CommentsInboxPage.tsx (M — botón Marcar resuelto)
+- frontend/src/pages/CommentsInboxPage.test.tsx (M — 2 tests nuevos + mock resolveThread)
+- _bmad-output/implementation-artifacts/sprint-status.yaml (M — tracking)
+- _bmad-output/implementation-artifacts/7-3-resolver-thread.md (M — este archivo)
+
+## Change Log
+
+- 2026-07-10 — dev-story (Amelia): implementación completa Tasks 1–3, AC1–AC7 MET con los defaults técnicos auto-aprobados + guard de participante para family (postura 7.2). Suites 763/114/tsc/eslint verdes, 0 regresiones. Status → review.

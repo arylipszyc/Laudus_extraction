@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useAuth } from '@/hooks/useAuth'
 import { useHasRole } from '@/hooks/useHasRole'
-import { listThreads, replyThread, type Thread } from '@/services/ownerComments'
+import { listThreads, replyThread, resolveThread, type Thread } from '@/services/ownerComments'
 import { fmt } from '@/lib/format'
 
 type StatusFilter = 'open' | 'resolved' | 'all'
@@ -93,6 +93,16 @@ function ThreadCard({ thread, highlight = false }: { thread: Thread; highlight?:
     },
   })
 
+  // 7.3 AC6: resolver el hilo — visible para ambos roles; al éxito el hilo sale de "Abiertos"
+  // vía invalidación (la definición de resuelto vive en el backend, sin estado local).
+  const resolveMutation = useMutation({
+    mutationFn: () => resolveThread(thread.thread_id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['owner-comments'] })
+      qc.invalidateQueries({ queryKey: ['comment-threads'] })
+    },
+  })
+
   const canReply = !mutation.isPending && body.trim().length > 0
 
   return (
@@ -142,9 +152,24 @@ function ThreadCard({ thread, highlight = false }: { thread: Thread; highlight?:
         {mutation.error && (
           <p className="text-sm text-destructive">{(mutation.error as Error).message}</p>
         )}
-        <Button size="sm" onClick={() => mutation.mutate()} disabled={!canReply}>
-          {mutation.isPending ? 'Enviando…' : 'Responder'}
-        </Button>
+        {resolveMutation.error && (
+          <p className="text-sm text-destructive">{(resolveMutation.error as Error).message}</p>
+        )}
+        <div className="flex gap-2">
+          <Button size="sm" onClick={() => mutation.mutate()} disabled={!canReply}>
+            {mutation.isPending ? 'Enviando…' : 'Responder'}
+          </Button>
+          {!resolved && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => resolveMutation.mutate()}
+              disabled={resolveMutation.isPending}
+            >
+              {resolveMutation.isPending ? 'Resolviendo…' : 'Marcar resuelto'}
+            </Button>
+          )}
+        </div>
       </div>
     </Card>
     </div>

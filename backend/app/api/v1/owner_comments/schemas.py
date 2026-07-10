@@ -59,3 +59,17 @@ class ReplyRequest(BaseModel):
 class ReplyResponse(BaseModel):
     comment_id: str
     created_at: str
+
+
+# ── Story 7.3: resolver un hilo (FR40) ───────────────────────────────────────
+
+
+class ResolveThreadRequest(BaseModel):
+    # Nota OPCIONAL (decisión 7.3: cerrar sin fricción; el hilo ya tiene el historial). Mismo tope
+    # defensivo 10k que el body — también se commitea a git de forma irreversible.
+    note: Annotated[str, StringConstraints(strip_whitespace=True, max_length=10_000)] | None = None
+
+
+class ResolveThreadResponse(BaseModel):
+    thread_id: str
+    resolved_at: str

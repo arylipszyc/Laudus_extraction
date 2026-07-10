@@ -76,6 +76,21 @@ export async function replyThread(
   return res.json()
 }
 
+/** 7.3 AC6: marca el hilo como resuelto (nota opcional). Doble resolución → 400 legible. */
+export async function resolveThread(
+  thread_id: string,
+  note?: string,
+): Promise<{ thread_id: string; resolved_at: string }> {
+  const res = await apiFetch(`${base}/${thread_id}/resolve`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(note ? { note } : {}),
+  })
+  if (!res.ok) throw new Error(await errorMessage(res, `Error resolviendo (${res.status})`))
+  return res.json()
+}
+
 /** 7.1b AC3: crea el hilo raíz sobre una transacción del drill-down (POST de 7.1). */
 export async function createComment(
   tx_id: string,
