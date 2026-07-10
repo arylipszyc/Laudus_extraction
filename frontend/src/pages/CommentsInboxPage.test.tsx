@@ -122,16 +122,17 @@ describe('<CommentsInboxPage /> (Story 7.2)', () => {
 
   // ── 7.3 AC6: marcar resuelto ──────────────────────────────────────────────
 
-  it('7.3 AC6: "Marcar resuelto" llama resolveThread y refresca la lista', async () => {
+  it('7.3 AC6: "Marcar resuelto" llama resolveThread y el hilo desaparece de abiertos', async () => {
     vi.mocked(resolveThread).mockResolvedValue({ thread_id: 't1', resolved_at: '2026-07-10T10:00:00Z' })
+    // unread: false para que expandir no dispare mark-read (aísla el refetch del resolve)
+    vi.mocked(listThreads).mockResolvedValue([{ ...THREAD_RESOLVED, unread: false }, THREAD_ORPHANED])
     renderPage()
     fireEvent.click(await screen.findByText('COMPRA X')) // expandir (7.4)
-    const callsBefore = vi.mocked(listThreads).mock.calls.length
+    // tras resolver, el backend ya no devuelve t1 en "Abiertos" → el refetch por invalidación lo saca
+    vi.mocked(listThreads).mockResolvedValue([THREAD_ORPHANED])
     fireEvent.click(screen.getAllByText('Marcar resuelto')[0])
     await waitFor(() => expect(resolveThread).toHaveBeenCalledWith('t1'))
-    // refetch de la lista (invalidación) — el estado "resuelto" lo define el backend
-    await waitFor(() =>
-      expect(vi.mocked(listThreads).mock.calls.length).toBeGreaterThan(callsBefore))
+    await waitFor(() => expect(screen.queryByText('COMPRA X')).not.toBeInTheDocument())
   })
 
   it('7.3 AC6: un hilo ya resuelto no muestra el botón', async () => {

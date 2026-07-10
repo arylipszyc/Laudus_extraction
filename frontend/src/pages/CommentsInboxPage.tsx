@@ -89,6 +89,8 @@ function ThreadCard({ thread, highlight = false }: { thread: Thread; highlight?:
 
   // 7.4 AC6: al expandir un hilo NO leído se marca leído UNA vez (solo si hace falta — cada
   // marcador es un commit al ledger, no spamear). El chip decrementa vía invalidación + poll.
+  // El latch se libera si el POST falla (reintenta al re-expandir) y cuando `unread` vuelve a
+  // false (actividad nueva mientras está expandido se re-marca).
   const markedRef = useRef(false)
   const readMutation = useMutation({
     mutationFn: () => markThreadRead(thread.thread_id),
@@ -96,11 +98,18 @@ function ThreadCard({ thread, highlight = false }: { thread: Thread; highlight?:
       qc.invalidateQueries({ queryKey: ['comments-count'] })
       qc.invalidateQueries({ queryKey: ['owner-comments'] })
     },
+    onError: () => {
+      markedRef.current = false
+    },
   })
   const { unread } = thread
   const { mutate: markRead } = readMutation
   useEffect(() => {
-    if (expanded && unread && !markedRef.current) {
+    if (!unread) {
+      markedRef.current = false
+      return
+    }
+    if (expanded && !markedRef.current) {
       markedRef.current = true
       markRead()
     }
@@ -122,6 +131,8 @@ function ThreadCard({ thread, highlight = false }: { thread: Thread; highlight?:
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['owner-comments'] })
       qc.invalidateQueries({ queryKey: ['comment-threads'] })
+      // resolver saca el hilo del conteo (los resueltos no notifican) → chip al día sin esperar el poll
+      qc.invalidateQueries({ queryKey: ['comments-count'] })
     },
   })
 

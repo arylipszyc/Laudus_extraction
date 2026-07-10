@@ -1,6 +1,6 @@
 # Story 7.3: Resolver un hilo de comentario (ambos roles) — FR40
 
-Status: review
+Status: done
 
 <!-- Depende de 7.0 (writer + append_resolution de hilos) y 7.2 (inbox donde se resuelve). -->
 
@@ -57,6 +57,12 @@ so that **el hilo salga del inbox de pendientes y no siga apareciendo como algo 
 
 - [x] **Task 3 — Tests** (AC7)
   - [x] `backend/tests/test_owner_comments_resolve.py`: resolver abierto + sale de open; `family` 200; doble resolución rechazada; 404. Frontend component test.
+
+### Review Findings (code review 3 capas, 2026-07-10 — junto con 7.4)
+
+- [x] [Review][Patch — APLICADO 2026-07-10] Orden de guards en `resolve_thread` filtra estado a un `family` no participante — el guard `ThreadAlreadyResolved` (400) corría ANTES de `_require_participant` (403), así un family ajeno que sondeaba un hilo resuelto aprendía que existe y está resuelto; `reply` y `mark_read` chequean participación primero. Fix: `_require_participant` movido antes del guard ya-resuelto (sigue cumpliendo AC3 "antes de escribir") [backend/app/api/v1/owner_comments/service.py:286-289]
+- [x] [Review][Patch — APLICADO 2026-07-10] El component test del botón resolver no observaba la desaparición del hilo de "Abiertos" (AC7 PARTIAL) — solo assertaba que `resolveThread` fue llamado y que hubo refetch. Ahora el mock devuelve la lista sin el hilo tras el resolve y se asserta que la card desaparece [frontend/src/pages/CommentsInboxPage.test.tsx]
+- [x] [Review][Defer] TOCTOU: dos resolves concurrentes pasan ambos el guard de idempotencia (corre fuera del `.import.lock`) → dos líneas de resolución con 200 [service.py:282-301] — deferred, hardening de concurrencia; `read_threads` "última gana" lo enmascara en lectura; mismo patrón check-then-append de reconciliación
 
 ## Dev Notes
 

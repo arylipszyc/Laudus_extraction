@@ -1,6 +1,6 @@
 # Story 7.4: Notificaciones in-app (chips en el Header) para ambos roles — parte in-app de FR37/FR41
 
-Status: review
+Status: done
 
 <!-- Depende de 7.1/7.2/7.3 (hilos crean/responden/resuelven). Cubre la parte IN-APP de FR37/FR41.
      La parte por EMAIL de FR37/FR41 es la story 7.5 (deferida). -->
@@ -63,6 +63,19 @@ so that **me entere de que hay algo esperando mi atención sin tener que abrir e
 
 - [x] **Task 3 — Tests** (AC7)
   - [x] `backend/tests/test_owner_comments_count.py`: count por rol, propio evento no cuenta, resuelto no cuenta, `read` baja el unread. Frontend component test del `CommentsChip`.
+
+### Review Findings (code review 3 capas, 2026-07-10 — junto con 7.3)
+
+- [x] [Review][Decision→Defer] Una respuesta a un hilo RESUELTO no genera señal en ningún lado — responder-a-resuelto está permitido (decisión Ary 7.2) pero "solo hilos abiertos notifican" (AC1 de esta story): la respuesta se persiste y nadie se entera salvo browsing manual de "Resueltos/Todos". **Ary 2026-07-10: aceptar y diferir** — baja frecuencia; resolver cuando el flujo real lo pida (quizá junto con email 7.5)
+- [x] [Review][Patch — APLICADO 2026-07-10] `resolveMutation` no invalidaba `['comments-count']` — resolver un hilo unread dejaba el chip del Header stale hasta el poll de 60s; `readMutation` sí lo invalida. Fix: invalidación agregada al `onSuccess` del resolve [frontend/src/pages/CommentsInboxPage.tsx:120-126]
+- [x] [Review][Patch — APLICADO 2026-07-10] `markedRef` se latcheaba ANTES del éxito del mark-read y nunca se reseteaba — (a) POST fallido dejaba el hilo "nuevo" sin retry; (b) actividad nueva con el hilo expandido no se re-marcaba. Fix: latch se libera en `onError` (reintenta al re-expandir) y cuando `unread` vuelve a `false` (re-marca la próxima transición a unread) [frontend/src/pages/CommentsInboxPage.tsx:92-107]
+- [x] [Review][Patch — APLICADO 2026-07-10] La visibilidad del chip para `family` (el rasgo distintivo de la story) estaba mockeada, no asertada. Fix: test nuevo asserta `useHasRole` llamado con `['family','contador','admin']` [frontend/src/components/layout/CommentsChip.test.tsx]
+- [x] [Review][Patch — APLICADO 2026-07-10] Test "oculto si unread 0" dormía 50ms (flaky bajo carga de CI). Fix: `waitFor` sobre `client.getQueryState(['comments-count']).status === 'success'` — determinista [frontend/src/components/layout/CommentsChip.test.tsx]
+- [x] [Review][Defer] `mark_read` sin guard de no-op: cada POST repetido appendea línea + commit de git (spammable por cualquier autenticado); el front ya marca selectivo [service.py:322-343] — deferred, hardening server-side
+- [x] [Review][Defer] El `ts` de reply/mark-read se estampa ANTES de tomar el lock + `>` estricto → una reply no vista puede quedar "leída" si el mark-read la adelanta en el lock [service.py] — deferred, carrera fina de concurrencia
+- [x] [Review][Defer] Comparación lexicográfica de ISO-8601 rompe con formatos mixtos ("Z" vs "+00:00") — latente: todos los writers de producción usan `isoformat()`; misma convención pre-existente de `_last_activity` [service.py:121-125] — deferred, normalizar si aparece un writer externo
+- [x] [Review][Defer] Cambio de deep-link `?thread=` SIN remount no expande el hilo ni cambia el filtro a "all" (`useState` inicial no reacciona a searchParams; solo back/forward dentro de /comments) [CommentsInboxPage.tsx:19,78] — deferred, parcialmente pre-existente de 7.1b, navegación rara
+- [x] [Review][Defer] Un hilo con raíz de contador/admin es invisible para el owner (scoping por `root.author_email` en inbox y count); el contador SÍ puede crear hilos desde el drill-down (affordance 3 roles de 7.1b) — deferred, pre-existente del filtro de 7.2; este diff solo lo extiende consistentemente al count
 
 ## Dev Notes
 

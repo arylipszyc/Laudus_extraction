@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 
@@ -12,13 +12,14 @@ import { useHasRole } from '@/hooks/useHasRole'
 
 function renderChip() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return render(
+  const utils = render(
     <QueryClientProvider client={client}>
       <MemoryRouter>
         <CommentsChip />
       </MemoryRouter>
     </QueryClientProvider>,
   )
+  return { client, ...utils }
 }
 
 describe('<CommentsChip /> (Story 7.4)', () => {
@@ -35,10 +36,18 @@ describe('<CommentsChip /> (Story 7.4)', () => {
 
   it('AC3: oculto si unread es 0', async () => {
     vi.mocked(getCommentsCount).mockResolvedValue({ total: 3, unread: 0 })
-    const { container } = renderChip()
-    // esperar el ciclo de query y verificar que no rinde nada
-    await new Promise((r) => setTimeout(r, 50))
+    const { container, client } = renderChip()
+    // esperar a que la query RESUELVA (determinista, sin sleep) y verificar que no rinde nada
+    await waitFor(() =>
+      expect(client.getQueryState(['comments-count'])?.status).toBe('success'))
     expect(container.querySelector('button')).toBeNull()
+  })
+
+  it('AC3: pide visibilidad para family también (rasgo distintivo de la story)', async () => {
+    vi.mocked(getCommentsCount).mockResolvedValue({ total: 1, unread: 1 })
+    renderChip()
+    await screen.findByText(/1 comentarios/)
+    expect(useHasRole).toHaveBeenCalledWith(['family', 'contador', 'admin'])
   })
 
   it('AC3: error de carga sin dato previo → chip neutro, no se oculta', async () => {

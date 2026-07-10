@@ -228,8 +228,10 @@ def resolve_thread(
     de reconciliación (`resolve()` + guard antes de escribir):
 
     - hilo inexistente → `ThreadNotFound` (404), nada se escribe (AC4);
-    - ya resuelto → `ThreadAlreadyResolved` (400) ANTES del append — nunca dos resoluciones (AC3);
-    - `family` solo resuelve hilos donde participa (postura de `reply`); contador/admin cualquiera.
+    - `family` solo resuelve hilos donde participa (postura de `reply`); contador/admin cualquiera
+      — la autorización corre ANTES del guard de estado (un family ajeno no aprende si el hilo
+      está resuelto: siempre 403);
+    - ya resuelto → `ThreadAlreadyResolved` (400) ANTES del append — nunca dos resoluciones (AC3).
 
     "Resuelto" se deriva de UNA sola cosa: la línea de resolución en el JSONL (misma definición
     que usa el filtro `status` del inbox de 7.2 — sin flag paralelo)."""
@@ -238,10 +240,10 @@ def resolve_thread(
     if not threads:
         raise ThreadNotFound(thread_id)
     thread = threads[0]
-    if thread.get("resolution") is not None:
-        raise ThreadAlreadyResolved(thread_id)
     if user_role == "family":
         _require_participant(thread, user_email)
+    if thread.get("resolution") is not None:
+        raise ThreadAlreadyResolved(thread_id)
     resolution = {
         "action": "resolve",
         "resolved_by": user_email,
