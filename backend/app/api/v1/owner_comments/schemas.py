@@ -49,6 +49,8 @@ class ThreadView(BaseModel):
     anchor_status: str
     tx_id: str | None = None
     tx_context: TxContext
+    # 7.4: no-leído PARA el usuario del JWT (indicador del inbox + mark-read selectivo).
+    unread: bool = False
 
 
 class ReplyRequest(BaseModel):
@@ -73,3 +75,17 @@ class ResolveThreadRequest(BaseModel):
 class ResolveThreadResponse(BaseModel):
     thread_id: str
     resolved_at: str
+
+
+# ── Story 7.4: conteo de no-leídos + marcador de lectura ─────────────────────
+
+
+class CommentsCountResponse(BaseModel):
+    """Patrón `CountResponse` de reconciliación: el chip del Header consume esto."""
+    total: int
+    unread: int
+
+
+class MarkReadResponse(BaseModel):
+    thread_id: str
+    read_at: str

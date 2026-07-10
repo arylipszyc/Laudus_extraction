@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useAuth } from '@/hooks/useAuth'
 import { useHasRole } from '@/hooks/useHasRole'
-import { listThreads, replyThread, resolveThread, type Thread } from '@/services/ownerComments'
+import { listThreads, markThreadRead, replyThread, resolveThread, type Thread } from '@/services/ownerComments'
 import { fmt } from '@/lib/format'
 
 type StatusFilter = 'open' | 'resolved' | 'all'
@@ -73,6 +73,9 @@ const STATUS_LABEL: Record<StatusFilter, string> = {
 }
 
 function ThreadCard({ thread, highlight = false }: { thread: Thread; highlight?: boolean }) {
+  // 7.4 AC6: los hilos arrancan COLAPSADOS (resumen de una línea); expandir = leer. El hilo
+  // deep-linkeado (7.1b AC5) arranca expandido.
+  const [expanded, setExpanded] = useState(highlight)
   const [body, setBody] = useState('')
   const qc = useQueryClient()
   const ctx = thread.tx_context
@@ -83,6 +86,25 @@ function ThreadCard({ thread, highlight = false }: { thread: Thread; highlight?:
   useEffect(() => {
     if (highlight) cardRef.current?.scrollIntoView?.({ block: 'center' })
   }, [highlight])
+
+  // 7.4 AC6: al expandir un hilo NO leído se marca leído UNA vez (solo si hace falta — cada
+  // marcador es un commit al ledger, no spamear). El chip decrementa vía invalidación + poll.
+  const markedRef = useRef(false)
+  const readMutation = useMutation({
+    mutationFn: () => markThreadRead(thread.thread_id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['comments-count'] })
+      qc.invalidateQueries({ queryKey: ['owner-comments'] })
+    },
+  })
+  const { unread } = thread
+  const { mutate: markRead } = readMutation
+  useEffect(() => {
+    if (expanded && unread && !markedRef.current) {
+      markedRef.current = true
+      markRead()
+    }
+  }, [expanded, unread, markRead])
 
   const mutation = useMutation({
     mutationFn: () => replyThread(thread.thread_id, body),
@@ -108,6 +130,30 @@ function ThreadCard({ thread, highlight = false }: { thread: Thread; highlight?:
   return (
     <div ref={cardRef}>
     <Card className={`p-4 space-y-3 ${highlight ? 'ring-2 ring-primary' : ''}`}>
+      {/* 7.4: resumen colapsado — una línea clickeable con lo esencial + indicador de no-leído */}
+      <button
+        onClick={() => setExpanded((p) => !p)}
+        className="w-full text-left flex items-baseline gap-3 flex-wrap"
+      >
+        <span className="text-xs text-muted-foreground">{expanded ? '▾' : '▸'}</span>
+        <span className="text-sm text-muted-foreground">{ctx.date ?? '—'}</span>
+        <span className="text-sm font-mono">{fmt(ctx.amount, ctx.currency)}</span>
+        <span className="text-sm flex-1 truncate">{ctx.narration || '—'}</span>
+        {thread.replies.length > 0 && (
+          <span className="text-xs text-muted-foreground">{thread.replies.length} resp.</span>
+        )}
+        {thread.unread && (
+          <span
+            title="Actividad nueva"
+            className="px-1.5 py-0.5 rounded-full text-[10px] font-medium text-blue-600 bg-blue-50"
+          >
+            nuevo
+          </span>
+        )}
+        {resolved && <span className="text-xs text-green-700">✓ Resuelto</span>}
+      </button>
+
+      {expanded && (<>
       {/* Contexto de la transacción ancla (AC2) */}
       <div className="rounded-md bg-muted/40 px-3 py-2 text-sm">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -171,6 +217,7 @@ function ThreadCard({ thread, highlight = false }: { thread: Thread; highlight?:
           )}
         </div>
       </div>
+      </>)}
     </Card>
     </div>
   )

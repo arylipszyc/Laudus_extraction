@@ -1,6 +1,6 @@
 # Story 7.4: Notificaciones in-app (chips en el Header) para ambos roles — parte in-app de FR37/FR41
 
-Status: draft
+Status: review
 
 <!-- Depende de 7.1/7.2/7.3 (hilos crean/responden/resuelven). Cubre la parte IN-APP de FR37/FR41.
      La parte por EMAIL de FR37/FR41 es la story 7.5 (deferida). -->
@@ -51,18 +51,18 @@ so that **me entere de que hay algo esperando mi atención sin tener que abrir e
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1 — Conteo por rol + marcador de leído** (AC1, AC2, AC4, AC5)
-  - [ ] `GET /comments/count` en `owner_comments/router.py` (RBAC family/contador/admin, `user` del JWT). Service `unread_count(user_email, user_role, path)`: `read_threads` → por hilo abierto, determina el último evento "relevante para este rol" (para contador: root/reply del owner; para family: reply del contador), compara con el último `read_at` del usuario; excluye eventos propios (AC5).
-  - [ ] `POST /comments/{thread_id}/read` → `append_read_marker(thread_id, reader_email, read_at)` (nueva línea `type="read"` en el writer 7.0) → `persist_and_commit`.
-  - [ ] Schema `CommentsCountResponse{total, unread}` (patrón `CountResponse` de reconciliación, `models.py`).
+- [x] **Task 1 — Conteo por rol + marcador de leído** (AC1, AC2, AC4, AC5)
+  - [x] `GET /comments/count` en `owner_comments/router.py` (RBAC family/contador/admin, `user` del JWT). Service `comments_count(user_email, user_role, ledger_root)`: `read_threads` → por hilo abierto, determina el último evento "relevante para este rol" (para contador: root/reply del owner; para family: reply del contador), compara con el último `read_at` del usuario; excluye eventos propios (AC5).
+  - [x] `POST /comments/{thread_id}/read` → `append_read_marker(thread_id, reader_email, read_at)` (nueva línea `type="read"` en el writer 7.0) → `persist_and_commit`.
+  - [x] Schema `CommentsCountResponse{total, unread}` (patrón `CountResponse` de reconciliación, `models.py`).
 
-- [ ] **Task 2 — Chip en el Header** (AC3, AC6)
-  - [ ] `frontend/src/components/layout/CommentsChip.tsx` (molde `PendingReconciliationBadge.tsx`): `useQuery` sobre `getCommentsCount`, `errorAwareInterval`, link a `/comments`. **`useHasRole(['family','contador','admin'])`** (incluye family — a diferencia de los otros chips). Oculto si `unread===0`; neutro en error-sin-dato.
-  - [ ] Montarlo en `Header.tsx` junto a los otros dos (líneas 23-24).
-  - [ ] `ownerComments.ts`: `getCommentsCount()`, `markThreadRead(thread_id)`. `CommentsInboxPage` (7.2) llama `markThreadRead` al expandir un hilo.
+- [x] **Task 2 — Chip en el Header** (AC3, AC6)
+  - [x] `frontend/src/components/layout/CommentsChip.tsx` (molde `PendingReconciliationBadge.tsx`): `useQuery` sobre `getCommentsCount`, `errorAwareInterval`, link a `/comments`. **`useHasRole(['family','contador','admin'])`** (incluye family — a diferencia de los otros chips). Oculto si `unread===0`; neutro en error-sin-dato.
+  - [x] Montarlo en `Header.tsx` junto a los otros dos (líneas 23-24).
+  - [x] `ownerComments.ts`: `getCommentsCount()`, `markThreadRead(thread_id)`. `CommentsInboxPage` (7.2) llama `markThreadRead` al expandir un hilo.
 
-- [ ] **Task 3 — Tests** (AC7)
-  - [ ] `backend/tests/test_owner_comments_count.py`: count por rol, propio evento no cuenta, resuelto no cuenta, `read` baja el unread. Frontend component test del `CommentsChip`.
+- [x] **Task 3 — Tests** (AC7)
+  - [x] `backend/tests/test_owner_comments_count.py`: count por rol, propio evento no cuenta, resuelto no cuenta, `read` baja el unread. Frontend component test del `CommentsChip`.
 
 ## Dev Notes
 
@@ -104,22 +104,46 @@ FR37 ("notificar al contador de un comentario nuevo") y FR41 ("notificar al owne
 - [Source: backend/app/api/v1/reconciliation/router.py:57] — `GET /count` molde.
 - [Source: _bmad-output/planning-artifacts/epics.md#Epic 7] — FR37, FR41 (parte in-app).
 
-## Decisiones de diseño para Ary (abiertas)
+## Decisiones de diseño (resueltas con los defaults — mandato Ary 2026-07-10 "para preguntas técnicas sigue tu recomendación")
 
-1. **¿Marcar leído al expandir el hilo, o un botón explícito "marcar leído"?** Recomendado: **al expandir** (menos fricción; abrir = leer). Default = al expandir.
-2. **Polling del chip:** ¿60s (como categorización) o 5min (como reconciliación)? Recomendado: **60s** — la conversación quiere sentirse más viva que la reconciliación batch. Default = 60s.
-3. **¿Un solo chip de comentarios o separar "sin responder" vs "sin leer"?** Recomendado: **uno** (`unread` según rol). Default = uno.
+1. **Marcar leído AL EXPANDIR el hilo** (menos fricción; abrir = leer). Consecuencia de UX: los hilos del inbox ahora arrancan **colapsados** (resumen de una línea: fecha, monto, glosa, nº respuestas, badge "nuevo", ✓ resuelto) — antes de 7.4 se renderizaban completos y "expandir" no existía. El hilo deep-linkeado (7.1b) arranca expandido. El mark-read solo se dispara si el hilo está `unread` para el usuario (cada marcador es un commit al ledger — no spamear) y UNA vez por montaje.
+2. **Polling del chip = 60s** (`errorAwareInterval`, patrón existente).
+3. **Un solo chip** (`unread` según rol), azul 💬, oculto si 0, neutro en error-sin-dato.
+4. **[Agregada en dev] `ThreadView.unread` por usuario en `GET /comments`**: permite el badge "nuevo" en el resumen colapsado y el mark-read selectivo (sin él, el front marcaría leído cada expand = commits redundantes). `list_threads` recibe `user_email`/`user_role` opcionales (default `""` → `unread=False`, backward-compatible).
+5. **[Agregada en dev] `family` solo marca leído hilos donde participa** (403) — misma postura que reply (7.2) y resolve (7.3), helper `_require_participant` compartido. El count del family solo considera SUS hilos (espeja el scoping del inbox).
 
 ## Dev Agent Record
 
 ### Agent Model Used
 
-_(pendiente)_
+Claude Fable 5 (claude-fable-5) — Amelia (dev-story), 2026-07-10.
 
 ### Completion Notes List
 
-_(pendiente)_
+- Ciclo red-green: 8 tests backend nuevos escritos primero (8 rojos), luego implementación.
+- **Writer (7.0):** `append_read_marker` (línea `type="read"` = `{thread_id, reader_email, read_at}`) + `read_threads` pliega los marcadores en `thread["reads"]` (los consumidores existentes ignoran la clave extra). Sin flags mutables: "no leído" se DERIVA comparando el `ts` del último evento relevante vs el `read_at` máximo del usuario (AC4, ISO lexicográfico como `_last_activity`).
+- **Service:** `_is_unread(thread, user_email, user_role)` — relevante = eventos de LA OTRA PARTE (contador/admin ven actividad de rol `family`; family ve actividad de contador/admin), propio email excluido (AC5 doblemente guardado). `comments_count` = `{total, unread}` sobre hilos abiertos scoped por rol. `mark_read` con guards 404/403 antes de escribir. `list_threads` ahora estampa `unread` por hilo.
+- **Router:** `GET /comments/count` (no toca `entries` → inmune al 503 de ledger) + `POST /{thread_id}/read` (mismo mapeo de errores que reply/resolve).
+- **Frontend:** `CommentsChip` (molde `PendingReconciliationBadge`; diferencia clave: `useHasRole(['family','contador','admin'])` — primer elemento del Header dirigido al owner; azul; oculto si `unread=0`; neutro en error-sin-dato; poll 60s) montado en `Header`. `getCommentsCount`/`markThreadRead` en `ownerComments.ts`. `CommentsInboxPage`: hilos colapsados con resumen de una línea + badge "nuevo"; expandir un hilo `unread` llama `markThreadRead` una vez e invalida `['comments-count']` + `['owner-comments']` (el chip decrementa sin esperar el poll).
+- **Tests:** backend 8 nuevos (`test_owner_comments_count.py`: count por rol y AC5, read baja solo el unread del lector, actividad nueva post-read vuelve a contar, resuelto no cuenta, scoping family + 403 ajeno, 404/401, `ThreadView.unread` end-to-end); frontend 3 del chip (`CommentsChip.test.tsx`) + 3 del inbox (expand marca una vez / ya-leído no marca / badge "nuevo") + tests existentes adaptados al colapsado (expandir antes de asertar detalles; `vi.clearAllMocks` en `beforeEach` para no arrastrar conteos). Suites: backend **771 passed / 1 xfailed**, frontend **120 passed** (17 files), tsc + eslint (tocados) limpios, 0 regresiones.
+- **Cobertura FR37/FR41: PARCIAL por diseño** — esta story cubre el canal in-app; el email es 7.5 (deferred).
 
 ### File List
 
-_(pendiente)_
+- pipeline/importers/owner_comments_writer.py (M — append_read_marker + reads en read_threads)
+- backend/app/api/v1/owner_comments/service.py (M — _is_unread + comments_count + mark_read + unread en list_threads)
+- backend/app/api/v1/owner_comments/schemas.py (M — CommentsCountResponse, MarkReadResponse, ThreadView.unread)
+- backend/app/api/v1/owner_comments/router.py (M — GET /count + POST /{id}/read)
+- backend/tests/test_owner_comments_count.py (NUEVO — 8 tests)
+- frontend/src/components/layout/CommentsChip.tsx (NUEVO — chip del Header)
+- frontend/src/components/layout/CommentsChip.test.tsx (NUEVO — 3 tests)
+- frontend/src/components/layout/Header.tsx (M — monta CommentsChip)
+- frontend/src/services/ownerComments.ts (M — getCommentsCount + markThreadRead + Thread.unread)
+- frontend/src/pages/CommentsInboxPage.tsx (M — hilos colapsables + mark-read al expandir)
+- frontend/src/pages/CommentsInboxPage.test.tsx (M — tests adaptados + 3 nuevos)
+- _bmad-output/implementation-artifacts/sprint-status.yaml (M — tracking)
+- _bmad-output/implementation-artifacts/7-4-notificaciones-in-app.md (M — este archivo)
+
+## Change Log
+
+- 2026-07-10 — dev-story (Amelia): implementación completa Tasks 1–3, AC1–AC7 MET con los defaults técnicos auto-aprobados + ThreadView.unread + guard de participante (postura 7.2/7.3). Inbox pasa a hilos colapsados (consecuencia de "leer = expandir"). Suites 771/120/tsc/eslint verdes, 0 regresiones. Status → review.

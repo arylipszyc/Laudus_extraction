@@ -15,8 +15,10 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.app.api.v1.owner_comments.schemas import (
+    CommentsCountResponse,
     CreateCommentRequest,
     CreateCommentResponse,
+    MarkReadResponse,
     ReplyRequest,
     ReplyResponse,
     ResolveThreadRequest,
@@ -27,8 +29,10 @@ from backend.app.api.v1.owner_comments.service import (
     NotParticipant,
     ThreadAlreadyResolved,
     ThreadNotFound,
+    comments_count,
     create_comment,
     list_threads,
+    mark_read,
     reply,
     resolve_thread,
 )
@@ -82,10 +86,46 @@ def list_comments_endpoint(
     ledger vivo → contexto siempre actual."""
     root = Path(ledger.main_path).parent
     entries = _entries(ledger)  # fuera del try (no hay): su 503 debe propagar tal cual
-    threads = list_threads(status, entries, root)
+    threads = list_threads(status, entries, root, user_email=user.email, user_role=user.role)
     if user.role == "family":
         threads = [t for t in threads if t["root"]["author_email"] == user.email]
     return threads
+
+
+@router.get("/count", response_model=CommentsCountResponse)
+def comments_count_endpoint(
+    user: UserSession = Depends(require_role(["family", "contador", "admin"])),
+    ledger: LedgerService = Depends(get_ledger_service),
+):
+    """Conteo de hilos abiertos + no-leídos PARA el usuario del JWT (Story 7.4 AC1). Alimenta el
+    chip del Header (patrón GET /reconciliation/count). No necesita los `entries` del ledger —
+    se computa solo del JSONL — así que no puede fallar por 503 de ledger."""
+    root = Path(ledger.main_path).parent
+    return CommentsCountResponse(
+        **comments_count(user_email=user.email, user_role=user.role, ledger_root=root)
+    )
+
+
+@router.post("/{thread_id}/read", response_model=MarkReadResponse)
+def mark_read_endpoint(
+    thread_id: str,
+    user: UserSession = Depends(require_role(["family", "contador", "admin"])),
+    ledger: LedgerService = Depends(get_ledger_service),
+):
+    """Marca el hilo como leído por el usuario (Story 7.4 AC2): appendea `type="read"` al JSONL
+    (append-only, sin flags mutables). Mismo mapeo de errores que reply/resolve."""
+    root = Path(ledger.main_path).parent
+    try:
+        result = mark_read(
+            thread_id, user_email=user.email, user_role=user.role, ledger_root=root,
+        )
+    except ThreadNotFound:
+        raise HTTPException(status_code=404, detail=f"hilo {thread_id} no existe")
+    except NotParticipant:
+        raise HTTPException(status_code=403, detail="no participás de este hilo")
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, RuntimeError) as exc:
+        raise HTTPException(status_code=500, detail=f"COMMENT_PERSIST_FAILED: {exc}")
+    return MarkReadResponse(**result)
 
 
 @router.post("/{thread_id}/reply", response_model=ReplyResponse, status_code=201)

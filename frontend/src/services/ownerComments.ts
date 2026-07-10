@@ -37,6 +37,8 @@ export interface Thread {
   /** 7.1b AC2: tx_id ACTUAL de la tx ancla (el nuevo si re-anchored, null si orphaned). */
   tx_id: string | null
   tx_context: TxContext
+  /** 7.4: actividad de la otra parte sin leer PARA el usuario actual. */
+  unread: boolean
 }
 
 const base = `${api.baseUrl}/api/v1/comments`
@@ -73,6 +75,25 @@ export async function replyThread(
     body: JSON.stringify({ body }),
   })
   if (!res.ok) throw new Error(await errorMessage(res, `Error respondiendo (${res.status})`))
+  return res.json()
+}
+
+/** 7.4 AC1: conteo de hilos abiertos + no-leídos para el usuario actual (alimenta el chip). */
+export async function getCommentsCount(): Promise<{ total: number; unread: number }> {
+  const res = await apiFetch(`${base}/count`, { credentials: 'include' })
+  if (!res.ok) throw new Error(`Error cargando conteo de comentarios (${res.status})`)
+  return res.json()
+}
+
+/** 7.4 AC2/AC6: marca el hilo como leído por el usuario actual (marcador append-only). */
+export async function markThreadRead(
+  thread_id: string,
+): Promise<{ thread_id: string; read_at: string }> {
+  const res = await apiFetch(`${base}/${thread_id}/read`, {
+    method: 'POST',
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error(await errorMessage(res, `Error marcando leído (${res.status})`))
   return res.json()
 }
 

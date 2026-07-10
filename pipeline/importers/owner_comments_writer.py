@@ -233,6 +233,22 @@ def append_resolution(thread_id: str, resolution: dict, path) -> None:
     _append_line(record, path)
 
 
+def append_read_marker(thread_id: str, reader_email: str, read_at: str, path) -> None:
+    """Appendea un marcador de lectura por usuario (línea `type="read"`, Story 7.4 AC2).
+
+    "No leído" se DERIVA comparando timestamps (último evento relevante vs último `read_at` del
+    usuario) — sin flags mutables, consistente con el modelo append-only. Marcas repetidas son
+    inofensivas: el lector usa el `read_at` máximo."""
+    record = {
+        "schema_version": SCHEMA_VERSION,
+        "type": "read",
+        "thread_id": thread_id,
+        "reader_email": reader_email,
+        "read_at": read_at,
+    }
+    _append_line(record, path)
+
+
 def read_threads(path, thread_id: str | None = None) -> list[dict]:
     """Pliega el JSONL a hilos `{thread_id, root, replies[], resolution|None}` (AC1).
 
@@ -262,7 +278,8 @@ def read_threads(path, thread_id: str | None = None) -> list[dict]:
         if not tid:
             continue
         if tid not in threads:
-            threads[tid] = {"thread_id": tid, "root": None, "replies": [], "resolution": None}
+            threads[tid] = {"thread_id": tid, "root": None, "replies": [],
+                            "resolution": None, "reads": []}
             order.append(tid)
         thread = threads[tid]
         rtype = record.get("type")
@@ -272,6 +289,8 @@ def read_threads(path, thread_id: str | None = None) -> list[dict]:
             thread["replies"].append(record)
         elif rtype == "resolution":
             thread["resolution"] = record["resolution"]  # última gana
+        elif rtype == "read":
+            thread["reads"].append(record)  # marcadores de lectura por usuario (7.4)
         # anchor-heal: ignorado en 7.0
     out = [threads[t] for t in order]
     if thread_id is not None:

@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 
 from pipeline.importers.owner_comments_writer import (
     append_comment,
+    append_read_marker,
     append_reply,
     append_resolution,
     build_anchor,
@@ -103,13 +104,36 @@ def _last_activity(thread: dict) -> str:
     return max(ts_values) if ts_values else ""
 
 
-def list_threads(status: str, entries: list, ledger_root) -> list[dict]:
+def _is_unread(thread: dict, user_email: str, user_role: str) -> bool:
+    """¿El hilo tiene actividad de LA OTRA PARTE posterior al último `read_at` del usuario? (7.4 AC4)
+
+    Relevante para contador/admin = eventos del owner (rol `family`); para `family` = eventos del
+    contador/admin. La propia actividad nunca cuenta (AC5, doblemente guardada por rol y email).
+    Comparación lexicográfica de ISO-8601 (mismo criterio que `_last_activity`)."""
+    events = [thread.get("root") or {}] + list(thread.get("replies", []))
+    if user_role == "family":
+        relevant = [e for e in events if e.get("author_role") in ("contador", "admin")]
+    else:
+        relevant = [e for e in events if e.get("author_role") == "family"]
+    relevant = [e for e in relevant if e.get("author_email") != user_email]
+    if not relevant:
+        return False
+    last_relevant = max(e.get("ts", "") for e in relevant)
+    reads = [r.get("read_at", "") for r in thread.get("reads", [])
+             if r.get("reader_email") == user_email]
+    last_read = max(reads) if reads else ""
+    return last_relevant > last_read
+
+
+def list_threads(status: str, entries: list, ledger_root, *,
+                 user_email: str = "", user_role: str = "") -> list[dict]:
     """Pliega el JSONL a hilos, re-resuelve cada ancla EN CALIENTE y adjunta el contexto (AC1/AC2).
 
     `status` filtra por resolución: `open` (sin resolución), `resolved` (con resolución), `all` (ambos).
     Cada hilo pasa por `resolve_anchor` contra los `entries` vivos → `anchor_status` + `tx_context`
     reflejan la transacción ACTUAL (un re-import entre comentario y lectura no rompe el contexto).
-    Orden: última actividad primero."""
+    Orden: última actividad primero. Con `user_email`/`user_role`, cada hilo trae `unread` PARA ese
+    usuario (7.4) — el front lo usa para el indicador y para marcar leído solo cuando hace falta."""
     threads = read_threads(default_jsonl_path(ledger_root))
     out = []
     for thread in threads:
@@ -132,6 +156,8 @@ def list_threads(status: str, entries: list, ledger_root) -> list[dict]:
             # — permite al front cruzar hilos ↔ filas del drill-down aun después de un re-import.
             "tx_id": resolved.get("tx_id"),
             "tx_context": _tx_context(resolved["status"], resolved["entry"], root),
+            # 7.4: no-leído para ESTE usuario; solo hilos abiertos notifican (AC1).
+            "unread": is_open and _is_unread(thread, user_email, user_role),
         })
     out.sort(key=_last_activity, reverse=True)
     return out
@@ -229,3 +255,44 @@ def resolve_thread(
         ledger_root=ledger_root,
     )
     return {"thread_id": thread_id, "resolved_at": ts}
+
+
+# ── Story 7.4: conteo de no-leídos + marcador de lectura (FR37/FR41 in-app) ──
+
+
+def comments_count(*, user_email: str, user_role: str, ledger_root) -> dict:
+    """`{total, unread}` PARA este usuario (AC1): total = hilos abiertos que le conciernen
+    (family: solo los suyos, mismo scoping que el inbox); unread = los que tienen actividad de
+    la otra parte posterior a su último marcador de lectura. Los resueltos no notifican."""
+    threads = read_threads(default_jsonl_path(ledger_root))
+    open_threads = [t for t in threads
+                    if t.get("root") is not None and t.get("resolution") is None]
+    if user_role == "family":
+        open_threads = [t for t in open_threads
+                        if (t.get("root") or {}).get("author_email") == user_email]
+    unread = sum(1 for t in open_threads if _is_unread(t, user_email, user_role))
+    return {"total": len(open_threads), "unread": unread}
+
+
+def mark_read(
+    thread_id: str,
+    *,
+    user_email: str,
+    user_role: str,
+    ledger_root,
+    now_iso: str | None = None,
+) -> dict:
+    """Appendea el marcador de lectura del usuario sobre el hilo (AC2). 404 si no existe (sin
+    escritura); un `family` solo marca hilos donde participa (misma postura que reply/resolve)."""
+    ts = now_iso or datetime.now(timezone.utc).isoformat()
+    threads = read_threads(default_jsonl_path(ledger_root), thread_id=thread_id)
+    if not threads:
+        raise ThreadNotFound(thread_id)
+    if user_role == "family":
+        _require_participant(threads[0], user_email)
+    persist_and_commit(
+        lambda p: append_read_marker(thread_id, user_email, ts, p),
+        f"[owner-comment] read {user_role} hilo {thread_id[:8]}",
+        ledger_root=ledger_root,
+    )
+    return {"thread_id": thread_id, "read_at": ts}

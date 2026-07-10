@@ -4,6 +4,7 @@ import { logout } from '@/services/auth'
 import { useSyncStatus } from '@/hooks'
 import { PendingReconciliationBadge } from './PendingReconciliationBadge'
 import { PendingCategorizationChip } from './PendingCategorizationChip'
+import { CommentsChip } from './CommentsChip'
 
 export function Header({ minimal = false }: { minimal?: boolean }) {
   const navigate = useNavigate()
@@ -22,6 +23,7 @@ export function Header({ minimal = false }: { minimal?: boolean }) {
       <div className="flex items-center gap-3">
         <PendingCategorizationChip />
         <PendingReconciliationBadge />
+        <CommentsChip />
         {!minimal && (
           <span className="text-sm text-muted-foreground">
             {syncStatus?.job_status === 'running' && (
