@@ -246,7 +246,11 @@ def read_threads(path, thread_id: str | None = None) -> list[dict]:
     order: list[str] = []
     if not path.exists():
         return []
-    for line in path.read_text(encoding="utf-8").splitlines():
+    # split("\n") — NO splitlines(): un registro se escribe con json.dumps(ensure_ascii=False)+"\n",
+    # que deja crudos los separadores de línea Unicode (U+2028/U+2029/U+0085) si vienen en el body.
+    # splitlines() SÍ rompe en ellos → partiría el JSON en fragmentos inválidos y el comentario se
+    # perdería en silencio. split("\n") solo corta en el "\n" real que agrega el writer.
+    for line in path.read_text(encoding="utf-8").split("\n"):
         line = line.strip()
         if not line:
             continue

@@ -93,8 +93,14 @@ def test_family_crea_comentario_201_con_ancla_completa(tmp_path):
     anchor = root["anchor"]
     assert anchor["tx_id"] == _tx_id()
     assert anchor["anchor_key"]
-    assert anchor["tx_snapshot"]["narration"] == "COMPRA X"
-    assert anchor["tx_snapshot"]["amount"] == -300.0
+    assert "ledger_git_sha" in anchor  # capa de procedencia presente (None en tmp_path no-git, tolerado)
+    snap = anchor["tx_snapshot"]
+    # AC4: snapshot completo de 5 campos (no solo narration/amount)
+    assert snap["date"] == "2026-04-05"
+    assert snap["amount"] == -300.0
+    assert snap["currency"] == "CLP"
+    assert snap["account"] == "Liabilities:EAG:TC:Real:TestCard"
+    assert snap["narration"] == "COMPRA X"
 
 
 # ── AC2: contador y admin también pueden crear (allowlist = 3 roles) ──────────
@@ -163,3 +169,22 @@ def test_rol_desconocido_401(tmp_path):
     resp = client.post("/api/v1/comments", json={"tx_id": _tx_id(), "body": "x"},
                        cookies={"access_token": token})
     assert resp.status_code == 401
+
+
+# ── Regresión: body con separadores de línea Unicode sobrevive el round-trip ───
+
+
+def test_body_con_separador_unicode_no_se_pierde(tmp_path):
+    """U+2028 en medio del body: json.dumps(ensure_ascii=False) lo deja crudo; read_threads debe
+    usar split('\\n') (no splitlines()) para no partir el JSON y descartar el comentario en silencio."""
+    client = _app(_ledger(tmp_path))
+    body = "línea uno línea dos"  # LINE SEPARATOR en el medio (sobrevive al strip de bordes)
+    resp = client.post(
+        "/api/v1/comments",
+        json={"tx_id": _tx_id(), "body": body},
+        cookies={"access_token": create_jwt(email="ary@eag.cl", role="family")},
+    )
+    assert resp.status_code == 201, resp.text
+    threads = ocw.read_threads(ocw.default_jsonl_path(tmp_path))
+    assert len(threads) == 1  # el comentario NO se perdió al leer
+    assert threads[0]["root"]["body"] == body

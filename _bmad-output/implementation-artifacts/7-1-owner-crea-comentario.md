@@ -1,6 +1,6 @@
 # Story 7.1: El owner (rol `family`) crea un comentario sobre una transacción — FR36
 
-Status: review
+Status: done
 
 <!-- Depende de 7.0 (módulo owner_comments + ancla + persistencia). No arrancar antes de que 7.0 esté done. -->
 
@@ -61,6 +61,16 @@ so that **pueda pedirle al contador que aclare o corrija ese movimiento sin tene
 - [x] **Task 3 — Tests** (AC7)
   - [x] `backend/tests/test_owner_comments_api.py`: `family` 201 + JSONL con ancla; `tx_id` inexistente 404; body vacío 422; sin-auth/rol-desconocido 401. Ledger fixture inline + `monkeypatch.delenv("IMPORTER_GIT_ENABLED")`. (Nota: el "403" del AC7 es **inalcanzable** en este endpoint — la allowlist son los 3 roles válidos, así que un token sin auth válida cae en 401, no 403. Se testea el 401 real.)
   - [ ] Frontend component test del botón/input de comentario — **DIFERIDO a 7.1b** (junto con Task 2).
+
+### Review Findings (code review 2026-07-09) — RESUELTO
+
+Los 4 patches aplicados; suite backend **739 passed / 1 xfailed / 0 failed** (+1 test nuevo de regresión Unicode), 0 regresiones.
+
+- [x] [Review][Patch] (era Decision, Ary eligió tope defensivo) `body` sin `max_length` en el primer endpoint de escritura de `family` — un body multi-MB se persiste y commitea a git irreversible. **FIX:** `max_length=10_000` en `StringConstraints` (tope defensivo, no toca la UX). [backend/app/api/v1/owner_comments/schemas.py]
+- [x] [Review][Patch] `body` con separadores de línea Unicode (U+2028 / U+2029 / U+0085) se perdía silenciosamente: POST devolvía 201 pero el comentario desaparecía al leer (`json.dumps(ensure_ascii=False)` los deja crudos, `read_threads` usaba `.splitlines()` que rompe en ellos → JSON inválido → descartado). **FIX:** `read_threads` ahora usa `.split("\n")`; test de regresión `test_body_con_separador_unicode_no_se_pierde`. [pipeline/importers/owner_comments_writer.py:249]
+- [x] [Review][Patch] AC5 pedía "500 **con detalle**" ante fallo real de git, pero el código propagaba al handler default → 500 genérico sin detalle. **FIX:** el router mapea `CalledProcessError`/`TimeoutExpired`/`RuntimeError` (incl. `LockTimeout`) → `HTTPException(500, detail="COMMENT_PERSIST_FAILED: ...")`; `_entries()` movido fuera del `try` para que su 503 no se re-envuelva. [backend/app/api/v1/owner_comments/router.py]
+- [x] [Review][Patch] Test de AC4 incompleto: solo aseveraba `anchor_key`, `narration`, `amount`. **FIX:** ahora verifica `ledger_git_sha` (presencia), y `tx_snapshot.date/currency/account/narration/amount` completos. [backend/tests/test_owner_comments_api.py]
+- [x] [Review][Defer] `LockTimeout` bajo contención con el cron importer bloquea el request ~60s y luego devuelve 500 (ahora con detalle, tras el patch AC5) sin 503/backoff. Pre-existente: comportamiento del lock de `acquire_lock` (timeout=60), no introducido por este cambio. Anotado en `deferred-work.md`. [pipeline/importers/laudus_run.py:54]
 
 ## Dev Notes
 
