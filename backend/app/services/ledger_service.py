@@ -16,9 +16,12 @@ import logging
 import os
 import threading
 from datetime import datetime, timezone
+import hashlib
+from pathlib import Path
 
 import beanquery
 from beancount import loader
+from beancount.core import data
 from watchfiles import awatch
 
 logger = logging.getLogger(__name__)
@@ -165,3 +168,16 @@ class LedgerService:
                 await asyncio.sleep(5)
             else:
                 return  # awatch terminó (solo pasa en tests con fakes finitos)
+
+
+def compute_tx_id(filename: str, lineno: int, narration: str, amount) -> str:
+    """tx_id estable = sha256(file, line, narration, monto)[:12] (Story 9.7 Task 6)."""
+    base = f"{Path(filename).name}:{lineno}:{narration}:{amount}"
+    return hashlib.sha256(base.encode("utf-8")).hexdigest()[:12]
+
+
+def tx_id_of(entry: data.Transaction) -> str:
+    first = entry.postings[0].units.number if entry.postings and entry.postings[0].units else ""
+    return compute_tx_id(entry.meta.get("filename", ""), entry.meta.get("lineno", 0),
+                         entry.narration or "", first)
+

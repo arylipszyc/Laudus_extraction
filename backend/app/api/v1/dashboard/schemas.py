@@ -43,6 +43,9 @@ class LedgerEntryRecord(BaseModel):
     categoria1: str = Field(default="", alias="Categoria1")      # top-level category from PlanCuentas
     categoria2: str = Field(default="", alias="Categoria2")      # 2nd-level category from PlanCuentas
     categoria3: str = Field(default="", alias="Categoria3")      # 3rd-level category from PlanCuentas
+    # 7.1b AC1: tx_id de la transacción padre del posting (ancla de owner-comments). Sin alias —
+    # el nombre del wire es el mismo. Declarado para que el response_model no lo descarte (PR #18).
+    tx_id: str | None = None
 
 
 class DashboardMeta(BaseModel):

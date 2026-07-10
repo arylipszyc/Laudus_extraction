@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -11,7 +12,11 @@ type StatusFilter = 'open' | 'resolved' | 'all'
 
 /** Story 7.2 — inbox de hilos de comentario (contador: todos; owner: los suyos). */
 export function CommentsInboxPage() {
-  const [status, setStatus] = useState<StatusFilter>('open')
+  // 7.1b AC5: deep-link ?thread=<id> desde el drill-down. Se arranca en 'all' para que el hilo
+  // esté en la lista aunque esté resuelto; si igual no aparece, la página carga normal (no rompe).
+  const [searchParams] = useSearchParams()
+  const deepLinkId = searchParams.get('thread')
+  const [status, setStatus] = useState<StatusFilter>(deepLinkId ? 'all' : 'open')
   const { data: user } = useAuth()
   const isContador = useHasRole(['contador', 'admin'])
 
@@ -53,7 +58,9 @@ export function CommentsInboxPage() {
       )}
 
       <div className="space-y-4">
-        {visible.map((t) => <ThreadCard key={t.thread_id} thread={t} />)}
+        {visible.map((t) => (
+          <ThreadCard key={t.thread_id} thread={t} highlight={t.thread_id === deepLinkId} />
+        ))}
       </div>
     </div>
   )
@@ -65,25 +72,32 @@ const STATUS_LABEL: Record<StatusFilter, string> = {
   all: 'Todos',
 }
 
-function ThreadCard({ thread }: { thread: Thread }) {
+function ThreadCard({ thread, highlight = false }: { thread: Thread; highlight?: boolean }) {
   const [body, setBody] = useState('')
   const qc = useQueryClient()
   const ctx = thread.tx_context
   const orphaned = thread.anchor_status === 'orphaned'
   const resolved = thread.resolution !== null
+  // 7.1b AC5: el hilo deep-linkeado se trae a la vista (scrollIntoView no existe en jsdom → optional)
+  const cardRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (highlight) cardRef.current?.scrollIntoView?.({ block: 'center' })
+  }, [highlight])
 
   const mutation = useMutation({
     mutationFn: () => replyThread(thread.thread_id, body),
     onSuccess: () => {
       setBody('')
       qc.invalidateQueries({ queryKey: ['owner-comments'] })
+      qc.invalidateQueries({ queryKey: ['comment-threads'] })
     },
   })
 
   const canReply = !mutation.isPending && body.trim().length > 0
 
   return (
-    <Card className="p-4 space-y-3">
+    <div ref={cardRef}>
+    <Card className={`p-4 space-y-3 ${highlight ? 'ring-2 ring-primary' : ''}`}>
       {/* Contexto de la transacción ancla (AC2) */}
       <div className="rounded-md bg-muted/40 px-3 py-2 text-sm">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -122,7 +136,7 @@ function ThreadCard({ thread }: { thread: Thread }) {
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={2}
-          placeholder="Escribí una respuesta…"
+          placeholder="Escribe una respuesta…"
           className="w-full border rounded-md px-3 py-2 bg-background text-sm"
         />
         {mutation.error && (
@@ -133,6 +147,7 @@ function ThreadCard({ thread }: { thread: Thread }) {
         </Button>
       </div>
     </Card>
+    </div>
   )
 }
 

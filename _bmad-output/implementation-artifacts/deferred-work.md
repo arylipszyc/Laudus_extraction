@@ -1,5 +1,9 @@
 # Deferred Work
 
+## Deferred from: code review of 7-1b-frontend-comentar-owner.md (2026-07-10)
+
+- **Comentario contradictorio en `CommentsInboxPage.tsx` sobre filtrado en el backend** ([frontend/src/pages/CommentsInboxPage.tsx:28-29](../../frontend/src/pages/CommentsInboxPage.tsx#L28-L29)) — El comentario dice que el backend no filtra los hilos por rol, pero el backend `router.py` sí los filtra para el rol `family`. Este es un problema pre-existente introducido en la story 7.2.
+
 ## Deferred from: code review de story 7-2-inbox-contador-respuesta (2026-07-09)
 
 - **`_last_activity` ignora el timestamp de resolución** ([backend/app/api/v1/owner_comments/service.py:88](../../backend/app/api/v1/owner_comments/service.py#L88)) — el orden "última actividad primero" solo mira `root.ts` y `replies[].ts`, no el `resolved_at` de la resolución. En las vistas resolved/all, un hilo recién resuelto no burbujea arriba por su acción más reciente. No observable hoy: la resolución es 7.3 (fuera de alcance), así que no hay hilos resueltos aún. Fix natural al implementar 7.3: incluir `resolution.resolved_at` en `_last_activity`.

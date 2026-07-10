@@ -7,7 +7,6 @@ la regla supra de 9.7) y commitea. El cache del CategorizationService se invalid
 """
 from __future__ import annotations
 
-import hashlib
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
@@ -28,19 +27,7 @@ class CategoryEditError(Exception):
     """bean-check falló tras el edit → rollback (HTTP 422)."""
 
 
-def compute_tx_id(filename: str, lineno: int, narration: str, amount) -> str:
-    """tx_id estable = sha256(file, line, narration, monto)[:12] (Story 9.7 Task 6).
-
-    Estable entre commits del mismo archivo mientras beancount no re-numere líneas en un
-    re-render determinista (el importer emite el mismo orden → mismas líneas)."""
-    base = f"{Path(filename).name}:{lineno}:{narration}:{amount}"
-    return hashlib.sha256(base.encode("utf-8")).hexdigest()[:12]
-
-
-def _tx_id_of(entry: data.Transaction) -> str:
-    first = entry.postings[0].units.number if entry.postings and entry.postings[0].units else ""
-    return compute_tx_id(entry.meta.get("filename", ""), entry.meta.get("lineno", 0),
-                         entry.narration or "", first)
+from backend.app.services.ledger_service import compute_tx_id, tx_id_of as _tx_id_of
 
 
 def list_pending(entries: list) -> list[dict]:

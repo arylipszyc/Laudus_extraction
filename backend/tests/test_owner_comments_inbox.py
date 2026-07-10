@@ -93,6 +93,9 @@ def test_inbox_lista_hilo_resuelto_con_contexto(tmp_path):
     assert len(threads) == 1
     t = threads[0]
     assert t["anchor_status"] == "resolved"
+    # 7.1b AC2: el ThreadView expone el tx_id resuelto (== el original si `resolved`)
+    tx = next(e for e in entries if e.narration == "COMPRA X")
+    assert t["tx_id"] == ocw._tx_id_of(tx)
     assert t["resolution"] is None
     ctx = t["tx_context"]
     assert ctx["date"] == "2026-04-05"
@@ -120,6 +123,12 @@ def test_inbox_re_anchored_tras_reimport(tmp_path):
     # el contexto viene de la tx VIVA, no del snapshot
     assert t["tx_context"]["narration"] == "COMPRA X"
     assert t["tx_context"]["amount"] == -300.0
+    # 7.1b AC2: tx_id = el NUEVO id de la tx re-anclada (el del ledger vivo, no el persistido)
+    new_id = ocw._tx_id_of(next(e for e in reimported if e.narration == "COMPRA X"))
+    old_id = ocw._tx_id_of(next(e for e in _entries("cartola-2026-04.beancount")
+                                if e.narration == "COMPRA X"))
+    assert t["tx_id"] == new_id
+    assert t["tx_id"] != old_id
 
 
 # ── AC2: tx desaparecida → orphaned, contexto desde el snapshot congelado ─────
@@ -137,6 +146,8 @@ def test_inbox_orphaned_usa_snapshot(tmp_path):
     assert t["tx_context"]["date"] == "2026-04-05"
     assert t["tx_context"]["amount"] == -300.0
     assert t["tx_context"]["account"] == "Liabilities:EAG:TC:Real:TestCard"
+    # 7.1b AC2: sin tx viva → tx_id null (el front no muestra badge para este hilo)
+    assert t["tx_id"] is None
 
 
 # ── AC1: orden por última actividad (una respuesta reciente sube el hilo) ──────
@@ -286,6 +297,30 @@ def test_inbox_family_solo_ve_sus_hilos(tmp_path):
     # el contador ve ambos
     both = client.get("/api/v1/comments", cookies=_cookie(role="contador")).json()
     assert len(both) == 2
+
+
+# ── 7.1b AC1/AC6: round-trip — tx_id de /ledger-entries sirve para POST /comments ─
+
+
+def test_round_trip_tx_id_ledger_entries_a_post_comments(tmp_path):
+    """El contrato central de 7.1b: un tx_id sacado de GET /ledger-entries resuelve el ancla
+    de POST /comments (201, hilo creado). Es lo que hace la affordance del drill-down."""
+    from backend.app.services.bql_queries import ledger_entries_via_beancount
+
+    entries = _entries()
+    ledger = _ledger(tmp_path, entries)
+    client = _app(ledger)
+
+    rows = ledger_entries_via_beancount(ledger, "EAG")["data"]
+    assert rows and rows[0]["tx_id"]
+    tx_id = rows[0]["tx_id"]
+
+    resp = client.post("/api/v1/comments", json={"tx_id": tx_id, "body": "¿qué es este cargo?"},
+                       cookies=_cookie(role="family"))
+    assert resp.status_code == 201, resp.text
+    threads = ocw.read_threads(ocw.default_jsonl_path(tmp_path))
+    assert len(threads) == 1
+    assert threads[0]["root"]["anchor"]["tx_id"] == tx_id
 
 
 # ── AC4: un family NO participante no puede responder → 403 sin escritura ──────

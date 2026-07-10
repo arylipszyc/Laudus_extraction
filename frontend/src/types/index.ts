@@ -71,6 +71,8 @@ export interface LedgerEntryRecord {
   Categoria1: string    // top-level category from PlanCuentas (e.g. "Ingresos", "Gastos")
   Categoria2: string    // 2nd-level category from PlanCuentas
   Categoria3: string    // 3rd-level category from PlanCuentas
+  /** 7.1b: tx_id de la transacción padre (ancla de comentarios); ausente en datos cacheados viejos. */
+  tx_id?: string | null
 }
 
 export interface LedgerEntriesResponse {

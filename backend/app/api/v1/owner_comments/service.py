@@ -123,6 +123,9 @@ def list_threads(status: str, entries: list, ledger_root) -> list[dict]:
             "replies": thread.get("replies", []),
             "resolution": thread.get("resolution"),
             "anchor_status": resolved["status"],
+            # 7.1b AC2: el tx_id ACTUAL de la tx ancla (el nuevo si re-anchored, null si orphaned)
+            # — permite al front cruzar hilos ↔ filas del drill-down aun después de un re-import.
+            "tx_id": resolved.get("tx_id"),
             "tx_context": _tx_context(resolved["status"], resolved["entry"], root),
         })
     out.sort(key=_last_activity, reverse=True)

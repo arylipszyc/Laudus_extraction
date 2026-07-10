@@ -52,7 +52,7 @@ BALANCE_SHEET_KEYS = {
 LEDGER_KEYS = {
     "journalentryid", "journalentrynumber", "date", "accountnumber", "lineid",
     "description", "debit", "credit", "currencycode", "paritytomaincurrency",
-    "periodo", "accountName", "Categoria1", "Categoria2", "Categoria3",
+    "periodo", "accountName", "Categoria1", "Categoria2", "Categoria3", "tx_id",
 }
 
 
@@ -192,3 +192,46 @@ def test_ledger_entries_categoria_enrichment(tmp_path):
     record = result["data"][0]
     assert record["Categoria1"] == "ACTIVO EAG"
     assert record["accountName"] == "Banco Test EAG"
+
+
+# ── tx_id por fila (Story 7.1b AC1) ───────────────────────────────────────────
+
+
+def test_ledger_entries_tx_id_matches_parent_tx(tmp_path):
+    """7.1b AC1: cada fila trae el tx_id de la TRANSACCIÓN padre (== _tx_id_of canónico)."""
+    from beancount.core.data import Transaction as Txn
+    from backend.app.api.v1.transactions.service import _tx_id_of
+
+    ledger = _ledger(tmp_path)
+    result = ledger_entries_via_beancount(ledger, "EAG", account_number="511005")
+    assert result["data"]
+    row = result["data"][0]
+    parent = next(e for e in ledger.entries()
+                  if isinstance(e, Txn) and e.narration == "Compra insumos")
+    assert row["tx_id"] == _tx_id_of(parent)
+
+
+def test_ledger_entries_tx_id_shared_across_legs(tmp_path):
+    """7.1b AC1: una tx con 2 patas visibles bajo EAG → ambas filas comparten tx_id."""
+    result = ledger_entries_via_beancount(_ledger(tmp_path), "EAG")
+    rows = [r for r in result["data"] if r["description"] == "Compra insumos"]
+    assert len(rows) == 2  # pata gasto (511005) + pata banco (111005)
+    assert rows[0]["tx_id"] == rows[1]["tx_id"]
+    assert rows[0]["tx_id"]  # no vacío
+
+
+def test_ledger_entries_tx_id_stable_across_builds(tmp_path):
+    """7.1b AC1: el tx_id es estable entre dos cargas del mismo ledger."""
+    first = ledger_entries_via_beancount(_ledger(tmp_path), "EAG")
+    second = ledger_entries_via_beancount(_ledger(tmp_path), "EAG")
+    ids_a = [r["tx_id"] for r in first["data"]]
+    ids_b = [r["tx_id"] for r in second["data"]]
+    assert ids_a == ids_b
+    assert all(ids_a)
+
+
+def test_ledger_entries_order_date_desc(tmp_path):
+    """7.1b AC1: el orden `date DESC` del BQL saliente se preserva."""
+    result = ledger_entries_via_beancount(_ledger(tmp_path), "EAG")
+    dates = [r["date"] for r in result["data"]]
+    assert dates == sorted(dates, reverse=True)

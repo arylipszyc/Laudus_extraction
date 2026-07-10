@@ -33,17 +33,30 @@ def _validate_entity(entity: str) -> str:
 
 def _validate_dates(date_from: str | None, date_to: str | None) -> None:
     """Raise 422 for non-ISO date strings or inverted range."""
+    from datetime import date
     for name, value in [("date_from", date_from), ("date_to", date_to)]:
-        if value is not None and not _ISO_DATE_RE.match(value):
-            raise HTTPException(
-                status_code=422,
-                detail=f"Invalid date format for '{name}': expected YYYY-MM-DD, got '{value}'",
-            )
-    if date_from and date_to and date_from > date_to:
-        raise HTTPException(
-            status_code=422,
-            detail=f"date_from ({date_from}) must be <= date_to ({date_to})",
-        )
+        if value is not None:
+            if not _ISO_DATE_RE.match(value):
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Invalid date format for '{name}': expected YYYY-MM-DD, got '{value}'",
+                )
+            try:
+                date.fromisoformat(value)
+            except ValueError:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Invalid calendar date for '{name}': '{value}'",
+                )
+    if date_from and date_to:
+        try:
+            if date.fromisoformat(date_from) > date.fromisoformat(date_to):
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"date_from ({date_from}) must be <= date_to ({date_to})",
+                )
+        except ValueError:
+            pass  # ya validado arriba
 
 
 @router.get("/balance-sheets", response_model=BalanceSheetResponse)

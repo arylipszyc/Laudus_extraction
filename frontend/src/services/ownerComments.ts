@@ -34,10 +34,27 @@ export interface Thread {
   replies: Reply[]
   resolution: Record<string, unknown> | null
   anchor_status: AnchorStatus
+  /** 7.1b AC2: tx_id ACTUAL de la tx ancla (el nuevo si re-anchored, null si orphaned). */
+  tx_id: string | null
   tx_context: TxContext
 }
 
 const base = `${api.baseUrl}/api/v1/comments`
+
+async function errorMessage(res: Response, fallback: string): Promise<string> {
+  const d = await res.json().catch(() => null)
+  const detail = d?.detail
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) {
+    const err = detail[0]
+    if (err && typeof err === 'object') {
+      const loc = Array.isArray(err.loc) ? err.loc.join('.') : ''
+      const msg = err.msg || fallback
+      return loc ? `${loc}: ${msg}` : msg
+    }
+  }
+  return fallback
+}
 
 export async function listThreads(status: 'open' | 'resolved' | 'all' = 'open'): Promise<Thread[]> {
   const res = await apiFetch(`${base}?status=${status}`, { credentials: 'include' })
@@ -55,18 +72,21 @@ export async function replyThread(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ body }),
   })
-  if (!res.ok) {
-    const d = await res.json().catch(() => null)
-    const detail = d?.detail
-    // FastAPI 422 devuelve `detail` como lista de {msg,...} (no string) → sin esto se renderiza
-    // "[object Object]". Un 4xx/5xx propio devuelve `detail` string.
-    const msg =
-      typeof detail === 'string'
-        ? detail
-        : Array.isArray(detail)
-          ? (detail[0]?.msg ?? `Error respondiendo (${res.status})`)
-          : `Error respondiendo (${res.status})`
-    throw new Error(msg)
-  }
+  if (!res.ok) throw new Error(await errorMessage(res, `Error respondiendo (${res.status})`))
+  return res.json()
+}
+
+/** 7.1b AC3: crea el hilo raíz sobre una transacción del drill-down (POST de 7.1). */
+export async function createComment(
+  tx_id: string,
+  body: string,
+): Promise<{ thread_id: string; comment_id: string; created_at: string }> {
+  const res = await apiFetch(base, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tx_id, body }),
+  })
+  if (!res.ok) throw new Error(await errorMessage(res, `Error creando el comentario (${res.status})`))
   return res.json()
 }

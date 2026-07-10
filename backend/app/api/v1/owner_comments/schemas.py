@@ -47,6 +47,7 @@ class ThreadView(BaseModel):
     replies: list[dict]
     resolution: dict | None
     anchor_status: str
+    tx_id: str | None = None
     tx_context: TxContext
 
 

@@ -1,7 +1,11 @@
-import { useMemo, useState } from 'react'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { Fragment, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { ChevronDown, ChevronRight, MessageSquare, MessageSquarePlus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useLedger } from '@/hooks/useLedger'
+import { listThreads, createComment } from '@/services/ownerComments'
 import { groupByCategoria1 } from '@/utils/ledgerAnalytics'
 import type { LedgerEntryRecord } from '@/types'
 import type { AccountSummary, Categoria1Group, Categoria2Group, Categoria3Group } from '@/utils/ledgerAnalytics'
@@ -21,8 +25,80 @@ function formatDate(isoDate: string): string {
 
 // ── Transaction detail (lazy-loaded per account) ──────────────────────────────
 
-function TransactionRows({ accountNumber, type, selectedPeriods }: { accountNumber: string; type: 'income' | 'expenses'; selectedPeriods: string[] }) {
+// 7.1b AC3: form inline de "comentar" bajo la fila (una <tr> extra, sin toasts).
+function CommentFormRow({ txId, onClose }: { txId: string; onClose: () => void }) {
+  const [body, setBody] = useState('')
+  const [sent, setSent] = useState(false)
+  const qc = useQueryClient()
+  const mutation = useMutation({
+    mutationFn: () => createComment(txId, body),
+    onSuccess: () => {
+      setSent(true)
+      // la fila pasa a badge "ver hilo" sin recargar (AC3/AC4)
+      qc.invalidateQueries({ queryKey: ['comment-threads'] })
+      setTimeout(onClose, 3000)
+    },
+  })
+  const canSend = !mutation.isPending && body.trim().length > 0
+
+  return (
+    <tr className="bg-muted/10 border-t border-dashed">
+      <td colSpan={4} className="px-10 py-2">
+        {sent ? (
+          <div className="flex items-center justify-between text-xs text-green-700">
+            <span>✓ Comentario enviado — el contador lo verá en Comentarios.</span>
+            <button
+              onClick={onClose}
+              className="text-xs text-muted-foreground hover:text-foreground font-medium underline ml-2"
+            >
+              Cerrar
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            <textarea
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              rows={2}
+              maxLength={10_000}
+              placeholder="¿Qué quieres preguntar sobre este movimiento?"
+              disabled={mutation.isPending}
+              className="w-full border rounded-md px-3 py-2 bg-background text-xs"
+            />
+            {mutation.error && (
+              <p className="text-xs text-destructive">{(mutation.error as Error).message}</p>
+            )}
+            <div className="flex gap-2">
+              <Button size="sm" onClick={() => mutation.mutate()} disabled={!canSend}>
+                {mutation.isPending ? 'Enviando…' : 'Enviar'}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={onClose} disabled={mutation.isPending}>
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        )}
+      </td>
+    </tr>
+  )
+}
+
+export function TransactionRows({ accountNumber, type, selectedPeriods }: { accountNumber: string; type: 'income' | 'expenses'; selectedPeriods: string[] }) {
   const { data, isLoading } = useLedger(accountNumber)
+  const navigate = useNavigate()
+  // 7.1b AC4: hilos cargados UNA vez para todo el drill-down — la queryKey compartida
+  // dedupea entre todas las cuentas expandidas; para `family` el back ya acota a los suyos.
+  const { data: threads, error: threadsError } = useQuery({
+    queryKey: ['comment-threads'],
+    queryFn: () => listThreads('all'),
+    staleTime: 60_000,
+  })
+  const threadByTx = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const t of threads ?? []) if (t.tx_id) map.set(t.tx_id, t.thread_id)
+    return map
+  }, [threads])
+  const [openFormKey, setOpenFormKey] = useState<string | null>(null)
 
   if (isLoading) {
     return (
@@ -52,16 +128,55 @@ function TransactionRows({ accountNumber, type, selectedPeriods }: { accountNumb
 
   return (
     <>
-      {entries.map((e, i) => {
+      {threadsError && (
+        <tr>
+          <td colSpan={4} className="px-10 py-1 text-[10px] text-destructive bg-destructive/10 border-t border-dashed">
+            ⚠ No se pudieron cargar los hilos de comentarios. Las acciones de comentarios no están disponibles.
+          </td>
+        </tr>
+      )}
+      {entries.map((e) => {
         const amount = type === 'income' ? e.credit - e.debit : e.debit - e.credit
+        const unfilteredIndex = allEntries.indexOf(e)
+        const key = e.tx_id
+          ? `${e.tx_id}-${unfilteredIndex}`
+          : `${e.journalentryid}-${e.lineid}-${unfilteredIndex}`
+        const threadId = e.tx_id ? threadByTx.get(e.tx_id) : undefined
         return (
-          <tr key={`${e.journalentryid}-${e.lineid}-${i}`} className="bg-muted/10 text-xs border-t border-dashed">
-            <td className="px-10 py-1 font-mono text-muted-foreground whitespace-nowrap">{formatDate(e.date)}</td>
-            <td className="px-3 py-1 text-muted-foreground" colSpan={2}>{e.description || '—'}</td>
-            <td className={`px-4 py-1 text-right font-mono ${amount >= 0 ? 'text-green-600' : 'text-destructive'}`}>
-              {formatAmount(amount, e.currencycode || 'CLP')}
-            </td>
-          </tr>
+          <Fragment key={key}>
+            <tr className="bg-muted/10 text-xs border-t border-dashed">
+              <td className="px-10 py-1 font-mono text-muted-foreground whitespace-nowrap">{formatDate(e.date)}</td>
+              <td className="px-3 py-1 text-muted-foreground" colSpan={2}>
+                {e.description || '—'}
+                {/* 7.1b: sin tx_id (datos viejos cacheados) o si falló la carga → sin affordance (fail-safe AC3) */}
+                {!threadsError && e.tx_id && (threadId ? (
+                  <button
+                    title="Ver hilo de comentarios"
+                    aria-label="Ver hilo de comentarios"
+                    onClick={() => navigate(`/comments?thread=${threadId}`)}
+                    className="ml-2 align-middle text-primary hover:opacity-70"
+                  >
+                    <MessageSquare className="inline w-3.5 h-3.5" />
+                  </button>
+                ) : (
+                  <button
+                    title="Comentar esta transacción"
+                    aria-label="Comentar esta transacción"
+                    onClick={() => setOpenFormKey(k => (k === key ? null : key))}
+                    className="ml-2 align-middle text-muted-foreground hover:text-primary"
+                  >
+                    <MessageSquarePlus className="inline w-3.5 h-3.5" />
+                  </button>
+                ))}
+              </td>
+              <td className={`px-4 py-1 text-right font-mono ${amount >= 0 ? 'text-green-600' : 'text-destructive'}`}>
+                {formatAmount(amount, e.currencycode || 'CLP')}
+              </td>
+            </tr>
+            {openFormKey === key && e.tx_id && (
+              <CommentFormRow txId={e.tx_id} onClose={() => setOpenFormKey(null)} />
+            )}
+          </Fragment>
         )
       })}
     </>

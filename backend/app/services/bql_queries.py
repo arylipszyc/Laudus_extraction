@@ -17,11 +17,12 @@ Account-name convention (from `accounts.beancount`):
 """
 from __future__ import annotations
 
+import re
 from datetime import date
 
 from beancount.core.data import Open, Transaction
 
-from backend.app.services.ledger_service import LedgerService
+from backend.app.services.ledger_service import LedgerService, tx_id_of
 
 # Roots that make up the balance sheet (AC3).
 _BALANCE_SHEET_ROOTS = "Assets|Liabilities|Equity"
@@ -38,9 +39,17 @@ def _account_meta(entries: list) -> dict[str, dict]:
     return {e.account: (e.meta or {}) for e in entries if isinstance(e, Open)}
 
 
+import functools
+
+
 def _entity_pattern(roots: str, entity: str) -> str:
     """Regex matching `<root>:<entity>:...` for the given roots."""
     return f"^({roots}):{entity}:"
+
+
+@functools.lru_cache(maxsize=16)
+def _compiled_entity_pattern(roots: str, entity: str) -> re.Pattern:
+    return re.compile(_entity_pattern(roots, entity))
 
 
 def _clp(inventory) -> float:
@@ -123,51 +132,67 @@ def ledger_entries_via_beancount(
 
     Returns records keyed by the Sheets column aliases the `LedgerEntryRecord`
     model expects (accountnumber, accountName, Categoria1..3, ...).
+
+    Itera `ledger.entries()` directamente en vez de BQL (Story 7.1b AC1): el BQL entrega
+    filas por posting sin acceso a la transacción padre, y cada fila necesita el `tx_id`
+    de la TX (el ancla de owner-comments es por transacción, no por pata). Mismo patrón
+    que `list_pending` en `transactions/service.py`. Una sola pasada (lección D7).
     """
     entries = ledger.entries()
     meta = _account_meta(entries)
-    conn = ledger.connection()
 
-    pattern = _entity_pattern("Assets|Liabilities|Equity|Income|Expenses", entity)
-    where = f'account ~ "{pattern}"'
-    if date_from:
-        where += f" AND date >= {date_from}"
-    if date_to:
-        where += f" AND date <= {date_to}"
-    bql = (
-        f"SELECT date, account, narration, number, currency "
-        f"WHERE {where} ORDER BY date DESC"
-    )
-    cursor = conn.execute(bql)
+    pattern = _compiled_entity_pattern("Assets|Liabilities|Equity|Income|Expenses", entity)
+    try:
+        d_from = date.fromisoformat(date_from) if date_from else None
+        d_to = date.fromisoformat(date_to) if date_to else None
+    except ValueError as e:
+        raise ValueError(f"Invalid date format: {e}")
 
     data = []
     last_sync: str | None = None
-    for row_date, account, narration, number, currency in cursor.fetchall():
-        m = meta.get(account, {})
-        code = str(m.get("code", ""))
-        if account_number is not None and code != account_number:
+    for entry in entries:
+        if not isinstance(entry, Transaction):
             continue
-        amount = float(number) if number is not None else 0.0
-        iso_date = row_date.isoformat() if isinstance(row_date, date) else str(row_date)
-        if last_sync is None or iso_date > last_sync:
-            last_sync = iso_date
-        data.append({
-            "journalentryid": None,
-            "journalentrynumber": None,
-            "date": iso_date,
-            "accountnumber": code,
-            "lineid": None,
-            "description": narration or "",
-            "debit": amount if amount >= 0 else 0.0,
-            "credit": -amount if amount < 0 else 0.0,
-            "currencycode": currency or "CLP",
-            "paritytomaincurrency": 1.0,
-            "periodo": "",
-            "accountName": str(m.get("laudus_account_name", account)),
-            "Categoria1": str(m.get("laudus_categoria1", "")),
-            "Categoria2": str(m.get("laudus_categoria2", "")),
-            "Categoria3": str(m.get("laudus_categoria3", "")),
-        })
+        if d_from is not None and entry.date < d_from:
+            continue
+        if d_to is not None and entry.date > d_to:
+            break
+        tx_id: str | None = None  # una sola vez por tx, compartido entre sus patas
+        for posting in entry.postings:
+            if not pattern.match(posting.account):
+                continue
+            m = meta.get(posting.account, {})
+            code = str(m.get("code", ""))
+            if account_number is not None and code != account_number:
+                continue
+            number = posting.units.number if posting.units else None
+            currency = posting.units.currency if posting.units else None
+            amount = float(number) if number is not None else 0.0
+            iso_date = entry.date.isoformat()
+            if last_sync is None or iso_date > last_sync:
+                last_sync = iso_date
+            if tx_id is None:
+                tx_id = tx_id_of(entry)
+            data.append({
+                "journalentryid": None,
+                "journalentrynumber": None,
+                "date": iso_date,
+                "accountnumber": code,
+                "lineid": None,
+                "description": entry.narration or "",
+                "debit": amount if amount >= 0 else 0.0,
+                "credit": -amount if amount < 0 else 0.0,
+                "currencycode": currency or "CLP",
+                "paritytomaincurrency": 1.0,
+                "periodo": "",
+                "accountName": str(m.get("laudus_account_name", posting.account)),
+                "Categoria1": str(m.get("laudus_categoria1", "")),
+                "Categoria2": str(m.get("laudus_categoria2", "")),
+                "Categoria3": str(m.get("laudus_categoria3", "")),
+                "tx_id": tx_id,
+            })
+    # `ORDER BY date DESC` del BQL saliente; sort estable → orden de archivo intra-día.
+    data.sort(key=lambda r: r["date"], reverse=True)
     return {"data": data, "meta": {"last_sync": last_sync}}
 
 
