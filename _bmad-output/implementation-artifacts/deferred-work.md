@@ -1,5 +1,15 @@
 # Deferred Work
 
+## Deferred from: code review de story 7-2-inbox-contador-respuesta (2026-07-09)
+
+- **`_last_activity` ignora el timestamp de resolución** ([backend/app/api/v1/owner_comments/service.py:88](../../backend/app/api/v1/owner_comments/service.py#L88)) — el orden "última actividad primero" solo mira `root.ts` y `replies[].ts`, no el `resolved_at` de la resolución. En las vistas resolved/all, un hilo recién resuelto no burbujea arriba por su acción más reciente. No observable hoy: la resolución es 7.3 (fuera de alcance), así que no hay hilos resueltos aún. Fix natural al implementar 7.3: incluir `resolution.resolved_at` en `_last_activity`.
+- **El guard de 404 de `reply()` no verifica que exista la RAÍZ del hilo** ([backend/app/api/v1/owner_comments/service.py:143](../../backend/app/api/v1/owner_comments/service.py#L143)) — `read_threads(path, thread_id=...)` crea un bucket para cualquier línea (reply/resolution), no solo la raíz. Un `thread_id` que aparezca solo en una línea reply/resolution con la raíz caída (JSONL parcial/corrupto) pasa el chequeo y `reply()` appendea en vez de devolver 404 — el mismo hilo es invisible en `list_threads` (que saltea `root is None`). Solo alcanzable con JSONL corrupto; low. Fix: filtrar el guard a hilos con raíz.
+- **El working tree mezcla parches sin commitear del code-review de 7.1 con 7.2** ([pipeline/importers/owner_comments_writer.py:249](../../pipeline/importers/owner_comments_writer.py#L249)) — el fix `read_threads` `splitlines()→split("\n")` + los asserts nuevos y el `test_body_con_separador_unicode_no_se_pierde` en `test_owner_comments_api.py` son parches del review de 7.1 que quedaron "SIN COMMIT" y ahora viajan en el mismo working tree que 7.2. Los cambios son correctos; el problema es de higiene de commit. Acción: separar el commit de 7.1 del de 7.2 al commitear.
+
+## Deferred from: code review de story 7-1-owner-crea-comentario (2026-07-09)
+
+- **`LockTimeout` bajo contención con el cron importer bloquea el request ~60s y luego 500 genérico** ([pipeline/importers/laudus_run.py:54](../../pipeline/importers/laudus_run.py#L54)) — `persist_and_commit` toma `acquire_lock(root/".import.lock")` con `timeout=60`. Si el cron/importer sostiene el lock (backfill largo), un POST /comments concurrente queda colgado hasta 60s y luego levanta `LockTimeout` no capturado → 500 genérico, sin 503 ni backoff. Pre-existente: comportamiento del lock compartido, no introducido por 7.1. Fix eventual: capturar `LockTimeout` → 503 con Retry-After.
+
 ## Deferred from: code review de story 6.7 — batch-resolve (2026-07-08)
 
 Review adversarial 3 capas (Blind + Edge + D7-guard). 0 bloqueantes; 4 patches aplicados (G1 estados ambiguos se ESCALAN en el multiselect en vez de registrar `accept-cartola` en silencio; dedup en el path single `annotate_discrepancy` = mata el doble-conteo del cruce crash-parcial→cierre-por-single; G2 `selectableIds` evita el TypeError por fila stale; G6 aviso "siguen ABIERTAS" también en 400). Estos 4 quedan diferidos:

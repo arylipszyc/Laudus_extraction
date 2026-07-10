@@ -10,6 +10,12 @@ const dashboardNavItems = [
   { label: 'Variación Patrimonial', to: '/dashboard/equity-variation' },
 ]
 
+// Story 7.2 — visible para los TRES roles (owner family + contador + admin): ambos participan
+// del hilo. NO va en contadorNavItems (se gatea con useHasRole → el owner no lo vería).
+const sharedNavItems = [
+  { label: 'Comentarios', to: '/comments' },
+]
+
 // Visible para contador + admin (Story 9.13 matriz autoritativa)
 const contadorNavItems = [
   { label: 'Cargar Cartola', to: '/upload' },
@@ -53,6 +59,10 @@ export function Sidebar() {
       </div>
       <nav className="flex-1 p-2 space-y-1">
         {dashboardNavItems.map((item) => (
+          <NavItem key={item.to} to={item.to} label={item.label} />
+        ))}
+
+        {sharedNavItems.map((item) => (
           <NavItem key={item.to} to={item.to} label={item.label} />
         ))}
 

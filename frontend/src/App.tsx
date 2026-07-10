@@ -10,6 +10,7 @@ import { CuentasPendientesPage } from '@/pages/CuentasPendientesPage'
 import { ReconciliationPage } from '@/pages/ReconciliationPage'
 import { TcReconciliationPage } from '@/pages/TcReconciliationPage'
 import { CategorizacionPage } from '@/pages/CategorizacionPage'
+import { CommentsInboxPage } from '@/pages/CommentsInboxPage'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
@@ -131,6 +132,18 @@ function App() {
           }
         >
           <Route index element={<CategorizacionPage />} />
+        </Route>
+        {/* Story 7.2 — inbox de comentarios: accesible para AMBOS roles (owner family + contador),
+            por eso va bajo RequireAuth SIN RequireContador. */}
+        <Route
+          path="/comments"
+          element={
+            <RequireAuth>
+              <DashboardLayout />
+            </RequireAuth>
+          }
+        >
+          <Route index element={<CommentsInboxPage />} />
         </Route>
         {/* Catch-all: redirect to login (Story 1.3 wires real auth) */}
         <Route path="*" element={<Navigate to="/login" replace />} />

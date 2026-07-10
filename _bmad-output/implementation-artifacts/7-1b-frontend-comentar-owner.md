@@ -1,61 +1,75 @@
-# Story 7.1b: Frontend — el owner crea un comentario desde la app (UI de AC6 de 7.1)
+# Story 7.1b: Superficie del owner en el drill-down — leer hilo + crear comentario sobre una transacción
 
 Status: draft
 
-<!-- Desprendida de 7.1 (2026-07-09, decisión Ary). El backend `POST /api/v1/comments` ya está
-     entregado y testeado en 7.1. Esta story es SOLO la UI de crear comentario, que se difirió por
-     un gap de arquitectura (ver Contexto). Recomendado: hacerla JUNTO con 7.2 (inbox contador) y
-     7.4 (notificaciones), que traen la UI de LEER/mostrar hilos — así la de crear se diseña con la
-     de leer y no se construye algo que se rehace. -->
+<!-- REFRAMED 2026-07-09 (decisión Ary, dos preguntas en create-story):
+     (1) "Bundle con la UI de leer hilos (7.2/7.4)" en vez de crear-suelto.
+     (2) Decomposición: 7.2 primero (backend de hilos + inbox contador + LEER del owner) →
+         LUEGO esta 7.1b reframeada = la superficie de CREAR del owner, en el drill-down de
+         Ingresos/Gastos (Opción A), que ahora se diseña con la de leer ya construida → sin rework.
+     DEPENDE de 7.2 (backend GET /comments + list_threads + resolve_anchor ya montados).
+     La antigua versión "crear-suelto, vista por decidir" quedó obsoleta: la decisión de vista ya
+     está tomada (Opción A: drill-down) y el gap de tx_id se resuelve exponiéndolo en /ledger-entries. -->
 
 ## Story
 
 As a **owner del family office (rol `family`)**,
-I want **un botón "Comentar" sobre una transacción en la app**,
-so that **pueda crear el comentario raíz (que el backend de 7.1 ya sabe persistir) sin salir de la app**.
+I want **ver, sobre cada fila de transacción del drill-down de Ingresos/Gastos, si ya hay un hilo de comentario y poder abrir uno nuevo ("¿qué es este cargo?") ahí mismo**,
+so that **pueda preguntarle al contador sobre un movimiento sin salir de la vista donde lo estoy mirando — y el comentario queda pegado a esa transacción (backend de 7.1, ya entregado)**.
 
-## Contexto — por qué se difirió (gap de `tx_id`)
+## Contexto — por qué se reframeó (gap de `tx_id`, ya con decisión)
 
-El backend de 7.1 (`POST /api/v1/comments`) ancla el comentario por el **`tx_id` de beancount**
-(`compute_tx_id(filename, lineno, narration, amount)`, `transactions/service.py`). Al implementar la
-UI se descubrió que **ninguna vista del owner expone ese `tx_id`**:
+El backend de 7.1 (`POST /api/v1/comments`, DONE) ancla por el **`tx_id` de beancount**
+(`compute_tx_id(filename, lineno, narration, amount)`). Al implementar la UI se destapó que **ninguna
+vista del owner expone ese `tx_id`** (verificado 2026-07-09):
 
-- **`/reportes` (Reporte de Gastos)** es un botón de **descarga** de Excel — no muestra filas de tx.
-- El **drill-down de Ingresos/Gastos** (`IncomeExpensesDrilldown` / `TransactionRows`, la única tabla
-  de transacciones que el owner ve) identifica cada fila por `journalentryid`/`lineid`
-  (`LedgerEntryRecord`, modelo Laudus/dashboard), **no** por el `tx_id` de beancount.
-- El `tx_id` de beancount **solo** se expone hoy en `CategorizacionPage` → endpoint `transactions`
-  (`list_pending`), que es **contador/admin** (el owner no lo ve).
+- **`/reportes` (`ReportesPage`)** es solo un botón de **descarga** de Excel — **no** hay filas de tx
+  (`frontend/src/pages/ReportesPage.tsx`, verificado). La "decisión resuelta" que 7.1 anotó ("botón
+  en la fila del reporte de gastos") era **infeasible** por esto.
+- El **drill-down de Ingresos/Gastos** (`IncomeExpensesDrilldown` → `TransactionRows`, la única tabla
+  de tx que el owner ve) identifica cada fila por `journalentryid`/`lineid`, que además vienen
+  **`None`** desde el engine Beancount: `ledger_entries_via_beancount` hace
+  `SELECT date, account, narration, number, currency` y **no** computa `tx_id`
+  (`backend/app/services/bql_queries.py:115`).
+- El `tx_id` de beancount solo se expone hoy en `CategorizacionPage` → endpoint `transactions`
+  (`list_pending`, contador/admin, y **solo trae pendientes**, no todas las tx).
 
-Por eso enganchar el botón "Comentar" exige una decisión de vista + trabajo extra. Las 3 opciones que
-se le presentaron a Ary (eligió **diferir**):
+**Decisión tomada (Ary 2026-07-09): Opción A — exponer `tx_id` en el drill-down.** Esta story:
+1. Agrega `tx_id` por fila al endpoint `/ledger-entries` (path del dashboard).
+2. Pone la superficie de leer-hilo + crear-comentario del owner en el drill-down.
 
-1. **Exponer el `tx_id` de beancount por fila en el drill-down de Ingresos/Gastos** y poner ahí el
-   botón. Requiere que el endpoint del dashboard/ledger devuelva el `tx_id` de beancount por fila
-   (o un mapeo `journalentryid` ↔ `tx_id`, que no es trivial: son dos representaciones distintas del
-   mismo dato). Toca el path del dashboard (riesgo bajo-medio).
-2. **Vista de transacciones del owner nueva** que consuma el endpoint `transactions` (que sí trae
-   `tx_id`), con el botón por fila. Página nueva, no toca el dashboard.
-3. Diferir (lo elegido) — resolver 1 vs 2 cuando se diseñe junto con la UI de leer hilos.
+Se hace **después de 7.2** (que trae el backend de leer hilos `GET /comments` + `list_threads` +
+`resolve_anchor` y la vista de leer del owner), así el "crear" se diseña con el "leer" ya existente.
 
-## Alcance (cuando se retome)
+## Alcance (cuando se retome, post-7.2)
 
-- `frontend/src/services/ownerComments.ts` — `createComment(tx_id, body)` (patrón `fetch` +
-  `credentials:'include'` de `reconciliation.ts`), contra `POST /api/v1/comments`.
-- Componente `TxCommentButton`/input embebible, **visible para `family`** (no filtrar por rol
-  contador). Confirmación inline al éxito (estilo Cards/badges, sin toast), error legible al fallo.
-- Cablearlo en la vista que se decida (opción 1 o 2 de arriba).
-- Component test (vitest) del botón/input: submit → llama `createComment`, muestra confirmación.
+### Backend — `tx_id` por fila en el drill-down (Opción A)
+- Exponer el `tx_id` de beancount en `ledger_entries_via_beancount` / `LedgerEntryRecord`.
+  **Sutileza a resolver:** `compute_tx_id` usa el `filename` + `lineno` + `narration` + monto de la
+  **primera pata** de la transacción; el BQL actual itera **por posting** y muestra el monto de la
+  pata de esa cuenta. Para emitir el `tx_id` correcto por fila hay que resolver el `tx_id` **a nivel
+  de transacción padre** (no de posting) — probablemente iterando `ledger.entries()` con
+  `compute_tx_id`/`_tx_id_of` (como hace `transactions/service.py`) en vez de vía BQL puro, o
+  enriqueciendo las filas del BQL con el `tx_id` de su tx. Decidir en dev-story.
 
-## Decisión pendiente para retomar
+### Frontend — superficie owner en el drill-down
+- `frontend/src/services/ownerComments.ts` — `createComment(tx_id, body)` contra `POST /api/v1/comments`
+  (lo crea 7.2; acá se reusa/extiende). Patrón `fetch` + `credentials:'include'` de `reconciliation.ts`.
+- En `TransactionRows` (`IncomeExpensesDrilldown.tsx`): por fila, affordance "comentar / ver hilo"
+  visible para `family`. Al crear → `POST /comments` con el `tx_id` de esa fila; confirmación inline
+  (estilo Cards/badges, sin toast); error legible. Mostrar si la fila ya tiene hilo (reusar el
+  `GET /comments` de 7.2 filtrado por `tx_id`/`thread`).
+- Component test (vitest) del affordance: submit → llama `createComment`, muestra confirmación.
 
-- **Opción 1 (tx_id en el drill-down) vs Opción 2 (vista nueva de transacciones del owner).**
-  Recomendado resolverlo junto con 7.2/7.4 (UI de leer hilos), porque la vista donde se leen los
-  hilos es probablemente la misma donde conviene crear el comentario.
+## Anti-alcance
+- **No** inbox del contador (7.2). **No** notificaciones/chip (7.4). **No** resolución (7.3).
+- **No** line-item (diferido en 7.0).
 
 ## References
 
-- [Source: 7-1-owner-crea-comentario.md] — backend entregado (endpoint + ancla + tests).
-- [Source: frontend/src/components/charts/IncomeExpensesDrilldown.tsx] — `TransactionRows` usa `journalentryid`/`lineid`.
-- [Source: frontend/src/types/index.ts:58] — `LedgerEntryRecord` (sin `tx_id` de beancount).
-- [Source: frontend/src/pages/CategorizacionPage.tsx] — única vista con `tx_id` (contador/admin).
+- [Source: 7-1-owner-crea-comentario.md] — backend `POST /comments` entregado (endpoint + ancla + tests).
+- [Source: 7-2-inbox-contador-respuesta.md] — backend de leer hilos + `ownerComments.ts` (dependencia).
+- [Source: backend/app/services/bql_queries.py#L115] — `ledger_entries_via_beancount` (donde agregar `tx_id`).
+- [Source: backend/app/api/v1/transactions/service.py#L31] — `compute_tx_id` / `_tx_id_of` (a reusar).
+- [Source: frontend/src/components/charts/IncomeExpensesDrilldown.tsx] — `TransactionRows` (superficie del owner).
+- [Source: frontend/src/pages/CategorizacionPage.tsx] — única vista con `tx_id` hoy (contador/admin).
