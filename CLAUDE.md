@@ -62,4 +62,17 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ---
 
+## Project gotchas (verificar antes de declarar "frontend verde")
+
+- **El typecheck del frontend es `npm run typecheck` (= `tsc -b`), NUNCA `tsc --noEmit`.**
+  `frontend/tsconfig.json` es solution-style (`files: []` + `references`): en modo
+  no-build, `tsc --noEmit` ignora las references y da verde vacío sin chequear nada
+  (incluidos los `.test.tsx`). El deploy de Render usa `tsc -b` y sí falla. Un mock
+  mal tipado tumbó todo deploy del frontend 3 días (story 6.7) porque los reviews
+  verificaban con el comando no-op. `vitest` tampoco typechea (usa esbuild).
+- **Hook de pre-push**: `.githooks/pre-push` corre ese typecheck y bloquea el push si
+  falla. En un clon nuevo hay que activarlo una vez: `git config core.hooksPath .githooks`.
+
+---
+
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.

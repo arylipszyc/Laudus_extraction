@@ -1,5 +1,11 @@
 # Deferred Work
 
+## RADAR — gate de typecheck del frontend era un no-op (2026-07-11)
+
+- **El frontend falló el deploy 3 días (2026-07-08 → 07-11) sin que nadie lo notara.** Causa: build de Render = `tsc -b && vite build`; `tsc -b` typechea los `.test.tsx`, y un mock de `laudus` en `ReconciliationPage.test.tsx` (introducido en 6.7 / `1c86512`) tenía `{date,amount,currency}` sin los campos requeridos `journal_entry_id`+`description` → TS2739. Fix: `9d1cdfa`.
+- **Por qué el code-review NO lo pescó (verificado empíricamente):** los reviews/dev-story verificaban el frontend con `npx tsc --noEmit`, que sobre `frontend/tsconfig.json` (solution-style: `files:[]` + solo `references`) **ignora las references en modo no-build → no typechea NADA y da exit 0 vacío**. Demostrado: mismo archivo roto → `tsc --noEmit` exit 0, `tsc -b` exit 2. El gate del review era un no-op desde siempre; `vitest` tampoco typechea (esbuild). Cada "tsc --noEmit verde" en los records de 6.7+ verificó literalmente nada.
+- **Cerrado con:** `frontend/package.json` script `typecheck: tsc -b`; hook `.githooks/pre-push` que lo corre y bloquea el push (activar en clon nuevo: `git config core.hooksPath .githooks`); nota en `CLAUDE.md`. **Pendiente (radar):** la guía de los skills `bmad-code-review`/`bmad-dev-story` sigue diciendo/asumiendo `tsc --noEmit` — al próximo toque de esos skills, cambiar a `npm run typecheck`. Y considerar CI (GitHub Actions) como gate compartido — hoy no hay ningún gate automático (0 workflows, 0 husky).
+
 ## Deferred from: dev de story 12-4-import-historico-fondo-comun (2026-07-11)
 
 - **`ledger_entries_via_beancount` no soporta grupos de consolidación** ([backend/app/services/bql_queries.py:151](../../backend/app/services/bql_queries.py#L151)) — `entity="FondoComun"` devuelve 0 filas (el patrón `^(...):FondoComun:` no matchea nada) mientras `balance_sheet_via_beancount` SÍ resuelve el grupo (33 cuentas). NO alcanzable desde la UI hoy: `FondoComun` no está en `VALID_ENTITIES` ni en el selector (decisión 11.1: "vive solo a nivel servicio"). Latente si algún día se expone el grupo o la vista combinada EAG+RUT2. Verificado con datos reales post-import 12.4.

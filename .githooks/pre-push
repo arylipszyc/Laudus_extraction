@@ -1,0 +1,33 @@
+#!/bin/sh
+# Gate de pre-push: typecheck del frontend con el MISMO comando que el build de
+# Render (`tsc -b`), no `tsc --noEmit`.
+#
+# Por qué: `frontend/tsconfig.json` es solution-style (`files: []` + `references`).
+# En modo no-build, `tsc --noEmit` ignora las references → no typechea NADA y da
+# verde vacío. El deploy usa `tsc -b`, que sí sigue las references (incluye los
+# .test.tsx) y falla. Un mock mal tipado (story 6.7) tumbó TODO deploy del
+# frontend por 3 días sin que ningún gate local lo pescara. Este hook cierra ese
+# hueco: bloquea el push si el typecheck real falla.
+#
+# Bypass de emergencia (usar con criterio): `git push --no-verify`.
+# Setup en un clon nuevo: `git config core.hooksPath .githooks`
+
+set -e
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+FRONTEND_DIR="$REPO_ROOT/frontend"
+
+if [ ! -d "$FRONTEND_DIR/node_modules" ]; then
+  echo "pre-push: frontend/node_modules ausente — corré 'npm ci' en frontend/ o saltea con --no-verify" >&2
+  exit 1
+fi
+
+echo "pre-push: typecheck del frontend (npm run typecheck = tsc -b)..."
+if ! ( cd "$FRONTEND_DIR" && npm run --silent typecheck ); then
+  echo "" >&2
+  echo "pre-push BLOQUEADO: el typecheck del frontend falló — este MISMO error tumbaría el deploy de Render." >&2
+  echo "Arreglá el error de tipos y volvé a pushear (o 'git push --no-verify' si sabés lo que hacés)." >&2
+  exit 1
+fi
+
+echo "pre-push: typecheck OK."
