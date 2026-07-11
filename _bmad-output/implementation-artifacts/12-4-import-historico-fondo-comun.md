@@ -1,6 +1,6 @@
 # Story 12.4: Importar histórico y apertura del Fondo Común
 
-Status: review
+Status: done
 
 ## Story
 
@@ -73,6 +73,16 @@ so that los números de FFCC/JAB existan en el sistema y sean navegables como lo
   - [x] Tests nuevos sobre el ledger real (patrón `test_rut2_accounts_tree.py`): main.beancount incluye los globs/archivos RUT2; si existe `opening-rut2.beancount`, cada transacción balancea y su contrapartida Equity no cruza entidades; ningún archivo de `imports/laudus-rut2/` referencia cuentas con 2º segmento fuera de {FFCC, JAB, sus PendingReview}.
   - [x] Actualizar `deferred-work.md`: marcar cerrados los defers de 12-2/12-3 que esta story resuelve (env render.yaml, include+gate, y generate_opening_balances SOLO si se tocó); anotar los nuevos que queden.
   - [x] Commitear al cerrar (acuerdo retro). Nota: el histórico en sí ya viaja en los commits del importador (Task 3).
+
+## Review Findings (code-review 2026-07-11)
+
+Revisión adversarial 3 capas (Blind Hunter / Edge Case Hunter / Acceptance Auditor). Los 6 ACs verificados como cumplidos por el Auditor. 0 decision-needed, 1 patch, 2 defer, 9 dismiss.
+
+- [x] [Review][Patch] (APLICADO 2026-07-11) Rama fallback de `_freshness_pattern` sin `(?-i:)` — la query de DATOS de una entidad no-grupo matchea case-insensitive (beanquery `~` = IGNORECASE) pero la FRESCURA la compila `re.compile` case-sensitive → data y fecha "al" sobre universos distintos. La rama de grupo ya está protegida (`_group_pattern` mete `(?-i:)`, patch 11.1); solo el fallback quedó inconsistente. Inalcanzable vía API hoy (toda `VALID_ENTITIES` es miembro de un grupo), pero es código nuevo de esta story. Fix: envolver el fallback en `(?-i:)` o compilar con flag fijo. [backend/app/services/bql_queries.py:124]
+
+- [x] [Review][Defer] JE cross-libro / reconciliación 12.5 puede filtrar frescura entre libros [backend/app/services/bql_queries.py:102,73-74] — deferred, latente. `_max_transaction_date` cuenta el asiento si ALGUNA pata matchea el patrón del grupo (sin exigir que TODAS sean del mismo grupo). Un JE con una pata EAG y una RUT2 avanzaría la frescura de ambos libros; hoy no existe ninguno (gate 0-diffs pasó byte-idéntico incl. `meta.last_sync`) y el importer escribe por libro. Además los namespaces `Equity:Apertura`/`Equity:Reconciliation` (entityless) caen en el grupo EAG por diseño — si 12.5 postea la reconciliación RUT2 a un `Equity:Reconciliation` entityless en vez de `Equity:FFCC:Reconciliation`, filtraría a EAG. Guardar cuando aterrice 12.5.
+
+- [x] [Review][Defer] `last_sync`/`query_date` en blanco (null) para entidad/grupo con 0 postings [backend/app/services/bql_queries.py:157] — deferred, by-design. Pre-12.4 el máximo global siempre devolvía una fecha; ahora un libro vacío deja `last_sync=None`. Es el comportamiento correcto (no mostrar la fecha de EAG para un RUT2 vacío), pero el frontend debe tolerar `last_sync: null`. Sin entidad vacía alcanzable vía API hoy (FFCC/JAB ya tienen datos). Verificar el render de null en el indicador "Datos de Laudus al:".
 
 ## Dev Notes
 

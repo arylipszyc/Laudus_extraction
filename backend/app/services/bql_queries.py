@@ -121,7 +121,11 @@ def _freshness_pattern(entity: str) -> str:
     )
     if group is not None:
         return _group_pattern(_ALL_ROOTS, group)
-    return _entity_pattern(_ALL_ROOTS, entity)
+    # Case-sensitive explícito (paridad con _group_pattern): la frescura de una
+    # entidad no-grupo no debe absorber una cuenta case-variante (misma decisión
+    # que el patch 11.1). Rama inalcanzable vía API hoy (toda VALID_ENTITIES es
+    # miembro de un grupo); el `(?-i:)` fija la intención para entidades futuras.
+    return f"(?-i:{_entity_pattern(_ALL_ROOTS, entity)})"
 
 
 def balance_sheet_via_beancount(
