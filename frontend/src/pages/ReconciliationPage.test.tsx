@@ -157,7 +157,7 @@ describe('<ReconciliationPage /> (Story 6.4)', () => {
   it('AC8/G1: estado ambiguo (value-mismatch) se ESCALA, no acepta una cara en silencio', async () => {
     vi.mocked(getDiscrepancies).mockResolvedValue({
       discrepancies: [{ ...DISC, discrepancy_id: 'dv', state: 'value-mismatch',
-        laudus: { date: '2026-04-15', amount: -40000, currency: 'CLP' } }],
+        laudus: { journal_entry_id: 'je1', date: '2026-04-15', amount: -40000, currency: 'CLP', description: 'GASTO REAL' } }],
       summary: { total: 1, by_state: { 'value-mismatch': 1 } },
     })
     renderPage()
