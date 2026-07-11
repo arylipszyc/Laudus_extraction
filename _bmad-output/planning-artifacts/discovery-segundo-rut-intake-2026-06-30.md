@@ -46,6 +46,41 @@
 
 ---
 
+## Sección 1-bis — RESPUESTAS de Ary (2026-07-10) — la Sección 1 se resolvió SIN contador
+
+Ary respondió los ítems directamente; ya no se envía el mensaje al contador (el único
+insumo externo pendiente es el Excel de clasificación que llena Ary, ítem C).
+
+- **A (identidad/acceso):** resuelto. El libro RUT2 vive en el MISMO login de Laudus; su
+  `companyVATId` es el placeholder **`12.345.678-2`** (así se creó la empresa en Laudus —
+  no es RUT legal; verificado re-tirando el plan 2026-07-10). Sigue vigente el guardrail:
+  el importador debe assertar la empresa esperada por nombre (Laudus no valida el RUT).
+- **B (plan de cuentas):** confirmado — nada que pedir. Plan re-bajado 2026-07-10 y
+  **persistido** en `planning-artifacts/rut2-plan-cuentas-laudus-2026-07-10.json`
+  (357 cuentas / 309 hojas; raíces 1-4=FFCC 118, 6-8=JAB 239, cero huérfanas).
+- **C (sub-entidades):** Ary llena el Excel
+  `_handoff/Plan-Cuentas-RUT2-para-clasificar-2026-07-10.xlsx` (propuesta FFCC/JAB
+  pre-llenada por dígito de raíz + columnas Sub-entidad OK / ¿Es TC? / Comentarios)
+  y lo devuelve. → insumo de 12.1.
+- **D (cartolas/extracción):** DIFERIDO al final por decisión de Ary — por ahora se
+  confía en la data de Laudus. No pedir cartolas todavía.
+- **E (tarjetas de crédito):** Ary entiende que NO hay; lo confirma al llenar el Excel.
+  Candidatas detectadas en el plan: solo `871005` (JAB) y `873005` (FGK), colgadas de
+  gasto (el landmine ya documentado por Valentina — TC como gasto lumpeado, igual que EAG).
+- **F (apertura/saldos iniciales):** tomar los PRIMEROS asientos del libro en Laudus —
+  ahí deberían estar los saldos de apertura (equivalente al "Saldo anterior" de EAG).
+  [Interpretación de "toma las primeras caras" — confirmar al importar.]
+- **G (reporte):** referencias reales del contador en
+  `H:\My Drive\Emprendimientos\Analisis gastos Edu\Familia\`:
+  `FFCC 05-2025.xlsx` (hojas FFCC = resumen ingresos con retiros por persona
+  AAG/EAG/SAG/DAG/AZBA + Resúmen Gastos = retiros, traspasos a Molco, sueldos/impuestos,
+  gastos de administración, por mes) y `Resúmen Retiros al 31-05-2025.xlsx` (retiros
+  acumulados por persona y año). TAREA derivada: validar que estos reportes calcen con
+  la data de Laudus (reemplaza en la práctica al ancla del ítem H).
+- **H (ancla de validación):** no hay por ahora — **decisión Ary: asumir Laudus correcto**
+  (impacta el DoD de Epic 12: el fallback es el balance Laudus fin de mes + cruce con los
+  reportes del ítem G).
+
 ## Sección 2 — Decisiones de Ary (no del contador)
 
 - **Nombre corto de la entidad en el sistema** (el "RUT2"): qué label usar en las rutas de cuenta (`Assets:<Label>:*`), en el selector del frontend y en `VALID_ENTITIES`. Ej.: iniciales o nombre corto.
