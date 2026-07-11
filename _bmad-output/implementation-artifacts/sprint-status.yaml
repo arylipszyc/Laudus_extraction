@@ -197,20 +197,22 @@ development_status:
   #   planning-artifacts/epics-segundo-rut.md; readiness READY per implementation-readiness-report-2026-07-10.md).
   #   RUT2 = 2º libro de Laudus (Fondo Común, RUT placeholder 12.345.678-2), entidad HERMANA de EAG;
   #   sub-entidades FFCC (raíces 1-4) + JAB (raíces 6-8). Orden: 11.1 → 11.2 → 12.1/12.2 (paralelizables)
-  #   → 12.3 → [contador] 12.4 → 12.5 (DoD del epic) → 13.1.
-  #   ACCIÓN ARY al arrancar Epic 11: enviar Sección 1 del intake al contador (desbloquea 12.4/12.5;
-  #   quitar bloques de nota interna antes de reenviar).
-  epic-11: in-progress  # Consolidación por grupos — blindar EAG y registrar entidades nuevas (FR45–47). Arrancado 2026-07-10 (create-story 11.1); RECORDATORIO ARY: enviar Sección 1 del intake al contador.
+  #   → 12.3 → 12.4 → 12.5 (DoD del epic) → 13.1.
+  #   2026-07-10 DECISIONES ARY (respuestas al intake — el contador YA NO bloquea nada, no se le envía):
+  #   fecha de histórico y apertura se descubren de Laudus (sonda read-only, primeros asientos);
+  #   FGK/JAB = UNA sub-entidad; ancla = balance de Laudus (se asume correcto, sin TC a conciliar en este
+  #   libro); cuadratura vs cartolas/saldos reales = AL FINAL, cuando Ary entregue cartolas (fase posterior).
+  epic-11: in-progress  # Consolidación por grupos — blindar EAG y registrar entidades nuevas (FR45–47). Arrancado 2026-07-10 (create-story 11.1). [Recordatorio intake al contador OBSOLETO — Ary respondió el intake él mismo 2026-07-10, ver bloque de decisiones arriba.]
   11-1-grupos-consolidacion-explicitos: review  # 2026-07-10 dev-story DONE → review: CONSOLIDATION_GROUPS (EAG 5 entidades / FondoComun={FFCC,JAB} labels propuestos) + _group_pattern con rama Equity legacy (TRAP #1) reemplaza _CONSOLIDATED_ENTITY; balance_sheet lookup por grupo + report_rows acotado al grupo EAG; ledger_entries NO tocado. Gate 0-diffs vs ledger real BYTE-IDÉNTICO (56 cuentas/19.989 filas, fail-safe no-vacío), suite 776 passed/1 xfailed (+5 tests, 0 regresiones), bean-check exit 0. PRÓXIMO: code-review 11.1 (otro LLM). | 2026-07-10 create-story: alcance = CONSOLIDATION_GROUPS reemplaza _CONSOLIDATED_ENTITY (balance consolidado) + acotar report_rows_via_beancount al grupo EAG (2º supuesto "EAG=todo" destapado: /reportes/gastos hoy sin filtro de entidad y los códigos FFCC 41x/43x + JAB 8xx colisionan con los prefijos de report_builder). TRAP crítico documentado: Equity:Apertura/Equity:Reconciliation NO llevan segmento de entidad → asignarlas explícito al grupo EAG o el 0-diffs falla. NO tocar ledger_entries_via_beancount (per-entity vigente). Gate = 0 diffs peso-por-peso vs ledger real (fail-safe si dump vacío, lección 9.15) + suite + bean-check. HACER ANTES de meter cualquier dato de RUT2.
   11-2-entidades-fondo-comun-frontend: backlog  # FFCC/JAB en VALID_ENTITIES+FilterContext+selector; labels definitivos SE FIJAN AQUÍ (decisión Ary, hoy propuestos FFCC/JAB); estado vacío limpio sin datos.
   epic-11-retrospective: optional
 
-  epic-12: backlog  # El libro del Fondo Común en el ledger — import multi-libro validado (FR48–53, FR56). DoD: reconciliación al peso vs ancla (fallback = balance Laudus fin de mes).
-  12-1-clasificacion-contable-valentina: backlog  # precondición sin código: cerrar ¿FGK/JAB 1 o 2 sub-entidades?, raíces 4/8 P&L separados, convención Equity apertura → artefacto versionado que 12.3 consume (evita reconstruir 308 cuentas).
+  epic-12: backlog  # El libro del Fondo Común en el ledger — import multi-libro validado (FR48–53, FR56). DoD: reconciliación al peso vs balance de Laudus (decisión Ary 2026-07-10; cuadratura vs cartolas reales diferida al final).
+  12-1-clasificacion-contable-valentina: backlog  # precondición sin código: cerrar raíces 4/8 P&L separados + convención Equity apertura → artefacto versionado que 12.3 consume (evita reconstruir 308 cuentas). FGK/JAB ya resuelto por Ary 2026-07-10: UNA sub-entidad.
   12-2-importador-multi-libro: backlog  # entidad como parámetro explícito + índice (entidad,code) [18 códigos en colisión con EAG] + assert nombre de empresa (sin validar DV, RUT placeholder). Testeable hoy contra libro EAG. Paralelizable con 12.1.
   12-3-arbol-cuentas-rut2: backlog  # depende de 12.1. 308 hojas en accounts.beancount (mapeo raíz: 1/2/3/4=FFCC Assets/Liab/Income/Exp; 6/7/8=JAB Assets/Income/Exp) + bank_account_id minteados + Equity apertura. bean-check 0 + reportes EAG intactos.
-  12-4-import-historico-fondo-comun: blocked-by-insumos-contador  # depende de 12.2+12.3 + contador (fecha de corte histórico, forma de la apertura). AC clave: cero asientos nuevos bajo cuentas EAG post-import.
-  12-5-reconciliacion-ancla-validacion: blocked-by-insumos-contador  # depende de 12.4 + contador (ancla de validación; fallback balance Laudus fin de mes). ES el criterio de cierre del epic (DoD) — el epic no se declara done sin este PASS.
+  12-4-import-historico-fondo-comun: backlog  # DESBLOQUEADA 2026-07-10 (decisión Ary): fecha de corte y apertura se descubren de Laudus con la sonda, sin contador. Depende de 12.2+12.3. AC clave: cero asientos nuevos bajo cuentas EAG post-import.
+  12-5-reconciliacion-ancla-validacion: backlog  # DESBLOQUEADA 2026-07-10 (decisión Ary): ancla = balance de Laudus fin de mes vía API (Laudus se asume correcto; cuadratura vs cartolas reales diferida al final). Depende de 12.4. ES el criterio de cierre del epic (DoD) — no se declara done sin este PASS.
   epic-12-retrospective: optional
 
   epic-13: backlog  # Reporte de gastos del Fondo Común FFCC/JAB (FR54–55). Depende de Epic 12 cerrado.

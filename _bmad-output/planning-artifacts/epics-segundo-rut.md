@@ -39,14 +39,14 @@ Este documento descompone en epics y stories la incorporación del segundo libro
 - FR50: La entidad/libro es un parámetro explícito de la corrida de import (companyVATId, credenciales, subdirectorio destino); la entidad NUNCA se deriva de strings devueltos por Laudus.
 - FR51: El importador rutea asientos por índice (entidad, código) en lugar de solo código, de modo que los 18 códigos en colisión (misma numeración, cuenta distinta) jamás posteen a cuentas de EAG.
 - FR52: Antes de escribir, el importador verifica que el nombre de empresa devuelto por Laudus coincide con la entidad esperada de la corrida (Laudus no falla ante RUT equivocado); la validación NO usa dígito verificador (el RUT es placeholder con DV inválido por diseño).
-- FR53: El sistema importa el histórico contable de RUT2 desde la fecha de corte confirmada por el contador, incluyendo el asiento de apertura ("Saldo anterior") ruteado a la cuenta de Equity de apertura.
+- FR53: El sistema importa el histórico contable de RUT2 desde la fecha de corte descubierta en Laudus (primeros asientos cargados del libro, verificable con la sonda read-only — decisión Ary 2026-07-10, sin depender del contador), incluyendo el asiento de apertura ("Saldo anterior") ruteado a la cuenta de Equity de apertura.
 
 **5. Reporte de gastos RUT2**
 - FR54: Los usuarios pueden ver un reporte de gastos de RUT2 en dos niveles: (a) sub-entidad FFCC vs JAB; (b) grupos por encabezado numérico — FFCC: 41 Gastos Generales, 43 Gastos Fijos Oficina; JAB: 81 Casas, 83 Aviones, 85 Yates, 87 Gastos Personales — derivados mecánicamente de la jerarquía embebida en la numeración (8→81→811).
 - FR55: El reporte de RUT2 presenta las tarjetas de crédito de JAB/FGK (871005, 873005) como gasto lumpeado con la limitación marcada (estado 1, igual que EAG); el desglose por cartola queda explícitamente fuera de alcance.
 
 **6. Validación y confianza**
-- FR56: El sistema reconcilia los saldos importados de RUT2 peso-por-peso contra un ancla de validación conocida (saldo bancario real o balance de Laudus a fin de mes, provista por el contador) antes de dar por buena la importación.
+- FR56: El sistema reconcilia los saldos importados de RUT2 peso-por-peso contra el balance de Laudus a fin de mes (decisión Ary 2026-07-10: Laudus se asume correcto; este libro no maneja tarjetas de crédito a conciliar). La cuadratura contra cartolas/saldos bancarios reales queda diferida al final, cuando las cartolas estén disponibles.
 
 ### NonFunctional Requirements
 
@@ -69,10 +69,12 @@ Del análisis técnico (arquitectura c4 + sonda verificada 2026-06-30):
 - Ingesta de cartolas PDF y desglose de TC de RUT2: DIFERIDOS — dependen de respuestas del contador (bancos, disponibilidad de cartolas) y de la decisión futura estilo Epic 6. No son parte de este breakdown.
 - Vista combinada EAG+RUT2 ("a veces juntos"): futuro opcional, trivial una vez que los grupos son explícitos — no construir hasta que se pida.
 
-**Dependencias externas abiertas (no bloquean el diseño de epics, sí bloquean stories específicas):**
-- Contador: fecha desde la cual importar histórico; apertura/saldos iniciales; ancla de validación; lista de cuentas bancarias con banco/moneda/tipo.
-- Valentina/contador: ¿FGK y JAB son una sub-entidad o dos?; confirmación raíz 4 y raíz 8 como P&L separados.
-- Ary: label corto definitivo de las entidades en el sistema (FFCC / JAB / nombre del grupo del libro) — se fija al ejecutar la story 11.2.
+**Dependencias externas (actualizado 2026-07-10 con decisiones de Ary — el contador YA NO bloquea nada):**
+- Fecha de histórico y apertura: se descubren directo de Laudus con la sonda read-only (primeros asientos del libro).
+- FGK/JAB: UNA sola sub-entidad (resuelto por Ary; cierra la pregunta de Valentina).
+- Ancla de validación: balance de Laudus a fin de mes — Laudus se asume correcto. La cuadratura contra cartolas/saldos reales queda para el final, cuando Ary entregue las cartolas.
+- Valentina (story 12.1): confirmación raíz 4 y raíz 8 como P&L separados + convención de Equity de apertura.
+- Ary: label corto definitivo de las entidades — se fija al ejecutar la story 11.2.
 
 ### UX Design Requirements
 
@@ -88,10 +90,10 @@ No hay documento UX para este alcance. La única superficie visible nueva es la 
 - FR50: Epic 12 — Entidad/libro como parámetro explícito de la corrida de import
 - FR51: Epic 12 — Índice (entidad, código) en el importador
 - FR52: Epic 12 — Assert de nombre de empresa antes de escribir
-- FR53: Epic 12 — Import de histórico + apertura (bloqueada por respuestas del contador)
+- FR53: Epic 12 — Import de histórico + apertura (fecha y apertura se descubren de Laudus — decisión Ary 2026-07-10)
 - FR54: Epic 13 — Reporte de gastos dos niveles FFCC/JAB × grupos numéricos
 - FR55: Epic 13 — TC lumpeada marcada en el cuerpo del reporte
-- FR56: Epic 12 — Reconciliación contra ancla = criterio de cierre del epic (bloqueada por respuestas del contador)
+- FR56: Epic 12 — Reconciliación vs balance de Laudus = criterio de cierre del epic (cuadratura vs cartolas reales diferida al final)
 
 Transversales: NFR20 (aislamiento, 0 diffs EAG) y NFR21 (bean-check verde) aplican como criterios de aceptación en Epics 11 y 12.
 
@@ -100,13 +102,13 @@ Transversales: NFR20 (aislamiento, 0 diffs EAG) y NFR21 (bean-check verde) aplic
 ### Epic 11: Consolidación por grupos — blindar EAG y registrar las entidades nuevas
 Los reportes de EAG dejan de asumir "EAG = todas las cuentas" y pasan a grupos de consolidación explícitos; FFCC y JAB quedan registradas como entidades válidas y visibles en el selector. Valor: garantía verificable de que nada de lo que venga después contamina los números de EAG (0 diffs peso-por-peso pre/post).
 **FRs covered:** FR45, FR46, FR47
-**Nota de secuencia operativa:** al arrancar este epic se envía la Sección 1 del intake al contador (paralelo, no bloqueante) — sus respuestas solo bloquean FR53 y FR56 del Epic 12.
+**Nota de secuencia operativa (actualizada 2026-07-10):** el contador no es necesario para arrancar — fecha de histórico y apertura se leen de Laudus con la sonda; la cuadratura contra cartolas reales queda para el final (decisiones de Ary, respuestas al intake).
 
 ### Epic 12: El libro del Fondo Común en el ledger — importación multi-libro validada
 El árbol de cuentas de RUT2 (308 hojas) se pre-crea en el ledger; el importador Laudus se vuelve multi-libro (entidad como parámetro, índice entidad+código, assert de empresa) y trae el histórico + apertura. Valor: los números del Fondo Común están en el sistema, cuadran peso-por-peso, y son navegables por los dashboards existentes filtrando por entidad.
 **FRs covered:** FR48, FR49, FR50, FR51, FR52, FR53, FR56
-**Precondición interna (primera story del epic):** cerrar la clasificación con Valentina — ¿FGK y JAB una o dos sub-entidades?, ¿raíces 4 y 8 P&L separados?, convención de la cuenta de Equity de apertura — ANTES de pre-crear el árbol, para no reconstruir 308 cuentas.
-**Definition of Done del epic:** no cierra sin reconciliación peso-por-peso contra el ancla de validación (FR56), con fallback definido: si el contador no provee saldo bancario, se usa el balance de Laudus a fin de mes.
+**Precondición interna (primera story del epic):** cerrar la clasificación con Valentina — ¿raíces 4 y 8 P&L separados?, convención de la cuenta de Equity de apertura (FGK/JAB ya resuelto por Ary 2026-07-10: una sola sub-entidad) — ANTES de pre-crear el árbol, para no reconstruir 308 cuentas.
+**Definition of Done del epic:** no cierra sin reconciliación peso-por-peso contra el balance de Laudus a fin de mes (FR56; Laudus se asume correcto). La cuadratura contra cartolas/saldos reales es una fase posterior, fuera de este epic.
 
 ### Epic 13: Reporte de gastos del Fondo Común (FFCC / JAB)
 Reporte de gastos con plantilla propia de RUT2 en dos niveles: FFCC (41 Gastos Generales / 43 Gastos Fijos Oficina) vs JAB (81 Casas / 83 Aviones / 85 Yates / 87 Gastos Personales), derivado mecánicamente de la jerarquía embebida en la numeración. Las TC de JAB/FGK (871005, 873005) se muestran como gasto lumpeado con la limitación marcada en el cuerpo del reporte, no en nota al pie. Valor: responde "¿en qué gasta el Fondo Común y en qué gasta JAB/FGK?" — la misma pregunta que el reporte de EAG.
@@ -163,7 +165,7 @@ So that cuando sus datos entren al ledger pueda navegarlos desde la misma UI de 
 
 ## Epic 12: El libro del Fondo Común en el ledger — importación multi-libro validada
 
-El árbol de cuentas de RUT2 se pre-crea en el ledger; el importador Laudus se vuelve multi-libro y trae el histórico + apertura. Definition of Done del epic: reconciliación peso-por-peso contra el ancla de validación (FR56), con fallback = balance de Laudus a fin de mes. Stories 12.4 y 12.5 bloqueadas por respuestas del contador; el resto avanza con lo que ya entregó la sonda.
+El árbol de cuentas de RUT2 se pre-crea en el ledger; el importador Laudus se vuelve multi-libro y trae el histórico + apertura. Definition of Done del epic: reconciliación peso-por-peso contra el balance de Laudus a fin de mes (FR56; decisión Ary 2026-07-10: Laudus se asume correcto, sin TC a conciliar en este libro; cuadratura vs cartolas reales = fase posterior, fuera del epic). Ninguna story espera al contador: fecha de corte y apertura se descubren de Laudus con la sonda.
 
 ### Story 12.1: Cerrar la clasificación contable con Valentina
 
@@ -173,10 +175,9 @@ So that el árbol de 308 cuentas se construya una sola vez y el reporte final re
 
 **Acceptance Criteria:**
 
-**Given** los tres pendientes contables abiertos (¿FGK y JAB son una o dos sub-entidades?; ¿raíces 4 y 8 son P&L separados?; convención de la cuenta de Equity de apertura),
-**When** Valentina y/o el contador los resuelven,
-**Then** queda documentada la decisión de cada uno en un artefacto versionado en planning-artifacts,
-**And** el grupo de consolidación RUT2 se ajusta si FGK resulta ser entidad aparte.
+**Given** los dos pendientes contables abiertos (¿raíces 4 y 8 son P&L separados?; convención de la cuenta de Equity de apertura) — FGK/JAB ya resuelto por Ary 2026-07-10: una sola sub-entidad,
+**When** Valentina los resuelve,
+**Then** queda documentada la decisión de cada uno en un artefacto versionado en planning-artifacts.
 
 **Given** el plan real de 357 cuentas,
 **When** se firma el mapeo raíz→(root Beancount, entidad),
@@ -231,15 +232,15 @@ So that cualquier import posterior tenga destino correcto y nada caiga en cuenta
 
 ### Story 12.4: Importar histórico y apertura del Fondo Común
 
-> ⏳ Bloqueada por contador: fecha de corte del histórico y forma de la apertura.
+> Insumos: la fecha de corte y la forma de la apertura se descubren directo de Laudus (sonda read-only sobre los primeros asientos del libro) — decisión Ary 2026-07-10, no requiere al contador.
 
 As contador (usuario del sistema),
-I want el histórico contable del Fondo Común importado al ledger desde la fecha de corte confirmada,
+I want el histórico contable del Fondo Común importado al ledger desde la fecha de corte descubierta en Laudus,
 So that los números de FFCC/JAB existan en el sistema y sean navegables como los de EAG.
 
 **Acceptance Criteria:**
 
-**Given** la fecha de corte y la apertura confirmadas por el contador,
+**Given** la fecha de corte y la forma de la apertura descubiertas en Laudus (primeros asientos cargados del libro),
 **When** corre la importación multi-libro contra el libro RUT2,
 **Then** los asientos quedan en cuentas de RUT2 desde esa fecha y el asiento de apertura ("Saldo anterior") rutea a la cuenta de Equity de apertura (FR53).
 
@@ -254,15 +255,15 @@ So that los números de FFCC/JAB existan en el sistema y sean navegables como lo
 
 ### Story 12.5: Reconciliación peso-por-peso contra el ancla de validación
 
-> ⏳ Bloqueada por contador: ancla de validación. Fallback definido: balance de Laudus a fin de mes. **Esta story es el criterio de cierre del epic.**
+> Ancla = balance de Laudus a fin de mes (decisión Ary 2026-07-10: Laudus se asume correcto; sin TC a conciliar en este libro). La cuadratura contra cartolas/saldos bancarios reales queda diferida al final, como fase posterior. **Esta story es el criterio de cierre del epic.**
 
 As Ary (dueño),
-I want los saldos importados del Fondo Común reconciliados peso-por-peso contra un dato real conocido,
-So that pueda confiar en los números de RUT2 igual que confío en los de EAG.
+I want los saldos importados del Fondo Común reconciliados peso-por-peso contra el balance de Laudus a fin de mes,
+So that tenga la garantía de que el sistema es espejo fiel de Laudus (la cuadratura contra el mundo real viene después, con las cartolas).
 
 **Acceptance Criteria:**
 
-**Given** el ancla provista por el contador (saldo bancario real o, en su defecto, balance de Laudus a fin de mes),
+**Given** el balance de Laudus a fin de mes (vía API — mismo mecanismo de paridad usado con EAG, 186/186 al peso),
 **When** se reconcilian los saldos importados a esa fecha,
 **Then** cuadran al peso, o cada discrepancia queda documentada con explicación aceptada (FR56).
 
