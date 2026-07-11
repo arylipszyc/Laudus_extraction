@@ -72,7 +72,10 @@ def _group_pattern(roots: str, group: str) -> str:
     if group == "EAG":
         legacy = "|".join(_ENTITYLESS_EQUITY_NAMESPACES)
         pattern += f"|^Equity:({legacy})(:|$)"
-    return pattern
+    # beanquery evalúa `~` con re.IGNORECASE; el aislamiento de grupo (FR45)
+    # debe ser case-sensitive o una entidad case-variante de un miembro se
+    # consolidaría en silencio (patch code-review 11.1).
+    return f"(?-i:{pattern})"
 
 
 def _clp(inventory) -> float:

@@ -318,3 +318,27 @@ def test_balance_sheet_rut2_group_consolidates_ffcc_jab(tmp_path):
     assert "111005" not in numbers and "610005" not in numbers  # EAG + hija fuera
     assert not any(a.startswith("Equity:Apertura") for a in accounts)
     assert not any(a.startswith("Equity:Reconciliation") for a in accounts)
+
+
+def test_balance_sheet_eag_excludes_case_variant_entity(tmp_path):
+    """Patch code-review 11.1 (FR45): beanquery evalúa `~` con IGNORECASE — el
+    aislamiento de grupo debe ser case-sensitive para que una entidad futura
+    case-variante de un miembro EAG (JAEL) o de un namespace Equity legacy
+    (APERTURA) no se consolide en silencio dentro de EAG."""
+    extra = """\
+
+2020-01-01 open Assets:JAEL:Banco-910001 CLP
+  code: "910001"
+2020-01-01 open Equity:APERTURA:Otro CLP
+
+2024-06-01 * "Movimiento libro ajeno case-variante"
+  Assets:JAEL:Banco-910001    50000 CLP
+  Equity:APERTURA:Otro       -50000 CLP
+"""
+    main = tmp_path / "case.beancount"
+    main.write_text(MINI_LEDGER + extra, encoding="utf-8")
+    result = balance_sheet_via_beancount(LedgerService(str(main)), "EAG")
+    numbers = {r["account_number"] for r in result["data"]}
+    accounts = {r["account"] for r in result["data"]}
+    assert "910001" not in numbers
+    assert not any(a.startswith("Equity:APERTURA") for a in accounts)

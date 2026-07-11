@@ -1,6 +1,6 @@
 # Story 11.1: Grupos de consolidación explícitos en el motor de reportes
 
-Status: review
+Status: done
 
 ## Story
 
@@ -36,6 +36,14 @@ so that agregar el Fondo Común (o cualquier entidad futura) al ledger jamás co
 - [x] Task 5: Suite completa + bean-check (AC: 1)
   - [x] `python -m pytest backend/tests -q` desde la raíz del repo — verde, 0 regresiones (baseline actual ~771 passed; los rojos date-dependientes pre-existentes documentados no cuentan como regresión).
   - [x] `bean-check ledger/main.beancount` exit 0 (esta story no escribe al ledger — debe ser trivialmente verde; correrlo igual como evidencia NFR21).
+
+### Review Findings
+
+Code review 3 capas 2026-07-10 (Blind Hunter / Edge Case Hunter / Acceptance Auditor). Auditor: AC1/AC2/AC3 **PASS** con verificación independiente (suite re-corrida 776 passed/1 xfailed, bean-check exit 0, gate 0-diffs reproducido estructuralmente: old vs new pattern sobre las 267 opens del ledger real → conjuntos idénticos y no vacíos).
+
+- [x] [Review][Patch] **APLICADO 2026-07-10** — Aislamiento case-insensitive: beanquery evalúa `~` con `re.IGNORECASE`, así que una entidad futura case-variante de un miembro EAG (ej. `Assets:JAEL:...`, `Equity:APERTURA:...`) se consolidaba en silencio dentro de EAG — exactamente el invariante FR45. Fix: `(?-i:...)` en `_group_pattern` + test `test_balance_sheet_eag_excludes_case_variant_entity` (RED verificado pre-fix, GREEN post-fix); gate 0-diffs re-corrido sobre las 267 opens del ledger real: PASS [backend/app/services/bql_queries.py:66-79]
+- [x] [Review][Defer] Sin invariante de cobertura total del ledger: una cuenta cuyo 2º segmento no pertenece a ningún grupo (o de solo 2 segmentos, ej. `Assets:FFCC`) desaparece en silencio del reporte de gastos; el gate 0-diffs fue one-shot y no re-corre en CI — deferred, guard natural para 12.x (validación/cuarentena del import RUT2)
+- [x] [Review][Defer] Notas para 11.2 (labels definitivos): `report_rows_via_beancount` hardcodea la clave `"EAG"` (un rename del dict daría `KeyError` 500 en runtime) y los labels van crudos a regex/BQL sin escape — los definitivos deben ser alfanuméricos, sin metacaracteres ni comillas — deferred, se resuelve al fijar labels en 11.2
 
 ## Dev Notes
 
@@ -149,3 +157,4 @@ Claude Fable 5 (claude-fable-5) — dev-story workflow BMAD.
 ## Change Log
 
 - 2026-07-10: Story 11.1 implementada completa (Tasks 1–5) — grupos de consolidación explícitos en `bql_queries.py`, gate 0-diffs byte-idéntico vs ledger real, suite 776 passed/1 xfailed, bean-check exit 0. Status → review.
+- 2026-07-10: Code review 3 capas — Auditor AC1/AC2/AC3 PASS (verificación independiente). 1 patch aplicado (case-sensitivity `(?-i:)` en `_group_pattern`, FR45), 2 defer (→ deferred-work.md: invariante de cobertura para 12.x; notas labels para 11.2), 9 dismiss. Suite 777 passed/1 xfailed, gate 0-diffs re-PASS. Status → done.
