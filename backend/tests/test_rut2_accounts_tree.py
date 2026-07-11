@@ -68,16 +68,20 @@ def rut2(opens) -> list[Open]:
 
 
 @pytest.fixture(scope="module")
-def plan_leaves() -> list[dict]:
+def plan_accounts() -> list[dict]:
     if not PLAN_JSON.exists():
         pytest.skip("plan JSON RUT2 not present in this checkout")
-    accounts = json.loads(PLAN_JSON.read_text(encoding="utf-8"))
-    numbers = {a["accountNumber"] for a in accounts}
+    return json.loads(PLAN_JSON.read_text(encoding="utf-8"))
+
+
+@pytest.fixture(scope="module")
+def plan_leaves(plan_accounts) -> list[dict]:
+    numbers = {a["accountNumber"] for a in plan_accounts}
 
     def is_leaf(n: str) -> bool:
         return not any(m != n and m.startswith(n) for m in numbers)
 
-    return [a for a in accounts if is_leaf(a["accountNumber"])]
+    return [a for a in plan_accounts if is_leaf(a["accountNumber"])]
 
 
 def test_total_311_opens_rut2(rut2):
@@ -88,6 +92,7 @@ def test_total_311_opens_rut2(rut2):
 def test_hojas_matchean_plan_por_path_completo(rut2, plan_leaves):
     """AC1: bijección hoja-del-plan ↔ open, con la convención firmada
     `{Root}:{Entidad}:{slugify(name)}-{código}` (slugify canónico)."""
+    assert len(plan_leaves) == 309  # ANTES del set: una colisión de paths no se auto-oculta
     expected = set()
     for leaf in plan_leaves:
         number, name = leaf["accountNumber"], leaf["name"]
@@ -114,6 +119,34 @@ def test_toda_cuenta_rut2_tiene_categoria1(rut2):
     """Guard 10.2: laudus_categoria1 no-vacía en todo el subárbol."""
     for o in rut2:
         assert (o.meta or {}).get("laudus_categoria1"), f"{o.account} sin categoria1"
+
+
+def test_metadata_de_hojas_fiel_al_plan(rut2, plan_accounts):
+    """AC1: laudus_account_name y categoria1/2/3 de las 309 hojas reproducen el
+    plan (cat1 = nombre de la raíz; cat2/3 = ancestro ESTRICTO por prefijo de
+    2/3 dígitos, si falta el nivel → ""). Guard del reporte de gastos, que
+    agrupa por Categoria2 — un bug acá sería invisible sin este test."""
+    names = {a["accountNumber"]: a["name"] for a in plan_accounts}
+    hojas = [o for o in rut2 if not o.account.startswith("Equity:")]
+    assert len({(o.meta or {}).get("code") for o in hojas}) == 309  # codes únicos
+    for o in hojas:
+        meta = o.meta or {}
+        code = meta["code"]
+        assert meta.get("laudus_account_name") == names[code], o.account
+        assert meta.get("laudus_categoria1") == names[code[0]], o.account
+        cat2 = names.get(code[:2], "") if len(code) > 2 else ""
+        cat3 = names.get(code[:3], "") if len(code) > 3 else ""
+        assert meta.get("laudus_categoria2") == cat2, o.account
+        assert meta.get("laudus_categoria3") == cat3, o.account
+
+
+def test_fecha_y_monedas_de_los_opens(rut2):
+    """Defaults técnicos de Task 1: fecha open 2020-12-31 en las 311 (espejo
+    EAG); moneda CLP en todo, CLP+USD SOLO en el banco USD 611007."""
+    for o in rut2:
+        assert o.date.isoformat() == "2020-12-31", o.account
+        expected = {"CLP", "USD"} if o.account.endswith("-611007") else {"CLP"}
+        assert set(o.currencies or []) == expected, o.account
 
 
 def test_equity_apertura_convencion_firmada(rut2):
@@ -148,13 +181,15 @@ def test_bancos_rut2_con_uuid_y_metadata(rut2, opens):
     }
     for o in banks:
         meta = o.meta
-        uuid.UUID(meta["bank_account_id"])  # formato válido
-        assert meta.get("bank_name")
+        assert uuid.UUID(meta["bank_account_id"]).version == 4  # uuid4 real, no v1/v5
+        # Mapeo espejo EAG pinneado (Dev Record decisión 4): Edwards → "Banco Chile".
+        expected_bank = "Banco Chile" if "Edwards" in o.account else "BCI"
+        assert meta.get("bank_name") == expected_bank, o.account
         assert meta.get("bank_account_type") == "cta_corriente"
-        assert meta.get("bank_account_currency") in ("CLP", "USD")
+        expected_ccy = "USD" if o.account.endswith("-611007") else "CLP"
+        assert meta.get("bank_account_currency") == expected_ccy, o.account
     # El banco USD (611007) declara CLP, USD como commodities (espejo EAG 111011).
     usd = next(o for o in banks if o.account.endswith("-611007"))
-    assert usd.meta["bank_account_currency"] == "USD"
     assert set(usd.currencies or []) == {"CLP", "USD"}
     # Unicidad global de bank_account_id (RUT2 + EAG).
     all_ids = [

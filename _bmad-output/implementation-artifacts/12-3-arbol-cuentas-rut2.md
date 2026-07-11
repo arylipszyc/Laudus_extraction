@@ -1,6 +1,6 @@
 # Story 12.3: Pre-crear el árbol de cuentas de RUT2 con Equity de apertura
 
-Status: review
+Status: done
 
 ## Story
 
@@ -126,6 +126,21 @@ Claude Fable 5 (claude-fable-5) — dev-story workflow BMAD, worktree aislado (1
 - `backend/tests/test_rut2_accounts_tree.py` (nuevo — 8 tests sobre el ledger real)
 - `_bmad-output/implementation-artifacts/12-3-arbol-cuentas-rut2.md` (story file)
 
+### Review Findings
+
+Code review adversarial 3 capas (Blind Hunter / Edge Case Hunter / Acceptance Auditor), 2026-07-11. **AC1/AC2/AC3: PASS** — el Edge Hunter re-verificó mecánicamente TODOS los claims del Dev Record: 311 opens (309 hojas distribución §4 exacta + 2 Equity), append puro (+2217/−0, prefijo byte-exacto), bijección slug/path 309/309 con el slugify canónico, metadata de jerarquía 0 errores en las 309 (exhaustivo, no muestra), 6 UUIDs v4 únicos globalmente solo en "Banco *", Equity == precedente TC:Real, generador ABORT en re-run y reproduce el bloque byte-idéntico módulo UUIDs. Gates del orquestador: suite 836→842 passed / 1 xfailed, bean-check exit 0, 0-diffs EAG byte-idéntico (56 cuentas / 19.989 filas vs 013f0c8). Desvíos declarados (marcador USD, hoja "13", codes 9xxxxx) evaluados FIELES. Triage: 0 decision-needed / 1 patch / 3 defer / 5 dismiss.
+
+**Patch aplicado:**
+- [x] Endurecimiento de `test_rut2_accounts_tree.py` (el contenido estaba correcto; los tests no lo pinneaban): nuevo `test_metadata_de_hojas_fiel_al_plan` (laudus_account_name + cat1/2/3 de las 309 hojas contra la jerarquía del plan — el reporte de gastos agrupa por Categoria2 y un bug ahí era invisible), nuevo `test_fecha_y_monedas_de_los_opens` (2020-12-31 en las 311; CLP salvo 611007 CLP+USD), bancos pinneados (bank_name exacto Edwards→"Banco Chile"/BCI, currency por banco, uuid **version 4**), y `len(plan_leaves) == 309` ANTES del set (una colisión de paths ya no se auto-oculta). 8 → 10 tests, todos verdes.
+
+**Defer (anotados en deferred-work.md § 12-3):**
+- [x] Cuentas cash-US$ solo-CLP (111003/115007/613007) — herencia del espejo EAG, latente para el import 12.4.
+- [x] Hoja code `"13"` verbatim vs normalización a 6 dígitos — mina latente para consumidores futuros que normalicen.
+- [x] UUIDs no reproducibles en re-run disaster-recovery del generador — los commiteados son los canónicos.
+
+**Dismiss (falsos positivos/adjudicados):** intermedias de 4-5 dígitos que perderían nombre (no existen: intermedias del plan son 1/2/3 dígitos, verificado); test espejo "semi-tautológico" (la convención firmada ES la autoridad; el patch ancla además nombres/categorías al plan); test de namespace frágil ante appends futuros (pin deliberado del estado — romperse ante un append legítimo es señal, no bug); bancos RUT2 planos sin segmento `Bancos:` (convención firmada §1; la detección canónica es por `bank_account_id`); contaminación pre-marcador no testeable (garantizada por el append-puro verificado en el diff + gate 0-diffs).
+
 ## Change Log
 
 - 2026-07-11: Story 12.3 implementada completa (Tasks 1–4) — 311 opens RUT2 (309 hojas FFCC/JAB + 2 Equity de apertura) appendeados a `accounts.beancount` vía generador one-off; bean-check exit 0; gate 0-diffs EAG byte-idéntico (56 cuentas / 19.989 filas); suite 792 passed / 1 xfailed (0 regresiones). Status → review.
+- 2026-07-11: Code review 3 capas → 1 patch de tests aplicado (10/10 verdes), 3 defers anotados, gates re-verificados por el revisor (suite 842/1, bean-check 0, 0-diffs byte-idéntico). Status → done.

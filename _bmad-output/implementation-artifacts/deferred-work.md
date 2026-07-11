@@ -1,5 +1,11 @@
 # Deferred Work
 
+## Deferred from: code review de story 12-3-arbol-cuentas-rut2 (2026-07-11)
+
+- **Cuentas cash-US$ de RUT2 abiertas solo-CLP** (`Assets:FFCC:CajaUsFondoComn-111003`, `FondosPorRendirUs-115007`, `Assets:JAB:FondosPorRendirUs-613007`) — default literal de la story, espejo exacto de `Assets:EAG:CajaUs`. El `open ... CLP` restringe commodities: si el import histórico de 12.4 trajera montos USD a esas cuentas, bean-check fallaría. Riesgo heredado (Laudus exporta CLP), no introducido — **anotar en 12.4** por si el libro RUT2 se comporta distinto.
+- **Hoja code `"13"` verbatim vs normalización a 6 dígitos** — `normalize_account_number("13")` → `"130000"`; cualquier consumidor futuro que normalice codes no matcheará el `code: "13"` del open `Assets:FFCC:ActivosNoCorrientes-13`. Hoy solo el bootstrap deprecado normaliza — sin daño actual, mina latente.
+- **Los 6 `bank_account_id` no son reproducibles por el generador** ([bootstrap/generate_rut2_accounts.py](../../bootstrap/generate_rut2_accounts.py)) — mintea `uuid4()` en generación; un re-run disaster-recovery (tras pérdida de accounts.beancount) crearía UUIDs NUEVOS y rompería en silencio cualquier referencia externa (matching de cartolas por `bank_account_id`). El marcador de sección aborta el caso normal; los UUIDs commiteados son los canónicos — el SoT es el archivo, no el script.
+
 ## Deferred from: code review de story 12-1-clasificacion-contable-valentina (2026-07-11)
 
 - ~~**`bank_account_index._resolve_entity` no conoce FFCC/JAB — fallback silencioso a `entity=EAG` para cuentas RUT2**~~ **CERRADO en Story 12.2 (2026-07-11)** ([backend/app/integrations/bank_account_index.py](../../backend/app/integrations/bank_account_index.py)) — la resolución ahora usa el 2º segmento del PATH de la cuenta como autoridad (`_entity_from_path`, entidades conocidas = `VALID_ENTITIES`, que incluye FFCC/JAB desde 11.2), con `_resolve_entity(categoria1)` como fallback legacy y `"EAG"` como último recurso. Una cuenta `Assets:FFCC:...` con categoria1 `"PASIVO"` resuelve FFCC, no EAG; cuentas EAG existentes sin cambio (tests AC5 en `backend/tests/test_bank_account_index.py`). Hallazgo original: el índice bancario resolvía entidad solo desde `categoria1` con `_ENTITY_PREFIXES` que asignaba `"PASIVO"`/`"INGRESOS"` EXPLÍCITO a EAG.
