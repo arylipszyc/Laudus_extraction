@@ -1,10 +1,11 @@
-"""Tests for BankAccountIndex — Story 9.5 Task 4."""
+"""Tests for BankAccountIndex — Story 9.5 Task 4 (+ 12.2 AC5: entidad por path)."""
 from pathlib import Path
 
 import pytest
 
 from backend.app.integrations.bank_account_index import (
     BankAccountIndex,
+    _entity_from_path,
     _resolve_entity,
 )
 
@@ -36,6 +37,64 @@ def test_resolve_entity_returns_none_for_unknown():
 def test_resolve_entity_returns_none_for_empty():
     assert _resolve_entity(None) is None
     assert _resolve_entity("") is None
+
+
+# ── 12.2 AC5: entidad por 2º segmento del PATH (cierra defer code-review 12.1) ─
+
+
+@pytest.mark.parametrize(
+    "account, expected",
+    [
+        ("Assets:EAG:Bancos:Bci-111005", "EAG"),
+        ("Assets:Jocelyn:Bancos:Santander", "Jocelyn"),
+        ("Assets:FFCC:CajaUs-111003", "FFCC"),
+        ("Liabilities:FFCC:Apertura-211005", "FFCC"),
+        ("Expenses:JAB:GastosPersonales-871005", "JAB"),
+        ("Equity:Apertura:Legacy", None),   # namespace legacy sin entidad
+        ("Assets", None),
+    ],
+)
+def test_entity_from_path(account, expected):
+    assert _entity_from_path(account) == expected
+
+
+_FIXTURE_RUT2 = """
+2020-12-31 open Assets:FFCC:CajaUs-111003 CLP
+  laudus_categoria1: "ACTIVO FFCC"
+  bank_account_id: "uuid-ffcc-caja"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Liabilities:FFCC:Apertura-211005 CLP
+  laudus_categoria1: "PASIVO"
+  bank_account_id: "uuid-ffcc-apertura"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:JAB:Banco-611001 CLP
+  laudus_categoria1: "ACTIVO - JAB"
+  bank_account_id: "uuid-jab-banco"
+  bank_name: "Santander"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+"""
+
+
+def test_index_cuentas_rut2_no_caen_al_fallback_eag(tmp_path):
+    """AC5: cuentas FFCC/JAB resuelven por el path — incluso cuando la categoria1
+    ("PASIVO") mapea EXPLÍCITO a EAG en la tabla legacy."""
+    f = tmp_path / "accounts.beancount"
+    f.write_text((_FIXTURE + _FIXTURE_RUT2).strip() + "\n", encoding="utf-8")
+    idx = BankAccountIndex(f)
+    assert idx.get("uuid-ffcc-caja").entity == "FFCC"
+    assert idx.get("uuid-ffcc-apertura").entity == "FFCC"   # "PASIVO" ya no la vuelve EAG
+    assert idx.get("uuid-jab-banco").entity == "JAB"        # categoria1 desconocida → path
+    # 0 regresiones: las cuentas EAG/hijas del fixture original no cambian.
+    assert idx.get("uuid-bci-clp").entity == "EAG"
+    assert idx.get("uuid-santander-jocelyn").entity == "Jocelyn"
+    assert idx.get("uuid-visa-eduardo").entity == "EAG"
 
 
 # ── Index against minimal fixture file ────────────────────────────────────

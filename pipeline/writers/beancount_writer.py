@@ -29,11 +29,14 @@ from pathlib import Path
 from beancount.core.data import Open, Transaction
 from beancount.parser import parser
 
+from pipeline.config.laudus_config import ALL_BOOK_ENTITIES, BookConfig
+
 logger = logging.getLogger(__name__)
 
 _PENDING_OPEN_DATE = "2020-01-01"
-_PENDING_HEADER = (
-    ";; ledger/imports/_new-accounts-pending.beancount\n"
+_LEGACY_PENDING_FILE = "_new-accounts-pending.beancount"  # book=None (callers pre-12.2)
+_PENDING_HEADER_TEMPLATE = (
+    ";; ledger/imports/{pending_file}\n"
     ";;\n"
     ";; Cuentas detectadas por el importer Laudus (Story 9.4) que NO existen\n"
     ";; todavía en accounts.beancount. Cada entrada es un `open` tentativo +\n"
@@ -65,21 +68,50 @@ class WriteResult:
 # ── Account index (code → beancount account) ────────────────────────────────
 
 
-def load_account_index(accounts_path: str | os.PathLike) -> dict[str, str]:
-    """Map `code` metadata → full Beancount account name from accounts.beancount."""
+def _account_in_book(account: str, book: BookConfig) -> bool:
+    """¿La cuenta pertenece al libro? Autoridad = 2º segmento del path (entidad).
+
+    Un 2º segmento que no es entidad de NINGÚN libro (namespaces legacy sin entidad,
+    ej. `Equity:Apertura:*`) pertenece al libro con `include_entityless` (EAG).
+    """
+    parts = account.split(":")
+    segment = parts[1] if len(parts) > 1 else ""
+    if segment in book.entities:
+        return True
+    return book.include_entityless and segment not in ALL_BOOK_ENTITIES
+
+
+def load_account_index(
+    accounts_path: str | os.PathLike, book: BookConfig | None = None
+) -> dict[str, str]:
+    """Map `code` metadata → full Beancount account name from accounts.beancount.
+
+    Con `book` el índice queda SCOPED al libro (Story 12.2 / FR51): solo entran las
+    cuentas cuyo 2º segmento de path es una entidad del libro — un code de RUT2 que
+    colisiona con uno de EAG nunca puede resolver a la cuenta homónima del otro
+    libro. `book=None` = índice completo (callers legacy: bootstrap, tests).
+    """
     entries, _errors, _options = parser.parse_file(str(accounts_path))
     index: dict[str, str] = {}
     for e in entries:
         if isinstance(e, Open):
             code = (e.meta or {}).get("code")
-            if code is not None:
-                index[str(code)] = e.account
+            if code is None:
+                continue
+            if book is not None and not _account_in_book(e.account, book):
+                continue
+            index[str(code)] = e.account
     return index
 
 
-def _pending_account(code: str) -> str:
-    """Quarantine account for an unknown Laudus code (reclassified manually)."""
-    return f"Assets:EAG:PendingReview:Cuenta-{code}"
+def _pending_account(code: str, book: BookConfig | None = None) -> str:
+    """Quarantine account for an unknown Laudus code (reclassified manually).
+
+    La entidad de cuarentena es la del LIBRO (12.2 AC2): EAG → `Assets:EAG:...`
+    (idéntico al comportamiento previo); RUT2 → FFCC/JAB según dígito de raíz.
+    """
+    entity = book.pending_entity(code) if book is not None else "EAG"
+    return f"Assets:{entity}:PendingReview:Cuenta-{code}"
 
 
 # ── Formatting (deterministic → idempotent) ─────────────────────────────────
@@ -112,7 +144,9 @@ def _month_of(iso_date: str) -> str:
 # ── Build JEs from raw Laudus rows ──────────────────────────────────────────
 
 
-def _rows_to_jes(rows: list[dict], account_index: dict[str, str]) -> tuple[dict[str, JournalEntry], set[str]]:
+def _rows_to_jes(
+    rows: list[dict], account_index: dict[str, str], book: BookConfig | None = None
+) -> tuple[dict[str, JournalEntry], set[str]]:
     """Group normalized ledger rows by journalentryid → JournalEntry.
 
     Drops rows with journalentryid == 0 (synthetic "Saldo anterior"). Returns
@@ -129,7 +163,7 @@ def _rows_to_jes(rows: list[dict], account_index: dict[str, str]) -> tuple[dict[
         account = account_index.get(code)
         is_pending = account is None
         if is_pending:
-            account = _pending_account(code)
+            account = _pending_account(code, book)
             pending_codes.add(code)
         amount = Decimal(str(row.get("debit", 0))) - Decimal(str(row.get("credit", 0)))
         if je_id not in jes:
@@ -195,12 +229,13 @@ def _existing_pending_codes(pending_path: Path) -> set[str]:
     }
 
 
-def _write_pending_file(pending_path: Path, codes: set[str]) -> None:
+def _write_pending_file(pending_path: Path, codes: set[str], book: BookConfig | None = None) -> None:
     """Regenerate the pending-accounts file deterministically (sorted by code)."""
-    chunks = [_PENDING_HEADER]
+    pending_file = book.pending_file if book is not None else _LEGACY_PENDING_FILE
+    chunks = [_PENDING_HEADER_TEMPLATE.format(pending_file=pending_file)]
     for code in sorted(codes):
         chunks.append(
-            f"\n{_PENDING_OPEN_DATE} open {_pending_account(code)} CLP\n"
+            f"\n{_PENDING_OPEN_DATE} open {_pending_account(code, book)} CLP\n"
             f'  code: "{code}"\n'
             f'  pending_review: "TRUE"\n'
         )
@@ -220,27 +255,32 @@ def write_jes(
     pending_path: str | os.PathLike,
     replace: bool = False,
     existing_jes: dict[str, JournalEntry] | None = None,
+    book: BookConfig | None = None,
 ) -> WriteResult:
-    """Emit `imports/laudus/YYYY-MM.beancount` from normalized Laudus rows.
+    """Emit `imports/<subdir>/YYYY-MM.beancount` from normalized Laudus rows.
 
     Args:
         rows: normalized ledger rows (output of `map_ledger_row`).
-        target_dir: `ledger/imports/laudus/`.
+        target_dir: `ledger/imports/laudus/` (o el subdir del libro).
         accounts_path: `ledger/accounts.beancount` (account code index).
-        pending_path: `ledger/imports/_new-accounts-pending.beancount`.
+        pending_path: `ledger/imports/_new-accounts-pending.beancount` (o el del libro).
         replace: True (backfill) regenerates from `rows` only; False (incremental)
             merges with already-written JEs by `id` (new overrides existing).
         existing_jes: JEs ya parseados por el caller (review 2026-07-06 D4b: el run
             incremental los parsea una vez para el from_date y los pasa acá — evita
             el segundo parse completo). None → se parsean acá (comportamiento previo).
             Ignorado con replace=True.
+        book: libro Laudus (Story 12.2 / FR51). Scopea el índice de cuentas a las
+            entidades del libro y deriva la entidad de cuarentena. `run_import` lo
+            pasa SIEMPRE; None = comportamiento pre-12.2 (índice completo, cuarentena
+            EAG) para callers/tests legacy.
     """
     target_dir = Path(target_dir)
     pending_path = Path(pending_path)
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    account_index = load_account_index(accounts_path)
-    new_jes, pending_codes = _rows_to_jes(rows, account_index)
+    account_index = load_account_index(accounts_path, book)
+    new_jes, pending_codes = _rows_to_jes(rows, account_index, book)
 
     if replace:
         existing_jes = {}
@@ -276,7 +316,7 @@ def write_jes(
     # Reconcile the pending-accounts file: keep codes still unknown + new ones.
     surviving_pending = {c for c in _existing_pending_codes(pending_path) if c not in account_index}
     all_pending = surviving_pending | pending_codes
-    _write_pending_file(pending_path, all_pending)
+    _write_pending_file(pending_path, all_pending, book)
 
     new_ids = set(new_jes.keys())
     return WriteResult(

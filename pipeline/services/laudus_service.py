@@ -1,10 +1,19 @@
 import logging
 import requests
-from pipeline.config.laudus_config import LOGIN_URL, default_headers, payload
+from pipeline.config.laudus_config import (
+    ACCOUNTS_LIST_URL,
+    BookConfig,
+    LOGIN_URL,
+    default_headers,
+    get_book,
+    login_payload,
+)
 
 logger = logging.getLogger(__name__)
 
-_token = None
+# Token POR LIBRO (Story 12.2): antes era un `_token` global de módulo → estructuralmente
+# mono-libro por proceso. Clave = book_id.
+_tokens: dict[str, str] = {}
 _REQUEST_TIMEOUT = 30  # segundos — evita cuelgues si Laudus no responde
 # Tope duro de paginación: una API que repite página (o miente hasMore) no puede
 # convertirse en un loop infinito sosteniendo el .import.lock (review 2026-07-06 B8).
@@ -20,25 +29,65 @@ _PAGINATION_KEYS = {"total", "count", "nextPage", "hasMore", "page", "totalPages
 _DATA_WRAPPER_KEYS = ("data", "items", "records", "results")
 
 
-def login():
+class BookIdentityError(RuntimeError):
+    """La empresa que devuelve la API NO es la esperada para el libro — abortar sin escribir (FR52)."""
+
+
+def login(book: BookConfig | None = None):
     """
-    Autentica con la API de Laudus y obtiene un Bearer token.
-    El token queda en caché para las peticiones siguientes.
+    Autentica con la API de Laudus y obtiene un Bearer token PARA EL LIBRO dado.
+    El token queda en caché por libro para las peticiones siguientes.
+    `book=None` = libro EAG (compatibilidad con callers legacy: bootstrap, path Sheets).
 
     Un fallo PROPAGA (review 2026-07-06 B8): antes se tragaba la excepción y el caller
     reportaba el genérico "No hay token" en vez de la causa real (credenciales, red, 5xx).
     """
-    global _token
-    if _token is None:
+    cfg = book or get_book("EAG")
+    if cfg.book_id not in _tokens:
         response = requests.post(
-            LOGIN_URL, json=payload, headers=default_headers, timeout=_REQUEST_TIMEOUT
+            LOGIN_URL, json=login_payload(cfg), headers=default_headers,
+            timeout=_REQUEST_TIMEOUT,
         )
         response.raise_for_status()
         token = response.json().get("token")
         if not token:  # 200 sin token = fallo de auth con otra forma; mejor que un KeyError pelado
             raise RuntimeError(f"Login Laudus devolvió 200 sin token (keys: {list(response.json())})")
-        _token = token
-    return _token
+        _tokens[cfg.book_id] = token
+    return _tokens[cfg.book_id]
+
+
+def verify_book_identity(book: BookConfig) -> None:
+    """Assert de identidad de empresa (FR52) — corre ANTES del primer write de una corrida.
+
+    Laudus NO falla ante un companyVATId equivocado (sonda intake §4): devuelve el libro
+    que sea. El login tampoco trae nombre de empresa, así que la vía robusta es el
+    fingerprint del plan de cuentas: `POST /accounting/accounts/list` y assert de que la
+    cuenta raíz "1" se llama como el libro espera ("ACTIVO EAG" / "ACTIVO FFCC", ambos
+    verificados en datos reales). NO valida dígito verificador del RUT (el placeholder
+    de RUT2 tiene DV inválido por diseño).
+    """
+    token = login(book)
+    headers = {**default_headers, "Authorization": f"Bearer {token}"}
+    response = requests.post(
+        ACCOUNTS_LIST_URL, headers=headers,
+        json={"fields": ["accountNumber", "name"]}, timeout=_REQUEST_TIMEOUT,
+    )
+    response.raise_for_status()
+    accounts = response.json()
+    if not isinstance(accounts, list):
+        raise BookIdentityError(
+            f"No pude verificar la identidad del libro {book.book_id}: accounts/list "
+            f"devolvió {type(accounts).__name__} en vez de lista — se aborta sin escribir (FR52)"
+        )
+    root = next(
+        (a for a in accounts if str(a.get("accountNumber", "")).strip() == "1"), None)
+    name = str((root or {}).get("name", "")).strip()
+    if name != book.expected_root_name:
+        raise BookIdentityError(
+            f"Identidad de empresa NO coincide para el libro {book.book_id}: la cuenta raíz 1 "
+            f"se llama {name!r}, esperaba {book.expected_root_name!r} "
+            f"(¿companyVATId apunta a otro libro?) — se aborta sin escribir (FR52)"
+        )
 
 
 def _extract_page(data, url):
@@ -83,14 +132,15 @@ def _extract_page(data, url):
     return data, None
 
 
-def get_info_API(url, params=None, retry=True):
+def get_info_API(url, params=None, retry=True, book: BookConfig | None = None):
     """
-    Realiza GET al endpoint indicado con token en caché, timeout de 30s y soporte de paginación.
-    Si recibe 401, limpia el token y reintenta una vez.
+    Realiza GET al endpoint indicado con token en caché POR LIBRO, timeout de 30s y
+    soporte de paginación. Si recibe 401, limpia el token del libro y reintenta una vez.
     Acumula todas las páginas y retorna la lista completa de registros.
+    `book=None` = libro EAG (compatibilidad con callers legacy).
     """
-    global _token
-    token = login()
+    cfg = book or get_book("EAG")
+    token = login(cfg)
     if not token:
         logger.error("No hay token disponible. Abortando request a %s.", url)
         return None
@@ -137,13 +187,13 @@ def get_info_API(url, params=None, retry=True):
             raise  # no reintentar: la API está rota, un retry repetiría el loop entero
         except Exception as e:
             if response is not None and response.status_code == 401:
-                _token = None
+                _tokens.pop(cfg.book_id, None)
                 if retry:
                     logger.warning("Token expirado — reintentando con nuevo login...")
-                    return get_info_API(url, params, retry=False)
+                    return get_info_API(url, params, retry=False, book=cfg)
             elif retry:
                 logger.warning("Error en request a %s, reintentando: %s", url, e)
-                return get_info_API(url, params, retry=False)
+                return get_info_API(url, params, retry=False, book=cfg)
             logger.error("Error al obtener datos de %s: %s", url, e)
             # Fallo a mitad de paginación: NUNCA devolver la acumulación parcial como
             # éxito — un backfill con replace=True regeneraría los month files solo con

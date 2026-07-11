@@ -19,12 +19,17 @@ from pathlib import Path
 from beancount.loader import load_file
 from beancount.core.data import Open
 
+from backend.app.api.v1.dashboard.schemas import VALID_ENTITIES
+
 logger = logging.getLogger(__name__)
 
 
 # Story 9.13 + architecture-c4 §2.3 — Categoria1 (Laudus) → entity mapping.
 # Centralised so 9.5 (cartola source resolution) and 9.7 (categorization) share
-# the same authoritative table.
+# the same authoritative table. Desde 12.2 es FALLBACK legacy: la autoridad es el
+# 2º segmento del path de la cuenta (`_entity_from_path`) — las categoria1 de RUT2
+# raíces 2/3 se llaman literalmente "PASIVO"/"INGRESOS" y este mapa las asignaría
+# EXPLÍCITO a EAG (defer del code-review 12.1, cerrado acá).
 _ENTITY_PREFIXES: dict[str, str] = {
     # EAG-rooted
     "ACTIVO EAG": "EAG",
@@ -35,8 +40,20 @@ _ENTITY_PREFIXES: dict[str, str] = {
 _FAMILY_NAMES = ("Jocelyn", "Jeannette", "Johanna", "Jael")
 
 
+def _entity_from_path(account: str) -> str | None:
+    """Entidad = 2º segmento del path de la cuenta (autoridad per 11.x/12.2).
+
+    `Assets:FFCC:...` → FFCC; `Assets:EAG:Bancos:...` → EAG. Returns None si el
+    segmento no es una entidad conocida (namespaces legacy sin entidad).
+    """
+    parts = account.split(":")
+    if len(parts) > 1 and parts[1] in VALID_ENTITIES:
+        return parts[1]
+    return None
+
+
 def _resolve_entity(categoria1: str | None) -> str | None:
-    """Map laudus_categoria1 → entity per architecture-c4 §2.3.
+    """Map laudus_categoria1 → entity per architecture-c4 §2.3 (fallback legacy).
 
     Returns None if categoria1 is missing or not in the mapping table; caller
     decides whether to error or default.
@@ -108,7 +125,9 @@ class BankAccountIndex:
             last4 = meta.get("bank_account_last4")
             laudus_account_name = meta.get("laudus_account_name") or entry.account
             categoria1 = meta.get("laudus_categoria1")
-            entity = _resolve_entity(categoria1) or "EAG"
+            # Path primero (12.2 AC5): una cuenta FFCC/JAB nunca cae al fallback EAG
+            # aunque su categoria1 ("PASIVO"/"INGRESOS") mapee legacy a EAG.
+            entity = _entity_from_path(entry.account) or _resolve_entity(categoria1) or "EAG"
 
             by_id[str(bank_account_id)] = BankAccountEntry(
                 bank_account_id=str(bank_account_id),
