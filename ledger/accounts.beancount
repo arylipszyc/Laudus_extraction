@@ -2079,3 +2079,2220 @@
   laudus_categoria1: "PATRIMONIO"
   laudus_categoria2: ""
   laudus_categoria3: ""
+
+
+;; ─── RUT2 (Fondo Común) — subárbol FFCC/JAB — Story 12.3 ───
+;; Generado one-off por bootstrap/generate_rut2_accounts.py (2026-07-11) desde el
+;; plan real rut2-plan-cuentas-laudus-2026-07-10.json según la clasificación
+;; FIRMADA (clasificacion-contable-rut2-firmada-2026-07-11.md §1/§3/§8).
+;; 311 opens: 309 hojas {Root}:{FFCC|JAB}:{slug}-{código} + 2 Equity de apertura.
+;; Las cuentas intermedias del plan (357−309=48) NO se crean: la jerarquía vive
+;; en la numeración (8→81→811). TC 871005/873005 = hojas de gasto normales
+;; (estado-1, artefacto §5) — ninguna TC:Real acá.
+;; Equity:FFCC:Apertura / Equity:JAB:Apertura = respaldo/plug de apertura (§3):
+;; sintéticas (no existen en Laudus), cat1 PATRIMONIO no-vacía (guard 10.2),
+;; cat2/3 vacías (exclusión del reporte de gastos), code sintético 9-prefix
+;; (raíz 9 no existe en el libro → cero colisión bajo (entidad, code)), sin
+;; bank_account_id. Regla §3.4: un plug JAB jamás se tapa con Equity FFCC (ni
+;; viceversa). El monto puede ser plug grande — NO es patrimonio real (§3.5).
+
+2020-12-31 open Assets:FFCC:CajaFondoComn-111001 CLP
+  code: "111001"
+  laudus_account_name: "Caja $ - Fondo Común"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - FONDO COMUN"
+
+2020-12-31 open Assets:FFCC:CajaUsFondoComn-111003 CLP
+  code: "111003"
+  laudus_account_name: "Caja US$ - Fondo Común"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - FONDO COMUN"
+
+2020-12-31 open Assets:FFCC:BancoBci28981162-111005 CLP
+  code: "111005"
+  laudus_account_name: "Banco BCI - 28981162"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - FONDO COMUN"
+  bank_account_id: "d1a31ed3-8a9e-48c9-9106-beb24a189bf1"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:FFCC:BancoEdwards011626509-111007 CLP
+  code: "111007"
+  laudus_account_name: "Banco Edwards - 01-16265-09"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - FONDO COMUN"
+  bank_account_id: "2e55d58b-0d70-4497-8165-373bea363b5c"
+  bank_name: "Banco Chile"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:FFCC:FondoHsf-111009 CLP
+  code: "111009"
+  laudus_account_name: "Fondo HSF"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - FONDO COMUN"
+
+2020-12-31 open Assets:FFCC:LeoPartnershipLimited-111012 CLP
+  code: "111012"
+  laudus_account_name: "Leo Partnership Limited"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - FONDO COMUN"
+
+2020-12-31 open Assets:FFCC:CuentasCorrientesDelPersonal-115001 CLP
+  code: "115001"
+  laudus_account_name: "Cuentas Corrientes del Personal"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:FondoFijo-115003 CLP
+  code: "115003"
+  laudus_account_name: "Fondo Fijo"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:FondosPorRendir-115005 CLP
+  code: "115005"
+  laudus_account_name: "Fondos por Rendir"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:FondosPorRendirUs-115007 CLP
+  code: "115007"
+  laudus_account_name: "Fondos por Rendir - US$"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:DeudoresVarios-115019 CLP
+  code: "115019"
+  laudus_account_name: "Deudores Varios"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:RetirosAag-115021 CLP
+  code: "115021"
+  laudus_account_name: "Retiros AAG"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:RetirosEag-115023 CLP
+  code: "115023"
+  laudus_account_name: "Retiros EAG"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:RetirosSag-115025 CLP
+  code: "115025"
+  laudus_account_name: "Retiros SAG"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:RetirosDag-115027 CLP
+  code: "115027"
+  laudus_account_name: "Retiros DAG"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:CtaCteDagAutos-115028 CLP
+  code: "115028"
+  laudus_account_name: "Cta Cte DAG - Autos"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:RetirosAzba-115029 CLP
+  code: "115029"
+  laudus_account_name: "Retiros AZBA"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:JosAlazraki-115031 CLP
+  code: "115031"
+  laudus_account_name: "José Alazraki"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:DeniseZeldis-115033 CLP
+  code: "115033"
+  laudus_account_name: "Denise Zeldis"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:DeniseZeldisAutos-115034 CLP
+  code: "115034"
+  laudus_account_name: "Denise Zeldis - Autos"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:MichelleZeldis-115035 CLP
+  code: "115035"
+  laudus_account_name: "Michelle Zeldis"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:ArielBorzutzky-115037 CLP
+  code: "115037"
+  laudus_account_name: "Ariel Borzutzky"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:OtrosRetirosHijos-115039 CLP
+  code: "115039"
+  laudus_account_name: "Otros Retiros Hijos"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:Israel-115041 CLP
+  code: "115041"
+  laudus_account_name: "Israel"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:ControlYLiquidacin-115099 CLP
+  code: "115099"
+  laudus_account_name: "Control y Liquidación"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:FFCC:ActivosNoCorrientes-13 CLP
+  code: "13"
+  laudus_account_name: "ACTIVOS NO CORRIENTES"
+  laudus_categoria1: "ACTIVO FFCC"
+  laudus_categoria2: ""
+  laudus_categoria3: ""
+
+2020-12-31 open Liabilities:FFCC:Apertura-211005 CLP
+  code: "211005"
+  laudus_account_name: "Apertura"
+  laudus_categoria1: "PASIVO"
+  laudus_categoria2: "PASIVOS CORRIENTES"
+  laudus_categoria3: "PASIVOS CORRIENTES"
+
+2020-12-31 open Income:FFCC:Indumotora-310001 CLP
+  code: "310001"
+  laudus_account_name: "Indumotora"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: ""
+
+2020-12-31 open Income:FFCC:BankJb-310003 CLP
+  code: "310003"
+  laudus_account_name: "Bank JB"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: ""
+
+2020-12-31 open Income:FFCC:Molco-310005 CLP
+  code: "310005"
+  laudus_account_name: "Molco"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: ""
+
+2020-12-31 open Income:FFCC:Mbi-310007 CLP
+  code: "310007"
+  laudus_account_name: "MBI"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: ""
+
+2020-12-31 open Income:FFCC:LatinoamericanaSa-310009 CLP
+  code: "310009"
+  laudus_account_name: "Latinoamericana S.A."
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: ""
+
+2020-12-31 open Income:FFCC:Sade-310011 CLP
+  code: "310011"
+  laudus_account_name: "SADE"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: ""
+
+2020-12-31 open Income:FFCC:ClubDeGolfDevolucionLab-310019 CLP
+  code: "310019"
+  laudus_account_name: "Club de Golf - Devolucion LAB"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: ""
+
+2020-12-31 open Income:FFCC:VentaDeActivos-310091 CLP
+  code: "310091"
+  laudus_account_name: "Venta de Activos"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: ""
+
+2020-12-31 open Income:FFCC:OtrosIngresos-310099 CLP
+  code: "310099"
+  laudus_account_name: "Otros Ingresos"
+  laudus_categoria1: "INGRESOS"
+  laudus_categoria2: "INGRESOS"
+  laudus_categoria3: ""
+
+2020-12-31 open Expenses:FFCC:SueldoAag-411001 CLP
+  code: "411001"
+  laudus_account_name: "Sueldo AAG"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "SUELDO FAMILIA"
+
+2020-12-31 open Expenses:FFCC:SueldoEag-411003 CLP
+  code: "411003"
+  laudus_account_name: "Sueldo EAG"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "SUELDO FAMILIA"
+
+2020-12-31 open Expenses:FFCC:EagComplemento-411004 CLP
+  code: "411004"
+  laudus_account_name: "EAG - Complemento"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "SUELDO FAMILIA"
+
+2020-12-31 open Expenses:FFCC:SueldoSag-411005 CLP
+  code: "411005"
+  laudus_account_name: "Sueldo SAG"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "SUELDO FAMILIA"
+
+2020-12-31 open Expenses:FFCC:SueldosAzba-411006 CLP
+  code: "411006"
+  laudus_account_name: "Sueldos AZBA"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "SUELDO FAMILIA"
+
+2020-12-31 open Expenses:FFCC:SueldoDag-411007 CLP
+  code: "411007"
+  laudus_account_name: "Sueldo DAG"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "SUELDO FAMILIA"
+
+2020-12-31 open Expenses:FFCC:AagImpuestoRenta-413001 CLP
+  code: "413001"
+  laudus_account_name: "AAG - Impuesto Renta"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "IMPUESTOS"
+
+2020-12-31 open Expenses:FFCC:EagImpuestoRenta-413003 CLP
+  code: "413003"
+  laudus_account_name: "EAG - Impuesto Renta"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "IMPUESTOS"
+
+2020-12-31 open Expenses:FFCC:SagImpuestoRenta-413005 CLP
+  code: "413005"
+  laudus_account_name: "SAG - Impuesto Renta"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "IMPUESTOS"
+
+2020-12-31 open Expenses:FFCC:DagImpuestoRenta-413007 CLP
+  code: "413007"
+  laudus_account_name: "DAG - Impuesto Renta"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "IMPUESTOS"
+
+2020-12-31 open Expenses:FFCC:GastoCorporativo-415001 CLP
+  code: "415001"
+  laudus_account_name: "Gasto Corporativo"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "GASTOS VARIOS"
+
+2020-12-31 open Expenses:FFCC:GastosBancarios-415003 CLP
+  code: "415003"
+  laudus_account_name: "Gastos Bancarios"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "GASTOS VARIOS"
+
+2020-12-31 open Expenses:FFCC:VehculoCristobal-415007 CLP
+  code: "415007"
+  laudus_account_name: "Vehículo Cristobal"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "GASTOS VARIOS"
+
+2020-12-31 open Expenses:FFCC:ViajesCorporativos-415037 CLP
+  code: "415037"
+  laudus_account_name: "Viajes Corporativos"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "GASTOS VARIOS"
+
+2020-12-31 open Expenses:FFCC:GastosLegalesTributarios-415053 CLP
+  code: "415053"
+  laudus_account_name: "Gastos Legales / Tributarios"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "GASTOS VARIOS"
+
+2020-12-31 open Expenses:FFCC:Donaciones-415055 CLP
+  code: "415055"
+  laudus_account_name: "Donaciones"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "GASTOS VARIOS"
+
+2020-12-31 open Expenses:FFCC:EquipamientoComprasDeActivo-415090 CLP
+  code: "415090"
+  laudus_account_name: "Equipamiento, Compras de Activo"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS GENERALES"
+  laudus_categoria3: "GASTOS VARIOS"
+
+2020-12-31 open Expenses:FFCC:EduardoAvayGuiloff-431001 CLP
+  code: "431001"
+  laudus_account_name: "Eduardo Avayú Guiloff"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GERENCIA"
+
+2020-12-31 open Expenses:FFCC:GloriaJimenezBustos-431002 CLP
+  code: "431002"
+  laudus_account_name: "Gloria Jimenez Bustos"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GERENCIA"
+
+2020-12-31 open Expenses:FFCC:HugoSanzanaFigueroa-431003 CLP
+  code: "431003"
+  laudus_account_name: "Hugo Sanzana Figueroa"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GERENCIA"
+
+2020-12-31 open Expenses:FFCC:MaraEugeniaLlaulen-431004 CLP
+  code: "431004"
+  laudus_account_name: "María Eugenia Llaulen"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GERENCIA"
+
+2020-12-31 open Expenses:FFCC:CynthiaGarayDelVillar-431005 CLP
+  code: "431005"
+  laudus_account_name: "Cynthia Garay del Villar"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GERENCIA"
+
+2020-12-31 open Expenses:FFCC:MauricioPobleteCood-431006 CLP
+  code: "431006"
+  laudus_account_name: "Mauricio Poblete Cood"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GERENCIA"
+
+2020-12-31 open Expenses:FFCC:MacarenaBarra-431007 CLP
+  code: "431007"
+  laudus_account_name: "Macarena Barra"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GERENCIA"
+
+2020-12-31 open Expenses:FFCC:MiguelLilloOrtiz-431008 CLP
+  code: "431008"
+  laudus_account_name: "Miguel Lillo Ortiz"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GERENCIA"
+
+2020-12-31 open Expenses:FFCC:EdmundoEluchansSpa-431053 CLP
+  code: "431053"
+  laudus_account_name: "Edmundo Eluchans SpA"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GERENCIA"
+
+2020-12-31 open Expenses:FFCC:GloriaJimenezBustos-433002 CLP
+  code: "433002"
+  laudus_account_name: "Gloria Jimenez Bustos"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:HugoSanzanaFigueroa-433003 CLP
+  code: "433003"
+  laudus_account_name: "Hugo Sanzana Figueroa"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:MaraEugeniaLlaulen-433004 CLP
+  code: "433004"
+  laudus_account_name: "María Eugenia Llaulen"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:CynthiaGarayDelVillar-433005 CLP
+  code: "433005"
+  laudus_account_name: "Cynthia Garay del Villar"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:MauricioPobleteCood-433006 CLP
+  code: "433006"
+  laudus_account_name: "Mauricio Poblete Cood"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:MacarenaBarra-433007 CLP
+  code: "433007"
+  laudus_account_name: "Macarena Barra"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:MiguelLilloOrtiz-433008 CLP
+  code: "433008"
+  laudus_account_name: "Miguel Lillo Ortiz"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:AlbertoGassmann-433009 CLP
+  code: "433009"
+  laudus_account_name: "Alberto Gassmann"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:ArriendoLuzAguaGas-433013 CLP
+  code: "433013"
+  laudus_account_name: "Arriendo, luz, agua, gas"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:Telfono-433015 CLP
+  code: "433015"
+  laudus_account_name: "Teléfono"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:InsumosEquiposDeOficina-433021 CLP
+  code: "433021"
+  laudus_account_name: "Insumos Equipos de Oficina"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:UtilesDeEscritorio-433023 CLP
+  code: "433023"
+  laudus_account_name: "Utiles de Escritorio"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:Movilizacion-433037 CLP
+  code: "433037"
+  laudus_account_name: "Movilizacion"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:AycAuditores-433052 CLP
+  code: "433052"
+  laudus_account_name: "AYC Auditores"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:EluchansAbogadosSpa-433053 CLP
+  code: "433053"
+  laudus_account_name: "Eluchans Abogados SpA"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:LathropCompaia-433054 CLP
+  code: "433054"
+  laudus_account_name: "Lathrop & Compañia"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:Hapiness-433055 CLP
+  code: "433055"
+  laudus_account_name: "Hapiness"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:MquinasYEquiposDeOficina-433081 CLP
+  code: "433081"
+  laudus_account_name: "Máquinas y Equipos de Oficina"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:MantencinInstalaciones-433083 CLP
+  code: "433083"
+  laudus_account_name: "Mantención Instalaciones"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "OFICINA"
+
+2020-12-31 open Expenses:FFCC:EduardoAvayGuiloff-435001 CLP
+  code: "435001"
+  laudus_account_name: "Eduardo Avayú Guiloff"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "CEPECH"
+
+2020-12-31 open Expenses:FFCC:MaraEugeniaLlaulen-435004 CLP
+  code: "435004"
+  laudus_account_name: "María Eugenia Llaulen"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "CEPECH"
+
+2020-12-31 open Expenses:FFCC:Colacin-437009 CLP
+  code: "437009"
+  laudus_account_name: "Colación"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GASTOS GENERALES"
+
+2020-12-31 open Expenses:FFCC:CapacitacinDelPersonal-437011 CLP
+  code: "437011"
+  laudus_account_name: "Capacitación del Personal"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GASTOS GENERALES"
+
+2020-12-31 open Expenses:FFCC:UniformesDelPersonal-437013 CLP
+  code: "437013"
+  laudus_account_name: "Uniformes del Personal"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GASTOS GENERALES"
+
+2020-12-31 open Expenses:FFCC:Telfono-437015 CLP
+  code: "437015"
+  laudus_account_name: "Teléfono"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GASTOS GENERALES"
+
+2020-12-31 open Expenses:FFCC:InsumosEquiposDeOficina-437021 CLP
+  code: "437021"
+  laudus_account_name: "Insumos Equipos de Oficina"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GASTOS GENERALES"
+
+2020-12-31 open Expenses:FFCC:UtilesDeEscritorio-437023 CLP
+  code: "437023"
+  laudus_account_name: "Utiles de Escritorio"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GASTOS GENERALES"
+
+2020-12-31 open Expenses:FFCC:ArtculosDeAseo-437025 CLP
+  code: "437025"
+  laudus_account_name: "Artículos de Aseo"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GASTOS GENERALES"
+
+2020-12-31 open Expenses:FFCC:Suscripcionesrevistas-437027 CLP
+  code: "437027"
+  laudus_account_name: "Suscripciones/Revistas"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GASTOS GENERALES"
+
+2020-12-31 open Expenses:FFCC:GastosDeRepresentacin-437031 CLP
+  code: "437031"
+  laudus_account_name: "Gastos de Representación"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GASTOS GENERALES"
+
+2020-12-31 open Expenses:FFCC:MovilizacinViajes-437037 CLP
+  code: "437037"
+  laudus_account_name: "Movilización, Viajes"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GASTOS GENERALES"
+
+2020-12-31 open Expenses:FFCC:SupermercadoConsumosEnOficina-437049 CLP
+  code: "437049"
+  laudus_account_name: "Supermercado, Consumos en Oficina"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GASTOS GENERALES"
+
+2020-12-31 open Expenses:FFCC:CorreoValijaEncomiendas-437051 CLP
+  code: "437051"
+  laudus_account_name: "Correo, Valija, Encomiendas"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GASTOS GENERALES"
+
+2020-12-31 open Expenses:FFCC:GastosLegales-437053 CLP
+  code: "437053"
+  laudus_account_name: "Gastos Legales"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GASTOS GENERALES"
+
+2020-12-31 open Expenses:FFCC:DonacionesRegalos-437055 CLP
+  code: "437055"
+  laudus_account_name: "Donaciones, Regalos"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GASTOS GENERALES"
+
+2020-12-31 open Expenses:FFCC:MantencinMquinasYEquiposDeOficina-437081 CLP
+  code: "437081"
+  laudus_account_name: "Mantención Máquinas y Equipos de Oficina"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GASTOS GENERALES"
+
+2020-12-31 open Expenses:FFCC:MantencinInstalaciones-437083 CLP
+  code: "437083"
+  laudus_account_name: "Mantención Instalaciones"
+  laudus_categoria1: "GASTOS"
+  laudus_categoria2: "GASTOS FIJOS OFICINA"
+  laudus_categoria3: "GASTOS GENERALES"
+
+2020-12-31 open Assets:JAB:CajaJab-611001 CLP
+  code: "611001"
+  laudus_account_name: "Caja - $ JAB"
+  laudus_categoria1: "ACTIVO - JAB"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - JAB"
+
+2020-12-31 open Assets:JAB:CajaFgk-611003 CLP
+  code: "611003"
+  laudus_account_name: "Caja - $ FGK"
+  laudus_categoria1: "ACTIVO - JAB"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - JAB"
+
+2020-12-31 open Assets:JAB:BancoBciFgk35190183-611004 CLP
+  code: "611004"
+  laudus_account_name: "Banco BCI FGK 35190183"
+  laudus_categoria1: "ACTIVO - JAB"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - JAB"
+  bank_account_id: "f08f765a-54cf-4a55-b228-117e90973d20"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:JAB:BancoBciJabfgk28986911-611005 CLP
+  code: "611005"
+  laudus_account_name: "Banco BCI JAB/FGK 28986911"
+  laudus_categoria1: "ACTIVO - JAB"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - JAB"
+  bank_account_id: "4562d559-abbb-40bb-b2f5-3224e194220a"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:JAB:BancoBciFgk30396000-611006 CLP
+  code: "611006"
+  laudus_account_name: "Banco BCI FGK 30396000"
+  laudus_categoria1: "ACTIVO - JAB"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - JAB"
+  bank_account_id: "30cbdd6d-b125-4a67-bd29-77a6bd34fdf4"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+
+2020-12-31 open Assets:JAB:BancoBciUsdFgk19681721-611007 CLP, USD
+  code: "611007"
+  laudus_account_name: "Banco BCI USD FGK 19681721"
+  laudus_categoria1: "ACTIVO - JAB"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - JAB"
+  bank_account_id: "3d6fdba6-00c9-483e-8e10-c4bda040cc11"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "USD"
+
+2020-12-31 open Assets:JAB:CuentasCorrientesDelPersonal-613001 CLP
+  code: "613001"
+  laudus_account_name: "Cuentas Corrientes del Personal"
+  laudus_categoria1: "ACTIVO - JAB"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:JAB:FondoFijo-613003 CLP
+  code: "613003"
+  laudus_account_name: "Fondo Fijo"
+  laudus_categoria1: "ACTIVO - JAB"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:JAB:FondosPorRendir-613005 CLP
+  code: "613005"
+  laudus_account_name: "Fondos por Rendir"
+  laudus_categoria1: "ACTIVO - JAB"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:JAB:FondosPorRendirUs-613007 CLP
+  code: "613007"
+  laudus_account_name: "Fondos por Rendir - US$"
+  laudus_categoria1: "ACTIVO - JAB"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:JAB:DeudoresVarios-613019 CLP
+  code: "613019"
+  laudus_account_name: "Deudores Varios"
+  laudus_categoria1: "ACTIVO - JAB"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Assets:JAB:ControlYLiquidacin-613099 CLP
+  code: "613099"
+  laudus_account_name: "Control y Liquidación"
+  laudus_categoria1: "ACTIVO - JAB"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "CUENTAS POR COBRAR"
+
+2020-12-31 open Income:JAB:Molco-710005 CLP
+  code: "710005"
+  laudus_account_name: "Molco"
+  laudus_categoria1: "INGRESOS JAB"
+  laudus_categoria2: "INGRESOS JAB"
+  laudus_categoria3: ""
+
+2020-12-31 open Income:JAB:OtrosIngresos-710099 CLP
+  code: "710099"
+  laudus_account_name: "Otros Ingresos"
+  laudus_categoria1: "INGRESOS JAB"
+  laudus_categoria2: "INGRESOS JAB"
+  laudus_categoria3: ""
+
+2020-12-31 open Expenses:JAB:SueldosRopaRegalias-811001 CLP
+  code: "811001"
+  laudus_account_name: "Sueldos, Ropa, Regalias"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:SueldosJardineros-811002 CLP
+  code: "811002"
+  laudus_account_name: "Sueldos Jardineros"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:IreneGuiloff-811003 CLP
+  code: "811003"
+  laudus_account_name: "Irene Guiloff"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:LorenzoHPollaLoteraBencina-811004 CLP
+  code: "811004"
+  laudus_account_name: "Lorenzo H - Polla - Lotería - Bencina"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:Luz-811005 CLP
+  code: "811005"
+  laudus_account_name: "Luz"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:Agua-811006 CLP
+  code: "811006"
+  laudus_account_name: "Agua"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:Telfono-811007 CLP
+  code: "811007"
+  laudus_account_name: "Teléfono"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:Petrleo-811009 CLP
+  code: "811009"
+  laudus_account_name: "Petróleo"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:Gas-811010 CLP
+  code: "811010"
+  laudus_account_name: "Gas"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:TvCableInternet-811011 CLP
+  code: "811011"
+  laudus_account_name: "TV Cable - Internet"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:MantencinPiscina-811015 CLP
+  code: "811015"
+  laudus_account_name: "Mantención Piscina"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:MoJardinInvernadero-811017 CLP
+  code: "811017"
+  laudus_account_name: "M.O. Jardin / Invernadero"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:MantencinJardinMateriales-811018 CLP
+  code: "811018"
+  laudus_account_name: "Mantención Jardin / Materiales"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:MantencinAireAcondicionadocalefaccin-811019 CLP
+  code: "811019"
+  laudus_account_name: "Mantención Aire Acondicionado/Calefacción"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:MantencinElctrica-811020 CLP
+  code: "811020"
+  laudus_account_name: "Mantención Eléctrica"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:MantencinAscensores-811021 CLP
+  code: "811021"
+  laudus_account_name: "Mantención Ascensores"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:MantencinEquiposDeComunicacin-811022 CLP
+  code: "811022"
+  laudus_account_name: "Mantención Equipos de Comunicación"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:MantencinAlarmas-811023 CLP
+  code: "811023"
+  laudus_account_name: "Mantención Alarmas"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:MantencinGeneralInstalaciones-811024 CLP
+  code: "811024"
+  laudus_account_name: "Mantención General Instalaciones"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:Barrera-811025 CLP
+  code: "811025"
+  laudus_account_name: "Barrera"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:Contribuciones-811029 CLP
+  code: "811029"
+  laudus_account_name: "Contribuciones"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:SegurosIncendioRobo-811031 CLP
+  code: "811031"
+  laudus_account_name: "Seguros: Incendio, Robo"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:CorreoValijaCorrespondencia-811035 CLP
+  code: "811035"
+  laudus_account_name: "Correo, Valija, Correspondencia"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:ChoferesViajes-811037 CLP
+  code: "811037"
+  laudus_account_name: "Choferes, Viajes"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:MantencinVehculosSeguros-811042 CLP
+  code: "811042"
+  laudus_account_name: "Mantención Vehículos, Seguros"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:Movilizacin-811048 CLP
+  code: "811048"
+  laudus_account_name: "Movilización"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:GastosCasa-811049 CLP
+  code: "811049"
+  laudus_account_name: "Gastos Casa"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:NotaraGastosLegales-811082 CLP
+  code: "811082"
+  laudus_account_name: "Notaría, Gastos Legales"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:EquipamientoAlhajamiento-811090 CLP
+  code: "811090"
+  laudus_account_name: "Equipamiento - Alhajamiento"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION VIA GRIS"
+
+2020-12-31 open Expenses:JAB:SueldosRopaRegalas-813001 CLP
+  code: "813001"
+  laudus_account_name: "Sueldos, Ropa, Regalías"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:Luz-813005 CLP
+  code: "813005"
+  laudus_account_name: "Luz"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:Agua-813006 CLP
+  code: "813006"
+  laudus_account_name: "Agua"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:Telfono-813007 CLP
+  code: "813007"
+  laudus_account_name: "Teléfono"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:Petrleo-813009 CLP
+  code: "813009"
+  laudus_account_name: "Petróleo"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:Gas-813010 CLP
+  code: "813010"
+  laudus_account_name: "Gas"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:TvCableInternet-813011 CLP
+  code: "813011"
+  laudus_account_name: "TV Cable - Internet"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:MantencinPiscina-813015 CLP
+  code: "813015"
+  laudus_account_name: "Mantención Piscina"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:MantencinJardin-813018 CLP
+  code: "813018"
+  laudus_account_name: "Mantención Jardin"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:MantencinAireAcondicionadoCaldera-813019 CLP
+  code: "813019"
+  laudus_account_name: "Mantención Aire Acondicionado, Caldera"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:MantencinElectrica-813020 CLP
+  code: "813020"
+  laudus_account_name: "Mantención Electrica"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:MantencinAscensores-813021 CLP
+  code: "813021"
+  laudus_account_name: "Mantención Ascensores"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:MantencinEquiposDeComunicacin-813022 CLP
+  code: "813022"
+  laudus_account_name: "Mantención Equipos de Comunicación"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:MantencinAlarmas-813023 CLP
+  code: "813023"
+  laudus_account_name: "Mantención Alarmas"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:MantencinGeneralInstalaciones-813024 CLP
+  code: "813024"
+  laudus_account_name: "Mantención General Instalaciones"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:Contribuciones-813029 CLP
+  code: "813029"
+  laudus_account_name: "Contribuciones"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:Seguros-813031 CLP
+  code: "813031"
+  laudus_account_name: "Seguros"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:CorreoValijaCorrespondencia-813035 CLP
+  code: "813035"
+  laudus_account_name: "Correo, Valija, Correspondencia"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:GastosDeViajeChoferes-813037 CLP
+  code: "813037"
+  laudus_account_name: "Gastos de Viaje, Choferes"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:ManencinVehculosChoferes-813042 CLP
+  code: "813042"
+  laudus_account_name: "Manención Vehículos, Choferes"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:GastosCasa-813049 CLP
+  code: "813049"
+  laudus_account_name: "Gastos Casa"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:ArtculosDeAseo-813051 CLP
+  code: "813051"
+  laudus_account_name: "Artículos de Aseo"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:GastosNotariales-813082 CLP
+  code: "813082"
+  laudus_account_name: "Gastos Notariales"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:EquipamientoAlhajamiento-813090 CLP
+  code: "813090"
+  laudus_account_name: "Equipamiento - Alhajamiento"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION REÑACA"
+
+2020-12-31 open Expenses:JAB:SueldosRopaRegalas-815001 CLP
+  code: "815001"
+  laudus_account_name: "Sueldos, Ropa, Regalías"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:LuzRiegoJardn-815004 CLP
+  code: "815004"
+  laudus_account_name: "Luz - Riego Jardín"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:LuzCasaPatronal-815005 CLP
+  code: "815005"
+  laudus_account_name: "Luz - Casa Patronal"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:Agua-815006 CLP
+  code: "815006"
+  laudus_account_name: "Agua"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:Telfono-815007 CLP
+  code: "815007"
+  laudus_account_name: "Teléfono"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:Gas-815010 CLP
+  code: "815010"
+  laudus_account_name: "Gas"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:TvCableInternet-815011 CLP
+  code: "815011"
+  laudus_account_name: "TV Cable - Internet"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:MantencinPiscina-815015 CLP
+  code: "815015"
+  laudus_account_name: "Mantención Piscina"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:MantencinCalderaCalefaccin-815019 CLP
+  code: "815019"
+  laudus_account_name: "Mantención Caldera, Calefacción"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:MantencinElctrica-815020 CLP
+  code: "815020"
+  laudus_account_name: "Mantención Eléctrica"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:MantencinEquiposDeComunicacin-815022 CLP
+  code: "815022"
+  laudus_account_name: "Mantención Equipos de Comunicación"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:MantencinGeneralInstalaciones-815024 CLP
+  code: "815024"
+  laudus_account_name: "Mantención General Instalaciones"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:MantencinMuellePlaya-815025 CLP
+  code: "815025"
+  laudus_account_name: "Mantención Muelle - Playa"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:MantencinPistaHangares-815026 CLP
+  code: "815026"
+  laudus_account_name: "Mantención Pista - Hangares"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:ContribucionesHangar-815027 CLP
+  code: "815027"
+  laudus_account_name: "Contribuciones Hangar"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:Contribuciones-815028 CLP
+  code: "815028"
+  laudus_account_name: "Contribuciones"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:MantencinAgropecuaria-815029 CLP
+  code: "815029"
+  laudus_account_name: "Mantención Agropecuaria"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:MantencinForestal-815030 CLP
+  code: "815030"
+  laudus_account_name: "Mantención Forestal"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:SegurosCp-815031 CLP
+  code: "815031"
+  laudus_account_name: "Seguros CP"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:CamionetaSegundoRivas-815032 CLP
+  code: "815032"
+  laudus_account_name: "Camioneta Segundo Rivas"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:DiariosRevistasLibros-815033 CLP
+  code: "815033"
+  laudus_account_name: "Diarios, Revistas, Libros"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:FotosPlanosImprenta-815034 CLP
+  code: "815034"
+  laudus_account_name: "Fotos, Planos, Imprenta"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:CorreoValijaCorrespondencia-815035 CLP
+  code: "815035"
+  laudus_account_name: "Correo, Valija, Correspondencia"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:GastosDeViajeChoferes-815037 CLP
+  code: "815037"
+  laudus_account_name: "Gastos de Viaje, Choferes"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:MantencinVehculosMotosTierra-815042 CLP
+  code: "815042"
+  laudus_account_name: "Mantención Vehículos, Motos Tierra"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:MantencinLanchasMotosAgua-815046 CLP
+  code: "815046"
+  laudus_account_name: "Mantención Lanchas, Motos Agua"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:DevolucionCombustibleLanchasMotosOtros-815047 CLP
+  code: "815047"
+  laudus_account_name: "Devolucion combustible lanchas, motos, otros"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:GastosCasaComestiblesBebidas-815049 CLP
+  code: "815049"
+  laudus_account_name: "Gastos Casa, Comestibles, Bebidas"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:MantencinTractorCortarPasto-815051 CLP
+  code: "815051"
+  laudus_account_name: "Mantención Tractor Cortar Pasto"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:MantencinMotobombaRiego-815052 CLP
+  code: "815052"
+  laudus_account_name: "Mantención Motobomba, Riego"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:JardinHonorarios-815053 CLP
+  code: "815053"
+  laudus_account_name: "Jardin - Honorarios"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:JardinMateriales-815055 CLP
+  code: "815055"
+  laudus_account_name: "Jardin - Materiales"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:HuertoManoDeObra-815057 CLP
+  code: "815057"
+  laudus_account_name: "Huerto - Mano de Obra"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:HuertoMateriales-815059 CLP
+  code: "815059"
+  laudus_account_name: "Huerto Materiales"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:GastosLegalesNotaria-815082 CLP
+  code: "815082"
+  laudus_account_name: "Gastos Legales, Notaria"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:Arriendos-815087 CLP
+  code: "815087"
+  laudus_account_name: "Arriendos"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:EquipamientoAlhajamiento-815090 CLP
+  code: "815090"
+  laudus_account_name: "Equipamiento - Alhajamiento"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:ObrasEnCursoConstrucciones-815092 CLP
+  code: "815092"
+  laudus_account_name: "Obras en Curso, Construcciones"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:DerechosDeAgua-815095 CLP
+  code: "815095"
+  laudus_account_name: "Derechos de Agua"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:ConcesinMartima-815096 CLP
+  code: "815096"
+  laudus_account_name: "Concesión Marítima"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:PertenenciasMineras-815097 CLP
+  code: "815097"
+  laudus_account_name: "Pertenencias Mineras"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:Donaciones-815099 CLP
+  code: "815099"
+  laudus_account_name: "Donaciones"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "MANTENCION MOLCO"
+
+2020-12-31 open Expenses:JAB:DepartamentoMiami-817001 CLP
+  code: "817001"
+  laudus_account_name: "Departamento Miami"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "DEPARTAMENTO MIAMI"
+
+2020-12-31 open Expenses:JAB:GolfGastosGenerales-819001 CLP
+  code: "819001"
+  laudus_account_name: "Golf - Gastos Generales"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "MANTENCION CASAS JAB"
+  laudus_categoria3: "CANCHA DE GOLF"
+
+2020-12-31 open Expenses:JAB:AjkCombustible-831001 CLP
+  code: "831001"
+  laudus_account_name: "AJK - Combustible"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVION CC-AJK"
+
+2020-12-31 open Expenses:JAB:AjkMantencinYReparacin-831003 CLP
+  code: "831003"
+  laudus_account_name: "AJK - Mantención y Reparación"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVION CC-AJK"
+
+2020-12-31 open Expenses:JAB:AjkSeguros-831005 CLP
+  code: "831005"
+  laudus_account_name: "AJK - Seguros"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVION CC-AJK"
+
+2020-12-31 open Expenses:JAB:AjkGastosDeOperacin-831009 CLP
+  code: "831009"
+  laudus_account_name: "AJK - Gastos de Operación"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVION CC-AJK"
+
+2020-12-31 open Expenses:JAB:N266wwCombustible-833001 CLP
+  code: "833001"
+  laudus_account_name: "N266WW - Combustible"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVION CC-N266WW"
+
+2020-12-31 open Expenses:JAB:N266wwMantencinYReparacin-833003 CLP
+  code: "833003"
+  laudus_account_name: "N266WW - Mantención y Reparación"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVION CC-N266WW"
+
+2020-12-31 open Expenses:JAB:N266wwSeguros-833005 CLP
+  code: "833005"
+  laudus_account_name: "N266WW - Seguros"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVION CC-N266WW"
+
+2020-12-31 open Expenses:JAB:N266wwGastosDeOperacin-833009 CLP
+  code: "833009"
+  laudus_account_name: "N266WW - Gastos de Operación"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVION CC-N266WW"
+
+2020-12-31 open Expenses:JAB:N225awCombustible-834001 CLP
+  code: "834001"
+  laudus_account_name: "N225AW - Combustible"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVION CC-N225AW"
+
+2020-12-31 open Expenses:JAB:N225awMantencionYReparacion-834003 CLP
+  code: "834003"
+  laudus_account_name: "N225AW - Mantencion y Reparacion"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVION CC-N225AW"
+
+2020-12-31 open Expenses:JAB:N225awSeguros-834005 CLP
+  code: "834005"
+  laudus_account_name: "N225AW - Seguros"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVION CC-N225AW"
+
+2020-12-31 open Expenses:JAB:N225awGastosDeOperacion-834009 CLP
+  code: "834009"
+  laudus_account_name: "N225AW - Gastos de operacion"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVION CC-N225AW"
+
+2020-12-31 open Expenses:JAB:N225awGastosLegales-834010 CLP
+  code: "834010"
+  laudus_account_name: "N225AW - Gastos legales"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVION CC-N225AW"
+
+2020-12-31 open Expenses:JAB:SueldosPilotos-837001 CLP
+  code: "837001"
+  laudus_account_name: "Sueldos Pilotos"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVIONES - GASTOS GENERALES"
+
+2020-12-31 open Expenses:JAB:GastosDeOperacinPilotos-837005 CLP
+  code: "837005"
+  laudus_account_name: "Gastos de Operación - Pilotos"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVIONES - GASTOS GENERALES"
+
+2020-12-31 open Expenses:JAB:AsesorasAeronuticas-837011 CLP
+  code: "837011"
+  laudus_account_name: "Asesorías Aeronáuticas"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVIONES - GASTOS GENERALES"
+
+2020-12-31 open Expenses:JAB:DevolucinCombustibleAvin-837029 CLP
+  code: "837029"
+  laudus_account_name: "Devolución Combustible Avión"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVIONES - GASTOS GENERALES"
+
+2020-12-31 open Expenses:JAB:OtrosGastosAviones-837099 CLP
+  code: "837099"
+  laudus_account_name: "Otros Gastos Aviones"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "AVIONES"
+  laudus_categoria3: "AVIONES - GASTOS GENERALES"
+
+2020-12-31 open Expenses:JAB:DestinySueldoTripulacin-851001 CLP
+  code: "851001"
+  laudus_account_name: "Destiny - Sueldo Tripulación"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "YATES"
+  laudus_categoria3: "MANTENCION YATE DESTINY"
+
+2020-12-31 open Expenses:JAB:MarinaDelSurCofrada-851005 CLP
+  code: "851005"
+  laudus_account_name: "Marina del Sur - Cofradía"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "YATES"
+  laudus_categoria3: "MANTENCION YATE DESTINY"
+
+2020-12-31 open Expenses:JAB:DestinyCelularFonoSatelital-851007 CLP
+  code: "851007"
+  laudus_account_name: "Destiny - Celular / Fono Satelital"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "YATES"
+  laudus_categoria3: "MANTENCION YATE DESTINY"
+
+2020-12-31 open Expenses:JAB:MantencinEquiposDeComunicacin-851023 CLP
+  code: "851023"
+  laudus_account_name: "Mantención Equipos de Comunicación"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "YATES"
+  laudus_categoria3: "MANTENCION YATE DESTINY"
+
+2020-12-31 open Expenses:JAB:MantencinReparaciones-851024 CLP
+  code: "851024"
+  laudus_account_name: "Mantención / Reparaciones"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "YATES"
+  laudus_categoria3: "MANTENCION YATE DESTINY"
+
+2020-12-31 open Expenses:JAB:DestinySeguros-851031 CLP
+  code: "851031"
+  laudus_account_name: "Destiny - Seguros"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "YATES"
+  laudus_categoria3: "MANTENCION YATE DESTINY"
+
+2020-12-31 open Expenses:JAB:DestinyOtrosGastosYate-851099 CLP
+  code: "851099"
+  laudus_account_name: "Destiny - Otros Gastos Yate"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "YATES"
+  laudus_categoria3: "MANTENCION YATE DESTINY"
+
+2020-12-31 open Expenses:JAB:AlfinMantencinYReparacin-853024 CLP
+  code: "853024"
+  laudus_account_name: "Alfin - Mantención y Reparación"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "YATES"
+  laudus_categoria3: "MANTENCION YATE ALFIN II"
+
+2020-12-31 open Expenses:JAB:AlfinSeguros-853031 CLP
+  code: "853031"
+  laudus_account_name: "Alfin - Seguros"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "YATES"
+  laudus_categoria3: "MANTENCION YATE ALFIN II"
+
+2020-12-31 open Expenses:JAB:KeikiKaiSueldosTripulacin-855001 CLP
+  code: "855001"
+  laudus_account_name: "KEIKI KAI - Sueldos Tripulación"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "YATES"
+  laudus_categoria3: "MANTENCION YATE KEIKI KAI"
+
+2020-12-31 open Expenses:JAB:KeikiKaiGastosDeOperacinTripulacin-855003 CLP
+  code: "855003"
+  laudus_account_name: "KEIKI KAI - Gastos de Operación Tripulación"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "YATES"
+  laudus_categoria3: "MANTENCION YATE KEIKI KAI"
+
+2020-12-31 open Expenses:JAB:KeikiKaiTelfono-855007 CLP
+  code: "855007"
+  laudus_account_name: "KEIKI KAI - Teléfono"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "YATES"
+  laudus_categoria3: "MANTENCION YATE KEIKI KAI"
+
+2020-12-31 open Expenses:JAB:KeikiKaiMantencinReparacin-855024 CLP
+  code: "855024"
+  laudus_account_name: "KEIKI KAI - Mantención / Reparación"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "YATES"
+  laudus_categoria3: "MANTENCION YATE KEIKI KAI"
+
+2020-12-31 open Expenses:JAB:KeikiKaiSeguros-855031 CLP
+  code: "855031"
+  laudus_account_name: "KEIKI KAI - Seguros"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "YATES"
+  laudus_categoria3: "MANTENCION YATE KEIKI KAI"
+
+2020-12-31 open Expenses:JAB:KeikiKaiOtrosGastos-855099 CLP
+  code: "855099"
+  laudus_account_name: "KEIKI KAI - Otros Gastos"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "YATES"
+  laudus_categoria3: "MANTENCION YATE KEIKI KAI"
+
+2020-12-31 open Expenses:JAB:JabEfectivo-871001 CLP
+  code: "871001"
+  laudus_account_name: "JAB - Efectivo"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabBancoHsbc-871002 CLP
+  code: "871002"
+  laudus_account_name: "JAB - Banco HSBC"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabEdwardsbci-871003 CLP
+  code: "871003"
+  laudus_account_name: "JAB - Edwards/BCI"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabMastercardvisaamex-871005 CLP
+  code: "871005"
+  laudus_account_name: "JAB - Mastercard/Visa/Amex"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabIsapreCotizaciones-871013 CLP
+  code: "871013"
+  laudus_account_name: "JAB - Isapre / Cotizaciones"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabUnidadCoronaria-871015 CLP
+  code: "871015"
+  laudus_account_name: "JAB - Unidad Coronaria"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabBonosMdicosExmenesRemedios-871017 CLP
+  code: "871017"
+  laudus_account_name: "JAB- Bonos / Médicos / Exámenes / Remedios"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabClinicas-871019 CLP
+  code: "871019"
+  laudus_account_name: "JAB - Clinicas"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabVestuarioSastre-871023 CLP
+  code: "871023"
+  laudus_account_name: "JAB - Vestuario / Sastre"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabCelular-871025 CLP
+  code: "871025"
+  laudus_account_name: "JAB - Celular"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabCelularEliana-871026 CLP
+  code: "871026"
+  laudus_account_name: "JAB - Celular Eliana"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabFonoLorenzo998426743-871027 CLP
+  code: "871027"
+  laudus_account_name: "JAB - Fono Lorenzo 9 9842 6743"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabDiariosRevistasSuscripciones-871037 CLP
+  code: "871037"
+  laudus_account_name: "JAB - Diarios / Revistas / Suscripciones"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabGastosLegalesNotaria-871043 CLP
+  code: "871043"
+  laudus_account_name: "JAB - Gastos Legales / Notaria"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabEspectculosEntretenimiento-871045 CLP
+  code: "871045"
+  laudus_account_name: "JAB - Espectáculos / Entretenimiento"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabImprentaReproduccin-871047 CLP
+  code: "871047"
+  laudus_account_name: "JAB - Imprenta / Reproducción"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabCorreoCorrespondencia-871049 CLP
+  code: "871049"
+  laudus_account_name: "JAB - Correo, Correspondencia"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabGastosDeMovilizacin-871051 CLP
+  code: "871051"
+  laudus_account_name: "JAB - Gastos de Movilización"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabViajes-871053 CLP
+  code: "871053"
+  laudus_account_name: "JAB - Viajes"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabImpuestos-871097 CLP
+  code: "871097"
+  laudus_account_name: "JAB - Impuestos"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:JabOtrosGastos-871099 CLP
+  code: "871099"
+  laudus_account_name: "JAB - Otros Gastos"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "JAB - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:FgkEfectivo-873001 CLP
+  code: "873001"
+  laudus_account_name: "FGK - Efectivo"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "FGK - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:FgkEdwards-873003 CLP
+  code: "873003"
+  laudus_account_name: "FGK - Edwards"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "FGK - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:FgkMastercardVisaAmex-873005 CLP
+  code: "873005"
+  laudus_account_name: "FGK - Mastercard / Visa / Amex"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "FGK - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:FgkUnidadCoronaria-873013 CLP
+  code: "873013"
+  laudus_account_name: "FGK - Unidad Coronaria"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "FGK - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:FgkBonosMdicosExmenesRemedios-873017 CLP
+  code: "873017"
+  laudus_account_name: "FGK - Bonos / Médicos / Exámenes / Remedios"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "FGK - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:FgkVestuario-873023 CLP
+  code: "873023"
+  laudus_account_name: "FGK - Vestuario"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "FGK - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:FgkCelular-873025 CLP
+  code: "873025"
+  laudus_account_name: "FGK - Celular"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "FGK - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:FgkCelularLorenzoHeredia-873027 CLP
+  code: "873027"
+  laudus_account_name: "FGK - Celular Lorenzo Heredia"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "FGK - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:FgkViajes-873053 CLP
+  code: "873053"
+  laudus_account_name: "FGK - Viajes"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "FGK - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:FgkImpuestoALaRenta-873097 CLP
+  code: "873097"
+  laudus_account_name: "FGK - Impuesto a la Renta"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "FGK - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:FgkOtrosGastos-873099 CLP
+  code: "873099"
+  laudus_account_name: "FGK - Otros Gastos"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "FGK - GASTOS PERSONALES"
+
+2020-12-31 open Expenses:JAB:DeptoElBosque310-875021 CLP
+  code: "875021"
+  laudus_account_name: "Depto El Bosque 310"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "AYUDA FAMILIA"
+
+2020-12-31 open Expenses:JAB:CuentaBipersonalVarios-875023 CLP
+  code: "875023"
+  laudus_account_name: "Cuenta Bipersonal, Varios"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "AYUDA FAMILIA"
+
+2020-12-31 open Expenses:JAB:AagFamiliaRegalos-877001 CLP
+  code: "877001"
+  laudus_account_name: "AAG - Familia Regalos"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "REGALOS"
+
+2020-12-31 open Expenses:JAB:EagFamiliaRegalos-877003 CLP
+  code: "877003"
+  laudus_account_name: "EAG - Familia Regalos"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "REGALOS"
+
+2020-12-31 open Expenses:JAB:SagFamiliaRegalos-877005 CLP
+  code: "877005"
+  laudus_account_name: "SAG - Familia Regalos"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "REGALOS"
+
+2020-12-31 open Expenses:JAB:DagFamiliaRegalos-877007 CLP
+  code: "877007"
+  laudus_account_name: "DAG - Familia Regalos"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "REGALOS"
+
+2020-12-31 open Expenses:JAB:LabFamiliaRegalos-877009 CLP
+  code: "877009"
+  laudus_account_name: "LAB - Familia Regalos"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "REGALOS"
+
+2020-12-31 open Expenses:JAB:CrejRegalos-877013 CLP
+  code: "877013"
+  laudus_account_name: "CREJ - Regalos"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "REGALOS"
+
+2020-12-31 open Expenses:JAB:RegalosMarimoniosNacimientos-877021 CLP
+  code: "877021"
+  laudus_account_name: "Regalos Marimonios, Nacimientos"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "REGALOS"
+
+2020-12-31 open Expenses:JAB:ArreglosFlorales-877023 CLP
+  code: "877023"
+  laudus_account_name: "Arreglos Florales"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "REGALOS"
+
+2020-12-31 open Expenses:JAB:CoronasDeCaridad-877025 CLP
+  code: "877025"
+  laudus_account_name: "Coronas de Caridad"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "REGALOS"
+
+2020-12-31 open Expenses:JAB:RegalosDeNavidad-877029 CLP
+  code: "877029"
+  laudus_account_name: "Regalos de Navidad"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "REGALOS"
+
+2020-12-31 open Expenses:JAB:OtrosRegalos-877099 CLP
+  code: "877099"
+  laudus_account_name: "Otros Regalos"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "REGALOS"
+
+2020-12-31 open Expenses:JAB:Coanil-878001 CLP
+  code: "878001"
+  laudus_account_name: "Coanil"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "DONACIONES"
+
+2020-12-31 open Expenses:JAB:Ezra-878003 CLP
+  code: "878003"
+  laudus_account_name: "EZRA"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "DONACIONES"
+
+2020-12-31 open Expenses:JAB:HogarDeAncianos-878005 CLP
+  code: "878005"
+  laudus_account_name: "Hogar de Ancianos"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "DONACIONES"
+
+2020-12-31 open Expenses:JAB:Kkl-878007 CLP
+  code: "878007"
+  laudus_account_name: "KKL"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "DONACIONES"
+
+2020-12-31 open Expenses:JAB:KerenHayesod-878008 CLP
+  code: "878008"
+  laudus_account_name: "Keren Hayesod"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "DONACIONES"
+
+2020-12-31 open Expenses:JAB:Wizo-878009 CLP
+  code: "878009"
+  laudus_account_name: "WIZO"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "DONACIONES"
+
+2020-12-31 open Expenses:JAB:Crej-878011 CLP
+  code: "878011"
+  laudus_account_name: "CREJ"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "DONACIONES"
+
+2020-12-31 open Expenses:JAB:Cis-878013 CLP
+  code: "878013"
+  laudus_account_name: "CIS"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "DONACIONES"
+
+2020-12-31 open Expenses:JAB:HogarDeCristo-878015 CLP
+  code: "878015"
+  laudus_account_name: "Hogar de Cristo"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "DONACIONES"
+
+2020-12-31 open Expenses:JAB:CJafetzYJaim-878017 CLP
+  code: "878017"
+  laudus_account_name: "C. Jafetz y Jaim"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "DONACIONES"
+
+2020-12-31 open Expenses:JAB:FundacinMarDeChile-878019 CLP
+  code: "878019"
+  laudus_account_name: "Fundación Mar de Chile"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "DONACIONES"
+
+2020-12-31 open Expenses:JAB:FundacinFobeju-878021 CLP
+  code: "878021"
+  laudus_account_name: "Fundación FOBEJU"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "DONACIONES"
+
+2020-12-31 open Expenses:JAB:OtrasInstituciones-878099 CLP
+  code: "878099"
+  laudus_account_name: "Otras Instituciones"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "DONACIONES"
+
+2020-12-31 open Expenses:JAB:ClubNavalLasSalinas-879001 CLP
+  code: "879001"
+  laudus_account_name: "Club Naval Las Salinas"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "SOCIALES"
+
+2020-12-31 open Expenses:JAB:ClubNavalDeValparaso-879003 CLP
+  code: "879003"
+  laudus_account_name: "Club Naval de Valparaíso"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "SOCIALES"
+
+2020-12-31 open Expenses:JAB:MuseoNavalPatrimonio-879005 CLP
+  code: "879005"
+  laudus_account_name: "Museo Naval, Patrimonio"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "SOCIALES"
+
+2020-12-31 open Expenses:JAB:ClubDeGolfLaDehesa-879007 CLP
+  code: "879007"
+  laudus_account_name: "Club de Golf La Dehesa"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "SOCIALES"
+
+2020-12-31 open Expenses:JAB:ClubDeCampoGranadilla-879009 CLP
+  code: "879009"
+  laudus_account_name: "Club de Campo Granadilla"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "SOCIALES"
+
+2020-12-31 open Expenses:JAB:CiSefaradi-879011 CLP
+  code: "879011"
+  laudus_account_name: "C.I. Sefaradi"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "SOCIALES"
+
+2020-12-31 open Expenses:JAB:CiSantiago-879013 CLP
+  code: "879013"
+  laudus_account_name: "C.I. Santiago"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "SOCIALES"
+
+2020-12-31 open Expenses:JAB:FundacinMarDeChile-879019 CLP
+  code: "879019"
+  laudus_account_name: "Fundación Mar de Chile"
+  laudus_categoria1: "GASTOS JAB"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "SOCIALES"
+
+2020-12-31 open Equity:FFCC:Apertura CLP
+  code: "900001"
+  laudus_account_name: "Apertura FFCC — respaldo/plug (sintética, no existe en Laudus)"
+  laudus_categoria1: "PATRIMONIO"
+  laudus_categoria2: ""
+  laudus_categoria3: ""
+
+2020-12-31 open Equity:JAB:Apertura CLP
+  code: "900002"
+  laudus_account_name: "Apertura JAB — respaldo/plug (sintética, no existe en Laudus)"
+  laudus_categoria1: "PATRIMONIO"
+  laudus_categoria2: ""
+  laudus_categoria3: ""
