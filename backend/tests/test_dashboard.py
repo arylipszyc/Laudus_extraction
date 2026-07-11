@@ -13,7 +13,7 @@ from backend.app.auth.service import create_jwt
 from backend.app.dependencies import get_ledger_service
 from backend.app.middleware import add_middleware
 from backend.app.services.ledger_service import LedgerService
-from backend.tests.test_bql_queries import MINI_LEDGER
+from backend.tests.test_bql_queries import MINI_LEDGER, RUT2_BLOCK
 
 
 BROKEN_LEDGER = """\
@@ -167,6 +167,38 @@ def test_ledger_entries_jab_valid_and_empty(tmp_path):
                       cookies={"access_token": _family()})
     assert resp.status_code == 200
     assert resp.json()["data"] == []
+
+
+def test_balance_sheets_ffcc_with_data_returns_only_ffcc_slice(tmp_path):
+    """Caso positivo (patch code-review 11.2): con datos RUT2 en el ledger,
+    entity=FFCC devuelve SU slice — sin cuentas EAG ni JAB. Un ledger vacío no
+    distingue 'bien ruteada' de 'silenciosamente vacía'."""
+    client = _make_app(tmp_path, MINI_LEDGER + RUT2_BLOCK)
+    resp = client.get("/api/v1/balance-sheets", params={"entity": "FFCC"},
+                      cookies={"access_token": _family()})
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data
+    assert all(r["account"].split(":")[1] == "FFCC" for r in data)
+    numbers = {r["account_number"] for r in data}
+    assert "410001" in numbers
+    assert "111005" not in numbers and "810001" not in numbers
+
+
+def test_ledger_entries_jab_with_data_returns_only_jab_postings(tmp_path):
+    """Caso positivo (patch code-review 11.2): entity=JAB devuelve sus postings
+    (Assets+Equity del movimiento JAB) y excluye EAG/FFCC."""
+    client = _make_app(tmp_path, MINI_LEDGER + RUT2_BLOCK)
+    resp = client.get("/api/v1/ledger-entries", params={"entity": "JAB"},
+                      cookies={"access_token": _family()})
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data
+    # Sin metadata laudus_account_name, accountName cae al path Beancount completo.
+    assert all(":JAB:" in r["accountName"] for r in data)
+    numbers = {r["accountnumber"] for r in data}
+    assert "810001" in numbers
+    assert "111005" not in numbers and "410001" not in numbers
 
 
 def test_entity_gate_still_rejects_unknown_after_rut2(tmp_path):

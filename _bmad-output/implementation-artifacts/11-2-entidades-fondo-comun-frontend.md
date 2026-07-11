@@ -1,6 +1,6 @@
 # Story 11.2: Entidades del Fondo Común seleccionables en el frontend
 
-Status: review
+Status: done
 
 ## Story
 
@@ -42,6 +42,17 @@ so that cuando sus datos entren al ledger pueda navegarlos desde la misma UI de 
   - [x] `npx tsc --noEmit` verde (el union `Entity` propaga solo). → Verde.
   - [x] Backend: `python -m pytest backend/tests -q` desde la raíz — baseline 777 passed/1 xfailed, 0 regresiones. → 782 passed/1 xfailed (+5 tests nuevos, 0 regresiones).
   - [x] Commitear al cerrar la story (retro Epic 6 — no acumular working tree). → Commit al cierre de esta sesión dev.
+
+### Review Findings
+
+Code review 2026-07-11 (3 capas: Blind Hunter, Edge Case Hunter, Acceptance Auditor). Auditor: **AC1/AC2/AC3 PASS** — todas las afirmaciones del Dev Agent Record verificadas ciertas (suites reproducidas: vitest 126/126, tsc limpio, test_dashboard 22/22). 0 decision-needed, 1 patch, 3 defer, 6 dismiss.
+
+- [x] [Review][Patch] Falta el caso positivo per-entity con datos: los tests del router prueban FFCC/JAB solo contra ledger vacío (200 + `data==[]`) — una entidad registrada pero mal wireada daría el mismo resultado. 11.1 ya cubre aislamiento EAG y consolidado del grupo CON datos (`_multilibro_ledger`, test_bql_queries.py:278-317), pero nadie prueba que `entity=FFCC` devuelve el slice FFCC ni `ledger-entries` JAB con datos. Fix: +2 tests reusando el RUT2_BLOCK/multilibro existente. [backend/tests/test_dashboard.py:154] — **APLICADO**: `test_balance_sheets_ffcc_with_data_returns_only_ffcc_slice` + `test_ledger_entries_jab_with_data_returns_only_jab_postings` (ledger `MINI_LEDGER + RUT2_BLOCK`; slice propio, excluye EAG y la otra entidad RUT2). Suite backend 784 passed/1 xfailed, 0 regresiones.
+- [x] [Review][Defer] `_entity_pattern` sin `(?-i:)`: el balance-sheet per-entity (BQL, re.IGNORECASE) matchearía una cuenta mal-caseada (`Assets:Jab:...`) que ledger-entries (Python re, case-sensitive) y el consolidado del grupo (`(?-i:)` de 11.1) excluyen → vistas inconsistentes en silencio. Pre-existente del motor (defer conocido de 11.1, "cero cambios de motor" en esta story); mitigado porque 12.3 genera el árbol con los labels exactos. Hardening candidato para 12.3. [backend/app/services/bql_queries.py:56-58] — deferred, pre-existing
+- [x] [Review][Defer] `getLedgerCategory` está calibrado al plan EAG/Laudus (prefijo 4→ingreso, 5|6→gasto, else `other`): registros RUT2 sin keywords ingreso/gasto en Categoria1/2 (ej. código 810001, o cuentas abiertas sin `laudus_categoria1`) caerían en `other` y desaparecen de totales/pies/timeline sin indicación. No actionable hasta que 12.3/12.4 fijen la metadata/categorías del libro RUT2 — **anotar en esas stories**. [frontend/src/utils/ledgerAnalytics.ts:48-52] — deferred, pre-existing (reachable recién con datos post-Epic 12)
+- [x] [Review][Defer] Cuenta RUT2 sin metadata `code` → backend emite `accountnumber:""` → expandir esa fila del drill-down llama `useLedger('')`, el param se omite por falsy y la API devuelve TODO el ledger de la entidad como si fuera una cuenta. Guardia natural: 12.3 debe emitir `code` en toda cuenta del árbol RUT2. [frontend/src/services/dashboard.ts:29 + frontend/src/components/charts/IncomeExpensesDrilldown.tsx:86] — deferred, pre-existing (contingente a la disciplina de metadata de 12.3)
+
+Dismissed (6, verificados falsos o decididos): useBalanceSheet "sin ruteo" (falso — ya lleva `entity` en queryKey y lo pasa directo al API); pass-through de `filterByEntity` "devuelve cross-entity" (por diseño — el único call path RUT2 recibe data ya filtrada server-side, contrato documentado); authz RUT2 (decisión Ary 2026-06-30: entidad hermana, sin auth nueva); layering util→context (nit, la spec lo permitió); redundancia de tests backend (nit, el parametrize cubre la asimetría); `isRut2Entity(string)` (deliberado per Task 2).
 
 ## Dev Notes
 
