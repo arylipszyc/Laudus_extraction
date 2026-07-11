@@ -342,3 +342,48 @@ def test_balance_sheet_eag_excludes_case_variant_entity(tmp_path):
     accounts = {r["account"] for r in result["data"]}
     assert "910001" not in numbers
     assert not any(a.startswith("Equity:APERTURA") for a in accounts)
+
+
+# ── Frescura por grupo/libro (Story 12.4, NFR20) ─────────────────────────────
+
+_RUT2_EXTRA = """\
+
+2020-12-31 open Assets:FFCC:BancoFfcc-111005R CLP
+  code: "111005R"
+  laudus_account_name: "Banco FFCC"
+2020-12-31 open Liabilities:FFCC:Apertura-211005R CLP
+  code: "211005R"
+
+2024-09-01 * "Movimiento RUT2 mas fresco que todo EAG"
+  Assets:FFCC:BancoFfcc-111005R      1000 CLP
+  Liabilities:FFCC:Apertura-211005R -1000 CLP
+"""
+
+
+def _ledger_con_rut2(tmp_path):
+    main = tmp_path / "con-rut2.beancount"
+    main.write_text(MINI_LEDGER + _RUT2_EXTRA, encoding="utf-8")
+    return LedgerService(str(main))
+
+
+def test_balance_sheet_eag_last_sync_no_avanza_con_datos_rut2(tmp_path):
+    """NFR20 (12.4): un asiento del libro RUT2 más fresco que el último de EAG
+    NO avanza el last_sync/query_date del balance de EAG — la frescura se mide
+    sobre el grupo de consolidación, no sobre el ledger completo."""
+    result = balance_sheet_via_beancount(_ledger_con_rut2(tmp_path), "EAG")
+    assert result["meta"]["last_sync"] == "2024-06-20"  # último tx EAG, no 2024-09-01
+    assert all(r["query_date"] == "2024-06-20" for r in result["data"])
+
+
+def test_balance_sheet_hija_hereda_frescura_del_grupo(tmp_path):
+    """La frescura de una hija = la del grupo EAG (comportamiento pre-12.4:
+    el máximo global del ledger ERA el máximo del libro EAG)."""
+    result = balance_sheet_via_beancount(_ledger_con_rut2(tmp_path), "Jocelyn")
+    assert result["meta"]["last_sync"] == "2024-06-20"
+
+
+def test_balance_sheet_ffcc_frescura_de_su_propio_libro(tmp_path):
+    """FFCC (y su grupo FondoComun) miden frescura sobre SU libro."""
+    for entity in ("FFCC", "FondoComun"):
+        result = balance_sheet_via_beancount(_ledger_con_rut2(tmp_path), entity)
+        assert result["meta"]["last_sync"] == "2024-09-01", entity

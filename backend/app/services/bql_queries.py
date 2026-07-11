@@ -88,10 +88,40 @@ def _clp(inventory) -> float:
     return float(amount.number)
 
 
-def _max_transaction_date(entries: list) -> str | None:
-    """Latest transaction date in the ledger as ISO string, or None."""
-    dates = [e.date for e in entries if isinstance(e, Transaction)]
+def _max_transaction_date(entries: list, pattern: str | None = None) -> str | None:
+    """Latest transaction date as ISO string, or None.
+
+    Con `pattern` (regex de cuenta) solo cuentan las transacciones con alguna
+    pata en ese universo: la frescura de un grupo no debe avanzar porque OTRO
+    libro del ledger tenga datos más nuevos (NFR20, Story 12.4)."""
+    rx = re.compile(pattern) if pattern else None
+    dates = [
+        e.date
+        for e in entries
+        if isinstance(e, Transaction)
+        and (rx is None or any(rx.search(p.account) for p in e.postings))
+    ]
     return max(dates).isoformat() if dates else None
+
+
+# Universo de frescura: TODAS las raíces — un asiento solo-P&L también cuenta
+# como movimiento fresco del libro (paridad con el máximo global pre-12.4).
+_ALL_ROOTS = "Assets|Liabilities|Equity|Income|Expenses"
+
+
+def _freshness_pattern(entity: str) -> str:
+    """Patrón que define la FRESCURA de `entity`: el universo de su grupo de
+    consolidación (= su libro), no la entidad sola — una hija muestra la
+    frescura del libro EAG (idéntico al comportamiento pre-12.4, cuando el
+    máximo global del ledger era el máximo del libro EAG) y FFCC/JAB la del
+    libro RUT2."""
+    group = entity if entity in CONSOLIDATION_GROUPS else next(
+        (g for g, members in CONSOLIDATION_GROUPS.items() if entity in members),
+        None,
+    )
+    if group is not None:
+        return _group_pattern(_ALL_ROOTS, group)
+    return _entity_pattern(_ALL_ROOTS, entity)
 
 
 def balance_sheet_via_beancount(
@@ -124,7 +154,7 @@ def balance_sheet_via_beancount(
     )
     cursor = conn.execute(bql)
 
-    query_date = date_to or _max_transaction_date(entries) or ""
+    query_date = date_to or _max_transaction_date(entries, _freshness_pattern(entity)) or ""
     data = []
     for account, balance in cursor.fetchall():
         amount = _clp(balance)
