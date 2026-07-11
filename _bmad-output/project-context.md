@@ -44,3 +44,31 @@ decisión de negocio sin que yo la vea.
 Cuando documentes una decisión técnica en architecture.md o en un ADR, agrega una línea
 de "por qué" en lenguaje simple (una frase, sin jerga), para que si más adelante reviso el
 documento entienda el motivo sin tener que preguntar.
+
+## Comandos de verificación (fuente de verdad — NO inventar otros)
+
+> Cuando un skill (dev-story, code-review, quick-dev) pide "correr los checks del
+> proyecto" o "typecheck/lint/tests", correr EXACTAMENTE estos comandos. NO improvisar
+> una invocación distinta: un comando inventado puede dar verde sin chequear nada y
+> dejar pasar un error que rompe el deploy (pasó con `tsc --noEmit`, ver abajo).
+
+- **Backend (Python, desde la raíz del repo):**
+  `PYTHONUTF8=1 venv/Scripts/python.exe -m pytest backend/tests pipeline -q`
+  (Windows: `PYTHONUTF8=1` es obligatorio. El venv del repo es `venv/`.)
+- **bean-check del ledger:** `venv/Scripts/python.exe -m beancount.scripts.check ledger/main.beancount`
+  (borrar `ledger/.main.beancount.picklecache` antes — el cache por mtime no ve archivos
+  nuevos que entran por glob).
+- **Frontend typecheck:** `cd frontend && npm run typecheck` (= `tsc -b`).
+  ⚠️ **NUNCA usar `tsc --noEmit` para verificar el frontend.** `frontend/tsconfig.json`
+  es solution-style (`files: []` + solo `references`): en modo no-build, `tsc --noEmit`
+  ignora las references → no typechea NADA y da verde vacío. El deploy de Render usa
+  `tsc -b` y sí falla. `vitest` tampoco typechea (usa esbuild). Un mock mal tipado tumbó
+  todo deploy del frontend 3 días (story 6.7) porque el review verificaba con el comando
+  no-op. Hook de pre-push `.githooks/pre-push` bloquea el push si el typecheck falla
+  (activar en clon nuevo: `git config core.hooksPath .githooks`).
+- **Frontend tests:** `cd frontend && npm run test` (= `vitest run`).
+
+Regla general para agentes: si vas a declarar "frontend verde" o "tests verdes", el
+comando que corriste tiene que ser uno de los de arriba. Si el proyecto no declara un
+comando para algo que querés chequear, preguntá o mirá `package.json`/`build command` —
+no inventes la invocación.
