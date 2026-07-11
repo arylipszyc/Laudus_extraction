@@ -40,6 +40,9 @@ services:
         sync: false
       - key: LAUDUS_COMPANYVATID
         sync: false
+      # Libro RUT2 / Fondo Común JAB-FGK (Story 12.4) — companyVATId del segundo libro
+      - key: LAUDUS_COMPANYVATID_RUT2
+        sync: false
 
   # ── Frontend (React/Vite → nginx static) ──────────────────────────────────
   - type: web

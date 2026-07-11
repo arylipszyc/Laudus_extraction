@@ -1,0 +1,5 @@
+;; ledger/imports/laudus-rut2/_init.beancount — placeholder para que el glob
+;; `include "imports/laudus-rut2/*.beancount"` matchee algún archivo aún
+;; cuando todavía no corrió el importer del libro RUT2 (Story 12.4).
+;; El importer escribe `imports/laudus-rut2/YYYY-MM.beancount` por mes;
+;; este archivo queda inocuo en producción.
