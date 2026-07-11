@@ -1,6 +1,6 @@
 # Story 12.2: Importador multi-libro — entidad como parámetro, índice (entidad, código), assert de empresa
 
-Status: review
+Status: done
 
 ## Story
 
@@ -171,8 +171,8 @@ claude-fable-5 (Amelia, dev-story BMAD) — 2026-07-11, en git worktree aislado 
 
 Code review adversarial 3 capas (Blind Hunter / Edge Case Hunter / Acceptance Auditor), 2026-07-11. **AC1–AC5: PASS** con verificación independiente (índice scoped seguido sobre el ledger real: 111005 → FFCC con book=RUT2 / EAG con book=EAG; verify antes de todo write en incremental/backfill; aislamiento de subdir/pending/incremental; cierre del defer 12.1 real). Gates: suite 836→842 passed / 1 xfailed, bean-check exit 0, 0-diffs EAG byte-idéntico vs 013f0c8. Triage: **1 decision-needed** / 3 patch / 5 defer / 6 dismiss.
 
-**Decision-needed (para Ary — NO resuelto por el review):**
-- [ ] **23 cuentas de las HIJAS cambian de entity en `bank_account_index` (EAG → Jocelyn×6/Jeannette×6/Johanna×5/Jael×6)**, además de las 6 RUT2 buscadas. Causa: el fallback viejo por categoria1 era case-sensitive (`_FAMILY_NAMES` title-case) y en prod las categorías están en MAYÚSCULA (`"DISPONIBLE JOCELYN AVAYU DEUTSCH"`) → NUNCA matcheó, todas las hijas resolvían EAG; la autoridad por path de AC5 ahora resuelve la hija correcta. La letra de Task 4 ("cuentas EAG existentes → sin cambio") no se sostiene sobre datos reales — el test AC5 pasa porque su fixture usa categoria1 title-case, que no modela prod. La DIRECCIÓN es corrección (una cuenta `Assets:Jocelyn:...` ES de Jocelyn) y AC5 mismo manda path-como-autoridad; único consumidor = `source.entity` del JSON canónico de cartolas (string libre, sin enum) → riesgo bajo. **Decisión requerida:** ratificar el cambio de las 23 como fix intencional (y de paso ajustar el fixture del test a categoria1 MAYÚSCULA real), o exigir preservación estricta del entity previo para las hijas. Verificado con script sobre el ledger real: 29 cuentas cambian (6 RUT2 intencionales + 23 hijas).
+**Decision-needed — RESUELTO por Ary 2026-07-11 ("dejalo como quedó" = ratificado como fix):**
+- [x] **23 cuentas de las HIJAS cambian de entity en `bank_account_index` (EAG → Jocelyn×6/Jeannette×6/Johanna×5/Jael×6)**, además de las 6 RUT2 buscadas. Causa: el fallback viejo por categoria1 era case-sensitive (`_FAMILY_NAMES` title-case) y en prod las categorías están en MAYÚSCULA (`"DISPONIBLE JOCELYN AVAYU DEUTSCH"`) → NUNCA matcheó, todas las hijas resolvían EAG; la autoridad por path de AC5 ahora resuelve la hija correcta. La letra de Task 4 ("cuentas EAG existentes → sin cambio") no se sostiene sobre datos reales — el test AC5 pasa porque su fixture usa categoria1 title-case, que no modela prod. La DIRECCIÓN es corrección (una cuenta `Assets:Jocelyn:...` ES de Jocelyn) y AC5 mismo manda path-como-autoridad; único consumidor = `source.entity` del JSON canónico de cartolas (string libre, sin enum) → riesgo bajo. **Decisión requerida:** ratificar el cambio de las 23 como fix intencional (y de paso ajustar el fixture del test a categoria1 MAYÚSCULA real), o exigir preservación estricta del entity previo para las hijas. Verificado con script sobre el ledger real: 29 cuentas cambian (6 RUT2 intencionales + 23 hijas).
 
 **Patches aplicados:**
 - [x] **`verify_book_identity` maneja 401 invalidando SOLO el token del libro + retry único** (`laudus_service.py`) — era la única llamada de red sin el manejo de token expirado que `get_info_API` sí tiene, y ahora es la PRIMERA de toda corrida: en el backend long-lived (`/sync/trigger`) un token expirado quedaba en `_tokens` para siempre → todas las corridas siguientes fallaban hasta reiniciar el proceso. +2 tests (retry con login fresco; 401 persistente propaga sin loop).
@@ -192,3 +192,4 @@ Code review adversarial 3 capas (Blind Hunter / Edge Case Hunter / Acceptance Au
 
 - 2026-07-11 — Story 12.2 implementada completa (Tasks 1-5, AC1-AC5) por Amelia (claude-fable-5). Suite 828 passed / 1 xfailed (baseline 784/1, +44 nuevos, 0 regresiones); corrida EAG byte-idéntica pre/post verificada. Status → review.
 - 2026-07-11 — Code review 3 capas: AC1–AC5 PASS; 3 patches aplicados (retry 401 en verify_book_identity + tests de wiring y anti-drift; suite 842/1 verde), 5 defers anotados. Queda 1 decision-needed (23 cuentas de hijas cambian entity en bank_account_index — ratificar como fix o revertir). Status se mantiene en review hasta la decisión de Ary.
+- 2026-07-11 — Ary ratifica el decision-needed ("dejalo como quedó"): las 23 cuentas de hijas conservan su entity correcta por path. Se agrega `test_hijas_con_categoria1_mayuscula_de_prod_resuelven_por_path` (fixture con categoria1 MAYÚSCULA real de prod) que pinnea la decisión. Suite 843 passed / 1 xfailed. Status → done.

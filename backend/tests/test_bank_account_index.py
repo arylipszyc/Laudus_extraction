@@ -97,6 +97,29 @@ def test_index_cuentas_rut2_no_caen_al_fallback_eag(tmp_path):
     assert idx.get("uuid-visa-eduardo").entity == "EAG"
 
 
+_FIXTURE_HIJA_PROD = """
+2020-12-31 open Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005 CLP
+  laudus_categoria1: "DISPONIBLE JOCELYN AVAYU DEUTSCH"
+  bank_account_id: "uuid-bci-jocelyn-prod"
+  bank_name: "BCI"
+  bank_account_type: "cta_corriente"
+  bank_account_currency: "CLP"
+"""
+
+
+def test_hijas_con_categoria1_mayuscula_de_prod_resuelven_por_path(tmp_path):
+    """Decisión Ary 2026-07-11 (code-review 12.2): en prod las categoria1 van en
+    MAYÚSCULA ("DISPONIBLE JOCELYN AVAYU DEUTSCH") y el fallback legacy por nombre
+    (case-sensitive) NUNCA matcheó — las 23 cuentas de hijas resolvían EAG por
+    error. La autoridad por path las corrige a su dueña real; ratificado como fix."""
+    f = tmp_path / "accounts.beancount"
+    f.write_text((_FIXTURE + _FIXTURE_HIJA_PROD).strip() + "\n", encoding="utf-8")
+    idx = BankAccountIndex(f)
+    assert idx.get("uuid-bci-jocelyn-prod").entity == "Jocelyn"
+    # El fallback legacy solo, con la categoria1 real de prod, no resolvía (→ EAG).
+    assert _resolve_entity("DISPONIBLE JOCELYN AVAYU DEUTSCH") is None
+
+
 # ── Index against minimal fixture file ────────────────────────────────────
 
 
