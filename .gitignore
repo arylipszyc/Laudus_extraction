@@ -41,7 +41,9 @@ _bmad-output/validation-runs/
 # Artefactos de runtime / cache (regenerables, no source)
 *.picklecache
 bootstrap/_cache/
-ledger/_meta/import-log.jsonl
+# NOTA: ledger/_meta/import-log.jsonl ya NO se ignora — desde 5fec3b4 el importer
+# lo commitea junto con los datos (el indicador de sync lo lee de origin); un
+# archivo ignorado+untracked hacía fallar el `git add` de TODA corrida (12.4).
 
 # Prototipos de reportes — outputs Excel generados localmente
 _reportes-prototipo/*.xlsx
