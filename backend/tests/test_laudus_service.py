@@ -24,10 +24,9 @@ class _FakeResponse:
 
 @pytest.fixture(autouse=True)
 def _fake_token(monkeypatch):
-    """Evita el login real: token en caché."""
-    monkeypatch.setattr(laudus_service, "_token", "fake-token")
+    """Evita el login real: token en caché (por libro desde 12.2; default = EAG)."""
+    monkeypatch.setattr(laudus_service, "_tokens", {"EAG": "fake-token"})
     yield
-    monkeypatch.setattr(laudus_service, "_token", None)
 
 
 def test_fallo_a_mitad_de_paginacion_lanza_no_devuelve_parcial(monkeypatch):
@@ -143,7 +142,8 @@ def test_paginacion_supera_max_pages_lanza(monkeypatch):
 
 def test_login_propaga_la_causa_real(monkeypatch):
     """B8: login() ya no traga la excepción (antes: None → genérico 'No hay token')."""
-    monkeypatch.setattr(laudus_service, "_token", None)
+    monkeypatch.setattr(laudus_service, "_tokens", {})
+    monkeypatch.setenv("LAUDUS_COMPANYVATID", "11.111.111-1")  # que no corte antes por env
 
     def fake_post(url, json=None, headers=None, timeout=None):
         raise laudus_service.requests.ConnectionError("DNS no resuelve api.laudus.cl")
@@ -151,3 +151,80 @@ def test_login_propaga_la_causa_real(monkeypatch):
     monkeypatch.setattr(laudus_service.requests, "post", fake_post)
     with pytest.raises(laudus_service.requests.ConnectionError, match="DNS"):
         laudus_service.login()
+
+
+def test_login_cachea_token_por_libro(monkeypatch):
+    """12.2 Task 1: el token ya no es global de módulo — cada libro tiene el suyo
+    (un login EAG no sirve a RUT2 y viceversa)."""
+    from pipeline.config.laudus_config import get_book
+
+    monkeypatch.setattr(laudus_service, "_tokens", {})
+    monkeypatch.setenv("LAUDUS_COMPANYVATID", "11.111.111-1")
+    monkeypatch.setenv("LAUDUS_COMPANYVATID_RUT2", "12.345.678-2")
+    vats_logueados = []
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        vats_logueados.append(json["companyVATId"])
+        return _FakeResponse({"token": f"token-{json['companyVATId']}"})
+
+    monkeypatch.setattr(laudus_service.requests, "post", fake_post)
+    t_eag = laudus_service.login(get_book("EAG"))
+    t_rut2 = laudus_service.login(get_book("RUT2"))
+    assert t_eag != t_rut2
+    assert vats_logueados == ["11.111.111-1", "12.345.678-2"]
+    # Segunda llamada por libro: cache, sin nuevo POST.
+    laudus_service.login(get_book("EAG"))
+    laudus_service.login(get_book("RUT2"))
+    assert len(vats_logueados) == 2
+
+
+# ── verify_book_identity (12.2 AC3 / FR52) ───────────────────────────────────
+
+
+def _fake_accounts_post(accounts_payload):
+    def fake_post(url, json=None, headers=None, timeout=None):
+        assert url == laudus_service.ACCOUNTS_LIST_URL
+        return _FakeResponse(accounts_payload)
+    return fake_post
+
+
+def test_verify_book_identity_pasa_con_la_raiz_correcta(monkeypatch):
+    from pipeline.config.laudus_config import get_book
+
+    monkeypatch.setattr(laudus_service.requests, "post", _fake_accounts_post([
+        {"accountNumber": "1", "name": "ACTIVO EAG"},
+        {"accountNumber": "111005", "name": "Banco BCI"},
+    ]))
+    laudus_service.verify_book_identity(get_book("EAG"))  # no lanza
+
+
+def test_verify_book_identity_aborta_si_la_empresa_es_otra(monkeypatch):
+    """FR52: Laudus devuelve datos de OTRO libro sin fallar — el fingerprint de la
+    cuenta raíz 1 lo detecta y aborta. Sin validación de DV (RUT placeholder)."""
+    from pipeline.config.laudus_config import get_book
+
+    monkeypatch.setattr(laudus_service, "_tokens", {"EAG": "t", "RUT2": "t"})
+    monkeypatch.setattr(laudus_service.requests, "post", _fake_accounts_post([
+        {"accountNumber": "1", "name": "ACTIVO EAG"},  # ← libro equivocado para RUT2
+    ]))
+    with pytest.raises(laudus_service.BookIdentityError, match="ACTIVO FFCC"):
+        laudus_service.verify_book_identity(get_book("RUT2"))
+
+
+def test_verify_book_identity_aborta_sin_cuenta_raiz(monkeypatch):
+    from pipeline.config.laudus_config import get_book
+
+    monkeypatch.setattr(laudus_service.requests, "post", _fake_accounts_post([
+        {"accountNumber": "111005", "name": "Banco BCI"},  # sin raíz "1"
+    ]))
+    with pytest.raises(laudus_service.BookIdentityError):
+        laudus_service.verify_book_identity(get_book("EAG"))
+
+
+def test_verify_book_identity_aborta_con_respuesta_no_lista(monkeypatch):
+    from pipeline.config.laudus_config import get_book
+
+    monkeypatch.setattr(laudus_service.requests, "post",
+                        _fake_accounts_post({"error": "algo raro"}))
+    with pytest.raises(laudus_service.BookIdentityError, match="lista"):
+        laudus_service.verify_book_identity(get_book("EAG"))

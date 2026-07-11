@@ -27,7 +27,9 @@ rm -rf /tmp/ledger-repo
 git clone "$BEANCOUNT_REPO_URL" /tmp/ledger-repo
 
 # 4. Importer contra el ledger clonado. Corre el codigo baked de la imagen (/app),
-#    LEDGER_DIR apunta los reads/writes al clon.
+#    LEDGER_DIR apunta los reads/writes al clon. IMPORTER_BOOK explicito (FR50,
+#    Story 12.2): este cron importa el libro EAG; sin libro el importer no corre.
 export LEDGER_DIR=/tmp/ledger-repo/ledger
+export IMPORTER_BOOK=EAG
 cd /app
 exec python -m pipeline.importers.laudus_run

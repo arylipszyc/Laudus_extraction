@@ -204,3 +204,102 @@ def test_load_account_index(tmp_path):
     index = load_account_index(accounts_path)
     assert index["111005"] == "Assets:EAG:Bancos:BancoBci-111005"
     assert index["411005"] == "Income:EAG:Ventas-411005"
+
+
+# ── Story 12.2: índice con noción de entidad + cuarentena por libro (FR51) ────
+
+# Árbol multi-libro: 111005 existe en AMBOS libros como cuenta DISTINTA (colisión
+# real del intake §4); un namespace legacy sin entidad pertenece a EAG.
+MULTI_BOOK_ACCOUNTS = MINI_ACCOUNTS + """\
+2020-12-31 open Assets:FFCC:CajaFfcc-111005 CLP
+  code: "111005"
+2020-12-31 open Expenses:JAB:GastosPersonales-811001 CLP
+  code: "811001"
+2020-12-31 open Equity:Apertura:Legacy CLP
+  code: "900001"
+"""
+
+
+def _books():
+    from pipeline.config.laudus_config import get_book
+    return get_book("EAG"), get_book("RUT2")
+
+
+def test_load_account_index_scoped_por_libro(tmp_path):
+    """El mismo code (111005) resuelve a la cuenta DEL LIBRO — nunca a la homónima
+    del otro. El namespace legacy sin entidad (Equity:Apertura) es de EAG."""
+    eag, rut2 = _books()
+    accounts_path, _, _ = _setup(tmp_path, accounts=MULTI_BOOK_ACCOUNTS)
+
+    idx_eag = load_account_index(accounts_path, eag)
+    assert idx_eag["111005"] == "Assets:EAG:Bancos:BancoBci-111005"
+    assert "811001" not in idx_eag                       # JAB fuera del libro EAG
+    assert idx_eag["900001"] == "Equity:Apertura:Legacy"  # legacy sin entidad → EAG
+
+    idx_rut2 = load_account_index(accounts_path, rut2)
+    assert idx_rut2["111005"] == "Assets:FFCC:CajaFfcc-111005"
+    assert idx_rut2["811001"] == "Expenses:JAB:GastosPersonales-811001"
+    assert "411005" not in idx_rut2                      # cuenta EAG fuera de RUT2
+    assert "900001" not in idx_rut2                      # legacy sin entidad NO es RUT2
+
+
+def test_load_account_index_sin_libro_conserva_comportamiento_legacy(tmp_path):
+    accounts_path, _, _ = _setup(tmp_path, accounts=MULTI_BOOK_ACCOUNTS)
+    index = load_account_index(accounts_path)
+    assert len(index) == 4  # todos los codes; 111005 colisionado (last-wins, pre-12.2)
+
+
+def test_write_jes_rut2_cuarentena_por_entidad_del_libro(tmp_path):
+    """AC2: code desconocido en corrida RUT2 → Assets:{FFCC|JAB}:PendingReview según
+    dígito de raíz, y el header del pending file nombra el archivo del libro."""
+    _, rut2 = _books()
+    accounts_path, _, _ = _setup(tmp_path, accounts=MULTI_BOOK_ACCOUNTS)
+    target_dir = tmp_path / "imports" / "laudus-rut2"
+    pending_path = tmp_path / "imports" / "_new-accounts-pending-rut2.beancount"
+    rows = [
+        _row(70, 1, "111005", debit=5000, date="2024-05-10"),
+        _row(70, 2, "433015", credit=3000, date="2024-05-10"),   # raíz 4 → FFCC
+        _row(70, 3, "871005", credit=2000, date="2024-05-10"),   # raíz 8 → JAB
+    ]
+    result = write_jes(rows, target_dir, accounts_path, pending_path, book=rut2)
+    month = (target_dir / "2024-05.beancount").read_text(encoding="utf-8")
+    assert "Assets:FFCC:CajaFfcc-111005" in month
+    assert "Assets:FFCC:PendingReview:Cuenta-433015" in month
+    assert "Assets:JAB:PendingReview:Cuenta-871005" in month
+    assert "EAG" not in month
+    pending = pending_path.read_text(encoding="utf-8")
+    assert pending.startswith(";; ledger/imports/_new-accounts-pending-rut2.beancount\n")
+    assert "open Assets:FFCC:PendingReview:Cuenta-433015 CLP" in pending
+    assert "open Assets:JAB:PendingReview:Cuenta-871005 CLP" in pending
+    assert result.pending_accounts == 2
+
+
+def test_write_jes_libro_eag_byte_identico_al_legacy(tmp_path):
+    """AC4 (anti-regresión): una corrida EAG con book explícito produce archivos
+    BYTE-IDÉNTICOS a los del comportamiento pre-12.2 (book=None), incluida la
+    cuarentena EAG y el pending file."""
+    eag, _ = _books()
+    rows = _balanced_je() + [
+        _row(60, 1, "111005", debit=5000, date="2024-05-10"),
+        _row(60, 2, "999999", credit=5000, date="2024-05-10"),  # desconocido → cuarentena
+    ]
+
+    legacy_dir = tmp_path / "legacy"
+    a1 = legacy_dir / "accounts.beancount"
+    legacy_dir.mkdir()
+    a1.write_text(MINI_ACCOUNTS, encoding="utf-8")
+    write_jes(rows, legacy_dir / "imports" / "laudus", a1,
+              legacy_dir / "imports" / "_new-accounts-pending.beancount")
+
+    book_dir = tmp_path / "book"
+    a2 = book_dir / "accounts.beancount"
+    book_dir.mkdir()
+    a2.write_text(MINI_ACCOUNTS, encoding="utf-8")
+    write_jes(rows, book_dir / "imports" / "laudus", a2,
+              book_dir / "imports" / "_new-accounts-pending.beancount", book=eag)
+
+    legacy_files = sorted((legacy_dir / "imports").rglob("*.beancount"))
+    book_files = sorted((book_dir / "imports").rglob("*.beancount"))
+    assert [p.name for p in legacy_files] == [p.name for p in book_files]
+    for lf, bf in zip(legacy_files, book_files):
+        assert lf.read_bytes() == bf.read_bytes(), f"{lf.name} difiere entre legacy y book=EAG"

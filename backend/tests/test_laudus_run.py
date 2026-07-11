@@ -22,21 +22,32 @@ MINI_ACCOUNTS = """\
   code: "411005"
 """
 
+# Cuentas del libro RUT2 (12.2): el code 111005 COLISIONA a propósito con el de EAG
+# (cuenta DISTINTA bajo el mismo código — intake §4).
+MINI_ACCOUNTS_RUT2 = """\
+2020-12-31 open Assets:FFCC:CajaFfcc-111005 CLP
+  code: "111005"
+2020-12-31 open Income:FFCC:IngresosFondo-311005 CLP
+  code: "311005"
+"""
+
 MAIN = (
     'option "operating_currency" "CLP"\n'
     '1900-01-01 commodity CLP\n'
     'include "accounts.beancount"\n'
     'include "imports/laudus/*.beancount"\n'
     'include "imports/_new-accounts-pending.beancount"\n'
+    # OJO: sin include de imports/laudus-rut2/ — mirror de prod: el include del libro
+    # RUT2 se agrega recién en 12.4 (primer archivo real; un glob vacío rompe bean-check).
 )
 
 
-def _ledger_root(tmp_path):
+def _ledger_root(tmp_path, accounts=MINI_ACCOUNTS):
     root = tmp_path / "ledger"
     (root / "imports" / "laudus").mkdir(parents=True)
     # Mirror prod: _init.beancount keeps the `imports/laudus/*.beancount` glob non-empty.
     (root / "imports" / "laudus" / "_init.beancount").write_text(";; init\n", encoding="utf-8")
-    (root / "accounts.beancount").write_text(MINI_ACCOUNTS, encoding="utf-8")
+    (root / "accounts.beancount").write_text(accounts, encoding="utf-8")
     (root / "main.beancount").write_text(MAIN, encoding="utf-8")
     (root / "imports" / "_new-accounts-pending.beancount").write_text(";; pending\n", encoding="utf-8")
     return root
@@ -55,7 +66,7 @@ def _balanced(je_id=1, date="2024-03-15"):
 
 def test_incremental_run_writes_and_logs(tmp_path):
     root = _ledger_root(tmp_path)
-    result = laudus_run.run_import(mode="incremental", fetch_fn=lambda f, t: _balanced(), ledger_root=root)
+    result = laudus_run.run_import("EAG", mode="incremental", fetch_fn=lambda f, t: _balanced(), ledger_root=root)
     assert result["success"] is True
     assert result["jes_added"] == 1
     assert (root / "imports" / "laudus" / "2024-03.beancount").exists()
@@ -69,7 +80,7 @@ def test_incremental_run_writes_and_logs(tmp_path):
 
 def test_git_disabled_by_default(tmp_path):
     root = _ledger_root(tmp_path)
-    result = laudus_run.run_import(fetch_fn=lambda f, t: _balanced(), ledger_root=root)
+    result = laudus_run.run_import("EAG", fetch_fn=lambda f, t: _balanced(), ledger_root=root)
     assert result["git_commit_sha"] is None
 
 
@@ -168,7 +179,7 @@ def test_run_import_marks_failure_when_push_fails(tmp_path, monkeypatch):
     root = _ledger_root(repo)  # ledger dentro del working tree git, sin 'origin' → push falla
     monkeypatch.setenv("IMPORTER_GIT_ENABLED", "true")
 
-    result = laudus_run.run_import(fetch_fn=lambda f, t: _balanced(), ledger_root=root)
+    result = laudus_run.run_import("EAG", fetch_fn=lambda f, t: _balanced(), ledger_root=root)
 
     assert result["success"] is False
     assert result["error_msg"]
@@ -206,7 +217,7 @@ def test_import_log_commiteado_en_sync_con_cambios(tmp_path, monkeypatch):
     root = _ledger_root(repo)
     monkeypatch.setenv("IMPORTER_GIT_ENABLED", "true")
 
-    result = laudus_run.run_import(fetch_fn=lambda f, t: _balanced(), ledger_root=root)
+    result = laudus_run.run_import("EAG", fetch_fn=lambda f, t: _balanced(), ledger_root=root)
 
     assert result["success"] is True
     files = _head_files(repo)
@@ -231,6 +242,7 @@ def test_import_log_commiteado_en_sync_noop(tmp_path, monkeypatch):
 
     called = []
     result = laudus_run.run_import(
+        "EAG",
         mode="backfill", from_date="2099-01-01",
         fetch_fn=lambda f, t: called.append(1) or _balanced(), ledger_root=root,
     )
@@ -256,7 +268,7 @@ def test_push_fallido_no_deja_linea_success_fantasma(tmp_path, monkeypatch):
     root = _ledger_root(repo)  # sin 'origin' → el push dentro de git_commit_push falla
     monkeypatch.setenv("IMPORTER_GIT_ENABLED", "true")
 
-    result = laudus_run.run_import(fetch_fn=lambda f, t: _balanced(), ledger_root=root)
+    result = laudus_run.run_import("EAG", fetch_fn=lambda f, t: _balanced(), ledger_root=root)
 
     assert result["success"] is False
     records = [
@@ -282,8 +294,8 @@ def test_incremental_from_date_advances(tmp_path):
         seen.append(date_from)
         return _balanced(je_id=len(seen), date="2024-03-15")
 
-    laudus_run.run_import(fetch_fn=fetch, ledger_root=root)   # first run, no prior data
-    laudus_run.run_import(fetch_fn=fetch, ledger_root=root)   # second run
+    laudus_run.run_import("EAG", fetch_fn=fetch, ledger_root=root)   # first run, no prior data
+    laudus_run.run_import("EAG", fetch_fn=fetch, ledger_root=root)   # second run
     assert seen[0] == "2021-01-01"          # default start
     assert seen[1] == "2024-03-16"          # day after the latest written JE
 
@@ -296,7 +308,7 @@ def test_incremental_from_date_applies_overlap_window(tmp_path):
 
     root = _ledger_root(tmp_path)
     recent = date.today().replace(day=15)
-    laudus_run.run_import(fetch_fn=lambda f, t: _balanced(date=recent.isoformat()), ledger_root=root)
+    laudus_run.run_import("EAG", fetch_fn=lambda f, t: _balanced(date=recent.isoformat()), ledger_root=root)
 
     nxt = date.fromisoformat(laudus_run._incremental_from_date(root / "imports" / "laudus"))
     # No es recent+1 (forward-only): retrocede ~13 meses por la ventana.
@@ -308,6 +320,7 @@ def test_no_new_dates_skips_fetch(tmp_path):
     called = []
     # backfill with a future from_date → start > today → no fetch.
     result = laudus_run.run_import(
+        "EAG",
         mode="backfill", from_date="2099-01-01",
         fetch_fn=lambda f, t: called.append(1) or _balanced(), ledger_root=root,
     )
@@ -330,7 +343,7 @@ def test_bean_check_failure_rolls_back(tmp_path):
             "paritytomaincurrency": 1.0, "periodo": "2024-04-30",
         }]
 
-    result = laudus_run.run_import(fetch_fn=bad_fetch, ledger_root=root)
+    result = laudus_run.run_import("EAG", fetch_fn=bad_fetch, ledger_root=root)
     assert result["success"] is False
     assert "bean-check failed" in result["error_msg"]
     # rollback: the month file was removed (did not exist before the run).
@@ -344,7 +357,7 @@ def test_fetch_error_reported_not_masked(tmp_path):
     def boom(date_from, date_to):
         raise RuntimeError("Laudus ledger fetch failed (HTTP 422)")
 
-    result = laudus_run.run_import(fetch_fn=boom, ledger_root=root)
+    result = laudus_run.run_import("EAG", fetch_fn=boom, ledger_root=root)
     assert result["success"] is False
     assert "422" in result["error_msg"]
     log = (root / "_meta" / "import-log.jsonl").read_text(encoding="utf-8").strip()
@@ -514,7 +527,7 @@ def test_incremental_parsea_existing_jes_una_sola_vez(tmp_path, monkeypatch):
 
     root = _ledger_root(tmp_path)
     # Primer run siembra JEs (parsea 1 vez un dir vacío).
-    r1 = laudus_run.run_import(mode="incremental", fetch_fn=lambda f, t: _balanced(), ledger_root=root)
+    r1 = laudus_run.run_import("EAG", mode="incremental", fetch_fn=lambda f, t: _balanced(), ledger_root=root)
     assert r1["success"] is True
 
     calls = {"n": 0}
@@ -530,7 +543,7 @@ def test_incremental_parsea_existing_jes_una_sola_vez(tmp_path, monkeypatch):
 
     expected_from = laudus_run._incremental_from_date(root / "imports" / "laudus")
     calls["n"] = 0
-    r2 = laudus_run.run_import(mode="incremental", fetch_fn=lambda f, t: _balanced(je_id=2, date="2024-04-10"),
+    r2 = laudus_run.run_import("EAG", mode="incremental", fetch_fn=lambda f, t: _balanced(je_id=2, date="2024-04-10"),
                                ledger_root=root)
     assert r2["success"] is True
     assert calls["n"] == 1, f"_parse_existing_jes corrió {calls['n']} veces (debe ser 1)"
@@ -634,7 +647,7 @@ def test_run_import_refresh_clone_corre_dentro_del_lock(tmp_path):
         events.append(("fetch", lock.exists()))
         return _balanced()
 
-    result = laudus_run.run_import(mode="incremental", fetch_fn=fetch,
+    result = laudus_run.run_import("EAG", mode="incremental", fetch_fn=fetch,
                                    ledger_root=root, refresh_clone=refresh)
     assert result["success"] is True
     assert events == [("refresh", True), ("fetch", True)], events
@@ -668,3 +681,139 @@ def test_lock_gc_de_steal_files_huerfanos(tmp_path):
         pass
     assert not orphan.exists(), "steal viejo debe limpiarse"
     assert fresh_orphan.exists(), "steal reciente (baile en curso) no se toca"
+
+
+# ── Story 12.2: importador multi-libro (FR50/FR51/FR52) ──────────────────────
+
+
+def _balanced_rut2(je_id=7, date="2024-03-15"):
+    """JE balanceada del libro RUT2: 111005 (COLISIONA con EAG) contra 311005."""
+    base = {"journalentrynumber": 2001, "currencycode": "CLP", "paritytomaincurrency": 1.0, "periodo": "2024-03-31"}
+    return [
+        {**base, "journalentryid": je_id, "lineid": 1, "date": date, "accountnumber": "111005", "description": "Aporte", "debit": 50000, "credit": 0},
+        {**base, "journalentryid": je_id, "lineid": 2, "date": date, "accountnumber": "311005", "description": "Aporte", "debit": 0, "credit": 50000},
+    ]
+
+
+def test_run_import_sin_libro_falla_antes_de_tocar_nada(tmp_path):
+    """AC1/FR50: sin libro explícito no hay corrida — error claro ANTES de leer o
+    escribir nada (ni lock, ni import-log, ni archivos)."""
+    root = _ledger_root(tmp_path)
+    for bad in (None, "", "OTRO"):
+        with pytest.raises(ValueError, match="FR50"):
+            laudus_run.run_import(bad, fetch_fn=lambda f, t: _balanced(), ledger_root=root)
+    assert not (root / "_meta").exists(), "no debe haber import-log"
+    assert not (root / ".import.lock").exists(), "no debe haberse tocado el lock"
+    assert list((root / "imports" / "laudus").glob("2*.beancount")) == []
+
+
+def test_rut2_codigo_en_colision_rutea_a_su_libro_nunca_a_eag(tmp_path):
+    """AC2/FR51: el code 111005 existe en AMBOS libros como cuenta distinta — una
+    corrida RUT2 debe postearlo a la cuenta FFCC vía índice scoped, jamás a la
+    homónima de EAG, y en el subdir del libro (imports/laudus-rut2/)."""
+    root = _ledger_root(tmp_path, accounts=MINI_ACCOUNTS + MINI_ACCOUNTS_RUT2)
+    result = laudus_run.run_import("RUT2", fetch_fn=lambda f, t: _balanced_rut2(), ledger_root=root)
+
+    assert result["success"] is True
+    assert result["book"] == "RUT2"
+    month = (root / "imports" / "laudus-rut2" / "2024-03.beancount").read_text(encoding="utf-8")
+    assert "Assets:FFCC:CajaFfcc-111005" in month
+    assert "Income:FFCC:IngresosFondo-311005" in month
+    assert "EAG" not in month, "un asiento RUT2 jamás rutea a cuentas EAG"
+    # El subdir de EAG queda intacto (solo _init del fixture).
+    assert list((root / "imports" / "laudus").glob("2*.beancount")) == []
+
+
+def test_rut2_codigo_sin_cuenta_cae_en_cuarentena_de_su_entidad(tmp_path):
+    """AC2: un code RUT2 sin cuenta pre-creada cae en cuarentena bajo la entidad del
+    LIBRO (FFCC/JAB por dígito de raíz), no bajo Assets:EAG:PendingReview, y el open
+    tentativo va al pending file PROPIO del libro."""
+    root = _ledger_root(tmp_path, accounts=MINI_ACCOUNTS + MINI_ACCOUNTS_RUT2)
+    base = {"journalentrynumber": 2002, "currencycode": "CLP", "paritytomaincurrency": 1.0, "periodo": "2024-03-31"}
+    rows = [
+        # je 8: code raíz 4 (FFCC) desconocido contra 111005
+        {**base, "journalentryid": 8, "lineid": 1, "date": "2024-03-10", "accountnumber": "433015", "description": "Tel", "debit": 20000, "credit": 0},
+        {**base, "journalentryid": 8, "lineid": 2, "date": "2024-03-10", "accountnumber": "111005", "description": "Tel", "debit": 0, "credit": 20000},
+        # je 9: code raíz 8 (JAB) desconocido contra 111005
+        {**base, "journalentryid": 9, "lineid": 1, "date": "2024-03-11", "accountnumber": "871005", "description": "TC JAB", "debit": 30000, "credit": 0},
+        {**base, "journalentryid": 9, "lineid": 2, "date": "2024-03-11", "accountnumber": "111005", "description": "TC JAB", "debit": 0, "credit": 30000},
+    ]
+    result = laudus_run.run_import("RUT2", fetch_fn=lambda f, t: rows, ledger_root=root)
+
+    assert result["success"] is True
+    assert result["pending_accounts"] == 2
+    month = (root / "imports" / "laudus-rut2" / "2024-03.beancount").read_text(encoding="utf-8")
+    assert "Assets:FFCC:PendingReview:Cuenta-433015" in month
+    assert "Assets:JAB:PendingReview:Cuenta-871005" in month
+    assert "Assets:EAG:PendingReview" not in month
+    pending = (root / "imports" / "_new-accounts-pending-rut2.beancount").read_text(encoding="utf-8")
+    assert "open Assets:FFCC:PendingReview:Cuenta-433015 CLP" in pending
+    assert "open Assets:JAB:PendingReview:Cuenta-871005 CLP" in pending
+    # El pending file de EAG no se toca.
+    assert (root / "imports" / "_new-accounts-pending.beancount").read_text(encoding="utf-8") == ";; pending\n"
+
+
+def test_incremental_rut2_aislado_del_subdir_eag(tmp_path):
+    """Task 2: `_incremental_start` deriva el from_date de los JEs del SUBDIR del
+    libro — los JEs de EAG no contaminan el from_date de RUT2 (y viceversa)."""
+    root = _ledger_root(tmp_path, accounts=MINI_ACCOUNTS + MINI_ACCOUNTS_RUT2)
+    laudus_run.run_import("EAG", fetch_fn=lambda f, t: _balanced(), ledger_root=root)
+
+    seen_rut2 = []
+    laudus_run.run_import(
+        "RUT2", fetch_fn=lambda f, t: seen_rut2.append(f) or _balanced_rut2(), ledger_root=root)
+    assert seen_rut2 == ["2021-01-01"], "RUT2 sin JEs previos arranca del default, no del max de EAG"
+
+    seen_eag = []
+    laudus_run.run_import(
+        "EAG", fetch_fn=lambda f, t: seen_eag.append(f) or _balanced(je_id=2), ledger_root=root)
+    assert seen_eag == ["2024-03-16"], "el from_date de EAG sigue derivando SOLO de su subdir"
+
+
+def test_run_import_aborta_sin_escribir_si_identidad_no_coincide(tmp_path):
+    """AC3/FR52: si la verificación de identidad de empresa falla, la corrida aborta
+    SIN ESCRIBIR (sin month files) y queda como failed en el import-log."""
+    from pipeline.services.laudus_service import BookIdentityError
+
+    root = _ledger_root(tmp_path, accounts=MINI_ACCOUNTS + MINI_ACCOUNTS_RUT2)
+
+    def fetch(date_from, date_to):
+        raise BookIdentityError(
+            "Identidad de empresa NO coincide para el libro RUT2: la cuenta raíz 1 "
+            "se llama 'ACTIVO EAG', esperaba 'ACTIVO FFCC' — se aborta sin escribir (FR52)")
+
+    result = laudus_run.run_import("RUT2", fetch_fn=fetch, ledger_root=root)
+    assert result["success"] is False
+    assert "NO coincide" in result["error_msg"]
+    assert list((root / "imports" / "laudus-rut2").glob("*.beancount")) == []
+    record = json.loads((root / "_meta" / "import-log.jsonl").read_text(encoding="utf-8").strip())
+    assert record["success"] is False
+    assert record["book"] == "RUT2"
+
+
+def test_default_fetch_verifica_identidad_antes_de_pedir_datos(tmp_path, monkeypatch):
+    """AC3: la verificación corre ANTES del fetch del ledger (y con el book correcto)."""
+    from pipeline.services import laudus_service, ledger_service
+    from pipeline.config.laudus_config import get_book
+
+    root = _ledger_root(tmp_path)
+    monkeypatch.setenv("LEDGER_DIR", str(root))
+    order = []
+    monkeypatch.setattr(laudus_service, "verify_book_identity",
+                        lambda book: order.append(("verify", book.book_id)))
+    monkeypatch.setattr(ledger_service, "fetch_ledger",
+                        lambda url, params=None, book=None: order.append(("fetch", book.book_id)) or [])
+
+    rows = laudus_run.default_fetch(get_book("EAG"), "2024-01-01", "2024-01-31")
+    assert rows == []
+    assert order == [("verify", "EAG"), ("fetch", "EAG")]
+
+
+def test_import_log_de_rut2_no_avanza_el_indicador_eag(tmp_path):
+    """El record de una corrida RUT2 lleva importer='laudus-rut2' — el lector de
+    /sync/status filtra importer=='laudus', así que la frescura de EAG no se mueve."""
+    root = _ledger_root(tmp_path, accounts=MINI_ACCOUNTS + MINI_ACCOUNTS_RUT2)
+    laudus_run.run_import("RUT2", fetch_fn=lambda f, t: _balanced_rut2(), ledger_root=root)
+    record = json.loads((root / "_meta" / "import-log.jsonl").read_text(encoding="utf-8").strip())
+    assert record["importer"] == "laudus-rut2"
+    assert record["success"] is True

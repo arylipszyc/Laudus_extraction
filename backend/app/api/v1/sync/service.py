@@ -150,7 +150,8 @@ def _run_laudus_import(job_id: str, mode: str, from_date: str | None = None) -> 
         from pipeline.importers.laudus_run import run_import
         # refresh como callback: corre DENTRO del lock de run_import — el reset --hard
         # fuera del lock podía pisar una escritura concurrente (categorización).
-        result = run_import(mode=mode, from_date=from_date,
+        # Libro EAG EXPLÍCITO (FR50, Story 12.2): este sync es el del libro principal.
+        result = run_import("EAG", mode=mode, from_date=from_date,
                             refresh_clone=_refresh_ledger_clone)
         with _job_lock:
             if _current_job["job_id"] != job_id:

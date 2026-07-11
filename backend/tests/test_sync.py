@@ -404,7 +404,8 @@ def test_run_laudus_import_incremental_sets_done_with_stats(monkeypatch):
 
     captured = {}
 
-    def fake_run_import(mode="incremental", from_date=None, refresh_clone=None):
+    def fake_run_import(book, mode="incremental", from_date=None, refresh_clone=None):
+        captured["book"] = book
         captured["mode"] = mode
         captured["refresh_clone"] = refresh_clone
         return {"success": True, "jes_added": 42, "error_msg": None}
@@ -420,6 +421,8 @@ def test_run_laudus_import_incremental_sets_done_with_stats(monkeypatch):
         assert svc._current_job["status"] == "done"
         assert svc._current_job["stats"]["ledger_added"] == 42
     assert captured["mode"] == "incremental"
+    # 12.2/FR50: el sync del backend pasa el libro EAG EXPLÍCITO al importer.
+    assert captured["book"] == "EAG"
     # B5b (review batch 3): el refresh viaja como CALLBACK (corre dentro del lock de
     # run_import) — una regresión a "_refresh_ledger_clone(); run_import(...)" fallaría acá.
     assert captured["refresh_clone"] is svc._refresh_ledger_clone
@@ -433,7 +436,8 @@ def test_run_laudus_import_backfill_passes_mode_and_from_date(monkeypatch):
 
     captured = {}
 
-    def fake_run_import(mode="incremental", from_date=None, refresh_clone=None):
+    def fake_run_import(book, mode="incremental", from_date=None, refresh_clone=None):
+        captured["book"] = book
         captured["mode"] = mode
         captured["from_date"] = from_date
         return {"success": True, "jes_added": 7, "error_msg": None}
@@ -448,6 +452,7 @@ def test_run_laudus_import_backfill_passes_mode_and_from_date(monkeypatch):
     with svc._job_lock:
         assert svc._current_job["status"] == "done"
         assert svc._current_job["stats"]["ledger_added"] == 7
+    assert captured["book"] == "EAG"
     assert captured["mode"] == "backfill"
     assert captured["from_date"] == "2021-01-01"
     reset_job_state()
@@ -460,7 +465,7 @@ def test_run_laudus_import_failure_sets_failed(monkeypatch):
 
     monkeypatch.setattr(
         "pipeline.importers.laudus_run.run_import",
-        lambda mode="incremental", from_date=None, refresh_clone=None: {"success": False, "jes_added": 0, "error_msg": "bean-check failed: boom"},
+        lambda book, mode="incremental", from_date=None, refresh_clone=None: {"success": False, "jes_added": 0, "error_msg": "bean-check failed: boom"},
     )
 
     job_id = "laudus-fail-job"

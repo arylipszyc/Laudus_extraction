@@ -25,6 +25,7 @@ from pathlib import Path
 
 from beancount import loader
 
+from pipeline.config.laudus_config import BookConfig, get_book
 from pipeline.writers.beancount_writer import write_jes, _parse_existing_jes
 
 logger = logging.getLogger(__name__)
@@ -319,15 +320,20 @@ def _incremental_from_date(target_dir: Path) -> str:
 # ── default fetch (real Laudus) ─────────────────────────────────────────────
 
 
-def _min_account_number() -> str:
-    """Lowest account code in accounts.beancount (for `accountNumberFrom`)."""
+def _min_account_number(book: BookConfig) -> str:
+    """Lowest account code OF THE BOOK in accounts.beancount (for `accountNumberFrom`)."""
     from pipeline.writers.beancount_writer import load_account_index
-    codes = list(load_account_index(_ledger_root() / "accounts.beancount").keys())
+    codes = list(load_account_index(_ledger_root() / "accounts.beancount", book).keys())
     return min(codes) if codes else "1"
 
 
-def default_fetch(date_from: str, date_to: str) -> list[dict]:
-    """Fetch + normalize Laudus ledger rows for the range (real API).
+def default_fetch(book: BookConfig, date_from: str, date_to: str) -> list[dict]:
+    """Fetch + normalize Laudus ledger rows for the range (real API), for ONE book.
+
+    Verifica la identidad de la empresa del libro ANTES de pedir datos (FR52):
+    Laudus no falla ante un companyVATId equivocado, así que sin este assert una
+    corrida podría traer los asientos de OTRO libro. La verificación aborta con
+    `BookIdentityError` (run_import la reporta como corrida fallida, sin escribir).
 
     The Laudus `/accounting/ledger` endpoint requires `accountNumberFrom` — without
     it the API returns 422 (same param the legacy `pipeline/sync.py` path sets).
@@ -335,12 +341,14 @@ def default_fetch(date_from: str, date_to: str) -> list[dict]:
     importer reports failure instead of masking it as "0 new rows".
     """
     from pipeline.config.laudus_config import get_endpoints
+    from pipeline.services.laudus_service import verify_book_identity
     from pipeline.services.ledger_service import fetch_ledger
     from pipeline.models import map_ledger_row
 
+    verify_book_identity(book)
     cfg = get_endpoints(date_from, date_to)["GET_LEDGER"]
-    cfg["params"]["accountNumberFrom"] = _min_account_number()
-    raw = fetch_ledger(cfg["url"], cfg["params"])
+    cfg["params"]["accountNumberFrom"] = _min_account_number(book)
+    raw = fetch_ledger(cfg["url"], cfg["params"], book=book)
     if raw is None:
         raise RuntimeError(
             f"Laudus ledger fetch failed for {date_from}..{date_to} "
@@ -353,21 +361,35 @@ def default_fetch(date_from: str, date_to: str) -> list[dict]:
 
 
 def run_import(
+    book: str | BookConfig,
     mode: str = "incremental",
     from_date: str | None = None,
-    fetch_fn=default_fetch,
+    fetch_fn=None,
     ledger_root: Path | None = None,
     refresh_clone=None,
 ) -> dict:
-    """Run one import. Returns a result dict (also appended to import-log).
+    """Run one import FOR ONE BOOK. Returns a result dict (also appended to import-log).
+
+    `book` es OBLIGATORIO y sin default (FR50, Story 12.2): "EAG" | "RUT2" (o un
+    BookConfig). Sin libro válido se lanza ValueError ANTES de leer o escribir nada
+    — ni lock, ni import-log. Cada libro escribe a su propio subdir
+    (`imports/<subdir>/`) y archivo de cuarentena, con índice de cuentas scoped a
+    sus entidades (FR51).
+
+    `fetch_fn`: inyectable para tests; None → `default_fetch` del libro (API real,
+    que además verifica la identidad de la empresa — FR52).
 
     `refresh_clone`: callable opcional que trae el clon a origin/main; corre DENTRO
     del lock (patrón beancount_promote) — antes corría afuera y un `reset --hard`
     podía pisar una escritura concurrente de categorización."""
+    book = book if isinstance(book, BookConfig) else get_book(book)
+    if fetch_fn is None:
+        from functools import partial
+        fetch_fn = partial(default_fetch, book)
     root = Path(ledger_root) if ledger_root else _ledger_root()
-    target_dir = root / "imports" / "laudus"
+    target_dir = root / "imports" / book.subdir
     accounts_path = root / "accounts.beancount"
-    pending_path = root / "imports" / "_new-accounts-pending.beancount"
+    pending_path = root / "imports" / book.pending_file
     main_path = root / "main.beancount"
     meta_dir = root / "_meta"
     lock_path = root / ".import.lock"
@@ -381,7 +403,10 @@ def run_import(
     start = (from_date or _DEFAULT_FROM_DATE) if replace else None
 
     result = {
-        "importer": "laudus",
+        # EAG mantiene "laudus" (el lector de /sync/status filtra por ese nombre);
+        # RUT2 reporta "laudus-rut2" para NO avanzar el indicador de frescura de EAG.
+        "importer": book.importer_name,
+        "book": book.book_id,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "mode": mode,
         "from_date": start,
@@ -416,7 +441,7 @@ def run_import(
                 # CHEQUEO de Laudus (lo que el usuario espera), no el último sync con cambios.
                 result["git_commit_sha"] = git_commit_push(
                     root, ["ledger/_meta/import-log.jsonl"],
-                    f"[importer-laudus] check {to_date}: sin cambios",
+                    f"[importer-{book.importer_name}] check {to_date}: sin cambios",
                 )
                 return result
 
@@ -425,7 +450,7 @@ def run_import(
 
             snapshot = _snapshot(list(target_dir.glob("*.beancount")) + [pending_path])
             write_result = write_jes(rows, target_dir, accounts_path, pending_path,
-                                     replace=replace, existing_jes=existing_jes)
+                                     replace=replace, existing_jes=existing_jes, book=book)
             result.update(
                 jes_added=write_result.jes_added,
                 jes_dedup=write_result.jes_dedup,
@@ -441,7 +466,7 @@ def run_import(
                 return result
 
             message = (
-                f"[importer-laudus] sync {to_date}: "
+                f"[importer-{book.importer_name}] sync {to_date}: "
                 f"+{write_result.jes_added} JE, {write_result.jes_dedup} dedup, "
                 f"{write_result.pending_accounts} pending account"
             )
@@ -456,7 +481,7 @@ def run_import(
             success_logged = True
             result["git_commit_sha"] = git_commit_push(
                 root,
-                ["ledger/imports/laudus/", "ledger/imports/_new-accounts-pending.beancount",
+                [f"ledger/imports/{book.subdir}/", f"ledger/imports/{book.pending_file}",
                  "ledger/_meta/import-log.jsonl"],
                 message,
             )
@@ -485,6 +510,12 @@ def run_import(
 
 if __name__ == "__main__":  # pragma: no cover
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+    _book = os.getenv("IMPORTER_BOOK")
+    if not _book:
+        raise SystemExit(
+            "IMPORTER_BOOK no seteada — el importador exige libro explícito "
+            "('EAG' | 'RUT2') y no corre sin él (FR50, Story 12.2)."
+        )
     _mode = os.getenv("IMPORTER_MODE", "incremental")
     _from = os.getenv("IMPORTER_FROM_DATE")
-    run_import(mode=_mode, from_date=_from)
+    run_import(_book, mode=_mode, from_date=_from)
