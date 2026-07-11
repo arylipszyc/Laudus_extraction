@@ -45,6 +45,16 @@ def test_libro_rut2_aislado_de_eag():
     assert "FFCC" in ALL_BOOK_ENTITIES and "EAG" in ALL_BOOK_ENTITIES
 
 
+def test_entidades_de_libros_sincronizadas_con_el_backend():
+    """Guard anti-drift (patch code-review 12.2): BOOKS[*].entities (pipeline) y
+    VALID_ENTITIES (backend) son dos registros de la MISMA noción. Si divergen,
+    `_account_in_book` (scoping del índice/cuarentena) y `_entity_from_path`
+    (bank_account_index) clasificarían la misma cuenta distinto."""
+    from backend.app.api.v1.dashboard.schemas import VALID_ENTITIES
+
+    assert ALL_BOOK_ENTITIES == VALID_ENTITIES
+
+
 # ── Cuarentena por entidad del libro (AC2) ───────────────────────────────────
 
 

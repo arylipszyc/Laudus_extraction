@@ -56,7 +56,7 @@ def login(book: BookConfig | None = None):
     return _tokens[cfg.book_id]
 
 
-def verify_book_identity(book: BookConfig) -> None:
+def verify_book_identity(book: BookConfig, _retry: bool = True) -> None:
     """Assert de identidad de empresa (FR52) — corre ANTES del primer write de una corrida.
 
     Laudus NO falla ante un companyVATId equivocado (sonda intake §4): devuelve el libro
@@ -72,6 +72,15 @@ def verify_book_identity(book: BookConfig) -> None:
         ACCOUNTS_LIST_URL, headers=headers,
         json={"fields": ["accountNumber", "name"]}, timeout=_REQUEST_TIMEOUT,
     )
+    if response.status_code == 401 and _retry:
+        # Espejo del manejo de 401 de get_info_API: en un proceso long-lived (backend
+        # /sync/trigger) el token cacheado del libro expira, y como esta es ahora la
+        # PRIMERA llamada de toda corrida, sin esto el token expirado quedaría en
+        # _tokens para siempre → todas las corridas siguientes fallarían hasta
+        # reiniciar el proceso. Invalidar SOLO el token del libro y reintentar una vez.
+        _tokens.pop(book.book_id, None)
+        logger.warning("Token expirado en verify_book_identity — reintentando con nuevo login...")
+        return verify_book_identity(book, _retry=False)
     response.raise_for_status()
     accounts = response.json()
     if not isinstance(accounts, list):

@@ -167,6 +167,28 @@ claude-fable-5 (Amelia, dev-story BMAD) — 2026-07-11, en git worktree aislado 
 - `_bmad-output/implementation-artifacts/deferred-work.md` — defer `bank_account_index` de 12.1 marcado CERRADO.
 - `_bmad-output/implementation-artifacts/12-2-importador-multi-libro.md` — este story file (tasks, record, status).
 
+### Review Findings
+
+Code review adversarial 3 capas (Blind Hunter / Edge Case Hunter / Acceptance Auditor), 2026-07-11. **AC1–AC5: PASS** con verificación independiente (índice scoped seguido sobre el ledger real: 111005 → FFCC con book=RUT2 / EAG con book=EAG; verify antes de todo write en incremental/backfill; aislamiento de subdir/pending/incremental; cierre del defer 12.1 real). Gates: suite 836→842 passed / 1 xfailed, bean-check exit 0, 0-diffs EAG byte-idéntico vs 013f0c8. Triage: **1 decision-needed** / 3 patch / 5 defer / 6 dismiss.
+
+**Decision-needed (para Ary — NO resuelto por el review):**
+- [ ] **23 cuentas de las HIJAS cambian de entity en `bank_account_index` (EAG → Jocelyn×6/Jeannette×6/Johanna×5/Jael×6)**, además de las 6 RUT2 buscadas. Causa: el fallback viejo por categoria1 era case-sensitive (`_FAMILY_NAMES` title-case) y en prod las categorías están en MAYÚSCULA (`"DISPONIBLE JOCELYN AVAYU DEUTSCH"`) → NUNCA matcheó, todas las hijas resolvían EAG; la autoridad por path de AC5 ahora resuelve la hija correcta. La letra de Task 4 ("cuentas EAG existentes → sin cambio") no se sostiene sobre datos reales — el test AC5 pasa porque su fixture usa categoria1 title-case, que no modela prod. La DIRECCIÓN es corrección (una cuenta `Assets:Jocelyn:...` ES de Jocelyn) y AC5 mismo manda path-como-autoridad; único consumidor = `source.entity` del JSON canónico de cartolas (string libre, sin enum) → riesgo bajo. **Decisión requerida:** ratificar el cambio de las 23 como fix intencional (y de paso ajustar el fixture del test a categoria1 MAYÚSCULA real), o exigir preservación estricta del entity previo para las hijas. Verificado con script sobre el ledger real: 29 cuentas cambian (6 RUT2 intencionales + 23 hijas).
+
+**Patches aplicados:**
+- [x] **`verify_book_identity` maneja 401 invalidando SOLO el token del libro + retry único** (`laudus_service.py`) — era la única llamada de red sin el manejo de token expirado que `get_info_API` sí tiene, y ahora es la PRIMERA de toda corrida: en el backend long-lived (`/sync/trigger`) un token expirado quedaba en `_tokens` para siempre → todas las corridas siguientes fallaban hasta reiniciar el proceso. +2 tests (retry con login fresco; 401 persistente propaga sin loop).
+- [x] **Test del wiring `fetch_fn=None → partial(default_fetch, book)`** (`test_laudus_run.py`) — el camino de prod real no tenía cobertura (todos los tests inyectan fetch_fn); un error en ese wiring pasaba la suite completa.
+- [x] **Guard anti-drift `ALL_BOOK_ENTITIES == VALID_ENTITIES`** (`test_book_config.py`) — pipeline y backend mantienen dos registros de la misma noción de entidad; si divergen, `_account_in_book` y `_entity_from_path` clasificarían la misma cuenta distinto.
+
+**Defer (anotados en deferred-work.md § 12-2):**
+- [x] `bootstrap/generate_opening_balances` + `validate_cuadratura` con índice propio last-wins → resuelven las 31 colisiones a RUT2 desde 12.3 (scripts offline; scoping por libro en 12.4).
+- [x] `book=None` permisivo en el writer (teórico, 0 callers de prod; incluye corrección documental: la decisión 5 citaba un import de bootstrap que no existe — bootstrap define su propia función).
+- [x] Corrida RUT2 commitearía datos que bean-check no ve hasta el include de 12.4 (validar lo escrito antes de activar el include).
+- [x] Re-login mid-run sin re-verificar identidad (teórico, mismo VAT).
+- [x] Choque de rebase en `import-log.jsonl` entre clones EAG/RUT2 (failed+retry, dato a salvo; relevante recién con cron RUT2).
+
+**Dismiss:** `export IMPORTER_BOOK=EAG` incondicional en el cron (Task 1 lo pide explícito; cron dedicado-EAG, determinista); `pending_entity` dígito 5/9/0 → FFCC (default firmado en la story); camino no-op commitea import-log sin verify (no escribe datos del libro; inalcanzable en incremental — `get_date_range` acota from_date ≤ hoy); campo aditivo `"book"` en el import-log EAG (el lector filtra por `importer`, sin efecto); `fetch_fn` inyectado salta el verify (documentado en docstrings; solo tests — los 3 entry points de prod usan el default); `target_dir.mkdir` antes del lock/verify (deja un dir vacío, cosmético).
+
 ## Change Log
 
 - 2026-07-11 — Story 12.2 implementada completa (Tasks 1-5, AC1-AC5) por Amelia (claude-fable-5). Suite 828 passed / 1 xfailed (baseline 784/1, +44 nuevos, 0 regresiones); corrida EAG byte-idéntica pre/post verificada. Status → review.
+- 2026-07-11 — Code review 3 capas: AC1–AC5 PASS; 3 patches aplicados (retry 401 en verify_book_identity + tests de wiring y anti-drift; suite 842/1 verde), 5 defers anotados. Queda 1 decision-needed (23 cuentas de hijas cambian entity en bank_account_index — ratificar como fix o revertir). Status se mantiene en review hasta la decisión de Ary.

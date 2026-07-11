@@ -228,3 +228,48 @@ def test_verify_book_identity_aborta_con_respuesta_no_lista(monkeypatch):
                         _fake_accounts_post({"error": "algo raro"}))
     with pytest.raises(laudus_service.BookIdentityError, match="lista"):
         laudus_service.verify_book_identity(get_book("EAG"))
+
+
+def test_verify_book_identity_reintenta_tras_401_de_token_expirado(monkeypatch):
+    """Patch code-review 12.2: verify es ahora la PRIMERA llamada de red de toda
+    corrida; en un proceso long-lived (backend /sync/trigger) el token cacheado del
+    libro expira → sin el retry el token muerto quedaba en _tokens para siempre y
+    TODAS las corridas siguientes fallaban hasta reiniciar (espejo de get_info_API)."""
+    from pipeline.config.laudus_config import get_book
+
+    monkeypatch.setattr(laudus_service, "_tokens", {"EAG": "token-expirado"})
+    monkeypatch.setenv("LAUDUS_COMPANYVATID", "11.111.111-1")
+    calls = []
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        if url == laudus_service.LOGIN_URL:
+            calls.append("login")
+            return _FakeResponse({"token": "token-fresco"})
+        calls.append(headers["Authorization"])
+        if headers["Authorization"] == "Bearer token-expirado":
+            return _FakeResponse({}, status_code=401)
+        return _FakeResponse([{"accountNumber": "1", "name": "ACTIVO EAG"}])
+
+    monkeypatch.setattr(laudus_service.requests, "post", fake_post)
+    laudus_service.verify_book_identity(get_book("EAG"))  # no lanza
+    assert calls == ["Bearer token-expirado", "login", "Bearer token-fresco"]
+    assert laudus_service._tokens["EAG"] == "token-fresco"
+
+
+def test_verify_book_identity_401_persistente_propaga_sin_loop(monkeypatch):
+    """Un 401 también con token fresco propaga HTTPError (un solo reintento)."""
+    from pipeline.config.laudus_config import get_book
+
+    monkeypatch.setattr(laudus_service, "_tokens", {"EAG": "t0"})
+    monkeypatch.setenv("LAUDUS_COMPANYVATID", "11.111.111-1")
+    posts = {"n": 0}
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        posts["n"] += 1
+        if url == laudus_service.LOGIN_URL:
+            return _FakeResponse({"token": f"t{posts['n']}"})
+        return _FakeResponse({}, status_code=401)
+
+    monkeypatch.setattr(laudus_service.requests, "post", fake_post)
+    with pytest.raises(laudus_service.requests.HTTPError):
+        laudus_service.verify_book_identity(get_book("EAG"))

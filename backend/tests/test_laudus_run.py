@@ -84,6 +84,25 @@ def test_git_disabled_by_default(tmp_path):
     assert result["git_commit_sha"] is None
 
 
+def test_fetch_fn_none_cablea_default_fetch_del_libro(tmp_path, monkeypatch):
+    """Patch code-review 12.2: run_import(book, fetch_fn=None) construye
+    partial(default_fetch, book). Todos los demás tests inyectan fetch_fn, así
+    que un error en ese wiring (orden de args, import roto) pasaría la suite."""
+    root = _ledger_root(tmp_path)
+    capturado = {}
+
+    def fake_default_fetch(book, date_from, date_to):
+        capturado["book"] = book
+        capturado["rango"] = (date_from, date_to)
+        return _balanced()
+
+    monkeypatch.setattr(laudus_run, "default_fetch", fake_default_fetch)
+    result = laudus_run.run_import("EAG", mode="incremental", ledger_root=root)
+    assert result["success"] is True
+    assert capturado["book"].book_id == "EAG"
+    assert capturado["rango"][0] <= capturado["rango"][1]
+
+
 def test_git_commit_push_stages_from_repo_toplevel(tmp_path, monkeypatch):
     """code-review pathspec: git_commit_push resuelve el toplevel real del repo, así stagea
     `ledger/imports/...` aunque reciba la subcarpeta `ledger` como repo_root (regresión del bug
