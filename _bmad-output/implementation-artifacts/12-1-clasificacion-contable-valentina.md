@@ -1,6 +1,6 @@
 # Story 12.1: Cerrar la clasificación contable con Valentina
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -46,6 +46,18 @@ so that el árbol de ~309 cuentas hoja se construya una sola vez y el reporte fi
   - [x] Crear `_bmad-output/planning-artifacts/clasificacion-contable-rut2-firmada-{{date}}.md` con: (1) mapeo raíz→(root Beancount, entidad) — tabla de 7 filas; (2) decisiones firmadas con fecha y fuente (raíces 4/8, FGK/JAB, Equity apertura, labels); (3) tabla de cobertura verificada (Task 3); (4) TC marcadas; (5) nota de deriva 308→309 hojas; (6) sección explícita "Qué consume 12.3 de este doc"
   - [x] Referenciar (no duplicar) la doble pregunta de negocio del reporte que 13.1 debe contemplar (Valentina 2026-07-11 §5): (a) en qué gasta el fondo y en qué gasta FGK, por activo; (b) cuánto repartió el fondo y a quién (retiros por persona)
   - [x] Commitear el artefacto (acuerdo de retro Epic 6/7: commitear al cerrar cada story)
+
+### Review Findings
+
+- [x] [Review][Patch] "308 hojas" fósil en el comment de 12-3 de sprint-status — exactamente la deriva que §6 del artefacto mata; 12.3 lo leerá al crearse [_bmad-output/implementation-artifacts/sprint-status.yaml] (blind+edge+auditor)
+- [x] [Review][Patch] Deriva FR49/FR53 del epic sin anotar — el epic dice "UNA cuenta de Equity" y "apertura rutea a Equity"; la convención firmada es Liabilities-211005 primario + DOS Equity de respaldo. Nota de deriva en §3 + pointer en comment de 12-4 [clasificacion-contable-rut2-firmada-2026-07-11.md §3] (auditor)
+- [x] [Review][Patch] Ejemplo de slug contradice el slugify canónico (`CajaUs` vs `CajaUsFondoComn` verificado contra bootstrap/account_mapping.slugify) + algoritmo sin fijar (131 hojas con caracteres no triviales) + 31 grupos de nombres duplicados bajo mismo root+entidad sin advertir [clasificacion-contable-rut2-firmada-2026-07-11.md §1] (edge)
+- [x] [Review][Patch] Rango de retiros §7 dice 115021–115029 pero el plan llega a 115039 (AZBA individuales 115031-37, Otros 115039) — 13.1 perdería retiros en silencio [clasificacion-contable-rut2-firmada-2026-07-11.md §7] (blind+edge)
+- [x] [Review][Patch] MEMORY de Valentina declara el label JAB "a decidir" y "ratificado" en el mismo archivo — una sesión futura podría re-abrir una decisión firmada [_bmad/memory/agent-contadora/MEMORY.md] (blind)
+- [x] [Review][Patch] §8 ambiguo: no dice que las 48 cuentas intermedias NO se crean; el producto cruzado sugiere Liabilities:JAB inexistente; total real de opens = 311 (309 hojas + 2 Equity), no 309 [clasificacion-contable-rut2-firmada-2026-07-11.md §8] (blind)
+- [x] [Review][Patch] Advertencia faltante en §8: bank_account_index._resolve_entity fallback entity=EAG para cuentas RUT2 al mintear bank_account_id en 12.3 [clasificacion-contable-rut2-firmada-2026-07-11.md §8] (edge; fix de código deferred)
+- [x] [Review][Patch] Polish de firma/evidencia: D4 sin nota de auto-aprobación (nunca pasó por Ary); cite file:line del precedente metadata TC:Real (verificado accounts.beancount:2020-2046); "§4 del artefacto" ambiguo en MEMORY; script de verificación persistido como _forense_ (patrón sancionado, tras 2 reproducciones independientes y una deriva 308/309 ya ocurrida) (blind)
+- [x] [Review][Defer] `bank_account_index._resolve_entity` no conoce FFCC/JAB y "PASIVO"/"INGRESOS" mapean explícito a EAG — fix real en 12.2/12.3 [backend/app/integrations/bank_account_index.py:111] — deferred, pre-existente y latente hasta cartolas RUT2; en deferred-work.md
 
 ## Dev Notes
 
@@ -146,3 +158,4 @@ claude-fable-5 (dev-story) + skill `agent-contadora` (Valentina) para la adjudic
 ## Change Log
 
 - 2026-07-11: Story 12.1 implementada completa (dev-story). Convención Equity de apertura adjudicada por Valentina; verificación mecánica PASS (357/309/118/239); artefacto firmado `clasificacion-contable-rut2-firmada-2026-07-11.md` escrito y versionado. Status → review.
+- 2026-07-11: Code review (3 capas: Blind Hunter / Edge Case Hunter / Acceptance Auditor). Auditor AC1/AC2/AC3 PASS con verificación mecánica reproducida 2× independiente. 0 decision-needed, 8 patches aplicados (destacados: ejemplo de slug corregido al slugify canónico + algoritmo fijado; deriva FR49/FR53 vs convención anotada como superseded; "308" fósil en sprint-status 12-3 → 309; §7 retiros sin rango numérico — el review destapó 115041 "Israel" que hasta el rango "corregido" perdía; §8 solo-hojas/311-opens/advertencia bank_account_index; MEMORY Valentina label des-contradicho; script persistido como _forense_verify_rut2_plan.py), 1 defer (bank_account_index._resolve_entity fallback EAG → deferred-work.md, fix en 12.2/12.3), 4 dismiss (destacado: "18 vs 31 colisiones" reconcilian vía intake §4 — 31 solapan, 18 distintos bajo mismo código). Status → done.

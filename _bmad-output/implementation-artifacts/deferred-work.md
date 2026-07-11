@@ -1,5 +1,9 @@
 # Deferred Work
 
+## Deferred from: code review de story 12-1-clasificacion-contable-valentina (2026-07-11)
+
+- **`bank_account_index._resolve_entity` no conoce FFCC/JAB — fallback silencioso a `entity=EAG` para cuentas RUT2** ([backend/app/integrations/bank_account_index.py:111](../../backend/app/integrations/bank_account_index.py#L111)) — el índice bancario resuelve entidad desde `categoria1` con `_ENTITY_PREFIXES` (líneas 28-34) que solo conoce EAG+hijas; las categoria1 de RUT2 no matchean y las raíces 2/3 se llaman literalmente `"PASIVO"` / `"INGRESOS"`, que el mapa asigna EXPLÍCITO a EAG. Los `bank_account_id` que 12.3 mintee quedarían etiquetados EAG en la resolución de cartolas (pipeline 9.5/9.7). Pre-existente, latente hasta subir cartolas RUT2 (decisión Ary: cartolas al final). **Fix va en 12.2/12.3**: enseñar FFCC/JAB a `_resolve_entity` (o resolver por dígito de raíz del code). Advertencia firmada en §8 del artefacto de 12.1.
+
 ## Deferred from: code review de story 11-2-entidades-fondo-comun-frontend (2026-07-11)
 
 - **`_entity_pattern` sin `(?-i:)` — matching per-entity inconsistente entre paths** ([backend/app/services/bql_queries.py:56-58](../../backend/app/services/bql_queries.py#L56-L58)) — el balance-sheet per-entity va por BQL (`account ~`, re.IGNORECASE) y matchearía una cuenta mal-caseada (`Assets:Jab:...`); ledger-entries compila el mismo patrón con Python `re` (case-sensitive) y el consolidado del grupo lleva `(?-i:)` desde 11.1 — la misma cuenta aparecería en el balance pero no en gastos ni en el consolidado, en silencio. Pre-existente del motor ("cero cambios de motor" en 11.2); mitigado porque 12.3 genera el árbol con labels exactos. Hardening candidato al ejecutar 12.3: envolver `_entity_pattern` en `(?-i:)`.
