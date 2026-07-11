@@ -61,7 +61,7 @@ def _validate_dates(date_from: str | None, date_to: str | None) -> None:
 
 @router.get("/balance-sheets", response_model=BalanceSheetResponse)
 def list_balance_sheets(
-    entity: str = Query(..., description="Entity name: EAG | Jocelyn | Jeannette | Johanna | Jael"),
+    entity: str = Query(..., description="Entity name: EAG | Jocelyn | Jeannette | Johanna | Jael | FFCC | JAB"),
     date_from: str | None = Query(default=None, description="ISO date YYYY-MM-DD (inclusive)"),
     date_to: str | None = Query(default=None, description="ISO date YYYY-MM-DD (inclusive)"),
     user: UserSession = Depends(get_current_user),
@@ -79,7 +79,7 @@ def list_balance_sheets(
 
 @router.get("/ledger-entries", response_model=LedgerEntriesResponse, response_model_by_alias=True)
 def list_ledger_entries(
-    entity: str = Query(..., description="Entity name: EAG | Jocelyn | Jeannette | Johanna | Jael"),
+    entity: str = Query(..., description="Entity name: EAG | Jocelyn | Jeannette | Johanna | Jael | FFCC | JAB"),
     date_from: str | None = Query(default=None, description="ISO date YYYY-MM-DD (inclusive)"),
     date_to: str | None = Query(default=None, description="ISO date YYYY-MM-DD (inclusive)"),
     account_number: str | None = Query(

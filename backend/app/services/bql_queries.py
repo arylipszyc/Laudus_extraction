@@ -32,8 +32,8 @@ _BALANCE_SHEET_ROOTS = "Assets|Liabilities|Equity"
 # el path per-entity. "EAG" espeja el tab legacy `balance_sheet_eag` de Sheets:
 # las hijas son egresos de EAG (971/1077 tx con contraparte en EAG); seleccionar
 # una hija en el filtro sigue devolviendo SU slice — la separación por entidad
-# no se pierde. "FondoComun"/FFCC/JAB son labels PROPUESTOS — 11.2 fija los
-# definitivos.
+# no se pierde. "FondoComun"/FFCC/JAB son los labels DEFINITIVOS, fijados por
+# la story 11.2 (ratificados por Ary 2026-07-11 vía Excel de clasificación).
 CONSOLIDATION_GROUPS: dict[str, frozenset[str]] = {
     "EAG": frozenset({"EAG", "Jocelyn", "Jeannette", "Johanna", "Jael"}),
     "FondoComun": frozenset({"FFCC", "JAB"}),

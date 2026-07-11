@@ -76,6 +76,15 @@ describe('filterByEntity', () => {
     const result = filterByEntity([jocelyn, johanna, jael], 'EAG')
     expect(result).toHaveLength(0)
   })
+
+  it('FFCC/JAB (libro RUT2) pass-through: la heurística Categoria1 no aplica (Story 11.2)', () => {
+    // Los registros RUT2 llegan ya filtrados server-side; su Categoria1 no
+    // contiene el nombre de la entidad — filtrar aquí los eliminaría todos.
+    const ffccRecord = makeRecord({ Categoria1: 'Gastos Administración Fondo', accountnumber: '410001' })
+    const jabRecord = makeRecord({ Categoria1: 'Gastos Casas', accountnumber: '810001' })
+    expect(filterByEntity([ffccRecord, jabRecord], 'FFCC')).toEqual([ffccRecord, jabRecord])
+    expect(filterByEntity([ffccRecord, jabRecord], 'JAB')).toEqual([ffccRecord, jabRecord])
+  })
 })
 
 // ── getLedgerCategory ─────────────────────────────────────────────────────────

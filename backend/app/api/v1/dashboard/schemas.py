@@ -4,7 +4,9 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 
-VALID_ENTITIES = frozenset({"EAG", "Jocelyn", "Jeannette", "Johanna", "Jael"})
+# EAG + hijas (libro principal) + FFCC/JAB (libro RUT2, Story 11.2/FR47).
+# El grupo consolidado "FondoComun" NO entra: vive solo a nivel servicio (11.1).
+VALID_ENTITIES = frozenset({"EAG", "Jocelyn", "Jeannette", "Johanna", "Jael", "FFCC", "JAB"})
 
 
 class BalanceSheetRecord(BaseModel):

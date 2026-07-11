@@ -139,13 +139,42 @@ def test_ledger_entries_invalid_entity_returns_422(tmp_path):
     assert resp.status_code == 422
 
 
-@pytest.mark.parametrize("entity", ["EAG", "Jocelyn", "Jeannette", "Johanna", "Jael"])
+@pytest.mark.parametrize("entity", ["EAG", "Jocelyn", "Jeannette", "Johanna", "Jael", "FFCC", "JAB"])
 def test_valid_entities_accepted(tmp_path, entity):
-    """Las 5 entidades válidas → 200 (data vacía es válida)."""
+    """Las 7 entidades válidas → 200 (data vacía es válida)."""
     client = _make_app(tmp_path)
     resp = client.get("/api/v1/balance-sheets", params={"entity": entity},
                       cookies={"access_token": _family()})
     assert resp.status_code == 200
+
+
+# ── entidades del libro RUT2 (Story 11.2, FR47) ─────────────────────────────────
+
+
+def test_balance_sheets_ffcc_valid_and_empty(tmp_path):
+    """FFCC es entidad válida; sin cuentas FFCC en el ledger → 200 con data vacía (AC3)."""
+    client = _make_app(tmp_path)
+    resp = client.get("/api/v1/balance-sheets", params={"entity": "FFCC"},
+                      cookies={"access_token": _family()})
+    assert resp.status_code == 200
+    assert resp.json()["data"] == []
+
+
+def test_ledger_entries_jab_valid_and_empty(tmp_path):
+    """JAB es entidad válida; sin cuentas JAB en el ledger → 200 con data vacía (AC3)."""
+    client = _make_app(tmp_path)
+    resp = client.get("/api/v1/ledger-entries", params={"entity": "JAB"},
+                      cookies={"access_token": _family()})
+    assert resp.status_code == 200
+    assert resp.json()["data"] == []
+
+
+def test_entity_gate_still_rejects_unknown_after_rut2(tmp_path):
+    """Registrar FFCC/JAB no abre la compuerta a entidades arbitrarias."""
+    client = _make_app(tmp_path)
+    resp = client.get("/api/v1/ledger-entries", params={"entity": "Pepito"},
+                      cookies={"access_token": _family()})
+    assert resp.status_code == 422
 
 
 # ── validación de fechas ISO ────────────────────────────────────────────────────

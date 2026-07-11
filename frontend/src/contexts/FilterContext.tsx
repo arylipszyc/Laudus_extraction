@@ -1,9 +1,18 @@
 import { createContext, useContext, useState, type ReactNode } from 'react'
 
-export type Entity = 'EAG' | 'Jocelyn' | 'Jeannette' | 'Johanna' | 'Jael'
+export type Entity = 'EAG' | 'Jocelyn' | 'Jeannette' | 'Johanna' | 'Jael' | 'FFCC' | 'JAB'
 export type DatePreset = 'month' | 'quarter' | 'year' | 'custom'
 
-export const ENTITIES: Entity[] = ['EAG', 'Jocelyn', 'Jeannette', 'Johanna', 'Jael']
+export const ENTITIES: Entity[] = ['EAG', 'Jocelyn', 'Jeannette', 'Johanna', 'Jael', 'FFCC', 'JAB']
+
+// Entidades del libro RUT2 (Fondo Común, Story 11.2). Se filtran server-side
+// (per-entity real del backend); EAG y las hijas conservan el filtrado
+// client-side por Categoria1 (legacy del libro principal).
+export const RUT2_ENTITIES = ['FFCC', 'JAB'] as const
+
+export function isRut2Entity(e: string): boolean {
+  return (RUT2_ENTITIES as readonly string[]).includes(e)
+}
 
 function getDateRange(preset: Exclude<DatePreset, 'custom'>): { dateFrom: string; dateTo: string } {
   const today = new Date()

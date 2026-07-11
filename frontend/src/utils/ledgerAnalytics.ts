@@ -1,4 +1,5 @@
 import type { LedgerEntryRecord } from '@/types'
+import { isRut2Entity } from '@/contexts/FilterContext'
 
 // ── Entity filtering ──────────────────────────────────────────────────────────
 
@@ -9,6 +10,10 @@ import type { LedgerEntryRecord } from '@/types'
 const DAUGHTERS = ['JOCELYN', 'JEANNETTE', 'JOHANNA', 'JAEL'] as const
 
 export function filterByEntity(records: LedgerEntryRecord[], entity: string): LedgerEntryRecord[] {
+  // Libro RUT2 (FFCC/JAB, Story 11.2): los registros ya llegan filtrados
+  // server-side (per-entity del backend) — la heurística Categoria1 del libro
+  // EAG filtraría TODO. Pass-through.
+  if (isRut2Entity(entity)) return records
   if (entity === 'EAG') {
     // EAG = records whose Categoria1 does NOT contain any daughter name
     return records.filter(r => !DAUGHTERS.some(d => (r.Categoria1 ?? '').toUpperCase().includes(d)))
