@@ -5,6 +5,7 @@ engine against a synthetic mini-ledger. Amount parity vs. real Laudus/Sheets
 data is covered (xfail) by test_beancount_parity.py.
 """
 from backend.app.services.bql_queries import (
+    CONSOLIDATION_GROUPS,
     balance_sheet_via_beancount,
     ledger_entries_via_beancount,
 )
@@ -235,3 +236,85 @@ def test_ledger_entries_order_date_desc(tmp_path):
     result = ledger_entries_via_beancount(_ledger(tmp_path), "EAG")
     dates = [r["date"] for r in result["data"]]
     assert dates == sorted(dates, reverse=True)
+
+
+# ── Grupos de consolidación explícitos (Story 11.1, FR45/FR46) ────────────────
+
+# Cuentas del libro EAG cuyo 2º segmento NO es una entidad (legacy del ledger
+# real) + un libro RUT2 (FFCC/JAB) conviviendo en el mismo ledger.
+EQUITY_LEGACY_BLOCK = """\
+
+2020-01-01 open Equity:Apertura:TarjetasSinDetalle CLP
+2020-01-01 open Equity:Reconciliation:Discrepancias CLP
+
+2024-02-01 * "Apertura TC sin detalle"
+  Liabilities:EAG:Tarjeta-211005          -80000 CLP
+  Equity:Apertura:TarjetasSinDetalle       80000 CLP
+
+2024-02-02 * "Discrepancia reconciliación"
+  Assets:EAG:Bancos:TestBank-111005         -500 CLP
+  Equity:Reconciliation:Discrepancias        500 CLP
+"""
+
+RUT2_BLOCK = """\
+
+2020-01-01 open Assets:FFCC:Test-410001 CLP
+  code: "410001"
+2020-01-01 open Equity:FFCC:Apertura CLP
+2020-01-01 open Assets:JAB:Banco-810001 CLP
+  code: "810001"
+2020-01-01 open Equity:JAB:Apertura CLP
+
+2024-05-05 * "Aporte FFCC"
+  Assets:FFCC:Test-410001    200000 CLP
+  Equity:FFCC:Apertura      -200000 CLP
+
+2024-05-06 * "Movimiento JAB"
+  Assets:JAB:Banco-810001     70000 CLP
+  Equity:JAB:Apertura        -70000 CLP
+"""
+
+
+def _multilibro_ledger(tmp_path, name="multi.beancount"):
+    main = tmp_path / name
+    main.write_text(MINI_LEDGER + EQUITY_LEGACY_BLOCK + RUT2_BLOCK, encoding="utf-8")
+    return LedgerService(str(main))
+
+
+def test_consolidation_group_rut2_members():
+    """AC3: el grupo RUT2 resuelve exactamente a {FFCC, JAB} y es disjunto de EAG."""
+    assert CONSOLIDATION_GROUPS["FondoComun"] == frozenset({"FFCC", "JAB"})
+    assert not (CONSOLIDATION_GROUPS["FondoComun"] & CONSOLIDATION_GROUPS["EAG"])
+
+
+def test_balance_sheet_eag_isolated_from_rut2(tmp_path):
+    """AC2 (FR45): las cuentas FFCC/JAB no aparecen ni alteran ningún total del
+    consolidado EAG — el resultado es idéntico con o sin el libro RUT2 presente."""
+    without = tmp_path / "sin_rut2.beancount"
+    without.write_text(MINI_LEDGER + EQUITY_LEGACY_BLOCK, encoding="utf-8")
+    base = balance_sheet_via_beancount(LedgerService(str(without)), "EAG")
+    with_rut2 = balance_sheet_via_beancount(_multilibro_ledger(tmp_path), "EAG")
+    assert with_rut2 == base
+    numbers = {r["account_number"] for r in with_rut2["data"]}
+    assert "410001" not in numbers and "810001" not in numbers
+
+
+def test_balance_sheet_eag_keeps_entityless_equity(tmp_path):
+    """Guard TRAP #1: Equity:Apertura/Equity:Reconciliation (sin segmento de
+    entidad) SIGUEN dentro del consolidado de EAG."""
+    result = balance_sheet_via_beancount(_multilibro_ledger(tmp_path), "EAG")
+    accounts = {r["account"] for r in result["data"]}
+    assert "Equity:Apertura:TarjetasSinDetalle" in accounts
+    assert "Equity:Reconciliation:Discrepancias" in accounts
+
+
+def test_balance_sheet_rut2_group_consolidates_ffcc_jab(tmp_path):
+    """AC3 (FR46): el consolidado del grupo RUT2 devuelve FFCC+JAB y excluye EAG
+    (incluidos sus namespaces de Equity legacy)."""
+    result = balance_sheet_via_beancount(_multilibro_ledger(tmp_path), "FondoComun")
+    numbers = {r["account_number"] for r in result["data"]}
+    accounts = {r["account"] for r in result["data"]}
+    assert "410001" in numbers and "810001" in numbers      # FFCC + JAB
+    assert "111005" not in numbers and "610005" not in numbers  # EAG + hija fuera
+    assert not any(a.startswith("Equity:Apertura") for a in accounts)
+    assert not any(a.startswith("Equity:Reconciliation") for a in accounts)

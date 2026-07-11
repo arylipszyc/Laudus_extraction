@@ -27,11 +27,22 @@ from backend.app.services.ledger_service import LedgerService, tx_id_of
 # Roots that make up the balance sheet (AC3).
 _BALANCE_SHEET_ROOTS = "Assets|Liabilities|Equity"
 
-# Entidad matriz cuyo balance-sheet es CONSOLIDADO (EAG + las 4 hijas),
-# espejando el tab legacy `balance_sheet_eag` de Sheets. Las hijas son egresos
-# de EAG (971/1077 tx con contraparte en EAG). Seleccionar una hija en el filtro
-# sigue devolviendo SU slice — la separación por entidad no se pierde.
-_CONSOLIDATED_ENTITY = "EAG"
+# Grupos de consolidación explícitos (Story 11.1, FR45/FR46). Clave = entidad
+# consultable que resuelve a un consolidado; el resto de VALID_ENTITIES sigue
+# el path per-entity. "EAG" espeja el tab legacy `balance_sheet_eag` de Sheets:
+# las hijas son egresos de EAG (971/1077 tx con contraparte en EAG); seleccionar
+# una hija en el filtro sigue devolviendo SU slice — la separación por entidad
+# no se pierde. "FondoComun"/FFCC/JAB son labels PROPUESTOS — 11.2 fija los
+# definitivos.
+CONSOLIDATION_GROUPS: dict[str, frozenset[str]] = {
+    "EAG": frozenset({"EAG", "Jocelyn", "Jeannette", "Johanna", "Jael"}),
+    "FondoComun": frozenset({"FFCC", "JAB"}),
+}
+
+# Namespaces de Equity SIN segmento de entidad — legacy del libro EAG (lista
+# congelada; las entidades nuevas deben llevar entidad en el path, ej.
+# Equity:FFCC:Apertura, para que la asignación a grupo siga siendo mecánica).
+_ENTITYLESS_EQUITY_NAMESPACES = ("Apertura", "Reconciliation")  # → grupo EAG
 
 
 def _account_meta(entries: list) -> dict[str, dict]:
@@ -50,6 +61,18 @@ def _entity_pattern(roots: str, entity: str) -> str:
 @functools.lru_cache(maxsize=16)
 def _compiled_entity_pattern(roots: str, entity: str) -> re.Pattern:
     return re.compile(_entity_pattern(roots, entity))
+
+
+@functools.lru_cache(maxsize=16)
+def _group_pattern(roots: str, group: str) -> str:
+    """Regex del consolidado: entidades del grupo como 2º segmento; el grupo EAG
+    suma además sus namespaces de Equity sin segmento de entidad (legacy)."""
+    members = "|".join(sorted(CONSOLIDATION_GROUPS[group]))
+    pattern = f"^({roots}):({members}):"
+    if group == "EAG":
+        legacy = "|".join(_ENTITYLESS_EQUITY_NAMESPACES)
+        pattern += f"|^Equity:({legacy})(:|$)"
+    return pattern
 
 
 def _clp(inventory) -> float:
@@ -83,9 +106,10 @@ def balance_sheet_via_beancount(
     meta = _account_meta(entries)
     conn = ledger.connection()
 
-    if entity == _CONSOLIDATED_ENTITY:
-        # Consolidado: roots-only, sin segmento de entidad → todas las entidades.
-        pattern = f"^({_BALANCE_SHEET_ROOTS}):"
+    if entity in CONSOLIDATION_GROUPS:
+        # Consolidado: solo las entidades del grupo (Story 11.1 — antes era
+        # roots-only = todo el ledger, contaminable por libros ajenos).
+        pattern = _group_pattern(_BALANCE_SHEET_ROOTS, entity)
     else:
         pattern = _entity_pattern(_BALANCE_SHEET_ROOTS, entity)
     where = f'account ~ "{pattern}"'
@@ -201,20 +225,24 @@ def report_rows_via_beancount(
     date_from: str | None = None,
     date_to: str | None = None,
 ) -> list[dict]:
-    """Filas estilo `ledger_final` desde Beancount — TODAS las entidades (#4 migración reporte).
+    """Filas estilo `ledger_final` desde Beancount — TODO el grupo EAG (#4 migración reporte).
 
     El reporte de gastos (`report_builder`) agrega por código de cuenta y categoría
     sobre EAG + las 4 hijas a la vez, así que a diferencia de
-    `ledger_entries_via_beancount` NO se filtra por entity. Cada posting del rango
-    se mapea a una fila con exactamente las claves que `report_builder` consume desde
-    `ledger_final` (date, accountnumber, accountName, Categoria1..3, debit, credit).
-    El split debit/credit por signo del número es el mismo que el resto del módulo.
+    `ledger_entries_via_beancount` no es per-entity: se acota al GRUPO EAG completo
+    (Story 11.1 — antes sin filtro de cuenta, es decir todo el ledger; los códigos
+    de FFCC/JAB colisionan con los prefijos de `report_builder` y contaminarían el
+    reporte). Cada posting del rango se mapea a una fila con exactamente las claves
+    que `report_builder` consume desde `ledger_final` (date, accountnumber,
+    accountName, Categoria1..3, debit, credit). El split debit/credit por signo del
+    número es el mismo que el resto del módulo.
     """
     entries = ledger.entries()
     meta = _account_meta(entries)
     conn = ledger.connection()
 
-    conds = []
+    pattern = _group_pattern("Assets|Liabilities|Equity|Income|Expenses", "EAG")
+    conds = [f'account ~ "{pattern}"']
     if date_from:
         conds.append(f"date >= {date_from}")
     if date_to:

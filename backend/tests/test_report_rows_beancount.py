@@ -1,9 +1,10 @@
 """Tests for report_rows_via_beancount — migración del reporte a Beancount (#4 / 9.11).
 
 Valida que las filas estilo `ledger_final` derivadas del ledger Beancount tengan la
-forma que `report_builder` consume, cubran TODAS las entidades (no filtra por entity),
-hagan el split debit/credit por signo, y respeten el rango de fechas. Cierra con una
-prueba de integración: las filas alimentan `build_report` y producen un xlsx válido.
+forma que `report_builder` consume, cubran TODO el grupo EAG (matriz + hijas, Story
+11.1 — antes "todas las entidades"), hagan el split debit/credit por signo, y respeten
+el rango de fechas. Cierra con una prueba de integración: las filas alimentan
+`build_report` y producen un xlsx válido.
 """
 from datetime import date
 
@@ -64,13 +65,42 @@ def test_rows_carry_report_builder_keys(tmp_path):
         assert ROW_KEYS <= set(r.keys())
 
 
-def test_includes_all_entities_no_entity_filter(tmp_path):
-    """A diferencia de ledger_entries_via_beancount, NO filtra por entity:
-    EAG y las hijas conviven (el reporte agrega sobre todas)."""
+def test_includes_whole_eag_group(tmp_path):
+    """Story 11.1: el reporte cubre TODO el grupo EAG (matriz + hijas) — a
+    diferencia de ledger_entries_via_beancount no es per-entity, pero tampoco
+    "todas las entidades": lo que no pertenece al grupo EAG queda fuera."""
     rows = report_rows_via_beancount(_ledger(tmp_path))
     numbers = {r["accountnumber"] for r in rows}
     assert "111005" in numbers   # EAG
     assert "610005" in numbers   # Jocelyn
+
+
+def test_excludes_foreign_namespace_keeps_legacy_equity(tmp_path):
+    """Story 11.1 AC2: una cuenta FFCC (fuera del grupo EAG) no aparece en las
+    filas del reporte; los namespaces Equity sin entidad (legacy EAG) siguen."""
+    extra = """\
+
+2020-01-01 open Assets:FFCC:Test-410001 CLP
+  code: "410001"
+2020-01-01 open Equity:FFCC:Apertura CLP
+2020-01-01 open Equity:Apertura:TarjetasSinDetalle CLP
+
+2024-05-05 * "Aporte FFCC"
+  Assets:FFCC:Test-410001    200000 CLP
+  Equity:FFCC:Apertura      -200000 CLP
+
+2024-05-07 * "Apertura TC sin detalle"
+  Assets:EAG:Bancos:TestBank-111005       -80000 CLP
+  Equity:Apertura:TarjetasSinDetalle       80000 CLP
+"""
+    main = tmp_path / "main.beancount"
+    main.write_text(MINI_LEDGER + extra, encoding="utf-8")
+    rows = report_rows_via_beancount(LedgerService(str(main)))
+    numbers = {r["accountnumber"] for r in rows}
+    assert "410001" not in numbers                       # FFCC excluida (AC2)
+    # Guard TRAP #1: la pata Equity:Apertura sí entra (2 filas del 2024-05-07).
+    legacy_day = [r for r in rows if r["date"] == "2024-05-07"]
+    assert len(legacy_day) == 2
 
 
 def test_debit_credit_split_by_sign(tmp_path):
