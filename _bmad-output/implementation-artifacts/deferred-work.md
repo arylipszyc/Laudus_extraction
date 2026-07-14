@@ -1,5 +1,13 @@
 # Deferred Work
 
+## Deferred from: code review of story-13.1 (2026-07-13)
+
+- **Hoja de gastos hardcodea `("FFCC","JAB")`** ([backend/app/api/v1/reportes/report_builder_rut2.py:114](../../backend/app/api/v1/reportes/report_builder_rut2.py#L114)) — inconsistente con la hoja Distribuciones (deriva la entidad genéricamente de `acc.split(":")[1]`). Hoy el `_group_pattern("...", "FondoComun")` restringe el universo a `FFCC|JAB`, así que ningún gasto se pierde; pero si el grupo FondoComun creciera a una 3ª entidad, sus gastos quedarían en `tree` sin renderizarse ni sumarse al TOTAL, en silencio.
+- **Etiqueta `cat2` del encabezado tomada del primer leaf del prefijo** ([report_builder_rut2.py:121](../../backend/app/api/v1/reportes/report_builder_rut2.py#L121)) — `next(iter(leaves.values()))["cat2"]`. Verificado que los prefijos actuales (41/43/81/83/85/87) mapean cada uno a una sola `laudus_categoria2`. Si un prefijo llegara a tener cat2 mixta, el encabezado/subtotal etiquetaría mal el bloque (los números siguen correctos por prefijo).
+- **Redondeo por-columna independiente vs invariante mostrado** ([backend/app/api/v1/reportes/_xlsx.py:89](../../backend/app/api/v1/reportes/_xlsx.py#L89)) — inicial/retiros/repartos/cierre se redondean por separado; el invariante `inicial+retiros+repartos==cierre` que el reporte publica podría diferir ±1 con datos fraccionarios. Inocuo hoy: todas las CxC son CLP enteros.
+- **`code` vacío colapsa cuentas en un bucket de prefijo en blanco** ([report_builder_rut2.py:119-121](../../backend/app/api/v1/reportes/report_builder_rut2.py#L119)) — una cuenta de gasto FFCC/JAB sin meta `code` → `prefix2=""` → encabezado `" · (sin categoría)"`, mezclando cuentas bajo un subtotal en vez de exponer la condición. No pierde plata.
+- **Posting USD en cuenta CxC desincronizaría el saldo vs balance reconciliado** ([bql_queries.py:374](../../backend/app/services/bql_queries.py#L374)) — `distribution_rows_via_beancount` suma `float(p.units.number)` de cualquier moneda mientras el cross-check de balance es CLP-only. Hoy todas las CxC (incl. `FondosPorRendirUs`) están declaradas CLP-only → inocuo; latente si alguna recibe un posting USD.
+
 ## RADAR — gate de typecheck del frontend era un no-op (2026-07-11)
 
 - **El frontend falló el deploy 3 días (2026-07-08 → 07-11) sin que nadie lo notara.** Causa: build de Render = `tsc -b && vite build`; `tsc -b` typechea los `.test.tsx`, y un mock de `laudus` en `ReconciliationPage.test.tsx` (introducido en 6.7 / `1c86512`) tenía `{date,amount,currency}` sin los campos requeridos `journal_entry_id`+`description` → TS2739. Fix: `9d1cdfa`.

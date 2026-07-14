@@ -18,6 +18,7 @@ Account-name convention (from `accounts.beancount`):
 from __future__ import annotations
 
 import re
+from collections import defaultdict
 from datetime import date
 
 from beancount.core.data import Open, Transaction
@@ -261,24 +262,28 @@ def report_rows_via_beancount(
     ledger: LedgerService,
     date_from: str | None = None,
     date_to: str | None = None,
+    group: str = "EAG",
 ) -> list[dict]:
-    """Filas estilo `ledger_final` desde Beancount — TODO el grupo EAG (#4 migración reporte).
+    """Filas estilo `ledger_final` desde Beancount — TODO un grupo de consolidación.
 
-    El reporte de gastos (`report_builder`) agrega por código de cuenta y categoría
-    sobre EAG + las 4 hijas a la vez, así que a diferencia de
-    `ledger_entries_via_beancount` no es per-entity: se acota al GRUPO EAG completo
+    El reporte de gastos agrega por código de cuenta y categoría sobre todas las
+    entidades de un grupo a la vez, así que a diferencia de
+    `ledger_entries_via_beancount` no es per-entity: se acota al GRUPO completo
     (Story 11.1 — antes sin filtro de cuenta, es decir todo el ledger; los códigos
-    de FFCC/JAB colisionan con los prefijos de `report_builder` y contaminarían el
-    reporte). Cada posting del rango se mapea a una fila con exactamente las claves
-    que `report_builder` consume desde `ledger_final` (date, accountnumber,
-    accountName, Categoria1..3, debit, credit). El split debit/credit por signo del
-    número es el mismo que el resto del módulo.
+    de libros distintos colisionan con los prefijos del builder y contaminarían el
+    reporte). `group` default `"EAG"` (reporte de gastos EAG, 0 regresión); la
+    Story 13.1 pasa `group="FondoComun"` para el reporte FFCC/JAB. Cada posting del
+    rango se mapea a una fila con las claves que `report_builder` consume desde
+    `ledger_final` (date, accountnumber, accountName, Categoria1..3, debit, credit)
+    MÁS `account` (path beancount completo) para que el builder RUT2 derive la
+    entidad del 2º segmento del path (13.1 Task 1). El split debit/credit por signo
+    del número es el mismo que el resto del módulo.
     """
     entries = ledger.entries()
     meta = _account_meta(entries)
     conn = ledger.connection()
 
-    pattern = _group_pattern("Assets|Liabilities|Equity|Income|Expenses", "EAG")
+    pattern = _group_pattern("Assets|Liabilities|Equity|Income|Expenses", group)
     conds = [f'account ~ "{pattern}"']
     if date_from:
         conds.append(f"date >= {date_from}")
@@ -295,6 +300,7 @@ def report_rows_via_beancount(
         iso_date = row_date.isoformat() if isinstance(row_date, date) else str(row_date)
         rows.append({
             "date": iso_date,
+            "account": account,
             "accountnumber": str(m.get("code", "")),
             "accountName": str(m.get("laudus_account_name", account)),
             "Categoria1": str(m.get("laudus_categoria1", "")),
@@ -303,4 +309,94 @@ def report_rows_via_beancount(
             "debit": amount if amount >= 0 else 0.0,
             "credit": -amount if amount < 0 else 0.0,
         })
+    return rows
+
+
+# ── Story 13.1: cuentas corriente de socios del Fondo Común ──────────────────
+# Cuentas por cobrar (categoria3) que son, contablemente, cuenta corriente /
+# patrimonio de socios (veredicto Valentina 2026-07-12). Las OPERACIONALES son un
+# set chico y estable de cuentas de sistema (existen en EAG/FFCC/JAB con el mismo
+# nombre) — NO es una allowlist de personas, es la exclusión de las cuentas que no
+# son de un familiar; todo lo demás en el universo CxC del grupo = familiar.
+_RECEIVABLE_CAT3 = "CUENTAS POR COBRAR"
+_OPERATIONAL_STEMS = frozenset({
+    "CuentasCorrientesDelPersonal", "FondoFijo", "FondosPorRendir",
+    "FondosPorRendirUs", "DeudoresVarios", "ControlYLiquidacin",
+})
+
+
+def distribution_rows_via_beancount(
+    ledger: LedgerService,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    group: str = "FondoComun",
+) -> list[dict]:
+    """Estado de cuenta corriente por socio del Fondo Común (Story 13.1 AC3).
+
+    Itera las transacciones una sola vez (NO `report_rows_via_beancount`) porque el
+    neteo de asientos *wash* (+X/−X a la MISMA cuenta en un mismo asiento =
+    reclasificación interna; 265 en el ledger @ 2026-06-30) exige agrupar por
+    (asiento, cuenta): las filas por-pata ya split debit/credit inflarían retiros Y
+    repartos con ese ruido. Por cuenta devuelve el NETO por asiento repartido en
+    flujos del período (retiro si neto ≥ 0, reparto si neto < 0) + saldos
+    cumulativos (inicial a `date_from-1`, cierre a `date_to`). Invariante:
+    `saldo_inicial + retiros + repartos == saldo_cierre`.
+
+    Universo = cuentas del grupo (case-sensitive, patch 11.1) con
+    `laudus_categoria3 == "CUENTAS POR COBRAR"`. `operational` marca las cuentas de
+    sistema (ver `_OPERATIONAL_STEMS`); el resto son familiares.
+    """
+    entries = ledger.entries()
+    meta = _account_meta(entries)
+    pattern = re.compile(_group_pattern("Assets", group))
+    accts = {
+        a for a, m in meta.items()
+        if pattern.match(a) and str(m.get("laudus_categoria3", "")) == _RECEIVABLE_CAT3
+    }
+    try:
+        d_from = date.fromisoformat(date_from) if date_from else None
+        d_to = date.fromisoformat(date_to) if date_to else None
+    except ValueError as e:
+        raise ValueError(f"Invalid date format: {e}")
+
+    inicial: dict[str, float] = defaultdict(float)
+    retiros: dict[str, float] = defaultdict(float)
+    repartos: dict[str, float] = defaultdict(float)
+    cierre: dict[str, float] = defaultdict(float)
+    for entry in entries:
+        if not isinstance(entry, Transaction):
+            continue
+        if d_to is not None and entry.date > d_to:
+            continue
+        net: dict[str, float] = defaultdict(float)
+        for p in entry.postings:
+            if p.account in accts and p.units is not None:
+                net[p.account] += float(p.units.number)
+        for acc, n in net.items():
+            cierre[acc] += n
+            if d_from is not None and entry.date < d_from:
+                inicial[acc] += n
+            elif n >= 0:
+                retiros[acc] += n
+            else:
+                repartos[acc] += n
+
+    rows = []
+    for acc in accts:
+        m = meta.get(acc, {})
+        stem = acc.split(":")[-1].rsplit("-", 1)[0]
+        rows.append({
+            "account": acc,
+            "entity": acc.split(":")[1],
+            "code": str(m.get("code", "")),
+            "name": str(m.get("laudus_account_name", acc)),
+            "saldo_inicial": inicial.get(acc, 0.0),
+            "retiros": retiros.get(acc, 0.0),
+            "repartos": repartos.get(acc, 0.0),  # ≤ 0
+            "saldo_cierre": cierre.get(acc, 0.0),
+            "operational": stem in _OPERATIONAL_STEMS,
+        })
+    # Familiares por |saldo| desc; operativas al final (Valentina: separar bloques).
+    # Desempate por `account` → orden determinista aunque `accts` sea un set.
+    rows.sort(key=lambda x: (x["operational"], -abs(x["saldo_cierre"]), x["account"]))
     return rows

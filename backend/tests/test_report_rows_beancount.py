@@ -135,6 +135,40 @@ def test_metadata_join_and_fallbacks(tmp_path):
     assert income["accountName"]             # cae al nombre de cuenta, no vacío
 
 
+def test_group_param_default_eag_and_fondocomun(tmp_path):
+    """Story 13.1 Task 1: `group` default "EAG" (0 regresión) vs "FondoComun" (solo
+    FFCC/JAB). Cada fila trae el path `account` completo para derivar la entidad."""
+    extra = """\
+
+2020-01-01 open Expenses:FFCC:GastosGenerales-410001 CLP
+  code: "410001"
+  laudus_account_name: "Gastos Generales FFCC"
+  laudus_categoria2: "GASTOS GENERALES"
+2020-01-01 open Assets:FFCC:Banco-111005F CLP
+  code: "111005F"
+
+2024-07-01 * "Gasto FFCC"
+  Expenses:FFCC:GastosGenerales-410001   40000 CLP
+  Assets:FFCC:Banco-111005F             -40000 CLP
+"""
+    main = tmp_path / "main.beancount"
+    main.write_text(MINI_LEDGER + extra, encoding="utf-8")
+    ledger = LedgerService(str(main))
+
+    eag = report_rows_via_beancount(ledger)  # default group
+    eag_nums = {r["accountnumber"] for r in eag}
+    assert "111005" in eag_nums                 # EAG presente
+    assert "410001" not in eag_nums             # FFCC fuera del grupo EAG
+    assert all("account" in r for r in eag)     # path completo en cada fila (Task 1)
+
+    ffcc = report_rows_via_beancount(ledger, group="FondoComun")
+    ffcc_nums = {r["accountnumber"] for r in ffcc}
+    assert "410001" in ffcc_nums                # FFCC dentro del grupo
+    assert "111005" not in ffcc_nums            # EAG fuera
+    ffcc_row = next(r for r in ffcc if r["accountnumber"] == "410001")
+    assert ffcc_row["account"] == "Expenses:FFCC:GastosGenerales-410001"
+
+
 def test_rows_feed_build_report(tmp_path):
     """Integración: las filas derivadas de Beancount alimentan build_report y
     producen un xlsx válido (mismo contrato que el path Sheets)."""

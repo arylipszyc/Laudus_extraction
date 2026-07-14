@@ -4,11 +4,14 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useSyncStatus } from '@/hooks/useSyncStatus'
 import { triggerSync } from '@/services/sync'
-import { downloadReporteGastos } from '@/services/reportes'
+import { downloadReporteFondoComun, downloadReporteGastos } from '@/services/reportes'
+
+type Libro = 'EAG' | 'FondoComun'
 
 export function ReportesPage() {
   const [start, setStart] = useState('2025-01-01')
   const [end, setEnd] = useState('2025-12-31')
+  const [libro, setLibro] = useState<Libro>('EAG')
   const [downloading, setDownloading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { data: sync } = useSyncStatus()
@@ -24,7 +27,11 @@ export function ReportesPage() {
     setError(null)
     setDownloading(true)
     try {
-      await downloadReporteGastos(start, end)
+      if (libro === 'FondoComun') {
+        await downloadReporteFondoComun(start, end)
+      } else {
+        await downloadReporteGastos(start, end)
+      }
     } catch (e) {
       setError((e as Error).message)
     } finally {
@@ -44,9 +51,21 @@ export function ReportesPage() {
 
   return (
     <div className="p-6 space-y-6 max-w-2xl">
-      <h1 className="text-2xl font-semibold">Reporte de Gastos</h1>
+      <h1 className="text-2xl font-semibold">Reportes</h1>
 
       <Card className="p-6 space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Libro</label>
+          <select
+            value={libro}
+            onChange={(e) => setLibro(e.target.value as Libro)}
+            className="w-full border rounded-md px-3 py-2 bg-background"
+          >
+            <option value="EAG">EAG</option>
+            <option value="FondoComun">Fondo Común (FFCC / JAB)</option>
+          </select>
+        </div>
+
         <div className="flex gap-4">
           <div className="flex-1">
             <label className="block text-sm font-medium mb-1">Desde</label>
@@ -91,11 +110,21 @@ export function ReportesPage() {
         </p>
       </Card>
 
-      <p className="text-sm text-muted-foreground">
-        El reporte trae lo que está en Laudus. Las celdas vacías —desglose de tarjeta de crédito y
-        clasificación manual— las completa el contador; subtotales y totales son fórmulas que se
-        recalculan solas.
-      </p>
+      {libro === 'FondoComun' ? (
+        <p className="text-sm text-muted-foreground">
+          El reporte del Fondo Común trae dos hojas: <strong>Gastos</strong> (FFCC/JAB por
+          encabezado) y <strong>Distribuciones</strong> (cuenta corriente de cada socio: retiros,
+          repartos y saldo). Los saldos son fieles a Laudus. El balance del fondo está incompleto
+          (inversiones y activos reales aún no cargados), por eso el reporte lleva una advertencia:
+          no representa el patrimonio real del fondo.
+        </p>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          El reporte trae lo que está en Laudus. Las celdas vacías —desglose de tarjeta de crédito y
+          clasificación manual— las completa el contador; subtotales y totales son fórmulas que se
+          recalculan solas.
+        </p>
+      )}
     </div>
   )
 }
