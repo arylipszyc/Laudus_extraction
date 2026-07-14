@@ -165,13 +165,65 @@ Proyecto en curso: replicar el sistema para un SEGUNDO libro de Laudus (RUT plac
 **Contexto de negocio (Ary 2026-07-11)** — detalle en `valentina-contexto-fondo-comun-jab-2026-07-11.md`:
 - FFCC = caja de los fondos familiares; reparte a AAG/EAG/DAG (hijos de JAB), AZBA (4 nietos, hijos de SAG = la hija fallecida) y FGK (viuda). "JAB" en cuentas = FGK en la práctica. **Label RESUELTO: `JAB`** (congelado por 11.2, ratificado por Ary vía Excel 2026-07-11 — NO re-abrir; la equivalencia JAB≡FGK queda como conocimiento de negocio).
 - **EAG retira del FFCC (cta 115023)** → conciliación cruzada futura contra nuestro libro principal.
-- **VERIFICADO en el plan: los retiros (115021–115039) son ACTIVO del FFCC (CxC)** — el fondo registra lo repartido como "me lo deben". Sospecha Ary confirmada en estructura; si no hay recuperos = activo inflado que esconde que el fondo se achica. Mismo patrón que la auditoría inversiones EAG.
+- **VERIFICADO en el plan: los retiros (115021–115039) son ACTIVO del FFCC (CxC)** — el fondo registra lo repartido como "me lo deben". Mismo patrón que la auditoría inversiones EAG. **[ACTUALIZADO 2026-07-12 con datos reales — mi sospecha inicial estaba al revés: ver §"Cuentas corriente de socios FFCC" abajo, los saldos son ACREEDORES sin respaldo, no deudores.]**
 - **Hipótesis solo-gastos:** Laudus del RUT2 sin ingresos de rentabilidad acreditados (MBI en 0 en el reporte del contador), sin saldos iniciales → usan Laudus solo para gastos. Se verifica al importar.
 - Activos: Vía Gris (casa FGK), Reñaca (VENDIDA 2026 → sin movimientos nuevos), Molco (campo con pérdidas; casas + golf), Miami, 1 avión vigente de 3 (identificar por movimientos), 1 yate conocido de 3 (Keiki Kai).
 - **Watchlist post-import (8 ítems, §4 del doc de CONTEXTO `valentina-contexto-fondo-comun-jab-2026-07-11.md` — no confundir con el §4 del artefacto firmado, que es la tabla de cobertura)** — DIFERIDA por Ary a cuando los números estén en Beancount. Pregunta de negocio del reporte 13.1 ampliada: (a) en qué gasta el fondo/FGK por activo + (b) cuánto repartió y a quién.
 - **Excel de clasificación DEVUELTO 2026-07-11:** 357/357 SI (mapeo y labels FFCC/JAB/FondoComun ratificados), 2 TC (871005 probablemente sin uso; 873005 FGK activa con ~3 tarjetas acumuladas en una cuenta), cero correcciones. → 12.1 tiene su insumo; mi clasificación 06-30 validada por el dueño.
 - **Convención Equity de apertura ADJUDICADA (yo, 2026-07-11, story 12.1):** FFCC abre self-balancing vía `Liabilities:FFCC:Apertura-211005` (espejo Laudus, como EAG); Equity solo como respaldo, UNA por sub-entidad: `Equity:FFCC:Apertura` (plug residual) y `Equity:JAB:Apertura` (todo lo del lado JAB — sin pasivo/patrimonio propio). Entidad como 2º segmento obligatoria (11.1); no cruzar plugs entre entidades; el monto puede ser plug grande ≠ patrimonio real (revisar post-import). Metadata 12.3: cat1=PATRIMONIO, cat2/3 vacías, code sintético, declarar directo en accounts.beancount. Formalizada en `clasificacion-contable-rut2-firmada-2026-07-11.md`.
 - **Dirección futura (Ary 2026-07-11): reconciliación de BANCOS e INVERSIONES, ambos libros incl. EAG** (§7 del artefacto contexto). Hoy nadie concilia bancos; TC fue primero solo porque estaba mal catalogada. Cta cte EAG = maquinaria ya construida (extractor 9.5 + motor Epic 6), gap operacional. Inversiones = capacidad nueva, desbloquea la auditoría diferida de inversiones EAG (≈26.193M) y testea "rentabilidad ausente" FFCC. Mi prioridad recomendada: inversiones ≥ cta cte; retomar post Epics 11–13 con un brief de epic.
+
+## 🚩 Cuentas corriente de socios FFCC (115xxx) — patrimonio disfrazado de CxC, sin respaldo (2026-07-12)
+
+Revisión para la sección de distribuciones de 13.1. Detalle + números en
+`_bmad-output/planning-artifacts/valentina-cuentas-corriente-socios-ffcc-2026-07-12.md`;
+session log `sessions/2026-07-12.md`; sondeo `_forense_retiros_rut2.py`.
+
+- Las `Assets:FFCC:Retiros<X>-115xxx` (cat3 "CUENTAS POR COBRAR") **NO son por cobrar** → son **cuenta
+  corriente / patrimonio de socios** (doble vía). Débito = préstamo/retiro (caja sale); crédito = utilidad
+  del fondo ASIGNADA al hijo (asiento anual de cierre reparte el resultado), **sin mover caja**. NO es un
+  aporte del hijo (respondió la extrañeza de Ary de "saldo negativo en una CxC").
+- **Datos @2026-06-30 (fieles a Laudus, 12.5 = 0 diffs):** el fondo "les debe" **−13.577M** (AAG −4.420,
+  EAG −3.557, DAG −3.344, resto ~−500; solo SAG +261 e Israel +4,6 en deuda).
+- 2021-2022 cerraban a 0; desde 2023 acumulan crédito. Como Equity=0, estas cuentas son el patrimonio de facto.
+- ⚠️ **CORRECCIÓN (Ary tenía razón, 2ª pasada): NO afirmar que los saldos a favor están "sin respaldo".**
+  El balance FFCC está **INCOMPLETO igual que EAG** — no carga posiciones de inversión ni activos reales:
+  - Cero cuentas de inversión en el plan (25 son 11x caja/CxC; única no-corriente `ActivosNoCorrientes-13` vacía),
+    pero cobra **Indumotora 6.341M dividendos** + Sade/Molco/ventas → posee inversiones NO registradas.
+  - "Caja −2.941M" es **falsa**: la produce `LeoPartnershipLimited-111012` −3.096M (vehículo de inversión
+    en "disponible" 111, arrastrado a negativo = **error B de inversiones EAG**). Caja bancaria real ~+155M.
+  - Propiedades/aviones/yates (Vía Gris, Molco, Miami, Keiki Kai) solo aparecen como **gasto JAB** al consumirse.
+  → **No es determinable el patrimonio real del fondo desde Laudus.** El "balance" hoy = caja + cuenta
+  corriente de socios. **Mismo hueco de inversiones que EAG (≈26.193M diferida) — el RUT2 lo confirma en 2º libro.**
+- **Mismo patrón familia TC/inversiones** (mislabel estructural). NO corregir sin cruzar reparto asignado
+  2023-25 vs reparto real acordado + cargar posiciones reales (lección inversiones EAG).
+- **Guía 13.1:** distribuciones = estado de cuenta corriente por socio (inicial + retiros − repartos = final,
+  signo etiquetado "A favor"/"Debe"); **netear asientos wash** (+X/−X misma cuenta = ruido); separar
+  familiares vs operativas (FondoFijo/FondosPorRendir/Deudores/Control ~0); **marca de limitación HONESTA**
+  (balance incompleto, patrimonio no determinable, NO usar caja total, NO afirmar (des)respaldo). Construir SÍ
+  (flujos Laudus-fieles); auditoría = diferida.
+- **Watchlist Fondo Común** (junto a bancos e inversiones): (a) cargar posiciones de inversión + activos reales
+  FFCC; (b) Leo Partnership negativo (error B); (c) reparto asignado vs acordado; (d) por qué dejó de saldar 2023.
+
+## 🚩 Activos (yate/avión) contabilizados por cuenta corriente + AZBA sin liquidar (2026-07-13)
+
+Comparación reporte contador `FFCC 05-2025.xlsx` vs Laudus crudo (réplica generada `H:\...\Familia\FFCC
+05-2025 - LAUDUS (beancount).xlsx`). Con el signo de ingresos alineado, **120/141 cuentas reconcilian**; las
+21 divergencias son **operaciones de activos que Laudus mete por las cuentas corriente de socios (115xxx)**
+y que el reporte del contador NO tiene (los contadores no manejan las cuentas de inversión — confirmado por
+Ary). Detalle en [[project_segundo_rut_multientidad]] y `_bmad-output/planning-artifacts/` (scripts forenses).
+
+- **NO hay cuenta de activo para yate ni avión** — 855xxx (Keiki Kai) / 833-834xxx (aviones) son solo GASTO
+  de mantención. El valor de capital (compra/venta) pasa como **asiento wash (+X/−X) por las cuentas
+  corriente**, sin capitalizarse. Mismo problema que la auditoría de inversiones EAG (≈26.193M) — confirmado
+  en el 2º libro. **Leo Partnership Limited (111012)** = vehículo offshore común de yate+avión.
+- **Avión 2025:** compra N225AW (nuevo, USD 2.266.667, solo AAG/EAG/DAG); venta N266WW (viejo, USD 1.498.483,
+  a los 4 nietos AZBA −272,6M c/u). **Yate Keiki Kai (Fraser Yachts):** salida de AZBA 31-ene −859M repartido
+  +286M a los 3; yate NO vendido, sigue operando.
+- **AZBA sin liquidar:** cuenta 115029 = −493M a favor; **rama AZBA completa (115029 + 4 nietos) = −2.490M que
+  el fondo le debe, todo como saldo entre cuentas corriente SIN pago en efectivo** (asientos sin pata de banco,
+  planos ~18 meses). ⚠️ Ítem de auditoría: ¿se va a liquidar en cash o queda como reparto de patrimonio?
+- **Residual sin explicar:** gasto Keiki Kai 855024 (Δ+217M) y avión 834003 (Δ+129M) Laudus>contador (gastos).
 
 ## ✅ Piloto TC materializado + bug de datos + vista de cuadre (2026-07-02)
 
