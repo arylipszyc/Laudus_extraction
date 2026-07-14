@@ -133,6 +133,32 @@ describe('getLedgerCategory', () => {
   it('Categoria1 takes priority over account prefix', () => {
     expect(getLedgerCategory('400001', 'Gastos Administración')).toBe('expenses')
   })
+
+  // ── Libro RUT2 (FFCC/JAB): categorías de balance no son gasto/ingreso ──────────
+  // El fallback por prefijo está calibrado al plan EAG; en RUT2 los activos JAB son
+  // prefijo 6 (colisiona con el fallback '6'→expenses). Se clasifica por Cat1/Cat2.
+
+  it('RUT2: activo JAB (prefijo 6, cat1 "ACTIVO - JAB") → other (no gasto)', () => {
+    expect(getLedgerCategory('600001', 'ACTIVO - JAB')).toBe('other')
+  })
+
+  // prefijos 6/4 colisionan con el fallback (6→expenses, 4→income): así el test
+  // falla si se borra el loop de balance-keywords, en vez de pasar por el fallback.
+  it('RUT2: pasivo (cat1 "PASIVO …") → other', () => {
+    expect(getLedgerCategory('600002', 'PASIVO CORRIENTE JAB')).toBe('other')
+  })
+
+  it('RUT2: patrimonio (cat1 "PATRIMONIO …") → other', () => {
+    expect(getLedgerCategory('400002', 'PATRIMONIO FFCC')).toBe('other')
+  })
+
+  it('RUT2: gasto JAB (prefijo 8, cat1 "GASTOS …") sigue expenses', () => {
+    expect(getLedgerCategory('810001', 'GASTOS CASAS JAB')).toBe('expenses')
+  })
+
+  it('RUT2: ingreso JAB (prefijo 7, cat1 "INGRESOS …") sigue income', () => {
+    expect(getLedgerCategory('710001', 'INGRESOS JAB')).toBe('income')
+  })
 })
 
 // ── periodLabel ───────────────────────────────────────────────────────────────

@@ -45,6 +45,13 @@ export function getLedgerCategory(
       cat.includes('expense')
     ) return 'expenses'
   }
+  // Libro RUT2 (FFCC/JAB): las categorías de balance no son gasto/ingreso. Sus
+  // prefijos (activos JAB = 6) chocan con el fallback por prefijo calibrado al plan
+  // EAG de abajo (6→expenses), así que se clasifican por Cat1/Cat2 antes de caer.
+  for (const cat of [categoria1.toLowerCase(), categoria2.toLowerCase()]) {
+    if (!cat) continue
+    if (cat.includes('activo') || cat.includes('pasivo') || cat.includes('patrimonio')) return 'other'
+  }
   // Fallback: account number prefix
   const s = String(accountNumber ?? '')
   if (s.startsWith('4')) return 'income'
