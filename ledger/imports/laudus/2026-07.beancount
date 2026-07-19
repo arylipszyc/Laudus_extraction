@@ -33,6 +33,13 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  1497256.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -1497256.00 CLP
 
+2026-07-03 * "Zita Miranda de Sra Raquel Ventura"
+  id: "6073"
+  je_num: "6033"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -285000.00 CLP
+  Expenses:EAG:SraRaquelVentura-430021  285000.00 CLP
+
 2026-07-06 * "Full Plagas B#5914 Desratizacion EAG"
   id: "6059"
   je_num: "6019"
@@ -82,9 +89,23 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -142928.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  142928.00 CLP
 
+2026-07-08 * "USD6.448,99 Kia Chile/Hotel Los Angeles"
+  id: "6109"
+  je_num: "6069"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci18565743Us-111011  5980535.00 CLP
+  Income:EAG:OtrosIngresos-310099  -5980535.00 CLP
+
 2026-07-10 * "USD8.926,49 Visa BCI 1027 Junio 2026"
   id: "6076"
   je_num: "6036"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -8353409.00 CLP
   Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  8353409.00 CLP
+
+2026-07-17 * "B#17441 Agua Choshuenco EAG Junio 2026"
+  id: "6111"
+  je_num: "6071"
+  source: "laudus-erp"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -83020.00 CLP
+  Expenses:EAG:Agua-413013  83020.00 CLP
