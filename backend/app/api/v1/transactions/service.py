@@ -29,18 +29,27 @@ class CategoryEditError(Exception):
 
 from backend.app.services.ledger_service import compute_tx_id, tx_id_of as _tx_id_of
 
+# Balde catch-all "T/C: Varias EAG": el matcher de cartolas-TC deja acá las compras que no
+# pudo categorizar y las AUTO-confirma (category_status="confirmed") → nunca entran a la cola.
+# Se surfacean para que el contador pueda re-categorizarlas desde la misma UI (update/bulk ya
+# reescriben SOLO la pata de gasto, preservando la deuda Liabilities:TC:Real).
+_TC_FALLBACK_BUCKET = "Expenses:EAG:TC:TcVariasEag-430017"
+
 
 def list_pending(entries: list) -> list[dict]:
-    """Transacciones con category_status ∈ (suggested, pending), agrupables por cuenta/período (AC9)."""
+    """Tx a revisar: category_status ∈ (suggested, pending) + cartola-TC atascadas en el
+    balde 430017 (auto-confirmadas). Agrupables por cuenta/período (AC9)."""
     out = []
     for e in entries:
         if not isinstance(e, data.Transaction):
             continue
         meta = e.meta or {}
-        if meta.get("category_status") not in ("suggested", "pending"):
-            continue
         cat = next((p.account for p in e.postings
                     if p.account.split(":")[0] in ("Expenses", "Income")), None)
+        is_pending = meta.get("category_status") in ("suggested", "pending")
+        is_tc_fallback = meta.get("source") == "cartola-tc" and cat == _TC_FALLBACK_BUCKET
+        if not (is_pending or is_tc_fallback):
+            continue
         amt = e.postings[0].units.number if e.postings and e.postings[0].units else None
         # `confidence` es meta Beancount (editable a mano): un valor no numérico no debe 500ear
         # el endpoint entero — cae a None, como el try/except de `color_for`.

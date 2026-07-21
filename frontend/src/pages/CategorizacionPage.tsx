@@ -8,6 +8,9 @@ import { CategoryAutocomplete } from '@/components/CategoryAutocomplete'
 // Las compras caen a Suspense hasta que el contador les pone cuenta. El batch confirma
 // justo las que ya salieron de Suspense (§tc_correction.SUSPENSE_ACCOUNT).
 const SUSPENSE = 'Expenses:EAG:Suspense'
+// Balde catch-all "T/C: Varias EAG": compras de cartola-TC que el matcher no categorizó.
+// Se tratan como Suspense (picker en blanco) para que el contador les asigne cuenta real.
+const TC_FALLBACK = 'Expenses:EAG:TC:TcVariasEag-430017'
 
 const fmt = (n: number | null) =>
   n == null ? '—' : new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(n)
@@ -59,7 +62,7 @@ export function CategorizacionPage() {
   const catOf = (tx: PendingTx) => {
     if (tx.tx_id in cats) return cats[tx.tx_id]
     const cur = tx.current_category ?? ''
-    return cur === SUSPENSE ? '' : cur
+    return cur === SUSPENSE || cur === TC_FALLBACK ? '' : cur
   }
 
   // Rojos arriba (lo que el contador debe decidir él); empate → mantiene el orden del backend.
