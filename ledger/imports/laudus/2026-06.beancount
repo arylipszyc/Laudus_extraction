@@ -46,8 +46,11 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -64687.00 CLP
   Expenses:EAG:SueldosRopaRegalas-411001  35000.00 CLP
+    desc: "Lathrop - Tramite personal Mariela M."
   Expenses:EAG:GastosLegalesNotara-430071  11093.00 CLP
+    desc: "Lathrop - Tramite Moreno Ventura de EAG"
   Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  18594.00 CLP
+    desc: "Lathrop - Testamento Johanna"
 
 2026-06-03 * "Devol Isapre B#8556 Psiquiatra EAG"
   id: "6086"
@@ -97,7 +100,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -365330.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -189080.00 CLP
+    desc: "Laboratorio Regonesi - Examenes Raquel"
   Expenses:EAG:SraRaquelVentura-430021  189080.00 CLP
+    desc: "Laboratorio Regonesi - Examenes Raquel"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  365330.00 CLP
 
 2026-06-04 * "Traspaso Fabian Nuñez Cortes de EAG"
@@ -113,9 +118,13 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -9580000.00 CLP
   Expenses:EAG:TC:TcRaquelVentura-430019  5235476.00 CLP
+    desc: "Visa Santander 1066 Raquel Ventura"
   Expenses:EAG:TC:TcRaquelVentura-430019  3344254.00 CLP
+    desc: "Master Santander 9046 Raquel Ventura"
   Expenses:EAG:TC:TcRaquelVentura-430019  224299.00 CLP
+    desc: "USD248,58 Visa 1066 Raquel Ventura"
   Expenses:EAG:TC:TcRaquelVentura-430019  775971.00 CLP
+    desc: "USD859,97 Master 9046 Raquel Ventura"
 
 2026-06-05 * "Efectivo Eduardo Avayu"
   id: "6009"
@@ -130,8 +139,10 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -90000.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -90000.00 CLP
+    desc: "Franco C. Com. venta camioneta Max Ventu"
   Expenses:EAG:MantencinVehculosSeguros-411043  90000.00 CLP
   Expenses:EAG:SraRaquelVentura-430021  90000.00 CLP
+    desc: "Franco C. Com. venta camioneta Max Ventu"
 
 2026-06-05 * "Com. Y Dist. Superkol de Johanna Avayu"
   id: "6011"
@@ -153,11 +164,17 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -1283228.00 CLP
   Expenses:EAG:SueldosRopaRegalas-411001  264179.00 CLP
+    desc: "Victoria Celia U. - Leyes soc Mayo 2026"
   Expenses:EAG:SueldosRopaRegalias-413001  223147.00 CLP
+    desc: "Andres Martinez - Leyes soc Mayo 2026"
   Expenses:EAG:SueldosRopaRegalias-413001  256138.00 CLP
+    desc: "Fresia Gonzalez - Leyes soc Mayo 2026"
   Expenses:EAG:SueldosRopaRegalias-413001  182843.00 CLP
+    desc: "Esteban Mendez - Leyes soc Mayo 2026"
   Expenses:EAG:SueldosRopaRegalias-413001  266535.00 CLP
+    desc: "Moises Moncada - Leyes soc Mayo 2026"
   Expenses:EAG:SueldosRopaRegalias-413001  90386.00 CLP
+    desc: "Rossy Diaz - Leyes soc Mayo 2026"
 
 2026-06-08 * "USD603,75 Levine y Partners - Asesoria"
   id: "6008"
@@ -181,13 +198,21 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  6956984.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -97503.00 CLP
+    desc: "PAT Santander Enel El Bosque"
   Assets:EAG:ControlYLiquidacin-115099  -18402.00 CLP
+    desc: "PAT Santander Aguas Andinas El Bosque"
   Assets:EAG:ControlYLiquidacin-115099  -14990.00 CLP
+    desc: "PAT Santander Claro Movil Lorenzo"
   Assets:EAG:ControlYLiquidacin-115099  -23990.00 CLP
+    desc: "PAT Santander Entel PCS FGK"
   Assets:EAG:ControlYLiquidacin-115099  -1777352.00 CLP
+    desc: "PAT Santander Metrogas SA VG"
   Assets:EAG:ControlYLiquidacin-115099  -2351528.00 CLP
+    desc: "PAT Santander Aguas Cordillera VG"
   Assets:EAG:ControlYLiquidacin-115099  -2590969.00 CLP
+    desc: "PAT Santander Enel VG"
   Assets:EAG:ControlYLiquidacin-115099  -82250.00 CLP
+    desc: "PAT Santander Abastible SA El Bosque"
 
 2026-06-08 * "Full Plagas B#5898 Desratizacion EAG"
   id: "6020"
@@ -223,7 +248,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -180000.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -50000.00 CLP
+    desc: "Jhonny Guerra de Eduardo Avayu"
   Expenses:EAG:MovilizacinViajesChoferes-411037  50000.00 CLP
+    desc: "Jhonny Guerra de Eduardo Avayu"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  180000.00 CLP
 
 2026-06-08 * "PAC Seguro fraude Santander"
@@ -246,13 +273,21 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -7466345.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  97503.00 CLP
+    desc: "PAT Santander Enel El Bosque"
   Assets:EAG:ControlYLiquidacin-115099  18402.00 CLP
+    desc: "PAT Santander Aguas Andinas El Bosque"
   Assets:EAG:ControlYLiquidacin-115099  14990.00 CLP
+    desc: "PAT Santander Claro Movil Lorenzo"
   Assets:EAG:ControlYLiquidacin-115099  23990.00 CLP
+    desc: "PAT Santander Entel PCS FGK"
   Assets:EAG:ControlYLiquidacin-115099  1777352.00 CLP
+    desc: "PAT Santander Metrogas SA VG"
   Assets:EAG:ControlYLiquidacin-115099  2351528.00 CLP
+    desc: "PAT Santander Aguas Cordillera VG"
   Assets:EAG:ControlYLiquidacin-115099  2590969.00 CLP
+    desc: "PAT Santander Enel VG"
   Assets:EAG:ControlYLiquidacin-115099  82250.00 CLP
+    desc: "PAT Santander Abastible SA El Bosque"
   Expenses:EAG:TC:Tc0858VisaLatanpass-430009  509361.00 CLP
 
 2026-06-09 * "Visa Banco de Chile 1168 Eduardo Avayu"
@@ -275,9 +310,13 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -409714.00 CLP
   Expenses:EAG:CombustibleVehculos-413044  130035.00 CLP
+    desc: "F#16524 Serv. Neltume SPA - Combustible"
   Expenses:EAG:CombustibleVehculos-413044  112620.00 CLP
+    desc: "F#16511 Serv. Neltume SPA - Combustible"
   Expenses:EAG:CombustibleVehculos-413044  142059.00 CLP
+    desc: "F#16864 Serv. Neltume SPA - Combustible"
   Expenses:EAG:CombustibleVehculos-413044  25000.00 CLP
+    desc: "F#16863 Serv. Neltume SPA - Combustible"
 
 2026-06-11 * "Mundo Tour devol seguro Jael Avayu"
   id: "6030"
@@ -306,7 +345,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -52980.00 CLP
   Expenses:EAG:SraRaquelVentura-430021  49000.00 CLP
+    desc: "Eliot - Farmacia remdios Sra Raquel"
   Expenses:EAG:OtrosGastosPersonales-430099  3980.00 CLP
+    desc: "Steck y Cia Plastificado seguro auto USA"
 
 2026-06-12 * "Moises Moncada - Comida perritos"
   id: "6027"
@@ -377,8 +418,10 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -150000.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -60000.00 CLP
+    desc: "Julia Aceituno Moris de Eduardo Avayu"
   Expenses:EAG:OtrosGastosPersonales-430099  150000.00 CLP
   Expenses:EAG:OtrosGastosPersonales-430099  60000.00 CLP
+    desc: "Julia Aceituno Moris de Eduardo Avayu"
 
 2026-06-16 * "Pedro Leon Pozo - Examenes EAG"
   id: "6005"
@@ -513,6 +556,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -5000000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  5000000.00 CLP
+    desc: "Traspaso de cuenta BCI EAG 10160175"
 
 2026-06-22 * "Marion Leal - Kinesiologia cuello EAG"
   id: "6104"
@@ -590,13 +634,21 @@
   source: "laudus-erp"
   Assets:EAG:ControlYLiquidacin-115099  4557.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -11099.00 CLP
+    desc: "USD1.960 Johanna - Dif remesa Junio 2026"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -10896.00 CLP
+    desc: "USD1.960 Johanna Avayu Remesa Junio 2026"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -1820742.00 CLP
+    desc: "USD1.960 Johanna Avayu Remesa Junio 2026"
   Expenses:Johanna:RetirosDelMes-890001  2758000.00 CLP
+    desc: "Johanna Avayu - Remesa Junio 2026"
   Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  -45000.00 CLP
+    desc: "Ary Lipszyc de Johanna Avayu"
   Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  -18594.00 CLP
+    desc: "Lathrop - Testamento Johanna"
   Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  -203100.00 CLP
+    desc: "Com. Y Dist. Superkol de Johanna Avayu"
   Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  -653126.00 CLP
+    desc: "Celia Denise Levy de Johanna Avayu"
 
 2026-06-24 * "Sra Raquel Ventura - Junio 2026"
   id: "6081"
@@ -667,7 +719,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -100000.00 CLP
+    desc: "Gloria Palma - Sueldo Junio 2026"
   Expenses:EAG:SueldosRopaRegalias-413001  100000.00 CLP
+    desc: "Gloria Palma - Sueldo Junio 2026"
   Expenses:EAG:GastosBancarios-430003  1.00 CLP
 
 2026-06-25 * "Sandra Caceres de Raquel Ventura"
@@ -683,9 +737,13 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -5281532.00 CLP
   Expenses:EAG:Contribuciones-411069  4779360.00 CLP
+    desc: "Rol 3783-191 Depto Jose A. Delano 2/4"
   Expenses:EAG:Contribuciones-411069  208574.00 CLP
+    desc: "Rol 3783-203 Estacionamiento 1 2/4"
   Expenses:EAG:Contribuciones-411069  208574.00 CLP
+    desc: "Rol 3783-225 Estacionamiento 23 2/4"
   Expenses:EAG:Contribuciones-411069  85024.00 CLP
+    desc: "Rol 3783-197 Bodega 1 2/4"
 
 2026-06-25 * "Rol 323-54 Contribucion Zapallar EAG 2/4"
   id: "6069"
@@ -728,24 +786,43 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -800000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -362000.00 CLP
+    desc: "Noelia Farfal Sueldo/Celular Junio 2026"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -1002697.00 CLP
+    desc: "Mariela Mendez - Sueldo Junio 2026"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -847355.00 CLP
+    desc: "Moises Moncada - Sueldo Junio 2026"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -215691.00 CLP
+    desc: "Rossy Diaz - Sueldo Junio 2026"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -756961.00 CLP
+    desc: "Andres Martinez - Sueldo Junio 2026"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -700000.00 CLP
+    desc: "Gloria Palma - Sueldo Junio 2026"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -600000.00 CLP
+    desc: "Fresia Gonzalez - Sueldo Junio 2026"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -497064.00 CLP
+    desc: "Esteban Mendez - Sueldo Junio 2026"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -200000.00 CLP
+    desc: "CC5.633 Fresia Gonzalez - Dscto prestamo"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -100000.00 CLP
+    desc: "CC5547 Esteban Mendez - Prestamo de EAG"
   Expenses:EAG:SueldosRopaRegalas-411001  1002697.00 CLP
+    desc: "Mariela Mendez - Sueldo Junio 2026"
   Expenses:EAG:SueldosRopaRegalias-413001  350000.00 CLP
+    desc: "Noelia Farfal - Sueldo Junio 2026"
   Expenses:EAG:SueldosRopaRegalias-413001  12000.00 CLP
+    desc: "Noelia Farfal - Celular Junio 2026"
   Expenses:EAG:SueldosRopaRegalias-413001  847355.00 CLP
+    desc: "Moises Moncada - Sueldo Junio 2026"
   Expenses:EAG:SueldosRopaRegalias-413001  215691.00 CLP
+    desc: "Rossy Diaz - Sueldo Junio 2026"
   Expenses:EAG:SueldosRopaRegalias-413001  756961.00 CLP
+    desc: "Andres Martinez - Sueldo Junio 2026"
   Expenses:EAG:SueldosRopaRegalias-413001  700000.00 CLP
+    desc: "Gloria Palma - Sueldo Junio 2026"
   Expenses:EAG:SueldosRopaRegalias-413001  800000.00 CLP
+    desc: "Fresia Gonzalez - Sueldo Junio 2026"
   Expenses:EAG:SueldosRopaRegalias-413001  597064.00 CLP
+    desc: "Esteban Mendez - Sueldo Junio 2026"
   Expenses:EAG:SraPatriciaDeutsch-430024  800000.00 CLP
 
 2026-06-26 * "Comision bancaria Comex"
@@ -761,10 +838,15 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  141594.00 CLP
   Income:EAG:DevolucinIsapre-310043  -29400.00 CLP
+    desc: "Devol Isapre B#16483 Examenes EAG"
   Income:EAG:DevolucinIsapre-310043  -21838.00 CLP
+    desc: "Devol Isapre B#16484 Examenes EAG"
   Income:EAG:DevolucinIsapre-310043  -57260.00 CLP
+    desc: "Devol Isapre B#16486 Examenes EAG"
   Income:EAG:DevolucinIsapre-310043  -27041.00 CLP
+    desc: "Devol Isapre B#16487 Examenes EAG"
   Income:EAG:DevolucinIsapre-310043  -6055.00 CLP
+    desc: "Devol Isapre B#16489 Examenes EAG"
 
 2026-06-26 * "Dr. Patricio Fischman - Atenciones EAG"
   id: "6107"
@@ -779,5 +861,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -150038.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -90000.00 CLP
+    desc: "Marion Leal - Kinesiologia cuello EAG"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  90000.00 CLP
+    desc: "Marion Leal - Kinesiologia cuello EAG"
   Expenses:EAG:OtrosGastosPersonales-430099  150038.00 CLP

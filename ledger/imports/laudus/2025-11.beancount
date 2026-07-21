@@ -25,7 +25,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -11699.00 CLP
   Expenses:EAG:MantencinVehculosSeguros-411043  4069.00 CLP
+    desc: "Servipag - Tag vespucio oriente EAG"
   Expenses:EAG:MantencinVehculosSeguros-411043  7630.00 CLP
+    desc: "Servipag - Tag vespucio Norte Sra. Coca"
 
 2025-11-04 * "Raquel Ventura Traspaso Banco Santander"
   id: "5356"
@@ -77,7 +79,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  17374.00 CLP
   Income:EAG:DevolucinIsapre-310043  -8687.00 CLP
+    desc: "Devol Isapre B#2792 Psiquiatra EAG"
   Income:EAG:DevolucinIsapre-310043  -8687.00 CLP
+    desc: "Devol Isapre B#2837 Psiquiatra EAG"
 
 2025-11-05 * "Traspaso a Cuenta Santander EAG 63188824"
   id: "5360"
@@ -85,6 +89,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -15500000.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  15500000.00 CLP
+    desc: "Traspaso de cuenta BCI EAG 10160175"
 
 2025-11-05 * "Full Plagas B#5739 Desratizacion EAG"
   id: "5362"
@@ -99,8 +104,10 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -46000.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -159000.00 CLP
+    desc: "Juan Vilaza de Sra. Raquel Ventura"
   Expenses:EAG:SraRaquelVentura-430021  46000.00 CLP
   Expenses:EAG:SraRaquelVentura-430021  159000.00 CLP
+    desc: "Juan Vilaza de Sra. Raquel Ventura"
 
 2025-11-05 * "Remedios Sra Raquel Ventura"
   id: "5364"
@@ -150,8 +157,11 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -6376000.00 CLP
   Expenses:EAG:TC:TcRaquelVentura-430019  763553.00 CLP
+    desc: "Master Santander 9046 Raquel Ventura"
   Expenses:EAG:TC:TcRaquelVentura-430019  2793295.00 CLP
+    desc: "Visa Santander 1066 Raquel Ventura"
   Expenses:EAG:TC:TcRaquelVentura-430019  2819152.00 CLP
+    desc: "USD2.981,30 Master 9046 Raquel Ventura"
 
 2025-11-06 * "Farmaceutica - Remedios Sra Raquel"
   id: "5370"
@@ -166,14 +176,22 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -266296.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -1411718.00 CLP
+    desc: "Leyes soc empl sur/stgo EAG Octubre2025"
   Expenses:EAG:SueldosRopaRegalas-411001  248922.00 CLP
+    desc: "Victoria Celia - Leyes soc Octubre 2025"
   Expenses:EAG:SueldosRopaRegalas-411001  266296.00 CLP
   Expenses:EAG:SueldosRopaRegalias-413001  258333.00 CLP
+    desc: "Leontina Mendez - Leyes soc Octubre 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  210261.00 CLP
+    desc: "Andres Martinez - Leyes soc Octubre 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  208620.00 CLP
+    desc: "Fresia Gonzalez - Leyes soc Octubre 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  172255.00 CLP
+    desc: "Esteban Mendez - Leyes soc Octubre 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  251100.00 CLP
+    desc: "Moises Moncada - Leyes soc Octubre 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  62227.00 CLP
+    desc: "Rossy Diaz - Leyes soc Octubre 2025"
 
 2025-11-06 * "EAG - Isapre Cruz Blanca Octubre 2025"
   id: "5372"
@@ -188,8 +206,10 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -26025971.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -691753.00 CLP
+    desc: "USD723,44 Visa Santander 0858 EAG"
   Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  26025971.00 CLP
   Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  691753.00 CLP
+    desc: "USD723,44 Visa Santander 0858 EAG"
 
 2025-11-06 * "Victoria Svigilisky Previred Oct. 2025"
   id: "5458"
@@ -269,13 +289,20 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1052428.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -5769726.00 CLP
+    desc: "Visa Santander 0858 Eduardo Avayu"
   Assets:EAG:ControlYLiquidacin-115099  14990.00 CLP
+    desc: "PAT Santander - Claro Chile SA"
   Assets:EAG:ControlYLiquidacin-115099  22990.00 CLP
+    desc: "PAT Santander - Entel PCS SA"
   Assets:EAG:ControlYLiquidacin-115099  3482743.00 CLP
+    desc: "PAT Santander - Metrogas SA"
   Assets:EAG:ControlYLiquidacin-115099  43958.00 CLP
+    desc: "PAT Santander - VTR Chile SA"
   Assets:EAG:ControlYLiquidacin-115099  1770132.00 CLP
+    desc: "PAT Santander - Aguas Cordillera SA"
   Expenses:EAG:TC:Tc8996MastercardLanpass-430007  1052428.00 CLP
   Expenses:EAG:TC:Tc0858VisaLatanpass-430009  434913.00 CLP
+    desc: "Visa Santander 0858 Eduardo Avayu"
 
 2025-11-10 * "Moises Moncada - Comida perritos"
   id: "5380"
@@ -298,6 +325,7 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -21642030.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -8420695.00 CLP
   Expenses:EAG:ObrasDeInfraestructuraMb-413900  21642030.00 CLP
+    desc: "USD200,10 Budhaus anticipo trabajos"
   Expenses:EAG:ObrasDeInfraestructuraMb-413900  8420695.00 CLP
 
 2025-11-12 * "Jhonny Guerra de Sra Raquel Ventura"
@@ -334,10 +362,15 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  5334813.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -22990.00 CLP
+    desc: "PAT Santander - Entel PCS SA"
   Assets:EAG:ControlYLiquidacin-115099  -14990.00 CLP
+    desc: "PAT Santander - Claro Chile SA"
   Assets:EAG:ControlYLiquidacin-115099  -3482743.00 CLP
+    desc: "PAT Santander - Metrogas SA"
   Assets:EAG:ControlYLiquidacin-115099  -43958.00 CLP
+    desc: "PAT Santander - VTR Chile SA"
   Assets:EAG:ControlYLiquidacin-115099  -1770132.00 CLP
+    desc: "PAT Santander - Aguas Cordillera SA"
 
 2025-11-13 * "Visa BCI 1027 EAG Octubre 2025"
   id: "5353"
@@ -345,12 +378,19 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -3294202.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  65631.00 CLP
+    desc: "PAT BCI - Security Sat SA"
   Assets:EAG:ControlYLiquidacin-115099  286000.00 CLP
+    desc: "PAT BCI - Esval SA"
   Assets:EAG:ControlYLiquidacin-115099  697510.00 CLP
+    desc: "PAT BCI - Chilquinta SA"
   Assets:EAG:ControlYLiquidacin-115099  173190.00 CLP
+    desc: "PAT BCI - Gasvalpo SA"
   Assets:EAG:ControlYLiquidacin-115099  8430.00 CLP
+    desc: "PAT BCI - Gasvalpo SA"
   Assets:EAG:ControlYLiquidacin-115099  8440.00 CLP
+    desc: "PAT BCI - Gasvalpo SA"
   Assets:EAG:ControlYLiquidacin-115099  26140.00 CLP
+    desc: "PAT BCI - Gasvalpo SA"
   Expenses:EAG:TC:Tc1027VisaInfinity-430005  2028861.00 CLP
 
 2025-11-13 * "Devol Visa BCI 1027 EAG Octubre 2025 FGK"
@@ -359,12 +399,19 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  1265341.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -65631.00 CLP
+    desc: "PAT BCI - Security Sat SA"
   Assets:EAG:ControlYLiquidacin-115099  -286000.00 CLP
+    desc: "PAT BCI - Esval SA"
   Assets:EAG:ControlYLiquidacin-115099  -697510.00 CLP
+    desc: "PAT BCI - Chilquinta SA"
   Assets:EAG:ControlYLiquidacin-115099  -173190.00 CLP
+    desc: "PAT BCI - Gasvalpo SA"
   Assets:EAG:ControlYLiquidacin-115099  -8430.00 CLP
+    desc: "PAT BCI - Gasvalpo SA"
   Assets:EAG:ControlYLiquidacin-115099  -8440.00 CLP
+    desc: "PAT BCI - Gasvalpo SA"
   Assets:EAG:ControlYLiquidacin-115099  -26140.00 CLP
+    desc: "PAT BCI - Gasvalpo SA"
 
 2025-11-13 * "B#15452 Agua Choshuenco EAG Oct 2025"
   id: "5355"
@@ -379,7 +426,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -177779.00 CLP
   Expenses:EAG:MantencinLanchasMotosDeAguaSeguros-413045  161779.00 CLP
+    desc: "B#585251 Chilemat Mant inspeccion lancha"
   Expenses:EAG:MantencinLanchasMotosDeAguaSeguros-413045  16000.00 CLP
+    desc: "B#31673 Pedernal mant inspeccion lancha"
 
 2025-11-13 * "Mariela Mendez de Sra Raquel Ventura"
   id: "5386"
@@ -423,6 +472,7 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -93675000.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -11015.00 CLP
   Assets:EAG:Bancos:BancoCityNBank30000771265-111016  93675000.00 CLP
+    desc: "USD100.000 de Cta Cte BCI 10160175 EAG"
   Expenses:EAG:GastosBancarios-430003  11015.00 CLP
 
 2025-11-14 * "F#368 Gomez Calefaccion Mant equipos EAG"
@@ -445,7 +495,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -71450.00 CLP
   Expenses:EAG:MantencinJardinTractor-413053  53400.00 CLP
+    desc: "Moises Moncada - Maceteros"
   Expenses:EAG:MantencinJardinTractor-413053  18050.00 CLP
+    desc: "Moises Moncada - PVC/Lija/Tapagorro"
 
 2025-11-18 * "Marion Leal - Kinesiologia cuello EAG"
   id: "5393"
@@ -510,6 +562,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -8000000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  8000000.00 CLP
+    desc: "Traspaso de cuenta BCI EAG 10160175"
 
 2025-11-21 * "Moises Moncada - Cable extensor internet"
   id: "5405"
@@ -608,7 +661,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -116791.00 CLP
   Expenses:EAG:MantencinJardinTractor-413053  59830.00 CLP
+    desc: "CTZ°109985 F.Jaramillo Materiales jardin"
   Expenses:EAG:MantencinJardinTractor-413053  56961.00 CLP
+    desc: "CTZ°109982 F.Jaramillo Materiales jardin"
 
 2025-11-25 * "USD2.100 Turnberry Ocean Colony"
   id: "5412"
@@ -658,9 +713,13 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -5203576.00 CLP
   Expenses:EAG:Contribuciones-411069  4708824.00 CLP
+    desc: "Rol 3783-191 Depto Jose A. Delano 4/4"
   Expenses:EAG:Contribuciones-411069  205492.00 CLP
+    desc: "Rol 3783-203 Estacionamiento 1 4/4"
   Expenses:EAG:Contribuciones-411069  205492.00 CLP
+    desc: "Rol 3783-225 Estacionamiento 23 4/4"
   Expenses:EAG:Contribuciones-411069  83768.00 CLP
+    desc: "Rol 3783-197 Bodega 1 4/4"
 
 2025-11-26 * "Comision mant plan banco Santander"
   id: "5460"
@@ -689,29 +748,53 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1300000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -955888.00 CLP
+    desc: "Mariela Mendez - Sueldo Noviembre 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -901358.00 CLP
+    desc: "Victoria Uscuvilca Sueldo Noviembre 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -365401.00 CLP
+    desc: "Esteban Mendez Sueldo Noviembre 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -520000.00 CLP
+    desc: "Andres Martinez - Sueldo Noviembre 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -304847.00 CLP
+    desc: "Fresia Gonzalez - Sueldo Noviembre 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -420400.00 CLP
+    desc: "Leontina Mendez - Sueldo Noviembre 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -754200.00 CLP
+    desc: "Moises Moncada - Sueldo Noviembre 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -215001.00 CLP
+    desc: "Rossy Diaz - Sueldo Noviembre 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -362000.00 CLP
+    desc: "Noelia Farfal - Sueldo/Celular Nov 2025"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -200000.00 CLP
+    desc: "CC4.656 Esteban Mendez - Prestamo de EAG"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -200000.00 CLP
+    desc: "CC4.270 Andres Martinez Dscto Ptamo EAG"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -250000.00 CLP
+    desc: "CC-4.801 Fresia G. - Dscto prestamo EAG"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -200000.00 CLP
+    desc: "CC-4.735 Leontina M. Dscto prestamo EAG"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -70000.00 CLP
+    desc: "CC5.093 Moises M. Dscto prestamo EAG"
   Expenses:EAG:SueldosRopaRegalas-411001  955888.00 CLP
+    desc: "Mariela Mendez - Sueldo Noviembre 2025"
   Expenses:EAG:SueldosRopaRegalas-411001  901358.00 CLP
+    desc: "Victoria Uscuvilca Sueldo Noviembre 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  565401.00 CLP
+    desc: "Esteban Mendez Sueldo Noviembre 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  720000.00 CLP
+    desc: "Andres Martinez - Sueldo Noviembre 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  554847.00 CLP
+    desc: "Fresia Gonzalez - Sueldo Noviembre 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  620400.00 CLP
+    desc: "Leontina Mendez - Sueldo Noviembre 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  824200.00 CLP
+    desc: "Moises Moncada - Sueldo Noviembre 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  215001.00 CLP
+    desc: "Rossy Diaz - Sueldo Noviembre 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  350000.00 CLP
+    desc: "Noelia Farfal - Sueldo Noviembre 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  12000.00 CLP
+    desc: "Noelia Farfal - Celular"
   Expenses:EAG:SraPatriciaDeutsch-430024  1300000.00 CLP
 
 2025-11-27 * "Selle Ltda - Toner impresora casa EAG"

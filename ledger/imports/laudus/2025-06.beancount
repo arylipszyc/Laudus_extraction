@@ -123,14 +123,22 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -259019.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -1389286.00 CLP
+    desc: "Leyes soc empl sur/stgo EAG Mayo 2025"
   Expenses:EAG:SueldosRopaRegalas-411001  259019.00 CLP
   Expenses:EAG:SueldosRopaRegalas-411001  242120.00 CLP
+    desc: "Victoria Celia U. - Leyes soc Mayo 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  167385.00 CLP
+    desc: "Esteban Mendez - Leyes soc Mayo 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  70015.00 CLP
+    desc: "Rossy Diaz - Leyes soc Mayo 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  202918.00 CLP
+    desc: "Fresia Gonzalez - Leyes soc Mayo 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  244000.00 CLP
+    desc: "Moises Moncada - Leyes soc Mayo 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  258333.00 CLP
+    desc: "Leontina Mendez - Leyes soc Mayo 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  204515.00 CLP
+    desc: "Andres Martinez - Leyes soc Mayo 2025"
 
 2025-06-06 * "Eliot Avendaño - Envio DHL EAG - Tauro"
   id: "4828"
@@ -145,12 +153,19 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  7960467.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -68300.00 CLP
+    desc: "PAT Santander - Abastible"
   Assets:EAG:ControlYLiquidacin-115099  -14990.00 CLP
+    desc: "PAT Santander - Claro Chile SA"
   Assets:EAG:ControlYLiquidacin-115099  -22990.00 CLP
+    desc: "PAT Santander - Entel PCS SA"
   Assets:EAG:ControlYLiquidacin-115099  -1936692.00 CLP
+    desc: "PAT Santander - Metrogas SA"
   Assets:EAG:ControlYLiquidacin-115099  -61993.00 CLP
+    desc: "PAT Santander - VTR Chile SA"
   Assets:EAG:ControlYLiquidacin-115099  -3105135.00 CLP
+    desc: "PAT Santander - Aguas Cordillera SA"
   Assets:EAG:ControlYLiquidacin-115099  -2750367.00 CLP
+    desc: "PAT Santander - Enel SA"
 
 2025-06-06 * "Traspaso a Cuenta Santander EAG 63188824"
   id: "4834"
@@ -158,6 +173,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -9000000.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  9000000.00 CLP
+    desc: "Traspaso de cuenta BCI EAG 10160175"
 
 2025-06-06 * "Jocelyn Avayu - Abono gastos Odontologia"
   id: "4852"
@@ -179,7 +195,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -39955.00 CLP
   Expenses:EAG:TC:TcRaquelVentura-430019  32950.00 CLP
+    desc: "Master Santander 9046 Raquel Ventura"
   Expenses:EAG:TC:TcRaquelVentura-430019  7005.00 CLP
+    desc: "USD7,50 Master Santander 9046 Raquel"
 
 2025-06-09 * "Mariela Mendez - Prestamo de EAG"
   id: "4831"
@@ -229,12 +247,19 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -8530287.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  68300.00 CLP
+    desc: "PAT Santander - Abastible Medidores"
   Assets:EAG:ControlYLiquidacin-115099  14990.00 CLP
+    desc: "PAT Santander - Claro Movil SA"
   Assets:EAG:ControlYLiquidacin-115099  22990.00 CLP
+    desc: "PAT Santander - Entel PCS"
   Assets:EAG:ControlYLiquidacin-115099  1936692.00 CLP
+    desc: "PAT Santander - Metrogas SA"
   Assets:EAG:ControlYLiquidacin-115099  61993.00 CLP
+    desc: "PAT Santander - VTR Chile SA"
   Assets:EAG:ControlYLiquidacin-115099  3105135.00 CLP
+    desc: "PAT Santander - Aguas Cordillera"
   Assets:EAG:ControlYLiquidacin-115099  2750367.00 CLP
+    desc: "PAT Santander - Enel"
   Expenses:EAG:TC:Tc0858VisaLatanpass-430009  569820.00 CLP
 
 2025-06-11 * "Devol FGK Visa BCI 1027 EAG Mayo 2025"
@@ -243,12 +268,19 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  1051270.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -203640.00 CLP
+    desc: "Esval SA - Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  -64806.00 CLP
+    desc: "Security Sat - Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  -611034.00 CLP
+    desc: "Chilquinta SA - Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  -10640.00 CLP
+    desc: "Gasvalpo SA - Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  -145270.00 CLP
+    desc: "Gasvalpo SA - Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  -7940.00 CLP
+    desc: "Gasvalpo SA - Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  -7940.00 CLP
+    desc: "Gasvalpo SA - Reñaca"
 
 2025-06-11 * "Servipag - Tag vehiculos Eduardo Avayu"
   id: "4857"
@@ -305,13 +337,21 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -10410176.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  203640.00 CLP
+    desc: "Esval SA - Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  64806.00 CLP
+    desc: "Security Sat - Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  611034.00 CLP
+    desc: "Chilquinta SA - Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  10640.00 CLP
+    desc: "Gasvalpo SA - Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  145270.00 CLP
+    desc: "Gasvalpo SA - Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  7940.00 CLP
+    desc: "Gasvalpo SA - Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  7940.00 CLP
+    desc: "Gasvalpo SA - Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  40000.00 CLP
+    desc: "Security Sat - Reñaca"
   Expenses:EAG:TC:Tc1027VisaInfinity-430005  9318906.00 CLP
 
 2025-06-12 * "F#14464 Serv. Neltume consumo Junio 2025"
@@ -397,8 +437,11 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4781750.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -11178.00 CLP
+    desc: "USD5.000 de Cta Cte BCI 10160175 EAG"
   Assets:EAG:Bancos:BancoCityNBank30000771265-111016  4781750.00 CLP
+    desc: "USD5.000 de Cta Cte BCI 10160175 EAG"
   Expenses:EAG:GastosBancarios-430003  11178.00 CLP
+    desc: "USD5.000 de Cta Cte BCI 10160175 EAG"
 
 2025-06-19 * "PAC BCI Seguros generales Junio 2025"
   id: "4907"
@@ -428,9 +471,13 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -5106450.00 CLP
   Expenses:EAG:Contribuciones-411069  4620924.00 CLP
+    desc: "Rol 3783-191 Depto Jose A. Delano 2/4"
   Expenses:EAG:Contribuciones-411069  201660.00 CLP
+    desc: "Rol 3783-203 Estacionamiento 1 2/4"
   Expenses:EAG:Contribuciones-411069  201660.00 CLP
+    desc: "Rol 3783-225 Estacionamiento 23  2/4"
   Expenses:EAG:Contribuciones-411069  82206.00 CLP
+    desc: "Rol 3783-197 Bodega 1 2/4"
 
 2025-06-23 * "Luis Salazar - Mantencion piscina"
   id: "4876"
@@ -466,9 +513,13 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -75750.00 CLP
   Assets:EAG:CuentasCorrientesDelPersonal-115001  22970.00 CLP
+    desc: "Sodimac - Cintas embalaje envio USA EAG"
   Expenses:EAG:ComprasCasaEfectivo-411049  9980.00 CLP
+    desc: "Pilas EAG"
   Expenses:EAG:RegalosDeMatrimonioOtros-430091  29300.00 CLP
+    desc: "Chocolates de EAG a M.Tadres - Regalo"
   Expenses:EAG:OtrosGastosPersonales-430099  13500.00 CLP
+    desc: "15 Plastificados Eduardo Avayu"
 
 2025-06-24 * "Esteban Mendez - Regalo cumpleaños"
   id: "4879"
@@ -483,6 +534,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -10000000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  10000000.00 CLP
+    desc: "Traspaso de cuenta BCI EAG 10160175"
 
 2025-06-24 * "Jeannette Avayu - Remesa Junio 2025"
   id: "4881"
@@ -490,7 +542,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2500000.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -2500000.00 CLP
+    desc: "Jocelyn Avayu - Remesa Junio 2025"
   Expenses:Jocelyn:RetirosDelMes-690001  2500000.00 CLP
+    desc: "Jocelyn Avayu - Remesa Junio 2025"
   Expenses:Jeannette:RetirosDelMes-790001  2500000.00 CLP
 
 2025-06-24 * "F#14538 Serv Neltume consumo Marzo 2025"
@@ -558,9 +612,12 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -11161.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -1945925.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -11260.00 CLP
+    desc: "Dif x cobrar envio Mayo 2025"
   Assets:EAG:ControlYLiquidacin-115099  18346.00 CLP
+    desc: "Dif x cobrar envio Junio 2025"
   Expenses:Johanna:RetirosDelMes-890001  2000000.00 CLP
   Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  -50000.00 CLP
+    desc: "Johanna Avayu - Santander Chile"
 
 2025-06-26 * "CC3.996 Moises Moncada - FxR Llave paso"
   id: "4892"
@@ -568,13 +625,21 @@
   source: "laudus-erp"
   Assets:EAG:FondosPorRendir-115005  -20000.00 CLP
   Assets:EAG:FondosPorRendir-115005  -100000.00 CLP
+    desc: "CC4.073 Moises Moncada FxR Compras varia"
   Assets:EAG:FondosPorRendir-115005  -60000.00 CLP
+    desc: "Moises Moncada - FxR Comida perros"
   Assets:EAG:ControlYLiquidacin-115099  3750.00 CLP
+    desc: "Moises M. Vuelto FxR Compras varias sur"
   Expenses:EAG:ComprasCasaEfectivo-413049  37200.00 CLP
+    desc: "Moises Monacada - Comida perros"
   Expenses:EAG:MantencinJardinTractor-413053  6800.00 CLP
+    desc: "Moises Monacada - Copla Hidraulica"
   Expenses:EAG:MantencinJardinTractor-413053  12760.00 CLP
+    desc: "Moises Monacada - Acc. PVC Hidraulico"
   Expenses:EAG:MantencinJardinTractor-413053  101721.00 CLP
+    desc: "Moises Monacada - Maceteros y boquillas"
   Expenses:EAG:MantencinGeneralInstalaciones-413065  17769.00 CLP
+    desc: "Moises Monacada - Llave de paso/varios"
 
 2025-06-26 * "CC4832 Moises M. - Dif FxR Ropa trabajo"
   id: "4893"
@@ -582,7 +647,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1402.00 CLP
   Expenses:EAG:SueldosRopaRegalias-413001  391402.00 CLP
+    desc: "Moises Moncada - Ropa de trabajo"
   Assets:Jocelyn:FondosPorRendir-613005  -390000.00 CLP
+    desc: "CC4832 Moises M. - FxR Internet / Ropa"
 
 2025-06-26 * "USD254,62 Rok Logistic Eduardo Avayu"
   id: "4906"
@@ -634,28 +701,51 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1500000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -365401.00 CLP
+    desc: "Esteban Mendez - Sueldo Junio 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -520000.00 CLP
+    desc: "Andres Martinez - Sueldo Junio 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -404847.00 CLP
+    desc: "Fresia Gonzalez - Sueldo Junio 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -420400.00 CLP
+    desc: "Leontina Mendez - Sueldo Junio 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -774200.00 CLP
+    desc: "Moises Moncada - Sueldo Junio 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -225751.00 CLP
+    desc: "Rossy Diaz - Sueldo Junio 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -955888.00 CLP
+    desc: "Mariela Mendez - Sueldo Junio 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -901358.00 CLP
+    desc: "Victoria Celia U. - Sueldo Junio 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -362000.00 CLP
+    desc: "Noelia Farfal M.. - Sueldo/Celular Junio"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -200000.00 CLP
+    desc: "CC3.640 Esteban Mendez - Prestamo de EAG"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -200000.00 CLP
+    desc: "CC4.270 Andres Martinez Dscto Ptamo EAG"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -250000.00 CLP
+    desc: "CC-3.892 Fresia G. - Dscto prestamo EAG"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -200000.00 CLP
+    desc: "CC-4.735 Leontina M. Dscto prestamo EAG"
   Expenses:EAG:SueldosRopaRegalas-411001  955888.00 CLP
+    desc: "Mariela Mendez - Sueldo Junio 2025"
   Expenses:EAG:SueldosRopaRegalas-411001  901358.00 CLP
+    desc: "Victoria Celia U. - Sueldo Junio 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  565401.00 CLP
+    desc: "Esteban Mendez - Sueldo Junio 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  720000.00 CLP
+    desc: "Andres Martinez - Sueldo Junio 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  654847.00 CLP
+    desc: "Fresia Gonzalez - Sueldo Junio 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  620400.00 CLP
+    desc: "Leontina Mendez - Sueldo Junio 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  774200.00 CLP
+    desc: "Moises Moncada - Sueldo Junio 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  225751.00 CLP
+    desc: "Rossy Diaz - Sueldo Junio 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  350000.00 CLP
+    desc: "Noelia Farfal M.. - Sueldo Junio 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  12000.00 CLP
+    desc: "Noelia Farfal M.. - Celular"
   Expenses:EAG:SraPatriciaDeutsch-430024  1500000.00 CLP
 
 2025-06-27 * "USD254,62 Rok Logistic Eduardo Avayu"
@@ -685,7 +775,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -419600.00 CLP
   Expenses:EAG:MantencinJardinBonsai-411053  193500.00 CLP
+    desc: "Arte y Dec Floral Ltda Mant Mayo 2025"
   Expenses:EAG:MantencinJardinBonsai-411053  226100.00 CLP
+    desc: "Arte y Dec Floral Ltda Mant Junio 2025"
 
 2025-06-30 * "USD30.000 de Cta Cte BCI 10160175 EAG"
   id: "4900"

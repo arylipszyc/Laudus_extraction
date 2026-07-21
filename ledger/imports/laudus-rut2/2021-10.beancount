@@ -11,9 +11,13 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -14446.00 CLP
   Assets:FFCC:BancoBci28981162-111005  7223.00 CLP
+    desc: "Devol de JAB Costanera Norte"
   Assets:FFCC:RetirosAzba-115029  7223.00 CLP
+    desc: "Costan. norte traslado cosas al sur SAG"
   Assets:JAB:BancoBciJabfgk28986911-611005  -7223.00 CLP
+    desc: "Devol de JAB Costanera Norte"
   Expenses:JAB:MantencinVehculosSeguros-811042  7223.00 CLP
+    desc: "Costan. norte traslado cosas al sur JAB"
 
 2021-10-01 * "Cancela BAM Entel AAG/Autopistas AAG"
   id: "1548"
@@ -21,10 +25,15 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -83280.00 CLP
   Assets:FFCC:RetirosAag-115021  58396.00 CLP
+    desc: "Entel PCS B#309068369 BAM Agosto AAG"
   Assets:FFCC:RetirosAag-115021  6480.00 CLP
+    desc: "Vespucio Norte AAG"
   Assets:FFCC:RetirosAag-115021  14482.00 CLP
+    desc: "Costanera Norte AAG"
   Assets:FFCC:RetirosAag-115021  2110.00 CLP
+    desc: "Vespucio sur AAG"
   Assets:FFCC:RetirosAag-115021  1812.00 CLP
+    desc: "Autopista Central AAG"
 
 2021-10-01 * "Elena Guzman - Dias/Masajes Sept. 2021"
   id: "1550"
@@ -32,10 +41,14 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -1075000.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -200226.00 CLP
+    desc: "2/2 Elizabeth Inostroza sueldo Sept. -21"
   Assets:JAB:BancoBciJabfgk28986911-611005  -320000.00 CLP
+    desc: "Elizabeth Inostroza dias Septiembre -21"
   Assets:JAB:ControlYLiquidacin-613099  1075000.00 CLP
   Assets:JAB:ControlYLiquidacin-613099  200226.00 CLP
+    desc: "2/2 Elizabeth Inostroza sueldo Sept. -21"
   Assets:JAB:ControlYLiquidacin-613099  320000.00 CLP
+    desc: "Elizabeth Inostroza dias Septiembre -21"
 
 2021-10-01 * "Alejandra Avayu Adicional remesa Septiem"
   id: "1551"
@@ -50,8 +63,10 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -27711.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -60546.00 CLP
+    desc: "Eliana Z. - Compra remedios envio al sur"
   Expenses:JAB:GastosCasa-811049  27711.00 CLP
   Expenses:JAB:GastosCasa-811049  60546.00 CLP
+    desc: "Eliana Z. - Compra remedios envio al sur"
 
 2021-10-01 * "Gastos Inversiones Tecnion Septiembre-21"
   id: "1564"
@@ -66,10 +81,14 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -41400.00 CLP
   Assets:FFCC:BancoBci28981162-111005  -41400.00 CLP
+    desc: "B#5052 Full Plagas SAG - Desratizacion"
   Assets:FFCC:RetirosAag-115021  41400.00 CLP
   Assets:FFCC:RetirosAzba-115029  41400.00 CLP
+    desc: "B#5052 Full Plagas SAG - Desratizacion"
   Assets:JAB:BancoBciJabfgk28986911-611005  -197064.00 CLP
+    desc: "B#5051 Full Plagas JAB - Desratizacion"
   Expenses:JAB:MantencinGeneralInstalaciones-815024  197064.00 CLP
+    desc: "B#5051 Full Plagas JAB - Desratizacion"
 
 2021-10-04 * "Gilma Pincheira F#80 1 Gas 45Kg CP JAB"
   id: "1567"
@@ -77,9 +96,13 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -84500.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -32000.00 CLP
+    desc: "Marianela Pineda - Diferencia Septiembre"
   Assets:JAB:BancoBciJabfgk28986911-611005  -768175.00 CLP
+    desc: "Interma F#9018 trabajos calefaccion CP"
   Expenses:JAB:MantencinAireAcondicionadocalefaccin-811019  768175.00 CLP
+    desc: "Interma F#9018 trabajos calefaccion CP"
   Expenses:JAB:SueldosRopaRegalas-815001  32000.00 CLP
+    desc: "Marianela Pineda - Diferencia Septiembre"
   Expenses:JAB:Gas-815010  84500.00 CLP
 
 2021-10-04 * "Marcelo Budnik bombas Luis Torres de DAG"
@@ -109,7 +132,9 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -754792.00 CLP
   Expenses:JAB:AjkGastosDeOperacin-831009  473642.00 CLP
+    desc: "F#2922 Aviasur - FBO CC-AJK Sept"
   Expenses:JAB:N266wwGastosDeOperacin-833009  281150.00 CLP
+    desc: "F#2923 Aviasur - FBO CC-N266WW Sept"
 
 2021-10-04 * "Cementerios Parques - Sepultura Mauricio"
   id: "1573"
@@ -124,7 +149,9 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  903698.00 CLP
   Assets:FFCC:ControlYLiquidacin-115099  -894135.00 CLP
+    desc: "CC1.540 USD1.100 Estrella B. - Sept 2021"
   Assets:FFCC:ControlYLiquidacin-115099  -9563.00 CLP
+    desc: "CC1.540 USD1.100 Estrella B. - Sept 2021"
 
 2021-10-05 * "Rodrigo Aravena - Devol compras casa"
   id: "1572"
@@ -146,8 +173,11 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -13546976.00 CLP
   Assets:FFCC:RetirosAag-115021  4515659.00 CLP
+    desc: "UF150 Eluchans F#12722 - Honorario AAG"
   Assets:FFCC:RetirosDag-115027  4515659.00 CLP
+    desc: "UF150 Eluchans F#12722 - Honorario DAG"
   Expenses:FFCC:GastosLegalesTributarios-415053  4515658.00 CLP
+    desc: "UF150 Eluchans F#12722 - Honorario FC"
 
 2021-10-05 * "UF130,21 Sura seguros autos AAG"
   id: "1583"
@@ -155,9 +185,13 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -3920470.00 CLP
   Assets:FFCC:RetirosAag-115021  1804348.00 CLP
+    desc: "UF59,93 Sura PHLG47 Land Rover Carolina"
   Assets:FFCC:RetirosAag-115021  1029009.00 CLP
+    desc: "UF34,18 Sura PSXW69 Sportage 2021 Cata H"
   Assets:FFCC:RetirosAag-115021  58104.00 CLP
+    desc: "UF1,93 Sura LBBR36 Sportage 2020 Cata H."
   Assets:FFCC:RetirosAag-115021  1029009.00 CLP
+    desc: "UF34,18 Sura KVVZ41 Subaru 2019 Jose H."
 
 2021-10-05 * "UF34,18 Sura - KZRG38 Mahindra JAB"
   id: "1584"
@@ -179,9 +213,13 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -8831188.00 CLP
   Assets:FFCC:RetirosDag-115027  1598825.00 CLP
+    desc: "UF54,2969 Aspor Multiriesgo - IF"
   Assets:FFCC:RetirosDag-115027  2098296.00 CLP
+    desc: "UF69,6914 Aspor Incendio Depto DAG"
   Assets:FFCC:RetirosDag-115027  4848100.00 CLP
+    desc: "UF161,0218 Aspor Incendio sur DAG"
   Assets:FFCC:RetirosDag-115027  285967.00 CLP
+    desc: "UF9,4979 Aspor Incendio - IF"
 
 2021-10-05 * "UF69,5374 Aspor - Multiriesgo hogar AZBA"
   id: "1616"
@@ -196,9 +234,13 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -21101343.00 CLP
   Expenses:JAB:SegurosIncendioRobo-811031  10277563.00 CLP
+    desc: "UF341,35 Aspor - Incendio VG"
   Expenses:JAB:Seguros-813031  2474531.00 CLP
+    desc: "UF82,1874 Aspor - Multiriesgo hogar"
   Expenses:JAB:SegurosCp-815031  7822945.00 CLP
+    desc: "UF259,826 Aspor - Incendio CP JAB"
   Expenses:JAB:DeptoElBosque310-875021  526304.00 CLP
+    desc: "UF17,4803 Aspor - Multiriesgo hogar"
 
 2021-10-06 * "Marcelo Budnik - Devol camas cas sur DAG"
   id: "1575"
@@ -213,11 +255,17 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -489088.00 CLP
   Assets:FFCC:BancoBci28981162-111005  -226871.00 CLP
+    desc: "AZBA - Leyes sociales empl casa Sept-21"
   Assets:FFCC:RetirosAag-115021  109287.00 CLP
+    desc: "Daissy Hueitra - Leyes sociales Sept-21"
   Assets:FFCC:RetirosAag-115021  212988.00 CLP
+    desc: "Mayeline Aquino - Leyes sociales Sept-21"
   Assets:FFCC:RetirosAag-115021  166813.00 CLP
+    desc: "Johanna de los S. - Leyes soc Sept 2021"
   Assets:FFCC:RetirosAzba-115029  187840.00 CLP
+    desc: "Lilia Alfaro - Leyes sociales Sept 2021"
   Assets:FFCC:RetirosAzba-115029  39031.00 CLP
+    desc: "Carolina Sepulveda - Leyes soc Sept 2021"
 
 2021-10-06 * "Rodrigo Arevena - Devol compras casa"
   id: "1577"
@@ -232,12 +280,19 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -6602855.00 CLP
   Expenses:JAB:MantencinVehculosSeguros-811042  1973365.00 CLP
+    desc: "UF65,53 Sura - KFWL75 Gran Carnival 2018"
   Expenses:JAB:MantencinVehculosSeguros-811042  1029145.00 CLP
+    desc: "UF34,18 Sura - LTJX46 Kia Rio 5 2021"
   Expenses:JAB:MantencinVehculosSeguros-811042  1029145.00 CLP
+    desc: "UF34,18 Sura -PPDX18 Subaru Outback 2021"
   Expenses:JAB:MantencinVehculosSeguros-811042  1029145.00 CLP
+    desc: "UF34,18 Sura - LTJY92 Kia Morning 2021"
   Expenses:JAB:MantencinVehculosSeguros-811042  1029145.00 CLP
+    desc: "UF34,18 Sura - LZRY28 Kia Cerato 2021"
   Expenses:JAB:MantencinVehculosSeguros-811042  -516235.00 CLP
+    desc: "UF17,14 Aplica endosos x duplic y baja"
   Expenses:JAB:MantencinVehculosMotosTierra-815042  1029145.00 CLP
+    desc: "UF34,18 Sura -PLPW49 Subaru Outback 2021"
 
 2021-10-06 * "Abono compra Via Gris"
   id: "1579"
@@ -259,6 +314,7 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -20000000.00 CLP
   Income:FFCC:Molco-310005  20000000.00 CLP
+    desc: "Traspaso de cuenta BCI FC 28981162"
 
 2021-10-07 * "USD500 Cumpleaños Raquel Ventura"
   id: "1586"
@@ -273,8 +329,10 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -4193034.00 CLP
   Assets:FFCC:BancoBci28981162-111005  -23729043.00 CLP
+    desc: "Visa BCI USD29.115,39 5705 Alberto Avayu"
   Assets:FFCC:RetirosAag-115021  4193034.00 CLP
   Assets:FFCC:RetirosAag-115021  23729043.00 CLP
+    desc: "Visa BCI USD29.115,39 5705 Alberto Avayu"
 
 2021-10-07 * "Abono compra Via Gris"
   id: "1588"
@@ -289,8 +347,10 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -4016430.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -122979.00 CLP
+    desc: "USD150,71 Visa BCI 2404 Septiembre JAB"
   Expenses:JAB:JabMastercardvisaamex-871005  4016430.00 CLP
   Expenses:JAB:JabMastercardvisaamex-871005  122979.00 CLP
+    desc: "USD150,71 Visa BCI 2404 Septiembre JAB"
 
 2021-10-07 * "USD68.003,44 Bella Marine Octubre 2021"
   id: "1590"
@@ -321,8 +381,10 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -781591.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -932898.00 CLP
+    desc: "Cristobal Guerrero - Leyes sociales Sept"
   Expenses:JAB:SueldosPilotos-837001  781591.00 CLP
   Expenses:JAB:SueldosPilotos-837001  932898.00 CLP
+    desc: "Cristobal Guerrero - Leyes sociales Sept"
 
 2021-10-07 * "VG/Reñaca/Molco Leyes sciales Septiembre"
   id: "1594"
@@ -330,19 +392,33 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -2798054.00 CLP
   Expenses:JAB:SueldosRopaRegalias-811001  229296.00 CLP
+    desc: "Elizabeth Inostroza leyes sociales Sept"
   Expenses:JAB:SueldosRopaRegalias-811001  59568.00 CLP
+    desc: "Veronica Vergara leyes sociales Sept"
   Expenses:JAB:SueldosRopaRegalias-811001  71720.00 CLP
+    desc: "Julia Bravo leyes sociales Sept 2021"
   Expenses:JAB:SueldosRopaRegalias-811001  187208.00 CLP
+    desc: "Esperanza Barrera leyes sociales Sept-21"
   Expenses:JAB:SueldosRopaRegalias-811001  381355.00 CLP
+    desc: "Rodrigo Aravena leyes sociales Sept 2021"
   Expenses:JAB:SueldosRopaRegalias-811001  342449.00 CLP
+    desc: "Fernando Diaz leyes sociales Sept 2021"
   Expenses:JAB:SueldosRopaRegalias-811001  244728.00 CLP
+    desc: "Janina Martinez leyes sociales Sept 2021"
   Expenses:JAB:SueldosRopaRegalias-811001  244823.00 CLP
+    desc: "Cruz Elena Guzman leyes sociales Sept-21"
   Expenses:JAB:SueldosJardineros-811002  51772.00 CLP
+    desc: "Juan Salas leyes sociales Septiembre-21"
   Expenses:JAB:SueldosJardineros-811002  159459.00 CLP
+    desc: "Jose Videla leyes sociales Sept 2021"
   Expenses:JAB:SueldosRopaRegalas-813001  282176.00 CLP
+    desc: "Carlos Mondaca leyes sociales Sept-21"
   Expenses:JAB:SueldosRopaRegalas-813001  217492.00 CLP
+    desc: "Ximena Azocar leyes sociales Sept-21"
   Expenses:JAB:SueldosRopaRegalas-815001  136922.00 CLP
+    desc: "Marianela Pineda leyes sociales Sept-21"
   Expenses:JAB:SueldosRopaRegalas-815001  189086.00 CLP
+    desc: "Maria L. Hernandez leyes sociales Sept"
 
 2021-10-07 * "Patricio Gallardo-Leyes sociales Sept-21"
   id: "1595"
@@ -350,9 +426,13 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -223356.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -305155.00 CLP
+    desc: "Molco jardin JAB Leyes sociales Septiemb"
   Expenses:JAB:JardinHonorarios-815053  55265.00 CLP
+    desc: "Reinaldo Zapata-Leyes sociales Sept-21"
   Expenses:JAB:JardinHonorarios-815053  134267.00 CLP
+    desc: "Marta Curilef - Leyes sociales Sept 2021"
   Expenses:JAB:JardinHonorarios-815053  115623.00 CLP
+    desc: "Bristela Quilaqueo - Leyes sociales Sept"
   Expenses:JAB:DestinySueldoTripulacin-851001  223356.00 CLP
 
 2021-10-07 * "Falabella - Procesador alimentos CP JAB"
@@ -361,7 +441,9 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -49990.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -156000.00 CLP
+    desc: "Rodrigo Aravena - Rosas y maceteros VG"
   Expenses:JAB:MantencinJardinMateriales-811018  156000.00 CLP
+    desc: "Rodrigo Aravena - Rosas y maceteros VG"
   Expenses:JAB:GastosCasaComestiblesBebidas-815049  49990.00 CLP
 
 2021-10-07 * "Lapiz Lopez B#40083841 Separadores/Resma"
@@ -377,7 +459,9 @@
   source: "laudus-erp"
   Assets:FFCC:RetirosDag-115027  283950.00 CLP
   Assets:FFCC:RetirosAzba-115029  378600.00 CLP
+    desc: "Vuelo 3.5Hrs Molco/Stgo/Molco - Michelle"
   Expenses:JAB:DevolucinCombustibleAvin-837029  -378600.00 CLP
+    desc: "Vuelo 3.5Hrs Molco/Stgo/Molco - Michelle"
   Expenses:JAB:DevolucinCombustibleAvin-837029  -283950.00 CLP
 
 2021-10-08 * "Karina Avayu - Hipotecario"
@@ -407,14 +491,22 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -125000.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -620000.00 CLP
+    desc: "Irene Guiloff - Isapre"
   Assets:JAB:BancoBciJabfgk28986911-611005  -15000.00 CLP
+    desc: "Lorenzo Heredia - Bencina"
   Assets:JAB:BancoBciJabfgk28986911-611005  -129338.00 CLP
+    desc: "Eliana - Remedios JAB envio al sur"
   Assets:JAB:BancoBciJabfgk28986911-611005  -363500.00 CLP
+    desc: "Fobeju - 18 Becas por don David Ventura"
   Expenses:JAB:SueldosJardineros-811002  125000.00 CLP
   Expenses:JAB:IreneGuiloff-811003  620000.00 CLP
+    desc: "Irene Guiloff - Isapre"
   Expenses:JAB:LorenzoHPollaLoteraBencina-811004  15000.00 CLP
+    desc: "Lorenzo Heredia - Bencina"
   Expenses:JAB:JabBonosMdicosExmenesRemedios-871017  129338.00 CLP
+    desc: "Eliana - Remedios JAB envio al sur"
   Expenses:JAB:FundacinFobeju-878021  363500.00 CLP
+    desc: "Fobeju - 18 Becas por don David Ventura"
 
 2021-10-08 * "Nicole Azcorbebeitia -Veterinaria perros"
   id: "1602"
@@ -429,10 +521,15 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -114500.00 CLP
   Assets:JAB:FondosPorRendir-613005  -60000.00 CLP
+    desc: "CC1385 Caja chica Septiembre 2021 Reñaca"
   Assets:JAB:FondosPorRendir-613005  60000.00 CLP
+    desc: "Caja chica Octubre 2021 Reñaca"
   Expenses:JAB:GastosCasa-813049  40190.00 CLP
+    desc: "Bolsas aseo/Cloro gel/paños"
   Expenses:JAB:GastosCasa-813049  16000.00 CLP
+    desc: "Detergente liquido ropa ecocarga"
   Expenses:JAB:GastosCasa-813049  58310.00 CLP
+    desc: "Cloro/Cif/Jabon liquido/Toalla nova"
 
 2021-10-11 * "Vuelo 3.6Hrs Molco/Stgo/Molco -Alejandra"
   id: "1776"
@@ -440,7 +537,9 @@
   source: "laudus-erp"
   Assets:FFCC:RetirosDag-115027  292063.00 CLP
   Assets:FFCC:RetirosAzba-115029  389417.00 CLP
+    desc: "Vuelo 3.6Hrs Molco/Stgo/Molco - Michelle"
   Expenses:JAB:DevolucinCombustibleAvin-837029  -389417.00 CLP
+    desc: "Vuelo 3.6Hrs Molco/Stgo/Molco - Michelle"
   Expenses:JAB:DevolucinCombustibleAvin-837029  -292063.00 CLP
 
 2021-10-12 * "Hipotecario departamento DAG/Mariela"
@@ -470,8 +569,10 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -15000.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -770000.00 CLP
+    desc: "Osvaldo Salgado Navarrete - Kine sur JAB"
   Expenses:JAB:LorenzoHPollaLoteraBencina-811004  15000.00 CLP
   Expenses:JAB:JabBonosMdicosExmenesRemedios-871017  770000.00 CLP
+    desc: "Osvaldo Salgado Navarrete - Kine sur JAB"
 
 2021-10-12 * "Rodrigo Aravena - Devol comoras VG/JAB"
   id: "1609"
@@ -479,14 +580,23 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -329482.00 CLP
   Expenses:JAB:SueldosRopaRegalias-811001  49980.00 CLP
+    desc: "Rodrigo Aravena - Pantalones (2)"
   Expenses:JAB:SueldosRopaRegalias-811001  55140.00 CLP
+    desc: "Rodrigo Aravena - Zapatillas Nike"
   Expenses:JAB:SueldosRopaRegalias-811001  54980.00 CLP
+    desc: "Rodrigo Aravena - Sweater y polera"
   Expenses:JAB:SueldosRopaRegalias-811001  79960.00 CLP
+    desc: "Rodrigo Aravena - Poleras (4)"
   Expenses:JAB:CorreoValijaCorrespondencia-811035  4000.00 CLP
+    desc: "Rodrigo Aravena - Correos de Chile VG"
   Expenses:JAB:MantencinVehculosSeguros-811042  37003.00 CLP
+    desc: "Rodrigo Aravena - Bencina VG"
   Expenses:JAB:GastosCasa-811049  13360.00 CLP
+    desc: "Rodrigo Aravena - Empanadas"
   Expenses:JAB:GastosCasa-811049  7059.00 CLP
+    desc: "Rodrigo Aravena - Pancito VG"
   Expenses:JAB:JabOtrosGastos-871099  28000.00 CLP
+    desc: "Rodrigo Aravena - Lavaseco parka JAB"
 
 2021-10-12 * "Costanera norte - Tag Carolina Sologuren"
   id: "1612"
@@ -494,26 +604,47 @@
   source: "laudus-erp"
   Assets:FFCC:RetirosAag-115021  4142.00 CLP
   Assets:FFCC:RetirosAag-115021  8200.00 CLP
+    desc: "SalcoBrand - Shampoo AAG"
   Assets:FFCC:RetirosAag-115021  15000.00 CLP
+    desc: "Eliot -Plastificado carnet B.doctors AAG"
   Assets:FFCC:RetirosEag-115023  8490.00 CLP
+    desc: "Eliot - Libro colección Marvel EAG Molco"
   Assets:FFCC:RetirosEag-115023  8500.00 CLP
+    desc: "Eliot - Libro colección Marvel EAG Molco"
   Assets:FFCC:DeniseZeldis-115033  3230.00 CLP
+    desc: "Denise Zeldis - Pago costanera norte"
   Assets:JAB:BancoBciJabfgk28986911-611005  -266742.00 CLP
+    desc: "Caja Chica Eliana Z. del 23/09 al 08/10"
   Expenses:JAB:SueldosRopaRegalias-811001  -15000.00 CLP
+    desc: "Reintegro de aguinaldos VG no retirados"
   Expenses:JAB:SueldosJardineros-811002  31250.00 CLP
+    desc: "Juan Salas - verano"
   Expenses:JAB:MantencinJardinMateriales-811018  87900.00 CLP
+    desc: "Juan S. repelentes insectos y materiales"
   Expenses:JAB:CorreoValijaCorrespondencia-811035  4660.00 CLP
+    desc: "chilexpress envio anexos contratos sur"
   Expenses:JAB:MantencinVehculosSeguros-811042  10990.00 CLP
+    desc: "Eliot - Ampolletas morning"
   Expenses:JAB:MantencinVehculosSeguros-811042  400.00 CLP
+    desc: "Eliot - estacionamiento"
   Expenses:JAB:MantencinVehculosSeguros-811042  1800.00 CLP
+    desc: "Eliot - Estacionamientos"
   Expenses:JAB:MantencinVehculosSeguros-811042  600.00 CLP
+    desc: "Eliot - Estacionamientos"
   Expenses:JAB:GastosCasa-811049  40000.00 CLP
+    desc: "Rodrigo A. consulta veterinaria perrito"
   Expenses:JAB:SueldosRopaRegalas-815001  16080.00 CLP
+    desc: "Lucy Hernandez 2 poleras blancas trabajo"
   Expenses:JAB:GastosCasaComestiblesBebidas-815049  22400.00 CLP
+    desc: "Nesspreso - Capsulas cafetera CP JAB"
   Expenses:JAB:JabBonosMdicosExmenesRemedios-871017  1200.00 CLP
+    desc: "Eliot - Alopurinol JAB"
   Expenses:JAB:JabOtrosGastos-871099  900.00 CLP
+    desc: "Eliot -El mercurio JAB"
   Expenses:JAB:FgkOtrosGastos-873099  13000.00 CLP
+    desc: "Eliot compra remedios Lilia regalo FGK"
   Expenses:JAB:FgkOtrosGastos-873099  3000.00 CLP
+    desc: "Eliot ramo de lilium de FGK a sra Coca"
 
 2021-10-12 * "DAG Impto Unico empl casa Sept 2021"
   id: "1613"
@@ -521,17 +652,29 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -4630.00 CLP
   Assets:FFCC:RetirosDag-115027  1699.00 CLP
+    desc: "Julio Saez - Impto Unico Sept 2021"
   Assets:FFCC:RetirosDag-115027  2931.00 CLP
+    desc: "Elizabeth Garcia - Impto Unico Sept 2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  -546604.00 CLP
+    desc: "Agustin Gomez /VG/Reñaca F29 Sept 2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  -958674.00 CLP
+    desc: "Cristobal Guerrero - Impto Unico Sept 21"
   Expenses:JAB:SueldosRopaRegalias-811001  20432.00 CLP
+    desc: "Rodrigo Aravena - Impto Unico Sept 21"
   Expenses:JAB:SueldosRopaRegalias-811001  16598.00 CLP
+    desc: "Fernando Diaz - Impto Unico Sept 2021"
   Expenses:JAB:SueldosRopaRegalias-811001  3764.00 CLP
+    desc: "Elena Guzman - Impto Unico Sept 2021"
   Expenses:JAB:SueldosRopaRegalias-811001  3752.00 CLP
+    desc: "Janina Martinez - Impto Unico Sept 2021"
   Expenses:JAB:SueldosRopaRegalias-811001  3738.00 CLP
+    desc: "Maria Inostroza - Impto Unico Sept 2021"
   Expenses:JAB:SueldosRopaRegalas-813001  7932.00 CLP
+    desc: "Carlos Mondaca - Impto Unico Sept 21"
   Expenses:JAB:SueldosPilotos-837001  490388.00 CLP
+    desc: "Agustin Gomez - Impto Unico Sept 2021"
   Expenses:JAB:SueldosPilotos-837001  958674.00 CLP
+    desc: "Cristobal Guerrero - Impto Unico Sept 21"
 
 2021-10-12 * "F#16276-7 Aviasur - Hangarajes aeronaves"
   id: "1619"
@@ -539,7 +682,9 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -7513113.00 CLP
   Expenses:JAB:AjkGastosDeOperacin-831009  3694967.00 CLP
+    desc: "F#16276 Aviasur - Hangaraje Octubre AJK"
   Expenses:JAB:N266wwGastosDeOperacin-833009  3818146.00 CLP
+    desc: "F#16277 Aviasur - Hangaraje Oct. N266WW"
 
 2021-10-13 * "Devol de EAG gastos FC Septiembre 2021"
   id: "1611"
@@ -576,9 +721,13 @@
   Assets:FFCC:BancoBci28981162-111005  -5890.00 CLP
   Assets:FFCC:RetirosAzba-115029  5890.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -74040.00 CLP
+    desc: "Molco JAB Agua Choshuenco Septiembre-21"
   Expenses:JAB:Agua-815006  2000.00 CLP
+    desc: "Agua Choshuenco Casa 39 Septiembre 2021"
   Expenses:JAB:Agua-815006  2000.00 CLP
+    desc: "Agua Choshuenco Casa 40 Septiembre 2021"
   Expenses:JAB:Agua-815006  70040.00 CLP
+    desc: "Agua Choshuenco CP JAB Septiembre 2021"
 
 2021-10-13 * "Mauricio Ergas - Vacuna hijo Karina"
   id: "1630"
@@ -600,13 +749,21 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -70000.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -40000.00 CLP
+    desc: "Patricio Gallardo - Quincena Octubre-21"
   Assets:JAB:BancoBciJabfgk28986911-611005  -253000.00 CLP
+    desc: "Jose O. Videla - 11 dias Octubre 2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  -125000.00 CLP
+    desc: "Juan Salas - Semana del 14 Octubre 2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  -150000.00 CLP
+    desc: "Lorenzo Heredia bono quincena caja FGK"
   Expenses:JAB:SueldosJardineros-811002  253000.00 CLP
+    desc: "Jose O. Videla - 11 dias Octubre 2021"
   Expenses:JAB:SueldosJardineros-811002  125000.00 CLP
+    desc: "Juan Salas - Semana del 14 Octubre 2021"
   Expenses:JAB:DestinySueldoTripulacin-851001  40000.00 CLP
+    desc: "Patricio Gallardo - Quincena Octubre-21"
   Expenses:JAB:FgkOtrosGastos-873099  150000.00 CLP
+    desc: "Lorenzo Heredia bono quincena caja FGK"
   Expenses:JAB:DagFamiliaRegalos-877007  70000.00 CLP
 
 2021-10-14 * "Mayelis Aquino - Anticipo Octubre 2021"
@@ -643,6 +800,7 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -15000000.00 CLP
   Expenses:FFCC:SueldoEag-411003  15000000.00 CLP
+    desc: "Octubre 2021"
 
 2021-10-14 * "USD317,27 Visa BCI 9124 Cata Avayu"
   id: "1638"
@@ -650,8 +808,10 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -261745.00 CLP
   Assets:FFCC:BancoBci28981162-111005  -19782245.00 CLP
+    desc: "USD23.978,77 Mastercard BCI 8544 AAG"
   Assets:FFCC:RetirosAag-115021  261745.00 CLP
   Assets:FFCC:RetirosAag-115021  19782245.00 CLP
+    desc: "USD23.978,77 Mastercard BCI 8544 AAG"
 
 2021-10-14 * "Mastercard BCI 8544 pesos AAG"
   id: "1639"
@@ -659,8 +819,10 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -6369360.00 CLP
   Assets:FFCC:BancoBci28981162-111005  -682183.00 CLP
+    desc: "Visa BCI 9124 pesos Cata Avayu"
   Assets:FFCC:RetirosAag-115021  6369360.00 CLP
   Assets:FFCC:RetirosAag-115021  682183.00 CLP
+    desc: "Visa BCI 9124 pesos Cata Avayu"
 
 2021-10-14 * "Rene Bastias - Estabilizador porton ppal"
   id: "1641"
@@ -675,12 +837,18 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -360455.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -385000.00 CLP
+    desc: "Lorena Ross B#135 - Sesiones kine JAB"
   Assets:JAB:BancoBciJabfgk28986911-611005  -18786.00 CLP
+    desc: "Rodrigo Aravena - Gastos casa Via Gris"
   Assets:JAB:BancoBciJabfgk28986911-611005  -42990.00 CLP
+    desc: "Esperanza Barrera - Zapatillas"
   Expenses:JAB:SueldosRopaRegalias-811001  42990.00 CLP
+    desc: "Esperanza Barrera - Zapatillas"
   Expenses:JAB:GastosCasa-811049  18786.00 CLP
+    desc: "Rodrigo Aravena - Gastos casa Via Gris"
   Expenses:JAB:MarinaDelSurCofrada-851005  360455.00 CLP
   Expenses:JAB:JabBonosMdicosExmenesRemedios-871017  385000.00 CLP
+    desc: "Lorena Ross B#135 - Sesiones kine JAB"
 
 2021-10-14 * "Jumbo - El Bosque"
   id: "1643"
@@ -688,10 +856,14 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -997542.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -433577.00 CLP
+    desc: "Jumbo - Via Gris"
   Expenses:JAB:IreneGuiloff-811003  997051.00 CLP
   Expenses:JAB:IreneGuiloff-811003  491.00 CLP
+    desc: "Jumbo - Comision supermercado El Bosque"
   Expenses:JAB:GastosCasa-811049  433086.00 CLP
+    desc: "Jumbo - Via Gris"
   Expenses:JAB:GastosCasa-811049  491.00 CLP
+    desc: "Jumbo - Comision supermercado VG"
 
 2021-10-14 * "Isapre Vida Tres Agosto Catalina Avayu"
   id: "1644"
@@ -713,8 +885,11 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -113591.00 CLP
   Expenses:JAB:Telfono-815007  24456.00 CLP
+    desc: "Telefonica del sur Nº8228 Septiembre-21"
   Expenses:JAB:Telfono-815007  66902.00 CLP
+    desc: "Telefonica del sur Nº8235 Septiembre-21"
   Expenses:JAB:Telfono-815007  22233.00 CLP
+    desc: "Telefonica del sur Nº8230 Septiembre-21"
 
 2021-10-15 * "USD2.000 Michael Patrella - Caja chica"
   id: "1647"
@@ -752,7 +927,9 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  191306.00 CLP
   Assets:FFCC:ControlYLiquidacin-115099  -76373.00 CLP
+    desc: "CC-1744 M.Poblete - Asignacion familiar"
   Assets:FFCC:ControlYLiquidacin-115099  -114933.00 CLP
+    desc: "M.Poblete-Diferencia Asignacion familiar"
 
 2021-10-18 * "Com. Edifcio El Bosque - Gtos Comunes"
   id: "1651"
@@ -760,12 +937,18 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -359786.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -39863.00 CLP
+    desc: "Rodrigo Aravena - Pan/Carne/Pollo VG"
   Assets:JAB:BancoBciJabfgk28986911-611005  -75949.00 CLP
+    desc: "Rodrigo Aravena - Remedios JAB del 14/10"
   Assets:JAB:BancoBciJabfgk28986911-611005  -90000.00 CLP
+    desc: "Jael Avayu - Cumpleaños"
   Expenses:JAB:IreneGuiloff-811003  359786.00 CLP
   Expenses:JAB:GastosCasa-811049  39863.00 CLP
+    desc: "Rodrigo Aravena - Pan/Carne/Pollo VG"
   Expenses:JAB:JabBonosMdicosExmenesRemedios-871017  75949.00 CLP
+    desc: "Rodrigo Aravena - Remedios JAB del 14/10"
   Expenses:JAB:EagFamiliaRegalos-877003  90000.00 CLP
+    desc: "Jael Avayu - Cumpleaños"
 
 2021-10-18 * "USD2,41 Visa BCI 2404 Septiembre JAB"
   id: "1652"
@@ -794,9 +977,13 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -90995.00 CLP
   Expenses:JAB:MantencinVehculosSeguros-811042  4240.00 CLP
+    desc: "Globalvia B#11786266 LTJY92 Morning VG"
   Expenses:JAB:MantencinVehculosSeguros-811042  13780.00 CLP
+    desc: "Vespucio norte B#64755495 Tag autos JAB"
   Expenses:JAB:MantencinVehculosSeguros-811042  14738.00 CLP
+    desc: "Vespucio sur B#88819378 Tag autos JAB"
   Expenses:JAB:MantencinVehculosSeguros-811042  58237.00 CLP
+    desc: "Costanera norte B#45191377 Tag autos JAB"
 
 2021-10-19 * "Hemuth B. traslado aeropuerto AAG y Sra."
   id: "1656"
@@ -825,10 +1012,14 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -143880.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -13048.00 CLP
+    desc: "Eliana - Pack 4 cajas toallas humedas"
   Assets:JAB:BancoBciJabfgk28986911-611005  -1000000.00 CLP
+    desc: "Gabriel Rojas - Avance sastre JAB"
   Expenses:JAB:JabBonosMdicosExmenesRemedios-871017  143880.00 CLP
   Expenses:JAB:JabBonosMdicosExmenesRemedios-871017  13048.00 CLP
+    desc: "Eliana - Pack 4 cajas toallas humedas"
   Expenses:JAB:JabVestuarioSastre-871023  1000000.00 CLP
+    desc: "Gabriel Rojas - Avance sastre JAB"
 
 2021-10-19 * "UF175,5 Budhaus - Casa cuidador sur DAG"
   id: "1660"
@@ -852,10 +1043,15 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -1716330.00 CLP
   Expenses:JAB:RegalosMarimoniosNacimientos-877021  817300.00 CLP
+    desc: "USD1.000 Alejadro Avayu nacimiento hija"
   Expenses:JAB:RegalosMarimoniosNacimientos-877021  326920.00 CLP
+    desc: "USD400 Alejandro Avayu - Cumpl Danielle"
   Expenses:JAB:RegalosMarimoniosNacimientos-877021  81730.00 CLP
+    desc: "USD100 Alejandro Avayu Cumpl hija Aurora"
   Expenses:JAB:RegalosMarimoniosNacimientos-877021  326920.00 CLP
+    desc: "USD400  Alejandro Avayu - Cumpl Alison"
   Expenses:JAB:RegalosMarimoniosNacimientos-877021  163460.00 CLP
+    desc: "USD200  Alejandro Avayu - Cumpl 2 hijos"
 
 2021-10-19 * "Security Sat - SAG"
   id: "1663"
@@ -877,7 +1073,9 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -104070.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -83985.00 CLP
+    desc: "Acevedo F#307204 Combustible CP JAB"
   Expenses:JAB:MantencinVehculosMotosTierra-815042  83985.00 CLP
+    desc: "Acevedo F#307204 Combustible CP JAB"
   Expenses:JAB:MantencinVehculosMotosTierra-815042  104070.00 CLP
 
 2021-10-21 * "Movistar Hogar F#47034651"
@@ -886,7 +1084,9 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -77730.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -125000.00 CLP
+    desc: "Juan Salas - Semana del 20 de Octubre-21"
   Expenses:JAB:SueldosJardineros-811002  125000.00 CLP
+    desc: "Juan Salas - Semana del 20 de Octubre-21"
   Expenses:JAB:Telfono-811007  77730.00 CLP
 
 2021-10-21 * "Gasto comun Depto 301 - Sept 2021 DAG"
@@ -923,11 +1123,17 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -928788.00 CLP
   Assets:FFCC:BancoBci28981162-111005  -120000.00 CLP
+    desc: "Valentina Tapia PCR AAG y Carolina S."
   Assets:FFCC:BancoBci28981162-111005  -3232793.00 CLP
+    desc: "AAG Cam las flores Gtos comun Sept 2021"
   Assets:FFCC:RetirosAag-115021  60000.00 CLP
+    desc: "Valentina Tapia B#314 PCR AAG+Laborator."
   Assets:FFCC:RetirosAag-115021  60000.00 CLP
+    desc: "Valentina Tapia B#315 PCR Carolina+Labor"
   Assets:FFCC:RetirosAag-115021  1908423.00 CLP
+    desc: "Cam las flores Gto comun Sept 2021 / 103"
   Assets:FFCC:RetirosAag-115021  1324370.00 CLP
+    desc: "Cam las flores Gto comun Sept 2021 / 203"
   Assets:FFCC:RetirosAzba-115029  928788.00 CLP
 
 2021-10-21 * "Mastercard Black Chile pesos 8364  AAG"
@@ -943,6 +1149,7 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -30000000.00 CLP
   Assets:FFCC:BancoEdwards011626509-111007  30000000.00 CLP
+    desc: "Traspaso de FC BCI 28981162"
 
 2021-10-22 * "Osvaldo Salgado Navarrete - Kine sur JAB"
   id: "1673"
@@ -957,8 +1164,10 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -216013.00 CLP
   Assets:FFCC:BancoBci28981162-111005  -77599.00 CLP
+    desc: "Vida Tres - Isapre Cata Avayu Septiembre"
   Assets:FFCC:RetirosAag-115021  216013.00 CLP
   Assets:FFCC:RetirosAag-115021  77599.00 CLP
+    desc: "Vida Tres - Isapre Cata Avayu Septiembre"
 
 2021-10-25 * "F#16335 Aviasur - Combustible N266WW"
   id: "1676"
@@ -994,9 +1203,13 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -124240.00 CLP
   Assets:FFCC:RetirosAzba-115029  41992.00 CLP
+    desc: "Entel PCS SAG"
   Assets:FFCC:RetirosAzba-115029  56510.00 CLP
+    desc: "GTD Manqueghue SAG"
   Assets:FFCC:RetirosAzba-115029  9888.00 CLP
+    desc: "Movistar SAG"
   Assets:FFCC:RetirosAzba-115029  15850.00 CLP
+    desc: "Aguas Cordillera SAG"
 
 2021-10-25 * "Cristobal Guerrero - Sueldo Octubre 2021"
   id: "1681"
@@ -1004,8 +1217,10 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -4486281.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -3793058.00 CLP
+    desc: "Agustin Gomez - Sueldo Octubre 2021"
   Expenses:JAB:SueldosPilotos-837001  4486281.00 CLP
   Expenses:JAB:SueldosPilotos-837001  3793058.00 CLP
+    desc: "Agustin Gomez - Sueldo Octubre 2021"
 
 2021-10-25 * "Eluchans F#12748 Serv Enero a Junio AAG"
   id: "1683"
@@ -1013,8 +1228,10 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -4536086.00 CLP
   Assets:FFCC:BancoBci28981162-111005  -4536086.00 CLP
+    desc: "Eluchans F#12749 Serv Enero a Junio DAG"
   Assets:FFCC:RetirosAag-115021  4536086.00 CLP
   Assets:FFCC:RetirosDag-115027  4536086.00 CLP
+    desc: "Eluchans F#12749 Serv Enero a Junio DAG"
 
 2021-10-25 * "Lorenzo Heredia - Bencina 18/10"
   id: "1684"
@@ -1022,10 +1239,14 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -20000.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -82155.00 CLP
+    desc: "Rodrigo Aravena - Compras pan VG"
   Assets:JAB:BancoBciJabfgk28986911-611005  -165288.00 CLP
+    desc: "Club de Golf - Cuota Octubre 2021 JAB"
   Expenses:JAB:LorenzoHPollaLoteraBencina-811004  20000.00 CLP
   Expenses:JAB:GastosCasa-811049  82155.00 CLP
+    desc: "Rodrigo Aravena - Compras pan VG"
   Expenses:JAB:ClubDeGolfLaDehesa-879007  165288.00 CLP
+    desc: "Club de Golf - Cuota Octubre 2021 JAB"
 
 2021-10-26 * "PAC BCI Seguros generales JAB"
   id: "1682"
@@ -1042,9 +1263,13 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -176218.00 CLP
   Assets:FFCC:RetirosDag-115027  105550.00 CLP
+    desc: "Agua Cordillera B#24316473 Isabel Figari"
   Assets:FFCC:RetirosDag-115027  32864.00 CLP
+    desc: "VTR B#212017373 Isabel Figari"
   Assets:FFCC:RetirosDag-115027  17964.00 CLP
+    desc: "Movistar B#156675322 IF Nº222089383"
   Assets:FFCC:RetirosDag-115027  19840.00 CLP
+    desc: "Movistar B#156675321 IF Nº222088718"
 
 2021-10-26 * "Directv/Enel SAG"
   id: "1686"
@@ -1052,7 +1277,9 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -149983.00 CLP
   Assets:FFCC:RetirosAzba-115029  67850.00 CLP
+    desc: "Directv SAG"
   Assets:FFCC:RetirosAzba-115029  82133.00 CLP
+    desc: "Enel SAG"
 
 2021-10-26 * "Victor Lara trab medidos agua deptos AAG"
   id: "1687"
@@ -1060,10 +1287,14 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -150000.00 CLP
   Assets:FFCC:BancoBci28981162-111005  -90000.00 CLP
+    desc: "Catherine Mardones de JAA"
   Assets:FFCC:BancoBci28981162-111005  -20000.00 CLP
+    desc: "Jose Astroza Octubre de JAA"
   Assets:FFCC:RetirosAag-115021  150000.00 CLP
   Assets:FFCC:JosAlazraki-115031  90000.00 CLP
+    desc: "Catherine Mardones de JAA"
   Assets:FFCC:JosAlazraki-115031  20000.00 CLP
+    desc: "Jose Astroza Octubre de JAA"
 
 2021-10-26 * "Unidad Coronaria Movil Nov 2021 JABFGK"
   id: "1688"
@@ -1071,19 +1302,33 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -125522.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -40800.00 CLP
+    desc: "Club naval Valparaiso - Cuota social"
   Assets:JAB:BancoBciJabfgk28986911-611005  -100019.00 CLP
+    desc: "Comite amigos Panguipulli"
   Assets:JAB:BancoBciJabfgk28986911-611005  -60000.00 CLP
+    desc: "Oscar Poblete - mensualidad JAB"
   Assets:JAB:BancoBciJabfgk28986911-611005  -109000.00 CLP
+    desc: "Unidad Vecinal A-12 - Octubre 2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  -40000.00 CLP
+    desc: "Sra Mina - Mant cementerio Octubre-21"
   Assets:JAB:BancoBciJabfgk28986911-611005  -40000.00 CLP
+    desc: "Bonsai arte y decoracion - Jardin VG"
   Expenses:JAB:MantencinGeneralInstalaciones-811024  40000.00 CLP
+    desc: "Bonsai arte y decoracion - Jardin VG"
   Expenses:JAB:Barrera-811025  60000.00 CLP
+    desc: "Oscar Poblete - mensualidad JAB"
   Expenses:JAB:Barrera-811025  109000.00 CLP
+    desc: "Unidad Vecinal A-12 - Octubre 2021"
   Expenses:JAB:Donaciones-815099  100019.00 CLP
+    desc: "Comite amigos Panguipulli"
   Expenses:JAB:JabUnidadCoronaria-871015  62761.00 CLP
+    desc: "Unidad Coronaria Movil Nov 2021 JAB"
   Expenses:JAB:FgkUnidadCoronaria-873013  62761.00 CLP
+    desc: "Unidad Coronaria Movil Nov 2021 FGK"
   Expenses:JAB:FgkOtrosGastos-873099  40000.00 CLP
+    desc: "Sra Mina - Mant cementerio Octubre-21"
   Expenses:JAB:ClubNavalDeValparaso-879003  40800.00 CLP
+    desc: "Club naval Valparaiso - Cuota social"
 
 2021-10-26 * "Juan S./Maria Jara sueldo/Efectivo FGK"
   id: "1689"
@@ -1091,8 +1336,11 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -1440000.00 CLP
   Expenses:JAB:SueldosRopaRegalias-811001  650000.00 CLP
+    desc: "Maria Jara - Sueldo Octubre 2021"
   Expenses:JAB:SueldosJardineros-811002  290000.00 CLP
+    desc: "Juan Salas - Sueldo Octubre 2021"
   Expenses:JAB:FgkEfectivo-873001  500000.00 CLP
+    desc: "FGK - Efectivo para el sur"
 
 2021-10-26 * "B#690 Pedro Zapata - Octubre 2021"
   id: "1690"
@@ -1131,22 +1379,38 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -33980.00 CLP
   Assets:FFCC:RetirosAag-115021  5000.00 CLP
+    desc: "Raul - Arreglo chapa puerta servicio AAG"
   Assets:FFCC:RetirosEag-115023  7990.00 CLP
+    desc: "Eliot - Libro coleccion EAG"
   Assets:FFCC:RetirosEag-115023  8490.00 CLP
+    desc: "Eliot - Libro coleccion marvel EAG"
   Assets:FFCC:RetirosEag-115023  1000.00 CLP
+    desc: "Eliot - plastificados pases movilidad"
   Assets:FFCC:RetirosEag-115023  8500.00 CLP
+    desc: "Eliot - Libro coleccion marvel EAG"
   Assets:FFCC:RetirosEag-115023  3000.00 CLP
+    desc: "Eliot - tarjeta regalo R. Zang EAG"
   Assets:JAB:BancoBciJabfgk28986911-611005  -244283.00 CLP
+    desc: "Caja chica Eliana Z. del 8 al 25/10/2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  33980.00 CLP
   Expenses:JAB:MantencinJardinMateriales-811018  58000.00 CLP
+    desc: "Eliot - Comida peces lo curro jardin"
   Expenses:JAB:MantencinVehculosSeguros-811042  100.00 CLP
+    desc: "Eliot - Estacionamiento"
   Expenses:JAB:GastosCasa-811049  40000.00 CLP
+    desc: "Rodrigo Aravena -consulta perrito Navajo"
   Expenses:JAB:GastosCasa-811049  4670.00 CLP
+    desc: "Eliot - compras cintas y papel regalo"
   Expenses:JAB:GastosCasa-811049  13200.00 CLP
+    desc: "Eliot - Frutos secos"
   Expenses:JAB:GastosCasa-811049  21803.00 CLP
+    desc: "Fernando Diaz - Compras para el desayuno"
   Expenses:JAB:GastosCasaComestiblesBebidas-815049  35970.00 CLP
+    desc: "Lider - 3 bolsas camarones sur JAB"
   Expenses:JAB:JabBonosMdicosExmenesRemedios-871017  35660.00 CLP
+    desc: "Eliot - Remedios JAB"
   Expenses:JAB:JabOtrosGastos-871099  900.00 CLP
+    desc: "Eliot - El Mercurio"
 
 2021-10-27 * "Patricio Gallardo - Sueldo Octubre 2021"
   id: "1695"
@@ -1154,13 +1418,21 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -653664.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -600000.00 CLP
+    desc: "M. Lucinda Hernandez - Sueldo Octubre-21"
   Assets:JAB:BancoBciJabfgk28986911-611005  -220000.00 CLP
+    desc: "M. Lucinda Hernandez - Bono Octubre 2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  -162000.00 CLP
+    desc: "Marianela Pineda - Sueldo Octubre 2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  -414000.00 CLP
+    desc: "Marianela Pineda - Bono Octubre 2021"
   Expenses:JAB:SueldosRopaRegalas-815001  600000.00 CLP
+    desc: "M. Lucinda Hernandez - Sueldo Octubre-21"
   Expenses:JAB:SueldosRopaRegalas-815001  220000.00 CLP
+    desc: "M. Lucinda Hernandez - Bono Octubre 2021"
   Expenses:JAB:SueldosRopaRegalas-815001  162000.00 CLP
+    desc: "Marianela Pineda - Sueldo Octubre 2021"
   Expenses:JAB:SueldosRopaRegalas-815001  414000.00 CLP
+    desc: "Marianela Pineda - Bono Octubre 2021"
   Expenses:JAB:DestinySueldoTripulacin-851001  653664.00 CLP
 
 2021-10-27 * "Fernando Diaz Parte cerato LZRY28/Pan"
@@ -1169,9 +1441,13 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -49215.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -110145.00 CLP
+    desc: "Rodrigo Aravena - Beigales/Frutas/Varios"
   Expenses:JAB:MantencinVehculosSeguros-811042  39630.00 CLP
+    desc: "Fernando Diaz - Parte cerato LZRY28 JAB"
   Expenses:JAB:GastosCasa-811049  9585.00 CLP
+    desc: "Fernando Diaz - Pancito"
   Expenses:JAB:GastosCasa-811049  110145.00 CLP
+    desc: "Rodrigo Aravena - Beigales/Frutas/Varios"
 
 2021-10-27 * "Prov 50% cierre Octubre hasta 15 Nov -21"
   id: "1697"
@@ -1186,8 +1462,10 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -386884.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -340785.00 CLP
+    desc: "Bristela Quilaqueo sueldo Octubre 2021"
   Expenses:JAB:JardinHonorarios-815053  386884.00 CLP
   Expenses:JAB:JardinHonorarios-815053  340785.00 CLP
+    desc: "Bristela Quilaqueo sueldo Octubre 2021"
 
 2021-10-27 * "Kia F#932811 Mant KXHR68 Cerato JAB"
   id: "1699"
@@ -1216,15 +1494,25 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -99770.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -56346.00 CLP
+    desc: "GTD Manquehue - Via Gris"
   Assets:JAB:BancoBciJabfgk28986911-611005  -3806104.00 CLP
+    desc: "Metrogas - Via Gris"
   Assets:JAB:BancoBciJabfgk28986911-611005  -91851.00 CLP
+    desc: "Movistar Hogar - Via Gris"
   Assets:JAB:BancoBciJabfgk28986911-611005  -50161.00 CLP
+    desc: "Security Sat - Reñaca JAB"
   Expenses:JAB:Telfono-811007  91851.00 CLP
+    desc: "Movistar Hogar - Via Gris"
   Expenses:JAB:Gas-811010  3806104.00 CLP
+    desc: "Metrogas - Via Gris"
   Expenses:JAB:TvCableInternet-811011  56346.00 CLP
+    desc: "GTD Manquehue - Via Gris"
   Expenses:JAB:TvCableInternet-813011  49885.00 CLP
+    desc: "VTR reñaca"
   Expenses:JAB:TvCableInternet-813011  49885.00 CLP
+    desc: "VTR reñaca"
   Expenses:JAB:MantencinAlarmas-813023  50161.00 CLP
+    desc: "Security Sat - Reñaca JAB"
 
 2021-10-28 * "Carlos Mondaca - Sueldo Octubre 2021"
   id: "1702"
@@ -1232,12 +1520,18 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -901007.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -30000.00 CLP
+    desc: "Carlos Mondaca - Salidas Octubre 2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  -700491.00 CLP
+    desc: "Ximena Azocar - Sueldo Octubre 2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  -25000.00 CLP
+    desc: "Ximena Azocar - Salidas Octubre 2021"
   Expenses:JAB:SueldosRopaRegalas-813001  901007.00 CLP
   Expenses:JAB:SueldosRopaRegalas-813001  30000.00 CLP
+    desc: "Carlos Mondaca - Salidas Octubre 2021"
   Expenses:JAB:SueldosRopaRegalas-813001  700491.00 CLP
+    desc: "Ximena Azocar - Sueldo Octubre 2021"
   Expenses:JAB:SueldosRopaRegalas-813001  25000.00 CLP
+    desc: "Ximena Azocar - Salidas Octubre 2021"
 
 2021-10-28 * "Aida Litvak - Ayuda de FGK"
   id: "1703"
@@ -1252,22 +1546,38 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -801334.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -270000.00 CLP
+    desc: "Esperando Barrera - Salidas Octubre 2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  -1201007.00 CLP
+    desc: "Rodrigo Aravena - Sueldo Octubre 2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  -160000.00 CLP
+    desc: "Rodrigo Aravena - Salidas Octubre 2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  -40000.00 CLP
+    desc: "Rodrigo Aravena - Bono JAB Octubre 2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  -352990.00 CLP
+    desc: "Jose Osvaldo Videla - Sueldo Octubre-21"
   Assets:JAB:BancoBciJabfgk28986911-611005  -1002245.00 CLP
+    desc: "Janina Martinez  - Sueldo Octubre 2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  -440000.00 CLP
+    desc: "Janina Martinez  - Salidas Octubre 2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  -800339.00 CLP
+    desc: "Elizabeth Inostroza - Sueldo Octubre 202"
   Expenses:JAB:SueldosRopaRegalias-811001  801334.00 CLP
   Expenses:JAB:SueldosRopaRegalias-811001  270000.00 CLP
+    desc: "Esperando Barrera - Salidas Octubre 2021"
   Expenses:JAB:SueldosRopaRegalias-811001  1201007.00 CLP
+    desc: "Rodrigo Aravena - Sueldo Octubre 2021"
   Expenses:JAB:SueldosRopaRegalias-811001  160000.00 CLP
+    desc: "Rodrigo Aravena - Salidas Octubre 2021"
   Expenses:JAB:SueldosRopaRegalias-811001  40000.00 CLP
+    desc: "Rodrigo Aravena - Bono JAB Octubre 2021"
   Expenses:JAB:SueldosRopaRegalias-811001  1002245.00 CLP
+    desc: "Janina Martinez  - Sueldo Octubre 2021"
   Expenses:JAB:SueldosRopaRegalias-811001  440000.00 CLP
+    desc: "Janina Martinez  - Salidas Octubre 2021"
   Expenses:JAB:SueldosRopaRegalias-811001  800339.00 CLP
+    desc: "Elizabeth Inostroza - Sueldo Octubre 202"
   Expenses:JAB:SueldosJardineros-811002  352990.00 CLP
+    desc: "Jose Osvaldo Videla - Sueldo Octubre-21"
 
 2021-10-28 * "UF90,47 Acuerdo mensual IF cuota 23/36"
   id: "1705"
@@ -1282,6 +1592,7 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -15000000.00 CLP
   Expenses:FFCC:SueldoDag-411007  15000000.00 CLP
+    desc: "Octubre 2021"
 
 2021-10-28 * "Denise Zeldis - Sueldo Octubre 2021"
   id: "1711"
@@ -1289,9 +1600,12 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -3750000.00 CLP
   Assets:FFCC:BancoBci28981162-111005  -3636125.00 CLP
+    desc: "Michelle Zeldis - Sueldo Octubre 2021"
   Assets:FFCC:MichelleZeldis-115035  -113875.00 CLP
+    desc: "Michelle Zeldis - Pago a Ariel Borzutzky"
   Expenses:FFCC:SueldosAzba-411006  3750000.00 CLP
   Expenses:FFCC:SueldosAzba-411006  3750000.00 CLP
+    desc: "Michelle Zeldis - Sueldo Octubre 2021"
 
 2021-10-28 * "USD1.100 Estrella Bitran Octubre 2021"
   id: "1712"
@@ -1308,9 +1622,13 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -4997646.00 CLP
   Assets:FFCC:JosAlazraki-115031  810200.00 CLP
+    desc: "USD1.000 Hijo JAA de cuenta ABA"
   Assets:FFCC:MichelleZeldis-115035  113875.00 CLP
+    desc: "Michelle Zeldis - Pago a Ariel Borzutzky"
   Assets:FFCC:Israel-115041  323571.00 CLP
+    desc: "Israel - Gasto comun Oct/Nov/Dic 2021"
   Expenses:FFCC:SueldosAzba-411006  3750000.00 CLP
+    desc: "Ariel Bortzutzky - Sueldo Octubre 2021"
 
 2021-10-28 * "Jose Alazraki - Sueldo Octubre 2021"
   id: "1716"
@@ -1318,10 +1636,15 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -2402800.00 CLP
   Assets:FFCC:JosAlazraki-115031  -90000.00 CLP
+    desc: "CC1.686 Catherine Mardones de JAA"
   Assets:FFCC:JosAlazraki-115031  -20000.00 CLP
+    desc: "CC1.686 Jose Astroza Octubre de JAA"
   Assets:FFCC:JosAlazraki-115031  -400000.00 CLP
+    desc: "CC1.707 JAA - Banco Santander personal"
   Assets:FFCC:JosAlazraki-115031  -27000.00 CLP
+    desc: "CC-1.707 JAA - Devol a Michelle Zeldis"
   Assets:FFCC:JosAlazraki-115031  -810200.00 CLP
+    desc: "CC-1.714 USD1.000 Hijo JAA de cuenta ABA"
   Expenses:FFCC:SueldosAzba-411006  3750000.00 CLP
 
 2021-10-29 * "Elizabeth Inostroza - Salidas Octubre-21"
@@ -1330,11 +1653,16 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -440000.00 CLP
   Assets:JAB:BancoBciJabfgk28986911-611005  -989307.00 CLP
+    desc: "Fernando Diaz - Sueldo Octubre 2021"
   Assets:JAB:BancoBciJabfgk28986911-611005  -337661.00 CLP
+    desc: "SEC Octubre 2021"
   Expenses:JAB:SueldosRopaRegalias-811001  440000.00 CLP
   Expenses:JAB:SueldosRopaRegalias-811001  1111491.00 CLP
+    desc: "Fernando Diaz - Sueldo Octubre 2021"
   Expenses:JAB:SueldosRopaRegalias-811001  -122184.00 CLP
+    desc: "Fernando Diaz - cuota 1/2 auto"
   Expenses:JAB:JabEfectivo-871001  337661.00 CLP
+    desc: "SEC Octubre 2021"
 
 2021-10-29 * "Mayelis Aquino - Sueldo Octubre 2021"
   id: "1707"
@@ -1342,12 +1670,18 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -351618.00 CLP
   Assets:FFCC:BancoBci28981162-111005  -430535.00 CLP
+    desc: "Johanna de los Santos - Sueldo Octubre"
   Assets:FFCC:BancoBci28981162-111005  -350000.00 CLP
+    desc: "Daissy Hueitra - Sueldo Octubre 2021"
   Assets:FFCC:BancoEdwards011626509-111007  -4000000.00 CLP
+    desc: "Alberto Avayu - Anticipo de sueldo"
   Assets:FFCC:RetirosAag-115021  351618.00 CLP
   Assets:FFCC:RetirosAag-115021  430535.00 CLP
+    desc: "Johanna de los Santos - Sueldo Octubre"
   Assets:FFCC:RetirosAag-115021  350000.00 CLP
+    desc: "Daissy Hueitra - Sueldo Octubre 2021"
   Assets:FFCC:RetirosAag-115021  4000000.00 CLP
+    desc: "Alberto Avayu - Anticipo de sueldo"
 
 2021-10-29 * "Carolina Sepulveda - Sueldo Octubre-21"
   id: "1708"
@@ -1355,14 +1689,22 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -100002.00 CLP
   Assets:FFCC:BancoBci28981162-111005  -80000.00 CLP
+    desc: "Jose Astroza - Octubre 2021"
   Assets:FFCC:BancoBci28981162-111005  -27000.00 CLP
+    desc: "Jose Astroza - Devol a Michelle Zeldis"
   Assets:FFCC:BancoBci28981162-111005  -36000.00 CLP
+    desc: "Claudia Rappaport"
   Assets:FFCC:BancoBci28981162-111005  -400000.00 CLP
+    desc: "JAA - Banco Santander personal JAA"
   Assets:FFCC:RetirosAzba-115029  100002.00 CLP
   Assets:FFCC:RetirosAzba-115029  80000.00 CLP
+    desc: "Jose Astroza - Octubre 2021"
   Assets:FFCC:RetirosAzba-115029  36000.00 CLP
+    desc: "Claudia Rappaport"
   Assets:FFCC:JosAlazraki-115031  27000.00 CLP
+    desc: "Jose Astroza - Devol a Michelle Zeldis"
   Assets:FFCC:JosAlazraki-115031  400000.00 CLP
+    desc: "JAA - Banco Santander personal JAA"
 
 2021-10-29 * "Aplica sueldo Octubre 2021 AAG"
   id: "1710"
@@ -1370,8 +1712,11 @@
   source: "laudus-erp"
   Assets:FFCC:RetirosAag-115021  -15000000.00 CLP
   Assets:FFCC:RetirosEag-115023  -1000000.00 CLP
+    desc: "Cobro a DAG Gastos de Administr Octubre"
   Assets:FFCC:RetirosDag-115027  1000000.00 CLP
+    desc: "Gastos de Administración Octubre"
   Expenses:FFCC:SueldoAag-411001  15000000.00 CLP
+    desc: "Octubre 2021"
 
 2021-10-29 * "USD977 Lilia Alfaro - Sueldo Octubre-21"
   id: "1713"
@@ -1432,11 +1777,17 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciJabfgk28986911-611005  -178278.00 CLP
   Expenses:JAB:MantencinVehculosMotosTierra-815042  500.00 CLP
+    desc: "Rend Cristobal - Parquimetro CP JAB"
   Expenses:JAB:MantencinVehculosMotosTierra-815042  38001.00 CLP
+    desc: "Rend Cristobal - Bencina CP JAB"
   Expenses:JAB:GastosCasaComestiblesBebidas-815049  96897.00 CLP
+    desc: "Rend Cristobal - Supermercado El Trebol"
   Expenses:JAB:GastosCasaComestiblesBebidas-815049  2580.00 CLP
+    desc: "Rend Cristobal - Bebida CP JAB"
   Expenses:JAB:GastosCasaComestiblesBebidas-815049  13000.00 CLP
+    desc: "Rend Cristobal - Cajon frutillas CP JAB"
   Expenses:JAB:GastosCasaComestiblesBebidas-815049  27300.00 CLP
+    desc: "Rend Cristobal -Tortas panaderia Enco CP"
 
 2021-10-29 * "USD13.600 Dymeq-Suscripcion anual N266WW"
   id: "1724"
@@ -1451,10 +1802,15 @@
   source: "laudus-erp"
   Assets:JAB:ControlYLiquidacin-613099  -1078763.00 CLP
   Expenses:JAB:Luz-813005  776563.00 CLP
+    desc: "Chilquinta B#7649711"
   Expenses:JAB:Agua-813006  147700.00 CLP
+    desc: "Esval B#57179572"
   Expenses:JAB:Gas-813010  29430.00 CLP
+    desc: "Gasvalpo B#3919187"
   Expenses:JAB:Gas-813010  7340.00 CLP
+    desc: "Gasvalpo B#3919185"
   Expenses:JAB:Gas-813010  117730.00 CLP
+    desc: "Gasvalpo B#3919186"
 
 2021-10-30 * "USD6.168,41 Comision Sueldo Oct Ariel"
   id: "1743"
@@ -1469,9 +1825,13 @@
   source: "laudus-erp"
   Expenses:JAB:TvCableInternet-811011  48960.00 CLP
   Expenses:JAB:TvCableInternet-811011  89630.00 CLP
+    desc: "PAT Santander 8328 - DIRECTV"
   Expenses:JAB:TvCableInternet-811011  103900.00 CLP
+    desc: "PAT Santander 8328 - DIRECTV"
   Expenses:JAB:JabMastercardvisaamex-871005  -429716.00 CLP
+    desc: "Mastecard Santander 8328 Octubre 2021"
   Expenses:JAB:Cis-878013  187226.00 CLP
+    desc: "PAT Santander 8328 - Com. Isr. Stgo"
 
 2021-10-30 * "Eliot - Libro colección Marvel EAG Molco"
   id: "1767"
@@ -1480,12 +1840,19 @@
   Assets:FFCC:RetirosEag-115023  -8490.00 CLP
   Assets:FFCC:RetirosEag-115023  -8500.00 CLP
   Assets:FFCC:RetirosEag-115023  -90875.00 CLP
+    desc: "Fobeju - Becas fallec Alberto Benadretti"
   Assets:FFCC:RetirosEag-115023  -7990.00 CLP
+    desc: "Eliot - Libro coleccion EAG"
   Assets:FFCC:RetirosEag-115023  -8490.00 CLP
+    desc: "Eliot - Libro coleccion marvel EAG"
   Assets:FFCC:RetirosEag-115023  -1000.00 CLP
+    desc: "Eliot - plastificados pases movilidad"
   Assets:FFCC:RetirosEag-115023  -8500.00 CLP
+    desc: "Eliot - Libro coleccion marvel EAG"
   Assets:FFCC:RetirosEag-115023  -3000.00 CLP
+    desc: "Eliot - tarjeta regalo R. Zang EAG"
   Assets:FFCC:ControlYLiquidacin-115099  136845.00 CLP
+    desc: "Devol de EAG gastos FC Octubre 2021"
 
 2021-10-30 * "Gastos Inversiones Tecnion Octubre 2021"
   id: "1773"
@@ -1493,13 +1860,21 @@
   source: "laudus-erp"
   Assets:FFCC:ControlYLiquidacin-115099  -11215701.00 CLP
   Expenses:FFCC:HugoSanzanaFigueroa-433003  3476395.00 CLP
+    desc: "Hugo Sanzana Octubre 2021"
   Expenses:FFCC:CynthiaGarayDelVillar-433005  1430140.00 CLP
+    desc: "Cynthia Garay Octubre 2021"
   Expenses:FFCC:MiguelLilloOrtiz-433008  3229979.00 CLP
+    desc: "Miguel Lillo Octubre 2021"
   Expenses:FFCC:ArriendoLuzAguaGas-433013  180650.00 CLP
+    desc: "Arriendo Cpech Octubre 2021"
   Expenses:FFCC:Telfono-433015  51635.00 CLP
+    desc: "F#66635573 Movistar"
   Expenses:FFCC:AycAuditores-433052  756888.00 CLP
+    desc: "F#2574 A&C Auditores"
   Expenses:FFCC:EluchansAbogadosSpa-433053  2032047.00 CLP
+    desc: "F#12688 Eluchans Spa - Octubre 2021"
   Expenses:FFCC:InsumosEquiposDeOficina-437021  57967.00 CLP
+    desc: "F#111848 Compuprint"
 
 2021-10-30 * "EAG Gerencia Octubre 2021"
   id: "1777"
@@ -1507,7 +1882,9 @@
   source: "laudus-erp"
   Assets:FFCC:ControlYLiquidacin-115099  -1865980.00 CLP
   Expenses:FFCC:ArriendoLuzAguaGas-433013  -180650.00 CLP
+    desc: "CC-1.772 Arriendo Cpech Octubre 2021"
   Expenses:FFCC:MaraEugeniaLlaulen-435004  2046630.00 CLP
+    desc: "Octubre 2021"
 
 2021-10-31 * "USD4.328,14   gasto en Keiki Kai - AAG"
   id: "4156"

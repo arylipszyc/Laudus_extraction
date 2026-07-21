@@ -11,12 +11,19 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  5560568.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -2180.00 CLP
+    desc: "PAT - GTD Manquehue SA"
   Assets:EAG:ControlYLiquidacin-115099  -47104.00 CLP
+    desc: "PAT - Movistar Hogar"
   Assets:EAG:ControlYLiquidacin-115099  -23317.00 CLP
+    desc: "PAT - Entel PCS FGK"
   Assets:EAG:ControlYLiquidacin-115099  -56703.00 CLP
+    desc: "PAT - VTR Chile Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  -1735613.00 CLP
+    desc: "PAT - Enel"
   Assets:EAG:ControlYLiquidacin-115099  -3680661.00 CLP
+    desc: "PAT - Aguas Cordillera"
   Assets:EAG:ControlYLiquidacin-115099  -14990.00 CLP
+    desc: "PAT - Claro Chile SA Lorenzo"
 
 2023-06-02 * "Alejandro Aliaga - Reparacion manilla"
   id: "2514"
@@ -31,7 +38,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -150000.00 CLP
   Expenses:EAG:MantencinJardinBonsai-411053  70000.00 CLP
+    desc: "Bonsai - Mantencion general Mayo 2023"
   Expenses:EAG:MantencinJardinBonsai-411053  80000.00 CLP
+    desc: "Jardin - Mantencion general Mayo 2023"
 
 2023-06-05 * "Yerbas Buenas SPA - Psicologa Jael Avayu"
   id: "2516"
@@ -39,8 +48,10 @@
   source: "laudus-erp"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -70000.00 CLP
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -390000.00 CLP
+    desc: "Inv. Some SpA - Psiquiatra Jael Avayu"
   Expenses:Jael:IsapreGastosMdicos-990051  70000.00 CLP
   Expenses:Jael:IsapreGastosMdicos-990051  390000.00 CLP
+    desc: "Inv. Some SpA - Psiquiatra Jael Avayu"
 
 2023-06-05 * "M. Ciraulo - Repar. lancha Cobalt EAG"
   id: "2517"
@@ -69,6 +80,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  80029566.00 CLP
   Income:EAG:Jb-310029  -80029566.00 CLP
+    desc: "USD100.000 a BCI USD EAG 18565743"
 
 2023-06-06 * "Mariela Mendez - Leyes soc Mayo 2023"
   id: "2520"
@@ -76,15 +88,24 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -250187.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -1494016.00 CLP
+    desc: "Leyes soc empl sur/stgo EAG Mayo 2023"
   Expenses:EAG:SueldosRopaRegalas-411001  243028.00 CLP
+    desc: "Eduardo Figueroa - Leyes soc Mayo 2023"
   Expenses:EAG:SueldosRopaRegalas-411001  227739.00 CLP
+    desc: "Victoria Celia - Leyes soc Mayo 2023"
   Expenses:EAG:SueldosRopaRegalas-411001  250187.00 CLP
   Expenses:EAG:SueldosRopaRegalias-413001  258333.00 CLP
+    desc: "Leontina Mendez - Leyes soc Mayo 2023"
   Expenses:EAG:SueldosRopaRegalias-413001  2183.00 CLP
+    desc: "Luis Mendez - Leyes soc Mayo 2023"
   Expenses:EAG:SueldosRopaRegalias-413001  193780.00 CLP
+    desc: "Andres Martinez - Leyes soc Mayo 2023"
   Expenses:EAG:SueldosRopaRegalias-413001  190950.00 CLP
+    desc: "Fresia Gonzalez - Leyes soc Mayo 2023"
   Expenses:EAG:SueldosRopaRegalias-413001  157516.00 CLP
+    desc: "Esteban Mendez - Leyes soc Mayo 2023"
   Expenses:EAG:SueldosRopaRegalias-413001  220487.00 CLP
+    desc: "Moises Moncada - Leyes soc Mayo 2023"
 
 2023-06-06 * "PAC Seguro fraude Santander"
   id: "2585"
@@ -113,7 +134,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1513997.00 CLP
   Expenses:EAG:TC:TcRaquelVentura-430019  1502050.00 CLP
+    desc: "Visa Santander 5966 Sra Raquel Ventura"
   Expenses:EAG:TC:TcRaquelVentura-430019  11947.00 CLP
+    desc: "USD14,99 Master Sant. 2019 Sra Raquel"
 
 2023-06-08 * "Cotizaciones Mayo 2023"
   id: "2524"
@@ -142,8 +165,11 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -565505.00 CLP
   Expenses:EAG:MantencinVehculosMotosTierraSeguros-413043  298831.00 CLP
+    desc: "Marcelo C. Hibernar 4 motos tierra"
   Expenses:EAG:MantencinLanchasMotosDeAguaSeguros-413045  201845.00 CLP
+    desc: "Marcelo C. Hibernacion 2 motos agua"
   Expenses:EAG:MantencinLanchasMotosDeAguaSeguros-413045  64829.00 CLP
+    desc: "Marcelo C. Hibernar 1 motor fuera borda"
 
 2023-06-08 * "Visa Santander pesos 0790 Mayo EAG"
   id: "2688"
@@ -151,12 +177,19 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -7002915.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  47104.00 CLP
+    desc: "PAT - Movistar Hogar"
   Assets:EAG:ControlYLiquidacin-115099  14990.00 CLP
+    desc: "PAT - Claro Chile SA Lorenzo"
   Assets:EAG:ControlYLiquidacin-115099  23317.00 CLP
+    desc: "PAT - Entel PCS FGK"
   Assets:EAG:ControlYLiquidacin-115099  56703.00 CLP
+    desc: "PAT - VTR Chile Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  1735613.00 CLP
+    desc: "PAT - Enel"
   Assets:EAG:ControlYLiquidacin-115099  3680661.00 CLP
+    desc: "PAT - Aguas Cordillera"
   Assets:EAG:ControlYLiquidacin-115099  2180.00 CLP
+    desc: "PAT - GTD Manquehue SA"
   Expenses:EAG:TC:Tc0858VisaLatanpass-430009  1442347.00 CLP
 
 2023-06-08 * "Master Santander pesos 2735 Mayo EAG"
@@ -172,7 +205,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -2461892.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -948218.00 CLP
+    desc: "USD1.158,61 Santander Master 2735 EAG"
   Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  948218.00 CLP
+    desc: "USD1.158,61 Santander Master 2735 EAG"
   Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  2461892.00 CLP
 
 2023-06-12 * "USD4.696,23 Visa BCI 1027 Mayo 2023"
@@ -202,7 +237,9 @@
   source: "laudus-erp"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  335629.00 CLP
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -332031.00 CLP
+    desc: "Cotizaciones Mayo 2023"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -3598.00 CLP
+    desc: "F29 Odontologia EIRL Mayo 2023"
 
 2023-06-12 * "Seguro proteccion bancaria Banco Chile"
   id: "2577"
@@ -231,8 +268,10 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -72866970.00 CLP
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -7162596.00 CLP
+    desc: "USD9.030 a BCI 28981162 Eduardo Avayu"
   Assets:EAG:TraspasoAFondoComn-113031  72866970.00 CLP
   Assets:EAG:TraspasoAFondoComn-113031  7162596.00 CLP
+    desc: "USD9.030 a BCI 28981162 Eduardo Avayu"
 
 2023-06-13 * "Visa BCI 1027 EAG Mayo 2023"
   id: "2537"
@@ -240,10 +279,15 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -10838757.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  278150.00 CLP
+    desc: "PAT Esval SA B#70227896"
   Assets:EAG:ControlYLiquidacin-115099  559322.00 CLP
+    desc: "PAT Chilquinta SA F#8694375"
   Assets:EAG:ControlYLiquidacin-115099  44930.00 CLP
+    desc: "PAT Gasvalpo SPA B#5774837"
   Assets:EAG:ControlYLiquidacin-115099  96500.00 CLP
+    desc: "PAT Gasvalpo SPA B#1012697"
   Assets:EAG:ControlYLiquidacin-115099  59267.00 CLP
+    desc: "Security Sat Reñaca"
   Expenses:EAG:TC:Tc1027VisaInfinity-430005  9800588.00 CLP
 
 2023-06-13 * "Visa Banco de Chile 1168 Eduardo Avayu"
@@ -259,10 +303,15 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -327820.00 CLP
   Expenses:EAG:ComprasCasaEfectivo-413049  8610.00 CLP
+    desc: "B#127964 Rend. Noelia - Ferreteria"
   Expenses:EAG:ComprasCasaEfectivo-413049  92950.00 CLP
+    desc: "B#1592039 Rend. Noelia - Art. Aseo"
   Expenses:EAG:ComprasCasaEfectivo-413049  59600.00 CLP
+    desc: "B#101092 Rend. Noelia - Bebidas"
   Expenses:EAG:ComprasCasaEfectivo-413049  116700.00 CLP
+    desc: "B#99781 Rend. Noelia - Alimento perros"
   Expenses:EAG:ComprasCasaEfectivo-413049  49960.00 CLP
+    desc: "B#45827 Rend. Noelia - Panaderia"
 
 2023-06-14 * "FxR Eliot - Remedios EAG"
   id: "2532"
@@ -305,9 +354,13 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  978902.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -278150.00 CLP
+    desc: "PAT Esval SA B#70227896"
   Assets:EAG:ControlYLiquidacin-115099  -559322.00 CLP
+    desc: "PAT Chilquinta SA F#8694375"
   Assets:EAG:ControlYLiquidacin-115099  -44930.00 CLP
+    desc: "PAT Gasvalpo SPA B#5774837"
   Assets:EAG:ControlYLiquidacin-115099  -96500.00 CLP
+    desc: "PAT Gasvalpo SPA B#1012697"
 
 2023-06-15 * "Mariela Mendez - Sueldo Junio 2023"
   id: "2539"
@@ -329,7 +382,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  9202.00 CLP
   Assets:EAG:FondosPorRendir-115005  -60000.00 CLP
+    desc: "CC2.523 FxR Eliot - Remedios EAG"
   Expenses:EAG:Remedios-430051  50798.00 CLP
+    desc: "Eliot Avendaño - Remedios EAG"
 
 2023-06-16 * "F#35160 Charter Link SPA - Transporte"
   id: "2543"
@@ -388,10 +443,14 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -17903.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -26113.00 CLP
+    desc: "Servipag - Autopistas Jael/Sra Raquel"
   Expenses:EAG:MantencinVehculosSeguros-411043  17903.00 CLP
   Expenses:EAG:MantencinVehculosSeguros-411043  15054.00 CLP
+    desc: "B#54317253 C. Norte - RXKT66/SWHH45 Jael"
   Expenses:EAG:MantencinVehculosSeguros-411043  8949.00 CLP
+    desc: "B#89564967 C. Norte - Maserati LZDV19"
   Expenses:EAG:MantencinVehculosSeguros-411043  2110.00 CLP
+    desc: "B#31273409 V. Norte - Maserati LZDV19"
 
 2023-06-20 * "PAC BCI Seguros generales Junio 2023"
   id: "2553"
@@ -435,7 +494,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2236877.00 CLP
   Expenses:EAG:ObrasDeInfraestructuraMb-413900  1767854.00 CLP
+    desc: "UF49 Budhaus - Sustratos/Entablonado"
   Expenses:EAG:ObrasDeInfraestructuraMb-413900  469023.00 CLP
+    desc: "UF13 Budhaus - Rep. circuito electrico"
 
 2023-06-23 * "Sra Jacqueline - Junio 2023"
   id: "2552"
@@ -464,8 +525,10 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  15840000.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  3960000.00 CLP
+    desc: "BH.83 Hyundai - Directiva Junio 2023"
   Income:EAG:KiaChileSpa-310023  -15840000.00 CLP
   Income:EAG:HyundaiChileSpa-310024  -3960000.00 CLP
+    desc: "BH.83 Hyundai - Directiva Junio 2023"
 
 2023-06-27 * "Traspaso a Cuenta Edwards EAG 162338082"
   id: "2554"
@@ -473,6 +536,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -20000000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  20000000.00 CLP
+    desc: "Traspaso de cuenta BCI EAG 10160175"
 
 2023-06-27 * "Contribuciones Jose A. Delano 2/4 EAG"
   id: "2555"
@@ -480,9 +544,13 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4700262.00 CLP
   Expenses:EAG:Contribuciones-411069  4253462.00 CLP
+    desc: "Rol 3783-191 Depto Jose A. Delano 2/4"
   Expenses:EAG:Contribuciones-411069  185575.00 CLP
+    desc: "Rol 3783-203 Estacionamiento 1 2/4"
   Expenses:EAG:Contribuciones-411069  185575.00 CLP
+    desc: "Rol 3783-225 Estacionamiento 23  2/4"
   Expenses:EAG:Contribuciones-411069  75650.00 CLP
+    desc: "Rol 3783-197 Bodega 1  2/4"
 
 2023-06-28 * "Jocelyn Avayu - Junio 2023"
   id: "2558"
@@ -490,10 +558,14 @@
   source: "laudus-erp"
   Expenses:Jocelyn:RetirosDelMes-690001  2500000.00 CLP
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -2500000.00 CLP
+    desc: "Jeannette Avayu - Junio 2023"
   Expenses:Jeannette:RetirosDelMes-790001  2500000.00 CLP
+    desc: "Jeannette Avayu - Junio 2023"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -2500000.00 CLP
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -800000.00 CLP
+    desc: "Jael Avayu - Junio 2023"
   Expenses:Jael:RetirosDelMes-990001  800000.00 CLP
+    desc: "Jael Avayu - Junio 2023"
 
 2023-06-28 * "Yudi Tudela de Sra Raquel Ventura"
   id: "2559"
@@ -508,8 +580,11 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -859200.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -362000.00 CLP
+    desc: "Noelia Farfal Sueldo/Celular Junio 2023"
   Expenses:EAG:SueldosRopaRegalias-413001  350000.00 CLP
+    desc: "Noelia Farfal - Sueldo Junio 2023"
   Expenses:EAG:SueldosRopaRegalias-413001  12000.00 CLP
+    desc: "Noelia Farfal - Celular"
   Expenses:EAG:SraJacquelineDeutsch-430023  859200.00 CLP
 
 2023-06-28 * "Metrogas B#44996244"
@@ -553,21 +628,36 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -739600.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -819923.00 CLP
+    desc: "Victoria Celia - Sueldo Junio 2023"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -435799.00 CLP
+    desc: "Esteban Mendez - Sueldo Junio 2023"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -649590.00 CLP
+    desc: "Andres Martinez  - Sueldo Junio 2023"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -470400.00 CLP
+    desc: "Fresia Gonzalez  - Sueldo Junio 2023"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -620400.00 CLP
+    desc: "Leontina Mendez - Sueldo Junio 2023"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -750000.00 CLP
+    desc: "Moises Mondaca - Sueldo Junio 2023"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -100000.00 CLP
+    desc: "CC-2.342 Eduardo F. - Prestamo de EAG"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -100000.00 CLP
+    desc: "CC1.663 Esteban Mendez - Dscto prestamo"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -150000.00 CLP
+    desc: "CC-2.201 Fresia G. - Dscto prestamo EAG"
   Expenses:EAG:SueldosRopaRegalas-411001  839600.00 CLP
   Expenses:EAG:SueldosRopaRegalas-411001  819923.00 CLP
+    desc: "Victoria Celia - Sueldo Junio 2023"
   Expenses:EAG:SueldosRopaRegalias-413001  535799.00 CLP
+    desc: "Esteban Mendez - Sueldo Junio 2023"
   Expenses:EAG:SueldosRopaRegalias-413001  649590.00 CLP
+    desc: "Andres Martinez  - Sueldo Junio 2023"
   Expenses:EAG:SueldosRopaRegalias-413001  620400.00 CLP
+    desc: "Fresia Gonzalez  - Sueldo Junio 2023"
   Expenses:EAG:SueldosRopaRegalias-413001  620400.00 CLP
+    desc: "Leontina Mendez - Sueldo Junio 2023"
   Expenses:EAG:SueldosRopaRegalias-413001  750000.00 CLP
+    desc: "Moises Mondaca - Sueldo Junio 2023"
 
 2023-06-30 * "UF238 50% Budhaus - Mant. casa EAG Molco"
   id: "2567"
@@ -582,8 +672,10 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -900179.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -900179.00 CLP
+    desc: "Kia Chile -  Inscripcion SWHH43 EAG"
   Expenses:EAG:MantencinVehculosSeguros-411043  900179.00 CLP
   Expenses:EAG:MantencinVehculosSeguros-411043  900179.00 CLP
+    desc: "Kia Chile -  Inscripcion SWHH43 EAG"
 
 2023-06-30 * "Bonsai/Jardin - Mant. general Junio 2023"
   id: "2569"
@@ -591,7 +683,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -150000.00 CLP
   Expenses:EAG:MantencinJardinBonsai-411053  70000.00 CLP
+    desc: "Bonsai - Mantencion general Junio 2023"
   Expenses:EAG:MantencinJardinBonsai-411053  80000.00 CLP
+    desc: "Jardin - Mantencion general Junio 2023"
 
 2023-06-30 * "Corona de flores por fallec. don Zenen"
   id: "2570"
@@ -622,6 +716,7 @@
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -9520.00 CLP
   Expenses:Johanna:RetirosDelMes-890001  1000000.00 CLP
   Expenses:Johanna:RetirosDelMes-890001  500000.00 CLP
+    desc: "Johanna Avayu - Anticipo Julio 2023"
   Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  -9988.00 CLP
 
 2023-06-30 * "Inversiones Tecnion Ltda - Junio 2023"

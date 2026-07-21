@@ -4,7 +4,9 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -10763.00 CLP
   Expenses:JAB:MantencinVehculosMotosTierra-815042  5563.00 CLP
+    desc: "Costanera norte F#4637930 SRBK72"
   Expenses:JAB:MantencinVehculosMotosTierra-815042  5200.00 CLP
+    desc: "Ruta 5 sur Talca-Chillan F#108991 SRBK72"
 
 2023-04-03 * "F#1491 Agropangui SPA Materiales jardin"
   id: "4957"
@@ -33,7 +35,9 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -126590.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -1700000.00 CLP
+    desc: "Irene Guiloff - Abril 2023"
   Expenses:JAB:IreneGuiloff-811003  1700000.00 CLP
+    desc: "Irene Guiloff - Abril 2023"
   Expenses:JAB:GastosCasa-811049  126590.00 CLP
 
 2023-04-03 * "Rodrigo Aravena - Compras/Combustible VG"
@@ -42,7 +46,9 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -64730.00 CLP
   Expenses:JAB:MantencinVehculosSeguros-811042  48936.00 CLP
+    desc: "Rodrigo Aravena - Combustible Cerato VG"
   Expenses:JAB:GastosCasa-811049  15794.00 CLP
+    desc: "Rodrigo Aravena - Compras Lo Curro"
 
 2023-04-03 * "Fernando Diaz - Compras Lo Curro"
   id: "4963"
@@ -143,9 +149,13 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -73892.00 CLP
   Expenses:JAB:LorenzoHPollaLoteraBencina-811004  30000.00 CLP
+    desc: "Lorenzo Heredia - Bencina Cerato VG"
   Expenses:JAB:GastosCasa-811049  22390.00 CLP
+    desc: "Lorenzo Heredia - Supermercado VG"
   Expenses:JAB:GastosCasa-811049  16000.00 CLP
+    desc: "Lorenzo Heredia - Tintoreria VG"
   Expenses:JAB:GastosCasa-811049  5502.00 CLP
+    desc: "Lorenzo Heredia - Farmacia VG"
 
 2023-04-05 * "Caja chica Abril 2023+Dif caja Marzo2023"
   id: "4981"
@@ -153,10 +163,15 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -164690.00 CLP
   Assets:JAB:FondosPorRendir-613005  -60000.00 CLP
+    desc: "CC4.789 Caja chica Marzo 2023 Reñaca"
   Assets:JAB:FondosPorRendir-613005  60000.00 CLP
+    desc: "Caja chica Abril 2023 Reñaca"
   Expenses:JAB:Gas-813010  17500.00 CLP
+    desc: "Gas licuado 11 Kilos - Reñaca"
   Expenses:JAB:MantencinGeneralInstalaciones-813024  40000.00 CLP
+    desc: "Reparacion chapa Sra Fanny Reñaca"
   Expenses:JAB:ArtculosDeAseo-813051  107190.00 CLP
+    desc: "Limpia vidrios/Bolsas basura/Confort etc"
 
 2023-04-05 * "USD60.000 Aporte Jose Alazraki"
   id: "4982"
@@ -178,17 +193,29 @@
   source: "laudus-erp"
   Assets:FFCC:RetirosAag-115021  70000.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -404625.00 CLP
+    desc: "Rendicion Nº65 Jaime Labraña Olmos"
   Expenses:JAB:GastosCasa-811049  3650.00 CLP
+    desc: "Vinilit - Pegamento"
   Expenses:JAB:MantencinGeneralInstalaciones-815024  5000.00 CLP
+    desc: "WD-40"
   Expenses:JAB:MantencinVehculosMotosTierra-815042  47850.00 CLP
+    desc: "Protector asientos Great Wall FGK"
   Expenses:JAB:MantencinVehculosMotosTierra-815042  36171.00 CLP
+    desc: "Protector asientos Great Wall FGK"
   Expenses:JAB:MantencinVehculosMotosTierra-815042  14600.00 CLP
+    desc: "Ampolletas camioneta Mahindra CP FGK"
   Expenses:JAB:MantencinVehculosMotosTierra-815042  2600.00 CLP
+    desc: "Estacionam. retirar materiales jardin CP"
   Expenses:JAB:MantencinVehculosMotosTierra-815042  39970.00 CLP
+    desc: "Aceite tractor jardin CP"
   Expenses:JAB:GastosCasaComestiblesBebidas-815049  72500.00 CLP
+    desc: "Utiles aseo FGK CP (Pendiente año 2022)"
   Expenses:JAB:GastosCasaComestiblesBebidas-815049  80000.00 CLP
+    desc: "Alimento 2 perros casa FGK (Para 1 mes)"
   Expenses:JAB:JardinMateriales-815055  10830.00 CLP
+    desc: "Utiles aseo para el jardin CP"
   Expenses:JAB:HuertoMateriales-815059  21454.00 CLP
+    desc: "Caja para frambuesas"
 
 2023-04-05 * "F#371735 Acevedo - Comb. Febrero 2023 FC"
   id: "4991"
@@ -196,8 +223,10 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -510000.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -40050.00 CLP
+    desc: "F#369474 Acevedo Comb. Enero 2023 CP FGK"
   Expenses:JAB:MantencinVehculosMotosTierra-815042  510000.00 CLP
   Expenses:JAB:MantencinVehculosMotosTierra-815042  40050.00 CLP
+    desc: "F#369474 Acevedo Comb. Enero 2023 CP FGK"
 
 2023-04-06 * "USD2.750,63 Bella Marine - Denise Zeldis"
   id: "4983"
@@ -214,7 +243,9 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -89746.00 CLP
   Expenses:JAB:MantencinVehculosSeguros-811042  33001.00 CLP
+    desc: "Fernando Diaz - Bencina"
   Expenses:JAB:GastosCasa-811049  56745.00 CLP
+    desc: "Fernando Diaz - Compras varias VG"
 
 2023-04-06 * "Lorenzo Heredia - Pollos"
   id: "4985"
@@ -243,14 +274,23 @@
   source: "laudus-erp"
   Expenses:FFCC:VehculoCristobal-415007  81736.00 CLP
   Expenses:FFCC:VehculoCristobal-415007  8354.00 CLP
+    desc: "B#18739005 Aconcagua RLDK61 Piloto"
   Expenses:FFCC:VehculoCristobal-415007  24574.00 CLP
+    desc: "B#52974638 Costanera norte RLDK61 Piloto"
   Expenses:FFCC:VehculoCristobal-415007  5896.00 CLP
+    desc: "B#103911860 Vespucio sur - RLDK61 Piloto"
   Assets:JAB:BancoBciFgk30396000-611006  -281828.00 CLP
+    desc: "Servipag - Autopistas varias Piloto / VG"
   Expenses:JAB:MantencinVehculosSeguros-811042  19143.00 CLP
+    desc: "B#126092177 Autopase KFWL75/LZRY28"
   Expenses:JAB:MantencinVehculosSeguros-811042  5013.00 CLP
+    desc: "B#18739005 Aconcagua RPXJ42"
   Expenses:JAB:MantencinVehculosSeguros-811042  99872.00 CLP
+    desc: "B#52974638 Costanera norte KFWL75/LZRY28"
   Expenses:JAB:MantencinVehculosSeguros-811042  25408.00 CLP
+    desc: "B#103911860 Vespucio sur - RPXJ42"
   Expenses:JAB:MantencinVehculosSeguros-811042  11832.00 CLP
+    desc: "B#1579647 Vespucio oriente PPDX18/LZRY28"
 
 2023-04-06 * "Carolina S./Lilia Alfaro Leyes sociales"
   id: "4992"
@@ -258,7 +298,9 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -282918.00 CLP
   Assets:FFCC:MichelleZeldis-115035  38022.00 CLP
+    desc: "Carolina S. - Leyes sociales Marzo 2023"
   Expenses:JAB:SueldosRopaRegalias-811001  244896.00 CLP
+    desc: "Lilia Alfaro - Leyes soc. Marzo 2023"
 
 2023-04-06 * "VG/Reñaca/Molco Leyes sciales Marzo 2023"
   id: "4993"
@@ -266,17 +308,29 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -2430513.00 CLP
   Expenses:JAB:SueldosRopaRegalias-811001  53376.00 CLP
+    desc: "Veronica Vergara - Leyes soc. Marzo 2023"
   Expenses:JAB:SueldosRopaRegalias-811001  244896.00 CLP
+    desc: "Esperanza Barrera - Leyes soc.Marzo 2023"
   Expenses:JAB:SueldosRopaRegalias-811001  401332.00 CLP
+    desc: "Rodrigo Aravena - Leyes soc.Marzo 2023"
   Expenses:JAB:SueldosRopaRegalias-811001  356380.00 CLP
+    desc: "Fernando Diaz - Leyes soc.Marzo 2023"
   Expenses:JAB:SueldosRopaRegalias-811001  297443.00 CLP
+    desc: "Janina Martinez - Leyes soc.Marzo 2023"
   Expenses:JAB:SueldosJardineros-811002  51772.00 CLP
+    desc: "Juan Salas - Leyes soc. Marzo 2023"
   Expenses:JAB:SueldosJardineros-811002  214936.00 CLP
+    desc: "Jose O. Videla - Leyes soc. Marzo 2023"
   Expenses:JAB:SueldosRopaRegalas-813001  320264.00 CLP
+    desc: "Carlos Mondaca - Leyes soc. Marzo 2023"
   Expenses:JAB:SueldosRopaRegalas-813001  254108.00 CLP
+    desc: "Ximena Azocar - Leyes soc. Marzo 2023"
   Expenses:JAB:SueldosRopaRegalas-815001  44564.00 CLP
+    desc: "Marianela Pineda - Leyes soc. Marzo 2023"
   Expenses:JAB:JardinHonorarios-815053  62367.00 CLP
+    desc: "Reinaldo Zapata - Leyes soc. Marzo 2023"
   Expenses:JAB:JardinHonorarios-815053  129075.00 CLP
+    desc: "Bristela Quinaqueo -Leyes soc.Marzo 2023"
 
 2023-04-06 * "Vuelo 3.1Hrs Stgo/Molco/Stgo - Flia EAG"
   id: "5118"
@@ -298,7 +352,9 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  93897500.00 CLP
   Assets:FFCC:BancoBci28981162-111005  106145000.00 CLP
+    desc: "USD130.000 Bank JB Alberto Avayu"
   Assets:FFCC:RetirosAag-115021  -106145000.00 CLP
+    desc: "USD130.000 Bank JB Alberto Avayu"
   Assets:FFCC:RetirosDag-115027  -93897500.00 CLP
 
 2023-04-10 * "USD90.000 Bank JB Eduardo Avayu"
@@ -314,8 +370,10 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -1121223.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -977969.00 CLP
+    desc: "Agustin Gomez Imposiciones Marzo 2023"
   Expenses:JAB:SueldosPilotos-837001  1121223.00 CLP
   Expenses:JAB:SueldosPilotos-837001  977969.00 CLP
+    desc: "Agustin Gomez Imposiciones Marzo 2023"
 
 2023-04-11 * "UF24,92 Sura Camioneta Great SRBK72 2023"
   id: "5004"
@@ -330,24 +388,43 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -12316443.00 CLP
   Assets:FFCC:BancoBci28981162-111005  -8315793.00 CLP
+    desc: "UF233,65 ASPOR - Propiedades DAG"
   Assets:FFCC:RetirosDag-115027  938146.00 CLP
+    desc: "UF26,36 Sura - KJFK71 Toyota 2018 DAG"
   Assets:FFCC:RetirosDag-115027  938128.00 CLP
+    desc: "UF26,36 Sura - PGTY73 Jeep Cherokee DAG"
   Assets:FFCC:RetirosDag-115027  938128.00 CLP
+    desc: "UF26,36 Sura - Cuatrimoto BPR 800 2012"
   Assets:FFCC:RetirosDag-115027  938128.00 CLP
+    desc: "UF26,36 Sura RKZL78 Subaru Forester DAG"
   Assets:FFCC:RetirosDag-115027  938128.00 CLP
+    desc: "UF26,36 Sura Subaru Forester 2023 DAG"
   Assets:FFCC:RetirosDag-115027  84707.00 CLP
+    desc: "UF2,38 Sura Subaru Outback 2023 IFC"
   Assets:FFCC:RetirosDag-115027  84707.00 CLP
+    desc: "UF2,38 Sura Subaru Forester 2023 IFC"
   Assets:FFCC:RetirosDag-115027  938128.00 CLP
+    desc: "UF26,36 Sura RKKJ19 Outback 2022 IFC"
   Assets:FFCC:RetirosDag-115027  938128.00 CLP
+    desc: "UF26,36 Sura RGJT64 Forester 2022 IFC"
   Assets:FFCC:RetirosDag-115027  938128.00 CLP
+    desc: "UF26,36 Sura Outback 2023 IFC"
   Assets:FFCC:RetirosDag-115027  938128.00 CLP
+    desc: "UF26,36 Sura Forester 2023 IFC"
   Assets:FFCC:RetirosDag-115027  1827567.00 CLP
+    desc: "UF51,35 Sura LHBK75 Mercedez B. Mariela"
   Assets:FFCC:RetirosDag-115027  938146.00 CLP
+    desc: "UF26,36 Sura RLDK54 Kia Rio 2022 EAF"
   Assets:FFCC:RetirosDag-115027  938146.00 CLP
+    desc: "UF26,36 Sura RLDK40 Kia Rio 2022 AAF"
   Assets:FFCC:RetirosDag-115027  1505439.00 CLP
+    desc: "UF42,30 ASPOR Multiriesgo Hogar JAA IFC"
   Assets:FFCC:RetirosDag-115027  1976495.00 CLP
+    desc: "UF55,54 ASPOR Incendio Depto 301 DAG"
   Assets:FFCC:RetirosDag-115027  4560394.00 CLP
+    desc: "UF128,13 ASPOR Incendio Choshuenco DAG"
   Assets:FFCC:RetirosDag-115027  273465.00 CLP
+    desc: "UF7,68 ASPOR Incendio JAA IFC"
 
 2023-04-11 * "Lorenzo Heredia - Bencina/Tintoreria VG"
   id: "5006"
@@ -355,7 +432,9 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -44000.00 CLP
   Expenses:JAB:LorenzoHPollaLoteraBencina-811004  30000.00 CLP
+    desc: "Lorenzo Heredia - Bencina Morning"
   Expenses:JAB:GastosCasa-811049  14000.00 CLP
+    desc: "Lorenzo Heredia - Tintoreria FGK VG"
 
 2023-04-11 * "Ines Perea - 3 Sesiones Kine FGK"
   id: "5007"
@@ -370,8 +449,11 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -183723.00 CLP
   Expenses:JAB:MantencinJardinMateriales-811018  47980.00 CLP
+    desc: "Rodrigo Araavena - Aceite mezcla jardin"
   Expenses:JAB:MantencinVehculosSeguros-811042  56409.00 CLP
+    desc: "Rodrigo Araavena - Combustible Cerato"
   Expenses:JAB:GastosCasa-811049  79334.00 CLP
+    desc: "Rodrigo Araavena - Gastos casa"
 
 2023-04-11 * "Gasto corporativo"
   id: "5009"
@@ -386,13 +468,20 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -887163.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -568604.00 CLP
+    desc: "Agustin Gomez /VG/Reñaca F29 Marzo 2023"
   Expenses:JAB:SueldosRopaRegalias-811001  19054.00 CLP
+    desc: "Rodrigo Aravena - Impto unico Marzo 2023"
   Expenses:JAB:SueldosRopaRegalias-811001  14887.00 CLP
+    desc: "Fernando Diaz - Impto unico Marzo 2023"
   Expenses:JAB:SueldosRopaRegalias-811001  304.00 CLP
+    desc: "Esperanza Barrera Impto unico Marzo 2023"
   Expenses:JAB:SueldosRopaRegalias-811001  6848.00 CLP
+    desc: "Janina Martinez - Impto unico Marzo 2023"
   Expenses:JAB:SueldosRopaRegalas-813001  8637.00 CLP
+    desc: "Carlos Gotelli - Impto unico Marzo 2023"
   Expenses:JAB:SueldosPilotos-837001  887163.00 CLP
   Expenses:JAB:SueldosPilotos-837001  518874.00 CLP
+    desc: "Agustin Gomez - Impto unico Marzo 2023"
 
 2023-04-11 * "UF351,24 ASPOR - VG/Reñaca/El Bosque FGK"
   id: "5014"
@@ -400,8 +489,11 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -12500808.00 CLP
   Expenses:JAB:SegurosIncendioRobo-811031  9677825.00 CLP
+    desc: "UF271,92 ASPOR - Incendio VG"
   Expenses:JAB:Seguros-813031  2329847.00 CLP
+    desc: "UF65,46 ASPOR - Multiriesgo hogar Reñaca"
   Expenses:JAB:DeptoElBosque310-875021  493136.00 CLP
+    desc: "UF13,86 ASPOR Multiriesgo hogar El Bosqu"
 
 2023-04-11 * "F#19668 Aviasur - Combustible N266WW"
   id: "5031"
@@ -451,8 +543,10 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -2165000.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -24000.00 CLP
+    desc: "Alejandro Aliaga - Adicional Filtracion"
   Expenses:JAB:DeptoElBosque310-875021  2165000.00 CLP
   Expenses:JAB:DeptoElBosque310-875021  24000.00 CLP
+    desc: "Alejandro Aliaga - Adicional Filtracion"
 
 2023-04-12 * "Flores fallecimiento Sra. Maria Jara"
   id: "5020"
@@ -467,16 +561,27 @@
   source: "laudus-erp"
   Expenses:FFCC:VehculoCristobal-415007  938470.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -7430226.00 CLP
+    desc: "UF208,69 SURA - Seguros autos FGK"
   Assets:JAB:BancoBciFgk30396000-611006  -9010681.00 CLP
+    desc: "UF253,08 Southbridge - Multiriesgo VG"
   Assets:JAB:BancoBciFgk30396000-611006  -7369510.00 CLP
+    desc: "UF206,99 ASPOR - Incendio CP FGK"
   Expenses:JAB:SegurosIncendioRobo-811031  9010681.00 CLP
+    desc: "UF253,08 Southbridge - Multiriesgo VG"
   Expenses:JAB:MantencinVehculosSeguros-811042  1799406.00 CLP
+    desc: "UF50,54 SURA - Gran Carnival KFWL75"
   Expenses:JAB:MantencinVehculosSeguros-811042  938470.00 CLP
+    desc: "UF26,36 SURA - Subaru Outback PPDX18"
   Expenses:JAB:MantencinVehculosSeguros-811042  938470.00 CLP
+    desc: "UF26,36 SURA - Kia Morning LTJY92"
   Expenses:JAB:MantencinVehculosSeguros-811042  938470.00 CLP
+    desc: "UF26,36 SURA - Kia cerato LZRY28"
   Expenses:JAB:MantencinVehculosSeguros-811042  938470.00 CLP
+    desc: "UF26,36 SURA - Kia Morning RPXJ42"
   Expenses:JAB:SegurosCp-815031  7369510.00 CLP
+    desc: "UF206,99 ASPOR - Incendio CP FGK"
   Expenses:JAB:MantencinVehculosMotosTierra-815042  938470.00 CLP
+    desc: "UF26,36 SURA - Subaru Outback PLPW49"
 
 2023-04-12 * "Tomas Brand - Apoyo vuelo Cristobal G."
   id: "5022"
@@ -491,7 +596,9 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -304.00 CLP
   Assets:FFCC:BancoBci28981162-111005  304.00 CLP
+    desc: "Devol Lilia A. - Impto unico Marzo 2023"
   Assets:JAB:BancoBciFgk30396000-611006  -304.00 CLP
+    desc: "Devol Lilia A. - Impto unico Marzo 2023"
   Expenses:JAB:SueldosRopaRegalias-811001  304.00 CLP
 
 2023-04-13 * "Juan Salas - Dif FxR Ropa de trabajo"
@@ -500,7 +607,9 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -46000.00 CLP
   Assets:JAB:FondosPorRendir-613005  -150000.00 CLP
+    desc: "CC4.860 Juan Salas - FxR Ropa de trabajo"
   Expenses:JAB:SueldosJardineros-811002  196000.00 CLP
+    desc: "Juan Salas - Ropa de trabajo"
 
 2023-04-13 * "Jose O. Videla - Quincena Abril 2023"
   id: "5025"
@@ -508,8 +617,10 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -250000.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -150000.00 CLP
+    desc: "Lorenzo Heredia - Quincena de FGK"
   Expenses:JAB:SueldosJardineros-811002  250000.00 CLP
   Expenses:JAB:FgkOtrosGastos-873099  150000.00 CLP
+    desc: "Lorenzo Heredia - Quincena de FGK"
 
 2023-04-13 * "Metrogas - Via Gris"
   id: "5026"
@@ -545,13 +656,21 @@
   source: "laudus-erp"
   Assets:FFCC:RetirosAag-115021  1490.00 CLP
   Expenses:FFCC:GastoCorporativo-415001  111700.00 CLP
+    desc: "Sakura Express - EAG/AAG"
   Assets:JAB:BancoBciFgk30396000-611006  -202963.00 CLP
+    desc: "Caja chica Eliana Z. del 10/3 al 11/4"
   Expenses:JAB:MantencinVehculosSeguros-811042  10000.00 CLP
+    desc: "Copec - Bencina Eliana tramites"
   Expenses:JAB:MantencinVehculosSeguros-811042  770.00 CLP
+    desc: "Estacionamiento"
   Expenses:JAB:CorreoValijaCorrespondencia-813035  5029.00 CLP
+    desc: "Eliot - Sobre a Reñaca"
   Expenses:JAB:FgkOtrosGastos-873099  10216.00 CLP
+    desc: "Chilexpress - Libro a K. Pugh"
   Expenses:JAB:FgkOtrosGastos-873099  40778.00 CLP
+    desc: "Remedios para Lilia Alfaro de FGK"
   Expenses:JAB:FgkOtrosGastos-873099  22980.00 CLP
+    desc: "Moza bonita - Tinturas pelo FGK"
 
 2023-04-13 * "Gastos Reñaca Visa 1027 BCI EAG"
   id: "5047"
@@ -559,11 +678,17 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -951658.00 CLP
   Expenses:JAB:Luz-813005  462121.00 CLP
+    desc: "PAT Chilquinta SA F#8588547"
   Expenses:JAB:Agua-813006  227810.00 CLP
+    desc: "PAT Esval SA B#68907234"
   Expenses:JAB:Gas-813010  7370.00 CLP
+    desc: "PAT Gasvalpo B#5584655"
   Expenses:JAB:Gas-813010  182160.00 CLP
+    desc: "PAT Gasvalpo B#5584656"
   Expenses:JAB:Gas-813010  13380.00 CLP
+    desc: "PAT Gasvalpo B#5584658"
   Expenses:JAB:MantencinAlarmas-813023  58817.00 CLP
+    desc: "PAT - Security Sat"
 
 2023-04-13 * "Efectivo FKG"
   id: "5127"
@@ -585,8 +710,10 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -175100.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -159930.00 CLP
+    desc: "Carlos Mondaca - Ropa trabajo"
   Expenses:JAB:SueldosRopaRegalas-813001  175100.00 CLP
   Expenses:JAB:SueldosRopaRegalas-813001  159930.00 CLP
+    desc: "Carlos Mondaca - Ropa trabajo"
 
 2023-04-14 * "Rutal del Maipo B#5491527 SRBK72 CP FGK"
   id: "5034"
@@ -601,8 +728,11 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -130408.00 CLP
   Expenses:JAB:Telfono-815007  76844.00 CLP
+    desc: "Telefonica del sur Nº8235 Marzo 2023"
   Expenses:JAB:Telfono-815007  28028.00 CLP
+    desc: "Telefonica del sur Nº8228 Marzo 2023"
   Expenses:JAB:Telfono-815007  25536.00 CLP
+    desc: "Telefonica del sur Nº8230 Marzo 2023"
 
 2023-04-14 * "1/2 Jumbo - Compras VG/Sra. Irene G."
   id: "5036"
@@ -610,8 +740,11 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -1000593.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -538473.00 CLP
+    desc: "2/2 Jumbo - Compras VG/Sra. Irene G."
   Expenses:JAB:IreneGuiloff-811003  956329.00 CLP
+    desc: "Jumbo - Compras Sra. Irene Guiloff"
   Expenses:JAB:GastosCasa-811049  582737.00 CLP
+    desc: "Jumbo - Compras Lo Curro"
 
 2023-04-14 * "Devol 50% LAB BH67 Felipe V Mant. Estanq"
   id: "5040"
@@ -644,7 +777,9 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -38090.00 CLP
   Expenses:JAB:LorenzoHPollaLoteraBencina-811004  30000.00 CLP
+    desc: "Lorenzo Heredia - Bencina Morning"
   Expenses:JAB:GastosCasa-811049  8090.00 CLP
+    desc: "Lorenzo Heredia - Almuerzo"
 
 2023-04-17 * "Ines Perea - 1 Sesion Kine FGK"
   id: "5038"
@@ -788,14 +923,23 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -35692539.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -874566.00 CLP
+    desc: "Rol 3145-23 Vitacura VG"
   Expenses:JAB:Contribuciones-811029  21681073.00 CLP
+    desc: "Rol 3702-15 Lo Barnechea VG"
   Expenses:JAB:Contribuciones-811029  9816297.00 CLP
+    desc: "Rol 3702-16 Lo Barnechea VG"
   Expenses:JAB:Contribuciones-811029  2397596.00 CLP
+    desc: "Rol 3145-23 Vitacura VG"
   Expenses:JAB:Contribuciones-811029  874566.00 CLP
+    desc: "Rol 3145-23 Vitacura VG"
   Expenses:JAB:Contribuciones-813029  1507122.00 CLP
+    desc: "Rol 3086-3 Bellavista - Reñaca"
   Expenses:JAB:DeptoElBosque310-875021  272199.00 CLP
+    desc: "Rol 1245-282 Depto 202 Providencia"
   Expenses:JAB:DeptoElBosque310-875021  12489.00 CLP
+    desc: "Rol 1245-316 Estacion. 8 Providencia"
   Expenses:JAB:DeptoElBosque310-875021  5763.00 CLP
+    desc: "Rol 1245-340 Bodega 8 Providencia"
 
 2023-04-21 * "Gasto corporativo"
   id: "5058"
@@ -814,8 +958,10 @@
   source: "laudus-erp"
   Assets:FFCC:BancoEdwards011626509-111007  -7351141.00 CLP
   Assets:FFCC:BancoEdwards011626509-111007  -225747.00 CLP
+    desc: "USD276,99 Mastercard Chile 8364 AAG"
   Assets:FFCC:RetirosAag-115021  7351141.00 CLP
   Assets:FFCC:RetirosAag-115021  225747.00 CLP
+    desc: "USD276,99 Mastercard Chile 8364 AAG"
 
 2023-04-21 * "Devol USD2.750,63 Bella Marine - DZA"
   id: "5062"
@@ -860,7 +1006,9 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -36000.00 CLP
   Expenses:JAB:LorenzoHPollaLoteraBencina-811004  30000.00 CLP
+    desc: "Lorenzo Heredia - Bencina morning"
   Expenses:JAB:GastosCasa-811049  6000.00 CLP
+    desc: "Lorenzo Heredia - Almuerzo"
 
 2023-04-24 * "AAG - Devolucion tc Banco de Chile"
   id: "5122"
@@ -917,15 +1065,25 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -40000.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -120000.00 CLP
+    desc: "Unidad Vecinal A-12 - Abril 2023"
   Assets:JAB:BancoBciFgk30396000-611006  -60000.00 CLP
+    desc: "Oscar Poblete - Mensualidad FGK"
   Assets:JAB:BancoBciFgk30396000-611006  -40000.00 CLP
+    desc: "Bonsais - Mantencion jardin Abril 2023"
   Assets:JAB:BancoBciFgk30396000-611006  -600000.00 CLP
+    desc: "Irene Guiloff - Gastos personales"
   Assets:JAB:BancoBciFgk30396000-611006  -533835.00 CLP
+    desc: "SEC Abril 2023"
   Expenses:JAB:IreneGuiloff-811003  600000.00 CLP
+    desc: "Irene Guiloff - Gastos personales"
   Expenses:JAB:MantencinJardinMateriales-811018  40000.00 CLP
+    desc: "Bonsais - Mantencion jardin Abril 2023"
   Expenses:JAB:Barrera-811025  120000.00 CLP
+    desc: "Unidad Vecinal A-12 - Abril 2023"
   Expenses:JAB:Barrera-811025  60000.00 CLP
+    desc: "Oscar Poblete - Mensualidad FGK"
   Expenses:JAB:FgkEfectivo-873001  533835.00 CLP
+    desc: "SEC Abril 2023"
   Expenses:JAB:FgkOtrosGastos-873099  40000.00 CLP
 
 2023-04-25 * "F#102973/104119 Ascens. Otis Ltda - VG"
@@ -934,7 +1092,9 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -423649.00 CLP
   Expenses:JAB:MantencinAscensores-811021  68394.00 CLP
+    desc: "F#102973 Ascens. Otis Mant Octubre 2020"
   Expenses:JAB:MantencinAscensores-811021  355255.00 CLP
+    desc: "F#104119 Ascens. Otis - Trabajos VG"
 
 2023-04-25 * "Sobretasa reavaluo cuota 1/4 EAG"
   id: "5072"
@@ -942,10 +1102,14 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -3517942.00 CLP
   Assets:FFCC:BancoBci28981162-111005  -3941320.00 CLP
+    desc: "Sobretasa reavaluo cuota 1/4 DAG"
   Assets:FFCC:BancoBci28981162-111005  -3412676.00 CLP
+    desc: "Sobretasa reavaluo cuota 3/4 AAG"
   Expenses:JAB:Contribuciones-811029  3517942.00 CLP
   Expenses:JAB:Contribuciones-811029  3941320.00 CLP
+    desc: "Sobretasa reavaluo cuota 1/4 DAG"
   Expenses:JAB:Contribuciones-811029  3412676.00 CLP
+    desc: "Sobretasa reavaluo cuota 3/4 AAG"
 
 2023-04-25 * "USD60.000 Aporte Denise Zeldis"
   id: "5100"
@@ -960,13 +1124,21 @@
   source: "laudus-erp"
   Expenses:FFCC:GastoCorporativo-415001  75806.00 CLP
   Expenses:FFCC:GastoCorporativo-415001  2900.00 CLP
+    desc: "Enex - Sandwich Macarena Jaramillo"
   Assets:JAB:BancoBciFgk30396000-611006  -225156.00 CLP
+    desc: "Caja chica Eliana Z. del 20 al 24 Abril"
   Assets:JAB:BancoBciFgk30396000-611006  65100.00 CLP
+    desc: "EAG - Mahindra - Rev. Tecn. Combustible"
   Assets:JAB:ControlYLiquidacin-613099  65100.00 CLP
+    desc: "EAG - Mahindra - Rev. Tecn. Combustible"
   Assets:JAB:ControlYLiquidacin-613099  -65100.00 CLP
+    desc: "EAG - Mahindra - Rev. Tecn. Combustible"
   Expenses:JAB:MantencinGeneralInstalaciones-811024  68000.00 CLP
+    desc: "Pezeria Limitada - Comida pececitos"
   Expenses:JAB:MantencinVehculosSeguros-811042  3350.00 CLP
+    desc: "Eliot - Estacionamientos"
   Expenses:JAB:MantencinVehculosSeguros-811042  10000.00 CLP
+    desc: "Bencina Lo Curro"
 
 2023-04-26 * "Macarena Barra - Sueldo Abril 2023"
   id: "5074"
@@ -995,8 +1167,11 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -32730.00 CLP
   Expenses:JAB:Agua-815006  2000.00 CLP
+    desc: "Agua Choshuenco Casa 40 Marzo 2023"
   Expenses:JAB:Agua-815006  2000.00 CLP
+    desc: "Agua Choshuenco Casa 39 Marzo 2023"
   Expenses:JAB:Agua-815006  28730.00 CLP
+    desc: "Agua Choshuenco CP FGK Marzo 2023"
 
 2023-04-26 * "1/2 Prov 50% cierre Abril al 15 Mayo-23"
   id: "5078"
@@ -1042,9 +1217,12 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -850334.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -270000.00 CLP
+    desc: "Esperanza Barrera - Dias Abril 2023"
   Assets:JAB:BancoBciFgk30396000-611006  -30000.00 CLP
+    desc: "Esperanza Barrera - Dias Abril 2023"
   Expenses:JAB:SueldosRopaRegalias-811001  850334.00 CLP
   Expenses:JAB:SueldosRopaRegalias-811001  300000.00 CLP
+    desc: "Esperanza Barrera - Dias Abril 2023"
 
 2023-04-27 * "Rodrigo Aravena - Sueldo Abril 2023"
   id: "5083"
@@ -1066,6 +1244,7 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -1107470.00 CLP
   Assets:JAB:CuentasCorrientesDelPersonal-613001  -92864.00 CLP
+    desc: "CC4.905 Fernando - Kia Chile F#1061356"
   Expenses:JAB:SueldosRopaRegalias-811001  1200334.00 CLP
 
 2023-04-27 * "Janina Martinez - Sueldo Abril 2023"
@@ -1074,8 +1253,10 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -1007399.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -440000.00 CLP
+    desc: "Janina Martinez - Dias Abril 2023"
   Expenses:JAB:SueldosRopaRegalias-811001  1007399.00 CLP
   Expenses:JAB:SueldosRopaRegalias-811001  440000.00 CLP
+    desc: "Janina Martinez - Dias Abril 2023"
 
 2023-04-27 * "Juan Salas/Lilia Alfaro - Efectivo Abril"
   id: "5087"
@@ -1083,9 +1264,13 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -1005849.00 CLP
   Assets:JAB:CuentasCorrientesDelPersonal-613001  -80000.00 CLP
+    desc: "CC4.300 Lilia Alfaro - Dscto Prestamo"
   Assets:JAB:CuentasCorrientesDelPersonal-613001  -100000.00 CLP
+    desc: "CC4.914 Juan Salas - Prestamo de FGK"
   Expenses:JAB:SueldosRopaRegalias-811001  360849.00 CLP
+    desc: "Lilia Alfaro - Efectivo dias Abril 2023"
   Expenses:JAB:SueldosJardineros-811002  825000.00 CLP
+    desc: "Juan Salas - Sueldo Abril 2023"
 
 2023-04-27 * "Marianela Pineda - Sueldo Abril 2023"
   id: "5088"
@@ -1128,8 +1313,10 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -420369.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -481744.00 CLP
+    desc: "Reinaldo Zapata - Sueldo Abril 2023"
   Expenses:JAB:JardinHonorarios-815053  420369.00 CLP
   Expenses:JAB:JardinHonorarios-815053  481744.00 CLP
+    desc: "Reinaldo Zapata - Sueldo Abril 2023"
 
 2023-04-27 * "USD60.000 Aporte Michelle Zeldis"
   id: "5101"
@@ -1180,9 +1367,12 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -840255.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -550334.00 CLP
+    desc: "Carlos Gotelli - Sueldo Abril 2023"
   Assets:JAB:CuentasCorrientesDelPersonal-613001  -500000.00 CLP
+    desc: "CC3.773 Carlos M. - Dscto Prestamo FGK"
   Expenses:JAB:SueldosRopaRegalas-813001  840255.00 CLP
   Expenses:JAB:SueldosRopaRegalas-813001  1050334.00 CLP
+    desc: "Carlos Gotelli - Sueldo Abril 2023"
 
 2023-04-28 * "Maria L. Hernandez - Sueldo Abril 2023"
   id: "5095"
@@ -1211,7 +1401,9 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -58090.00 CLP
   Expenses:JAB:LorenzoHPollaLoteraBencina-811004  30000.00 CLP
+    desc: "Lorenzo Heredia - Bencina morning"
   Expenses:JAB:GastosCasa-811049  28090.00 CLP
+    desc: "Lorenzo Heredia - Almuerzo/Feria VG"
 
 2023-04-28 * "SEC Abril 2023"
   id: "5106"
@@ -1247,17 +1439,29 @@
   source: "laudus-erp"
   Assets:FFCC:RetirosEag-115023  -15037151.00 CLP
   Expenses:FFCC:HugoSanzanaFigueroa-433003  4276190.00 CLP
+    desc: "Hugo Sanzana - Abril 2023"
   Expenses:FFCC:MaraEugeniaLlaulen-433004  2668112.00 CLP
+    desc: "Maria E. Llaulen - Abril 2023"
   Expenses:FFCC:MaraEugeniaLlaulen-433004  5005.00 CLP
+    desc: "Maria E. Llaulen - Seguro de vida"
   Expenses:FFCC:CynthiaGarayDelVillar-433005  2253378.00 CLP
+    desc: "Cynthia Garay - Abril 2023"
   Expenses:FFCC:CynthiaGarayDelVillar-433005  1908.00 CLP
+    desc: "Cynthia Garay - Seguro de vida"
   Expenses:FFCC:MiguelLilloOrtiz-433008  935946.00 CLP
+    desc: "Miguel Lillo - Abril 2023"
   Expenses:FFCC:MiguelLilloOrtiz-433008  2941.00 CLP
+    desc: "Miguel Lillo - Seguro de vida"
   Expenses:FFCC:AlbertoGassmann-433009  1311328.00 CLP
+    desc: "Alberto Gassmann - Abril 2023"
   Expenses:FFCC:ArriendoLuzAguaGas-433013  213418.00 CLP
+    desc: "Arriendo Cpech - Abril 2023"
   Expenses:FFCC:Telfono-433015  72003.00 CLP
+    desc: "F#68669460 Movistar"
   Expenses:FFCC:AycAuditores-433052  895964.00 CLP
+    desc: "F#3268 A&C Auditores"
   Expenses:FFCC:EluchansAbogadosSpa-433053  2400958.00 CLP
+    desc: "F#15185 Eluchans SPA - Abril 2023"
 
 2023-04-30 * "Cuentas varias Via Gris - Reñaca TC EAG"
   id: "5124"
@@ -1265,9 +1469,16 @@
   source: "laudus-erp"
   Assets:JAB:ControlYLiquidacin-613099  -6990146.00 CLP
   Expenses:JAB:Luz-811005  1692123.00 CLP
+    desc: "PAT - Enel"
   Expenses:JAB:Agua-811006  5088507.00 CLP
+    desc: "PAT - Aguas Cordillera"
   Expenses:JAB:Telfono-811007  47104.00 CLP
+    desc: "PAT - Movistar Hogar"
   Expenses:JAB:TvCableInternet-811011  67610.00 CLP
+    desc: "PAT - GTD Manquehue SA"
   Expenses:JAB:TvCableInternet-813011  56703.00 CLP
+    desc: "PAT - VTR Chile Reñaca"
   Expenses:JAB:JabFonoLorenzo998426743-871027  14990.00 CLP
+    desc: "PAT - Claro Chile SA Lorenzo"
   Expenses:JAB:FgkCelular-873025  23109.00 CLP
+    desc: "PAT - Entel PCS FGK"

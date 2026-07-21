@@ -18,7 +18,9 @@
   source: "laudus-erp"
   Expenses:EAG:MantencinVehculosSeguros-411043  7562.00 CLP
   Expenses:EAG:MantencinVehculosSeguros-411043  520.00 CLP
+    desc: "Vesp. norte B#22674651 LZDV19 Sra Coca"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -8082.00 CLP
+    desc: "Autopase EAG/Vespucio norte Sra Coca"
 
 2021-02-02 * "Abono prestamo Jhonny"
   id: "82"
@@ -47,9 +49,13 @@
   source: "laudus-erp"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  70747.00 CLP
   Income:Jael:DevolucinIsapreJael-970051  -34577.00 CLP
+    desc: "B#266068 Examenes de sangre Jael Avayu"
   Income:Jael:DevolucinIsapreJael-970051  -19711.00 CLP
+    desc: "B#266068 Examenes de sangre Jael Avayu"
   Income:Jael:DevolucinIsapreJael-970051  -9964.00 CLP
+    desc: "B#266068 Examenes de sangre Jael Avayu"
   Income:Jael:DevolucinIsapreJael-970051  -6495.00 CLP
+    desc: "B#266068 Vitamina D Jael Avayu"
 
 2021-02-04 * "Mastercard/Visa Santander EAG Enero 2021"
   id: "85"
@@ -58,9 +64,13 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -1195839.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  1195839.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -677278.00 CLP
+    desc: "Mastercard Santander 2735 EAG Enero 2021"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -518561.00 CLP
+    desc: "Visa Santander EAG 0790 Enero 2021"
   Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  677278.00 CLP
+    desc: "Mastercard Santander 2735 EAG Enero 2021"
   Expenses:EAG:TC:Tc0858VisaLatanpass-430009  518561.00 CLP
+    desc: "Visa Santander EAG 0790 Enero 2021"
 
 2021-02-04 * "Devol JAB gastos reñaca visa BCI EAG"
   id: "87"
@@ -68,10 +78,15 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  706203.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -153020.00 CLP
+    desc: "Esval SA B#52063765"
   Assets:EAG:ControlYLiquidacin-115099  -405453.00 CLP
+    desc: "Chilquinta SA B#7242716"
   Assets:EAG:ControlYLiquidacin-115099  -7340.00 CLP
+    desc: "Gasvalpo B#3247078"
   Assets:EAG:ControlYLiquidacin-115099  -31160.00 CLP
+    desc: "Gasvalpo B#3247080"
   Assets:EAG:ControlYLiquidacin-115099  -109230.00 CLP
+    desc: "Gasvalpo B#3247079"
 
 2021-02-04 * "Saldo Gilma Carrasco - sueldo Enero 2021"
   id: "88"
@@ -101,10 +116,15 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4148941.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -725400.00 CLP
+    desc: "USD169,94 Master Santander 2019 Enero-21"
   Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  2561001.00 CLP
+    desc: "USD3.462,45 Master. Sant EAG Enero 2021"
   Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  1587940.00 CLP
+    desc: "USD2.146,88 Visa Sant. EAG Enero 2021"
   Expenses:EAG:TC:TcRaquelVentura-430019  599738.00 CLP
+    desc: "USD811,06 Visa Santander 5966 Enero 2021"
   Expenses:EAG:TC:TcRaquelVentura-430019  125662.00 CLP
+    desc: "USD169,94 Master Santander 2019 Enero-21"
 
 2021-02-08 * "PAC Seguro Fraude Santander"
   id: "118"
@@ -126,14 +146,23 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1177499.00 CLP
   Expenses:EAG:SueldosRopaRegalas-411001  44217.00 CLP
+    desc: "Gabriela Navarro leyes sociales Enero-21"
   Expenses:EAG:SueldosRopaRegalas-411001  185006.00 CLP
+    desc: "Mariela Mendez leyes sociales Enero-21"
   Expenses:EAG:SueldosRopaRegalas-411001  173936.00 CLP
+    desc: "Eduardo Figueroa leyes sociales Enero-21"
   Expenses:EAG:SueldosRopaRegalias-413001  156933.00 CLP
+    desc: "Leontina Mendez leyes sociales Enero-21"
   Expenses:EAG:SueldosRopaRegalias-413001  31609.00 CLP
+    desc: "Luis Mendez leyes sociales Enero 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  132774.00 CLP
+    desc: "Andres Martinez leyes sociales Enero-21"
   Expenses:EAG:SueldosRopaRegalias-413001  105112.00 CLP
+    desc: "German Quilaqueo leyes sociales Enero-21"
   Expenses:EAG:SueldosRopaRegalias-413001  95609.00 CLP
+    desc: "Fresia Gonzalez leyes sociales Enero-21"
   Expenses:EAG:SueldosRopaRegalias-413001  252303.00 CLP
+    desc: "German Balladares leyes sociales Enero21"
 
 2021-02-08 * "Gilma Carrasco leyes sociales Enero 2021"
   id: "93"
@@ -148,7 +177,9 @@
   source: "laudus-erp"
   Expenses:EAG:MantencinJardinBonsai-411053  45000.00 CLP
   Expenses:EAG:MantencinJardinBonsai-411053  65000.00 CLP
+    desc: "Bonsai mantencion jardin Enero 2021"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -110000.00 CLP
+    desc: "Bonsai mant general/jardin Enero 2021"
 
 2021-02-08 * "Isapre Cruz Blanca - Enero 2021 EAG"
   id: "96"
@@ -191,15 +222,25 @@
   source: "laudus-erp"
   Expenses:EAG:Agua-413013  4700.00 CLP
   Expenses:EAG:Agua-413013  2900.00 CLP
+    desc: "B#54819 Acevedo Ltda - Agua destilada"
   Expenses:EAG:Gas-413015  1198224.00 CLP
+    desc: "B#2151238 Abastible SA - Gas casa sur"
   Expenses:EAG:MovilizacinViajesChoferes-413037  8690.00 CLP
+    desc: "Noelia Farfal - Viaje compras/Estacionam"
   Expenses:EAG:ComprasCasaEfectivo-413049  140000.00 CLP
+    desc: "B#06 Compra 2 corderos casa EAG"
   Expenses:EAG:ComprasCasaEfectivo-413049  69000.00 CLP
+    desc: "B#25313 Patricia Blancaire Comida perros"
   Expenses:EAG:ComprasCasaEfectivo-413049  391960.00 CLP
+    desc: "Noelia Farfal - Verduras y frutas"
   Expenses:EAG:ComprasCasaEfectivo-413049  53400.00 CLP
+    desc: "Noelia Farfal - Materiales Aseo"
   Expenses:EAG:ComprasCasaEfectivo-413049  50990.00 CLP
+    desc: "Noelia Farfal - Mercaderia"
   Expenses:EAG:ComprasCasaEfectivo-413049  944120.00 CLP
+    desc: "Noelia Farfal - Mercaderia"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -2863984.00 CLP
+    desc: "Noelia Farfal - Rendicion casa sur EAG"
 
 2021-02-10 * "Patricio G./German B. Impto unico Enero"
   id: "102"
@@ -207,7 +248,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4602.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  218.00 CLP
+    desc: "Patricio Gallardo Impto unico Enero 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  4384.00 CLP
+    desc: "German Balladares Impto unico Enero 2021"
 
 2021-02-11 * "Seguro proteccion bancaria Banco Chile"
   id: "111"
@@ -222,6 +265,7 @@
   source: "laudus-erp"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  10485.00 CLP
   Income:Jael:DevolucinIsapreJael-970051  -10485.00 CLP
+    desc: "B#678 Pisicologo Clinico Jael Avayu"
 
 2021-02-12 * "Sra Raquel - Facundo y Jacqueline"
   id: "101"
@@ -273,10 +317,15 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -5596652.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  405453.00 CLP
+    desc: "Chilquinta SA F#7242716"
   Assets:EAG:ControlYLiquidacin-115099  153020.00 CLP
+    desc: "Esval SA B#52063765"
   Assets:EAG:ControlYLiquidacin-115099  7340.00 CLP
+    desc: "Gasvalpo B#3247078"
   Assets:EAG:ControlYLiquidacin-115099  31160.00 CLP
+    desc: "Gasvalpo B#3247080"
   Assets:EAG:ControlYLiquidacin-115099  109230.00 CLP
+    desc: "Gasvalpo B#3247079"
   Expenses:EAG:TC:Tc1027VisaInfinity-430005  4890449.00 CLP
 
 2021-02-16 * "Noelia Farfal - Rendicion casa sur EAG"
@@ -285,11 +334,17 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1891110.00 CLP
   Expenses:EAG:Agua-413013  12260.00 CLP
+    desc: "Noelia Farfal - Agua potable"
   Expenses:EAG:Gas-413015  124500.00 CLP
+    desc: "Noelia Farfal - Gas sur"
   Expenses:EAG:ComprasCasaEfectivo-413049  506970.00 CLP
+    desc: "Noelia Farfal - Mercaderia"
   Expenses:EAG:ComprasCasaEfectivo-413049  653230.00 CLP
+    desc: "Noelia Farfal - Frutas y verduras"
   Expenses:EAG:ComprasCasaEfectivo-413049  512950.00 CLP
+    desc: "Noelia Farfal - Bebidas y confites"
   Expenses:EAG:ComprasCasaEfectivo-413049  81200.00 CLP
+    desc: "Noelia Farfal Pan/Colacion/Frascos/Otros"
 
 2021-02-16 * "1/2 Magaly Vergara - Mercaderia sur EAG"
   id: "109"
@@ -333,12 +388,16 @@
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  1696099.00 CLP
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -1701676.00 CLP
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -8550.00 CLP
+    desc: "Comision USD2.355 Stephen y Johanna"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -42684.00 CLP
+    desc: "Comision USD683.500 Stephen y Johanna"
   Assets:Johanna:ControlYLiquidacinJohanna-810999  -1696099.00 CLP
   Assets:Johanna:ControlYLiquidacinJohanna-810999  1696099.00 CLP
   Expenses:Johanna:GastosBancarios-890003  5577.00 CLP
   Expenses:Johanna:GastosBancarios-890003  8550.00 CLP
+    desc: "Comision USD2.355 Stephen y Johanna"
   Expenses:Johanna:GastosBancarios-890003  42684.00 CLP
+    desc: "Comision USD683.500 Stephen y Johanna"
 
 2021-02-18 * "American Express 8083 EAG Enero 2021"
   id: "120"
@@ -389,8 +448,11 @@
   source: "laudus-erp"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  369942.00 CLP
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -362045.00 CLP
+    desc: "Previred Odontologia EIRL Enero 2021"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -2897.00 CLP
+    desc: "F29 Odontologia EIRL Enero 2021"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -5000.00 CLP
+    desc: "Jorge Osorio Finiquito empl Jocelyn"
 
 2021-02-23 * "Mirador Sta Anita Gto Com Enero 2021"
   id: "124"
@@ -434,6 +496,7 @@
   source: "laudus-erp"
   Expenses:EAG:SraJacquelineDeutsch-430023  600000.00 CLP
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -600000.00 CLP
+    desc: "Sra Jacqueline retiro 1/2 Febrero 2021"
 
 2021-02-25 * "EAG sueldo Inv Tecnion Ltda Febrero 2021"
   id: "129"
@@ -462,7 +525,9 @@
   source: "laudus-erp"
   Expenses:EAG:MantencinJardinBonsai-411053  45000.00 CLP
   Expenses:EAG:MantencinJardinBonsai-411053  65000.00 CLP
+    desc: "Bonsai - Mant jardin Febrero 2021"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -110000.00 CLP
+    desc: "Bonsai - Mant general/jardin Febrero-21"
 
 2021-02-25 * "Andres Martinez sueldo Febrero 2021"
   id: "133"
@@ -470,27 +535,48 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -339840.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -120001.00 CLP
+    desc: "Luis Mendez sueldo Febrero 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -376884.00 CLP
+    desc: "Leontina Mendez sueldo Febrero 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -56544.00 CLP
+    desc: "Fresia Gonzalez - efectivo Febrero 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -186555.00 CLP
+    desc: "Fresia Gonzalez - sueldo Febrero 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -601502.00 CLP
+    desc: "German Balladares sueldo Febrero 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -362000.00 CLP
+    desc: "Noelia Farfal - sueldo/celular Febr-21"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -410667.00 CLP
+    desc: "Gabriela Navarro - sueldo Febrero 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -400000.00 CLP
+    desc: "Mariela Mendez - sueldo Febrero 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -600000.00 CLP
+    desc: "Eduardo Figueroa - sueldo Febrero 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -800000.00 CLP
+    desc: "Sra Berta Galatzan Febrero 2021"
   Expenses:EAG:SueldosRopaRegalas-411001  410667.00 CLP
+    desc: "Gabriela Navarro - sueldo Febrero 2021"
   Expenses:EAG:SueldosRopaRegalas-411001  400000.00 CLP
+    desc: "Mariela Mendez - sueldo Febrero 2021"
   Expenses:EAG:SueldosRopaRegalas-411001  600000.00 CLP
+    desc: "Eduardo Figueroa - sueldo Febrero 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  339840.00 CLP
   Expenses:EAG:SueldosRopaRegalias-413001  120001.00 CLP
+    desc: "Luis Mendez sueldo Febrero 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  376884.00 CLP
+    desc: "Leontina Mendez sueldo Febrero 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  56544.00 CLP
+    desc: "Fresia Gonzalez - efectivo Febrero 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  186555.00 CLP
+    desc: "Fresia Gonzalez - sueldo Febrero 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  601502.00 CLP
+    desc: "German Balladares sueldo Febrero 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  350000.00 CLP
+    desc: "Noelia Farfal sueldo Febrero 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  12000.00 CLP
+    desc: "Noelia Farfal - celular"
   Expenses:EAG:SraJacquelineDeutsch-430023  800000.00 CLP
+    desc: "Sra Berta Galatzan Febrero 2021"
 
 2021-02-25 * "USD700 Enfermera Johanna Febrero 2021"
   id: "134"
@@ -499,6 +585,7 @@
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -12616.00 CLP
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -503860.00 CLP
   Expenses:Johanna:EnfermeraGastosMdicos-890051  516476.00 CLP
+    desc: "USD700 Enfermera Febrero 2021"
 
 2021-02-25 * "EAG sueldo FC Febrero 2021"
   id: "135"
@@ -520,12 +607,17 @@
   source: "laudus-erp"
   Expenses:Jocelyn:RetirosDelMes-690001  1500000.00 CLP
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -2230000.00 CLP
+    desc: "Jeannette retiro/enfermera Febrero 202"
   Expenses:Jeannette:RetirosDelMes-790001  1500000.00 CLP
   Expenses:Jeannette:EnfermeraGastosMdicos-790051  730000.00 CLP
+    desc: "Enfermera Febrero 2021"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -1500000.00 CLP
+    desc: "Johanna retiro Febrero 2021"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -1500000.00 CLP
+    desc: "Jocelyn  retiro Febrero 2021"
   Expenses:Johanna:RetirosDelMes-890001  1500000.00 CLP
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -300000.00 CLP
+    desc: "Jael Avayu retiro Febrero 2021"
   Expenses:Jael:RetirosDelMes-990001  300000.00 CLP
 
 2021-02-26 * "2/2 Febrero 2021"
@@ -534,6 +626,7 @@
   source: "laudus-erp"
   Expenses:EAG:SraJacquelineDeutsch-430023  3295119.00 CLP
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -3295119.00 CLP
+    desc: "2/2 Sra Jacqueline retiro Febrero 2021"
 
 2021-02-26 * "USD8.000 Odis J. Olivero - Remodelacion"
   id: "139"

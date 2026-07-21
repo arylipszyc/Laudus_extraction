@@ -11,8 +11,10 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -60000.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -30000.00 CLP
+    desc: "Lorenzo Heredia - Bencina morning"
   Expenses:JAB:SueldosJardineros-811002  60000.00 CLP
   Expenses:JAB:LorenzoHPollaLoteraBencina-811004  30000.00 CLP
+    desc: "Lorenzo Heredia - Bencina morning"
 
 2026-07-01 * "Inversiones Sade SPA"
   id: "10532"
@@ -27,8 +29,10 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -1700000.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -150000.00 CLP
+    desc: "Cumpleaños Jonathan Pollak"
   Expenses:JAB:IreneGuiloff-811003  1700000.00 CLP
   Expenses:JAB:SagFamiliaRegalos-877005  150000.00 CLP
+    desc: "Cumpleaños Jonathan Pollak"
 
 2026-07-03 * "Cumpleaños Matias Maldavsky"
   id: "10553"
@@ -36,8 +40,10 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -150000.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -150000.00 CLP
+    desc: "Cumpleaños Karina Avayu"
   Expenses:JAB:EagFamiliaRegalos-877003  150000.00 CLP
   Expenses:JAB:DagFamiliaRegalos-877007  150000.00 CLP
+    desc: "Cumpleaños Karina Avayu"
 
 2026-07-03 * "Lorenzo Heredia - Bencina"
   id: "10554"
@@ -74,8 +80,10 @@
   Assets:FFCC:RetirosAag-115021  158270.00 CLP
   Assets:FFCC:RetirosAag-115021  -158270.00 CLP
   Assets:JAB:BancoBciFgk30396000-611006  -1300075.00 CLP
+    desc: "F#410 Gomez Calefaccion Mant equipos CP"
   Assets:JAB:BancoBciFgk30396000-611006  158270.00 CLP
   Expenses:JAB:MantencinCalderaCalefaccin-815019  1141805.00 CLP
+    desc: "F#410 Gomez Calefaccion Mant equipos CP"
 
 2026-07-03 * "F#29554 Home Security Desmonte cerco VG"
   id: "10559"
@@ -90,6 +98,25 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -3010700.00 CLP
   Expenses:JAB:MantencinElctrica-815020  3010700.00 CLP
+
+2026-07-03 * "USD115.896,37 Fraser Julio 2026"
+  id: "10603"
+  je_num: "10551"
+  source: "laudus-erp"
+  Assets:FFCC:LeoPartnershipLimited-111012  -104698463.00 CLP
+  Assets:FFCC:RetirosAag-115021  34899488.00 CLP
+    desc: "USD38.632,12 Fraser Julio 2026 AAG"
+  Assets:FFCC:RetirosAag-115021  -34899488.00 CLP
+    desc: "USD38.632,12 Fraser Julio 2026 AAG"
+  Assets:FFCC:RetirosEag-115023  34899488.00 CLP
+    desc: "USD38.632,12 Fraser Julio 2026 EAG"
+  Assets:FFCC:RetirosEag-115023  -34899488.00 CLP
+    desc: "USD38.632,12 Fraser Julio 2026 EAG"
+  Assets:FFCC:RetirosDag-115027  34899488.00 CLP
+    desc: "USD38.632,12 Fraser Julio 2026 DAG"
+  Assets:FFCC:RetirosDag-115027  -34899488.00 CLP
+    desc: "USD38.632,12 Fraser Julio 2026 DAG"
+  Expenses:JAB:KeikiKaiMantencinReparacin-855024  104698463.00 CLP
 
 2026-07-06 * "Uge Kleinkopf - Pilates Sra Fanny"
   id: "10542"
@@ -188,10 +215,14 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -1350622.00 CLP
   Assets:FFCC:BancoBci28981162-111005  -1320863.00 CLP
+    desc: "Agustin Gomez - Leyes soc Junio 2026"
   Assets:FFCC:BancoBci28981162-111005  -804694.00 CLP
+    desc: "Macarena Barra - Leyes soc Junio 2026"
   Assets:FFCC:RetirosDag-115027  804694.00 CLP
+    desc: "Macarena Barra - Leyes soc Junio 2026"
   Expenses:JAB:SueldosPilotos-837001  1350622.00 CLP
   Expenses:JAB:SueldosPilotos-837001  1320863.00 CLP
+    desc: "Agustin Gomez - Leyes soc Junio 2026"
 
 2026-07-07 * "USD100.000 Leo Limited Pictet & Cie SA"
   id: "10571"
@@ -199,8 +230,11 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  92340000.00 CLP
   Assets:FFCC:RetirosAag-115021  -30780000.00 CLP
+    desc: "USD33.333 Leo Limited Pictet AAG"
   Assets:FFCC:RetirosEag-115023  -30780000.00 CLP
+    desc: "USD33.333 Leo Limited Pictet EAG"
   Assets:FFCC:RetirosDag-115027  -30780000.00 CLP
+    desc: "USD33.333 Leo Limited Pictet DAG"
 
 2026-07-07 * "F#48 Const. Zomo SPA - Cierre perimetral"
   id: "10572"
@@ -215,17 +249,28 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -4820.00 CLP
   Assets:FFCC:BancoBci28981162-111005  -962115.00 CLP
+    desc: "Mayelis/Lorenzo/Cristobal Impto Unico Ju"
   Assets:FFCC:BancoBci28981162-111005  -616712.00 CLP
+    desc: "Macarena/Agustin Impto Unico Junio 2026"
   Assets:FFCC:RetirosAag-115021  2864.00 CLP
+    desc: "Mayelis Aquino - Impto unico Junio 2026"
   Assets:FFCC:RetirosDag-115027  66326.00 CLP
+    desc: "Impto unico empleados DAG Junio 2026"
   Assets:JAB:BancoBciFgk30396000-611006  -54178.00 CLP
+    desc: "FGK - Impuesto unico trabaj. Junio 2026"
   Expenses:JAB:SueldosRopaRegalias-811001  21867.00 CLP
+    desc: "Rodrigo Aravena - Impto unico Junio 2026"
   Expenses:JAB:SueldosRopaRegalias-811001  9997.00 CLP
+    desc: "Fernando Diaz - Impto unico Junio 2026"
   Expenses:JAB:SueldosRopaRegalias-811001  22314.00 CLP
+    desc: "Janina Martinez - Impto unico Junio 2026"
   Expenses:JAB:SueldosRopaRegalias-811001  4820.00 CLP
   Expenses:JAB:SueldosRopaRegalias-811001  9747.00 CLP
+    desc: "Lorenzo Heredia - Impto unico Junio 2026"
   Expenses:JAB:SueldosPilotos-837001  949504.00 CLP
+    desc: "Cristobal Guerr. Impto unico Junio 2026"
   Expenses:JAB:SueldosPilotos-837001  550386.00 CLP
+    desc: "Agustin Gomez - Impto unico Junio 2026"
 
 2026-07-08 * "AAG Devolucion gastos Junio 2026"
   id: "10575"
@@ -233,7 +278,9 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  12611.00 CLP
   Assets:FFCC:RetirosAag-115021  -2864.00 CLP
+    desc: "Mayelis Aquino - Impto unico Junio 2026"
   Income:JAB:OtrosIngresos-710099  -9747.00 CLP
+    desc: "Lorenzo Heredia - Impto unico Junio 2026"
 
 2026-07-08 * "Devol Lilia Alfaro Impto unico Junio-26"
   id: "10576"
@@ -249,6 +296,66 @@
   Assets:FFCC:BancoBci28981162-111005  -414120.00 CLP
   Expenses:JAB:MantencinGeneralInstalaciones-811024  414120.00 CLP
 
+2026-07-08 * "Jorge Balladares - Leyes soc Junio 2026"
+  id: "10604"
+  je_num: "10552"
+  source: "laudus-erp"
+  Assets:FFCC:BancoBci28981162-111005  -198112.00 CLP
+  Expenses:JAB:GolfGastosGenerales-819001  198112.00 CLP
+
+2026-07-08 * "VG - Molco Leyes soc Junio 2026"
+  id: "10605"
+  je_num: "10553"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -1952166.00 CLP
+  Expenses:JAB:SueldosRopaRegalias-811001  274142.00 CLP
+    desc: "Esperanza Barrera - Leyes soc Junio 2026"
+  Expenses:JAB:SueldosRopaRegalias-811001  479705.00 CLP
+    desc: "Rodrigo Aravena - Leyes soc Junio 2026"
+  Expenses:JAB:SueldosRopaRegalias-811001  372156.00 CLP
+    desc: "Fernando Diaz - Leyes soc Junio 2026"
+  Expenses:JAB:SueldosRopaRegalias-811001  466456.00 CLP
+    desc: "Janina Martinez - Leyes soc Junio 2026"
+  Expenses:JAB:SueldosJardineros-811002  103569.00 CLP
+    desc: "Juan Salas - Leyes soc Junio 2026"
+  Expenses:JAB:SueldosJardineros-811002  256138.00 CLP
+    desc: "Jose O. Videla - Leyes soc Junio 2026"
+
+2026-07-08 * "Leyes sociales Molco Junio 2026 AAG"
+  id: "10608"
+  je_num: "10556"
+  source: "laudus-erp"
+  Assets:FFCC:BancoBci28981162-111005  -725268.00 CLP
+  Expenses:JAB:SueldosRopaRegalas-815001  158302.00 CLP
+    desc: "Jose Manriquez - Leyes soc Junio 2026"
+  Expenses:JAB:SueldosRopaRegalas-815001  337154.00 CLP
+    desc: "Jaime Labraña - Leyes soc Junio 2026"
+  Expenses:JAB:SueldosRopaRegalas-815001  179571.00 CLP
+    desc: "Jose Astroza - Leyes soc Junio 2026"
+  Expenses:JAB:SueldosRopaRegalas-815001  50241.00 CLP
+    desc: "Rene Quilaqueo - Leyes soc Junio 2026"
+
+2026-07-09 * "Eliot Avendaño - Bencina Morning FC"
+  id: "10586"
+  je_num: "10534"
+  source: "laudus-erp"
+  Assets:FFCC:BancoBci28981162-111005  -40000.00 CLP
+  Expenses:FFCC:MovilizacinViajes-437037  40000.00 CLP
+
+2026-07-09 * "Leyes soc empleados DAG Junio 2026"
+  id: "10606"
+  je_num: "10554"
+  source: "laudus-erp"
+  Assets:FFCC:BancoBci28981162-111005  -1450501.00 CLP
+  Assets:FFCC:RetirosDag-115027  1450501.00 CLP
+
+2026-07-09 * "Leyes soc empleados DAG Junio 2026"
+  id: "10607"
+  je_num: "10555"
+  source: "laudus-erp"
+  Assets:FFCC:BancoBci28981162-111005  1450501.00 CLP
+  Assets:FFCC:RetirosDag-115027  -1450501.00 CLP
+
 2026-07-10 * "Lorenzo Heredia - Bencina Morning"
   id: "10582"
   je_num: "10530"
@@ -262,7 +369,9 @@
   source: "laudus-erp"
   Assets:JAB:BancoBciFgk30396000-611006  -270000.00 CLP
   Expenses:JAB:OtrosRegalos-877099  120000.00 CLP
+    desc: "Cumpleaños Julian Feldman"
   Expenses:JAB:OtrosRegalos-877099  150000.00 CLP
+    desc: "Cumpleaños Roberto Feldman"
 
 2026-07-10 * "F#240 Fulvio Forno - Lucarnas Lo Curro"
   id: "10584"
@@ -277,3 +386,201 @@
   source: "laudus-erp"
   Assets:FFCC:BancoBci28981162-111005  -166600.00 CLP
   Expenses:JAB:GolfGastosGenerales-819001  166600.00 CLP
+
+2026-07-10 * "AAG Devol Leyes soc empl VG/CP Junio FGK"
+  id: "10592"
+  je_num: "10540"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -342345.00 CLP
+  Expenses:JAB:SueldosRopaRegalias-811001  156520.00 CLP
+    desc: "Lorenzo Heredia - Leyes soc Junio 2026"
+  Expenses:JAB:SueldosRopaRegalas-815001  118112.00 CLP
+    desc: "M. Lucy Hernandez - Leyes soc Junio 2026"
+  Expenses:JAB:JardinHonorarios-815053  67713.00 CLP
+    desc: "Reinaldo Zapata - Leyes soc Junio 2026"
+
+2026-07-10 * "Carolina S/Lilia Leyes soc Junio 2026"
+  id: "10594"
+  je_num: "10542"
+  source: "laudus-erp"
+  Assets:FFCC:BancoBci28981162-111005  -172301.00 CLP
+  Assets:FFCC:BancoBci28981162-111005  140574.00 CLP
+    desc: "Devol Lilia Alfaro Leyes soc Junio 2026"
+  Assets:FFCC:MichelleZeldis-115035  31727.00 CLP
+    desc: "Carolina Sepulveda Leyes soc Junio 2026"
+  Assets:JAB:BancoBciFgk30396000-611006  -140574.00 CLP
+    desc: "Devol Lilia Alfaro Leyes soc Junio 2026"
+  Expenses:JAB:SueldosRopaRegalias-811001  140574.00 CLP
+    desc: "Lilia Alfaro - Leyes soc Junio 2026"
+
+2026-07-13 * "Jumbo - Pedido compras Lo Curro 13/07"
+  id: "10587"
+  je_num: "10535"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -157429.00 CLP
+  Expenses:JAB:GastosCasa-811049  157429.00 CLP
+
+2026-07-13 * "F#29755 Home Security Repar. cerco elect"
+  id: "10588"
+  je_num: "10536"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -890120.00 CLP
+  Expenses:JAB:MantencinGeneralInstalaciones-811024  890120.00 CLP
+
+2026-07-13 * "F#2815/2649 Interclima Trabajos Via Gris"
+  id: "10589"
+  je_num: "10537"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -1049215.00 CLP
+  Expenses:JAB:MantencinAireAcondicionadocalefaccin-811019  767116.00 CLP
+    desc: "F#2815 Interclima - Trabajos calefaccion"
+  Expenses:JAB:MantencinAireAcondicionadocalefaccin-811019  282099.00 CLP
+    desc: "F#2649 Interclima - Mant. Marzo 2026 VG"
+
+2026-07-13 * "Rodrigo Aravena - Compras/Bencina VG"
+  id: "10590"
+  je_num: "10538"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -292426.00 CLP
+  Expenses:JAB:MantencinVehculosSeguros-811042  91433.00 CLP
+    desc: "Rodrigo Aravena - Bencina Sportage VG"
+  Expenses:JAB:GastosCasa-811049  200993.00 CLP
+    desc: "Rodrigo Aravena - Carne/Huevos/Fruta/Ver"
+
+2026-07-13 * "Scharfstein SA - Nuevo sistema seguridad"
+  id: "10591"
+  je_num: "10539"
+  source: "laudus-erp"
+  Assets:FFCC:BancoBci28981162-111005  -2142860.00 CLP
+  Expenses:JAB:MantencinGeneralInstalaciones-811024  2142860.00 CLP
+
+2026-07-13 * "Gabriel Videla - Leyes soc Junio 2026"
+  id: "10593"
+  je_num: "10541"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -140529.00 CLP
+  Expenses:JAB:SueldosJardineros-811002  140529.00 CLP
+
+2026-07-14 * "Ines Perea - 5 Sesiones kine sem 08/07"
+  id: "10598"
+  je_num: "10546"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -275000.00 CLP
+  Expenses:JAB:FgkBonosMdicosExmenesRemedios-873017  275000.00 CLP
+
+2026-07-14 * "Lorenzo Heredia - Bencina/Compras VG"
+  id: "10599"
+  je_num: "10547"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -49271.00 CLP
+  Expenses:JAB:LorenzoHPollaLoteraBencina-811004  35014.00 CLP
+    desc: "Lorenzo Heredia - Bencina Morning"
+  Expenses:JAB:GastosCasa-811049  14257.00 CLP
+    desc: "Lorenzo Heredia - Cloro/Cafe/Servilleta"
+
+2026-07-14 * "F#30 Daraire SPA Mant. Climatizacion VG"
+  id: "10600"
+  je_num: "10548"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -600000.00 CLP
+  Expenses:JAB:MantencinAireAcondicionadocalefaccin-811019  600000.00 CLP
+
+2026-07-15 * "Jose O. Videla - Quincena Julio 2026"
+  id: "10609"
+  je_num: "10557"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -250000.00 CLP
+  Expenses:JAB:SueldosJardineros-811002  250000.00 CLP
+
+2026-07-15 * "Edificio el Bosque GGCC Junio 2026"
+  id: "10610"
+  je_num: "10558"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -551344.00 CLP
+  Expenses:JAB:DeptoElBosque310-875021  551344.00 CLP
+
+2026-07-17 * "F#30 Daraire SPA Mant. Climatizacion VG"
+  id: "10611"
+  je_num: "10559"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -816484.00 CLP
+  Expenses:JAB:MantencinAireAcondicionadocalefaccin-811019  816484.00 CLP
+
+2026-07-17 * "DAG - Devolucion gastos Junio 2026"
+  id: "10612"
+  je_num: "10560"
+  source: "laudus-erp"
+  Assets:FFCC:BancoBci28981162-111005  3086114.00 CLP
+  Assets:FFCC:RetirosDag-115027  -796210.00 CLP
+    desc: "Macarena Barra - Leyes soc Mayo 2026"
+  Assets:FFCC:RetirosDag-115027  -2289904.00 CLP
+    desc: "Macarena Barra - Sueldo Junio 2026"
+
+2026-07-17 * "Telefonica del sur consumo Junio 2026"
+  id: "10613"
+  je_num: "10561"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -149846.00 CLP
+  Expenses:JAB:Telfono-815007  29341.00 CLP
+    desc: "Telefonica del sur Nº8230 Junio 2026"
+  Expenses:JAB:Telfono-815007  32205.00 CLP
+    desc: "Telefonica del sur Nº8228 Junio 2026"
+  Expenses:JAB:Telfono-815007  88300.00 CLP
+    desc: "Telefonica del sur Nº8235 Junio 2026"
+
+2026-07-17 * "Agua Choshuenco - Junio 2026 MZA"
+  id: "10614"
+  je_num: "10562"
+  source: "laudus-erp"
+  Assets:FFCC:BancoBci28981162-111005  -7640.00 CLP
+  Assets:FFCC:MichelleZeldis-115035  7640.00 CLP
+
+2026-07-20 * "Agua Choshuenco consumo Junio 2026 CP"
+  id: "10615"
+  je_num: "10563"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -231060.00 CLP
+  Expenses:JAB:Agua-815006  3820.00 CLP
+    desc: "Agua Choshuenco Casa 40 Junio 2026"
+  Expenses:JAB:Agua-815006  3820.00 CLP
+    desc: "Agua Choshuenco Casa 39 Junio 2026"
+  Expenses:JAB:Agua-815006  223420.00 CLP
+    desc: "Agua Choshuenco CP FGK Junio 2026"
+
+2026-07-20 * "Cencosud - Jumbo - Compras El Bosque"
+  id: "10616"
+  je_num: "10564"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -2020857.00 CLP
+  Expenses:JAB:IreneGuiloff-811003  313619.00 CLP
+    desc: "Cencosud - Jumbo Sra. Irene"
+  Expenses:JAB:IreneGuiloff-811003  672895.00 CLP
+    desc: "Cencosud - Farmacia Sra Irene"
+  Expenses:JAB:IreneGuiloff-811003  291350.00 CLP
+    desc: "Cencosud - Extras con tarjeta Sra Irene"
+  Expenses:JAB:IreneGuiloff-811003  742993.00 CLP
+    desc: "Cencosud - Centro de la vision Sra Irene"
+
+2026-07-20 * "Jumbo - Pedido compras Lo Curro 16/06"
+  id: "10617"
+  je_num: "10565"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -154582.00 CLP
+  Expenses:JAB:GastosCasa-811049  154582.00 CLP
+
+2026-07-20 * "Ines Perea - 2 sesiones sem 16/07 FGK"
+  id: "10618"
+  je_num: "10566"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -110000.00 CLP
+  Expenses:JAB:FgkBonosMdicosExmenesRemedios-873017  110000.00 CLP
+
+2026-07-20 * "Rodrigo Aravena - Compras/Hervidor VG"
+  id: "10619"
+  je_num: "10567"
+  source: "laudus-erp"
+  Assets:JAB:BancoBciFgk30396000-611006  -184159.00 CLP
+  Expenses:JAB:GastosCasa-811049  159169.00 CLP
+    desc: "Rodrigo Aravena - Comprasa casa"
+  Expenses:JAB:GastosCasa-811049  24990.00 CLP
+    desc: "Rodrigo Aravena - Hervidor"

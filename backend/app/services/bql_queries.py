@@ -241,7 +241,11 @@ def ledger_entries_via_beancount(
                 "date": iso_date,
                 "accountnumber": code,
                 "lineid": None,
-                "description": entry.narration or "",
+                # Glosa POR LÍNEA (metadata `desc:` del posting) cuando existe; si no,
+                # la narration de la tx. Un asiento multi-línea de Laudus (ej. planilla
+                # de sueldos) tiene una glosa distinta por pata — sin esto todas las
+                # patas mostraban el encabezado del asiento (la glosa de la 1ª línea).
+                "description": (posting.meta or {}).get("desc") or entry.narration or "",
                 "debit": amount if amount >= 0 else 0.0,
                 "credit": -amount if amount < 0 else 0.0,
                 "currencycode": currency or "CLP",

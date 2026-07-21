@@ -53,7 +53,11 @@ class JournalEntry:
     id: str                        # journalentryid
     je_num: str                    # journalentrynumber
     narration: str
-    postings: list[tuple[str, Decimal]] = field(default_factory=list)  # (account, amount)
+    # (account, amount, desc) — `desc` = glosa POR LÍNEA de Laudus (Laudus da una por
+    # lineId; la narration de la tx es solo la de la 1ª línea). Se emite como metadata
+    # `desc:` del posting cuando difiere de la narration, para que el reporte muestre el
+    # concepto real de cada pata y no el encabezado del asiento.
+    postings: list[tuple[str, Decimal, str]] = field(default_factory=list)
     pending: bool = False          # alguna cuenta es de cuarentena → #pending-account
 
 
@@ -132,8 +136,12 @@ def _format_je(je: JournalEntry) -> str:
     lines.append(f'  id: "{je.id}"')
     lines.append(f'  je_num: "{je.je_num}"')
     lines.append('  source: "laudus-erp"')
-    for account, amount in je.postings:
+    for account, amount, desc in je.postings:
         lines.append(f"  {account}  {_fmt_amount(amount)}")
+        # Glosa por-línea: se emite solo si difiere de la narration (la 1ª línea la
+        # comparte → no se repite). El reporte cae a la narration cuando no hay `desc:`.
+        if desc and desc != je.narration:
+            lines.append(f'    desc: "{_escape(desc)}"')
     return "\n".join(lines)
 
 
@@ -177,7 +185,7 @@ def _rows_to_jes(
         je = jes[je_id]
         if not je.narration and row.get("description"):
             je.narration = str(row["description"])
-        je.postings.append((account, amount))
+        je.postings.append((account, amount, str(row.get("description", "") or "")))
         if is_pending:
             je.pending = True
     return jes, pending_codes
@@ -199,8 +207,11 @@ def _parse_existing_jes(target_dir: Path) -> dict[str, JournalEntry]:
             if meta.get("source") != "laudus-erp":
                 continue
             je_id = str(meta.get("id", ""))
+            # Recupera la glosa por-línea de la metadata `desc:`; si no está (la pata
+            # compartía la narration → no se emitió), cae a la narration para que el
+            # re-emit sea idéntico (idempotencia intacta).
             postings = [
-                (p.account, p.units.number)
+                (p.account, p.units.number, str((p.meta or {}).get("desc") or e.narration or ""))
                 for p in e.postings
                 if p.units is not None and p.units.number is not None
             ]

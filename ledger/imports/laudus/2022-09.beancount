@@ -60,7 +60,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  6621.00 CLP
   Assets:EAG:FondosPorRendir-115005  -75000.00 CLP
+    desc: "CC-1.693 Eliot - Compra remedios EAG"
   Expenses:EAG:Remedios-430051  68379.00 CLP
+    desc: "Cruz verde  - Compra remedios EAG"
 
 2022-09-05 * "Traspaso de Andres Turski Gottlieb"
   id: "1774"
@@ -98,14 +100,23 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -1622582.00 CLP
   Expenses:EAG:SueldosRopaRegalas-411001  223830.00 CLP
+    desc: "Mariela Mendez - Leyes soc Agosto 2022"
   Expenses:EAG:SueldosRopaRegalas-411001  217425.00 CLP
+    desc: "Eduardo Figueroa - Leyes soc Agosto 2022"
   Expenses:EAG:SueldosRopaRegalas-411001  203746.00 CLP
+    desc: "Victoria Celia - Leyes soc Agosto 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  229018.00 CLP
+    desc: "Leontina Mendez - Leyes soc Agosto 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  55704.00 CLP
+    desc: "Luis Mendez - Leyes soc Agosto 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  173318.00 CLP
+    desc: "Andres Martinez - Leyes soc Agosto 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  170834.00 CLP
+    desc: "Fresia Gonzalez - Leyes soc Agosto 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  140966.00 CLP
+    desc: "Esteban Mendez - Leyes soc Agosto 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  207741.00 CLP
+    desc: "Daniel Cadenas - Leyes soc Agosto 2022"
 
 2022-09-06 * "Traspaso a BCI 28981162 Eduardo Avayu"
   id: "1701"
@@ -162,8 +173,11 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -94253.00 CLP
   Income:EAG:OtrosIngresos-310099  -9774.00 CLP
+    desc: "USD11 Master Santander Agosto 2022"
   Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  94253.00 CLP
+    desc: "USD106,08 Master Santander Agosto 2022"
   Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  9774.00 CLP
+    desc: "USD11 Master Santander Agosto 2022"
 
 2022-09-07 * "Traspaso pago Master $ Santander EAG"
   id: "1707"
@@ -194,11 +208,17 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -182096.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  63777.00 CLP
+    desc: "PAT - GTD Manquehue SA"
   Assets:EAG:ControlYLiquidacin-115099  14990.00 CLP
+    desc: "PAT - Claro Chile SA Lorenzo"
   Assets:EAG:ControlYLiquidacin-115099  53054.00 CLP
+    desc: "PAT - VTR Chile Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  76938.00 CLP
+    desc: "PAT - Movistar Hogar Via Gris"
   Assets:EAG:ControlYLiquidacin-115099  22140.00 CLP
+    desc: "PAT - Entel PCS FGK"
   Assets:EAG:ControlYLiquidacin-115099  1415682.00 CLP
+    desc: "PAT - Enel Via Gris"
   Income:EAG:OtrosIngresos-310099  -2303000.00 CLP
   Expenses:EAG:TC:Tc0858VisaLatanpass-430009  838515.00 CLP
 
@@ -329,10 +349,14 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -90000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  45000.00 CLP
+    desc: "Devol AAG F#4888 Connect Chile"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  45000.00 CLP
+    desc: "Devol FGK F#4888 Connect Chile"
   Assets:EAG:ControlYLiquidacin-115099  90000.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -45000.00 CLP
+    desc: "Devol AAG F#4888 Connect Chile"
   Assets:EAG:ControlYLiquidacin-115099  -45000.00 CLP
+    desc: "Devol FGK F#4888 Connect Chile"
 
 2022-09-13 * "Jaime Labraña - Aguinaldo 18 Sept. 2022"
   id: "1731"
@@ -340,19 +364,33 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -100000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -150000.00 CLP
+    desc: "Noelia Farfal - Aguinaldo 18 Sept. 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -80000.00 CLP
+    desc: "Luis Mendez - Aguinaldo 18 Sept. 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -80000.00 CLP
+    desc: "Andres Martinez -Aguinaldo 18 Sept. 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -80000.00 CLP
+    desc: "Fresia Gonzalez -Aguinaldo 18 Sept. 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -80000.00 CLP
+    desc: "Leontina Mendez -Aguinaldo 18 Sept. 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -80000.00 CLP
+    desc: "Esteban Mendez - Aguinaldo 18 Sept. 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -80000.00 CLP
+    desc: "Daniel Cadenas - Aguinaldo 18 Sept. 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  150000.00 CLP
+    desc: "Noelia Farfal - Aguinaldo 18 Sept. 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  80000.00 CLP
+    desc: "Luis Mendez - Aguinaldo 18 Sept. 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  80000.00 CLP
+    desc: "Andres Martinez -Aguinaldo 18 Sept. 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  80000.00 CLP
+    desc: "Fresia Gonzalez -Aguinaldo 18 Sept. 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  80000.00 CLP
+    desc: "Leontina Mendez -Aguinaldo 18 Sept. 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  80000.00 CLP
+    desc: "Esteban Mendez - Aguinaldo 18 Sept. 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  80000.00 CLP
+    desc: "Daniel Cadenas - Aguinaldo 18 Sept. 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  100000.00 CLP
 
 2022-09-13 * "Eliot Avendaño - Aguinaldo Sept. 2022"
@@ -361,11 +399,17 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -100000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -100000.00 CLP
+    desc: "Victoria Celia - Aguinaldo Sept. 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -100000.00 CLP
+    desc: "Eduardo Figueroa - Aguinaldo Sept. 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -100000.00 CLP
+    desc: "Mariela Mendez - Aguinaldo Sept. 2022"
   Expenses:EAG:SueldosRopaRegalas-411001  100000.00 CLP
+    desc: "Victoria Celia - Aguinaldo Sept. 2022"
   Expenses:EAG:SueldosRopaRegalas-411001  100000.00 CLP
+    desc: "Eduardo Figueroa - Aguinaldo Sept. 2022"
   Expenses:EAG:SueldosRopaRegalas-411001  100000.00 CLP
+    desc: "Mariela Mendez - Aguinaldo Sept. 2022"
   Expenses:EAG:SueldosRopaRegalas-411001  100000.00 CLP
 
 2022-09-13 * "Kia Chile Inscripcion EV6 auto electrico"
@@ -395,7 +439,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -390000.00 CLP
   Expenses:EAG:ComprasCasaEfectivo-411049  150000.00 CLP
+    desc: "Edificio Aria-Aguinaldos conserjeria EAG"
   Expenses:EAG:ComprasCasaEfectivo-411049  240000.00 CLP
+    desc: "Edificio Aria - Aguinaldos porteria EAG"
 
 2022-09-14 * "Daniel Cadenas - FxR Herbicidos y jardin"
   id: "1735"
@@ -410,10 +456,15 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -9862008.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  254380.00 CLP
+    desc: "PAT - Esval Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  783429.00 CLP
+    desc: "PAT - Chilquinta Reñaca F#8219783"
   Assets:EAG:ControlYLiquidacin-115099  76200.00 CLP
+    desc: "PAT - Galvalpo Reñaca B#4918544"
   Assets:EAG:ControlYLiquidacin-115099  150260.00 CLP
+    desc: "PAT - Galvalpo Reñaca B#4918542"
   Assets:EAG:ControlYLiquidacin-115099  175960.00 CLP
+    desc: "PAT - Esval Reñaca"
   Expenses:EAG:TC:Tc1027VisaInfinity-430005  8421779.00 CLP
 
 2022-09-14 * "Visa Banco de Chile 1168 Agosto 2022"
@@ -436,8 +487,11 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -48445.00 CLP
   Expenses:EAG:MantencinVehculosSeguros-411043  2200.00 CLP
+    desc: "Autopista Autopase - Tag autos EAG"
   Expenses:EAG:MantencinVehculosSeguros-411043  8660.00 CLP
+    desc: "Autopistas varias - Tag auto Jael A."
   Expenses:EAG:MantencinVehculosSeguros-411043  37585.00 CLP
+    desc: "Autopistas varias - Tag auto Sra Raquel"
 
 2022-09-20 * "Patricio Legarraga Raddatz de EAG"
   id: "1736"
@@ -502,9 +556,13 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4463143.00 CLP
   Expenses:EAG:Contribuciones-411069  4038831.00 CLP
+    desc: "Rol 3783-191 Depto Jose A. Delano 3/4"
   Expenses:EAG:Contribuciones-411069  176235.00 CLP
+    desc: "Rol 3783-203 Estacionamiento 1  3/4"
   Expenses:EAG:Contribuciones-411069  176235.00 CLP
+    desc: "Rol 3783-225 Estacionamiento 23  3/4"
   Expenses:EAG:Contribuciones-411069  71842.00 CLP
+    desc: "Rol 3783-197 Bodega 1  3/4"
 
 2022-09-22 * "Jocelyn devol Previred/F29 Odontologia"
   id: "1752"
@@ -512,9 +570,13 @@
   source: "laudus-erp"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  307196.00 CLP
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -3766.00 CLP
+    desc: "Cargo Deuda Tarjeta Credito Mastercard"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -3944.00 CLP
+    desc: "Jocelyn Avayu - Seguro vida COVID-19"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -297750.00 CLP
+    desc: "Previred Odontologia EIRL Agosto 2022"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -1736.00 CLP
+    desc: "F29 Odontologia EIRL Agosto 2022"
 
 2022-09-22 * "Alberto Bitran - Abono prestamo mutuo"
   id: "1753"
@@ -550,7 +612,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  3960000.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  15840000.00 CLP
+    desc: "BH56 Kia Chile Junta directiva Sept 2022"
   Income:EAG:KiaChileSpa-310023  -15840000.00 CLP
+    desc: "BH56 Kia Chile Junta directiva Sept 2022"
   Income:EAG:HyundaiChileSpa-310024  -3960000.00 CLP
 
 2022-09-23 * "Nuevo Ciclo: Devolución de préstamos"
@@ -594,11 +658,17 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  1646581.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -63777.00 CLP
+    desc: "PAT - GTD Manquehue SA"
   Assets:EAG:ControlYLiquidacin-115099  -14990.00 CLP
+    desc: "PAT - Claro Chile SA Lorenzo"
   Assets:EAG:ControlYLiquidacin-115099  -53054.00 CLP
+    desc: "PAT - VTR Chile Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  -76938.00 CLP
+    desc: "PAT - Movistar Hogar Via Gris"
   Assets:EAG:ControlYLiquidacin-115099  -22140.00 CLP
+    desc: "PAT - Entel PCS FGK"
   Assets:EAG:ControlYLiquidacin-115099  -1415682.00 CLP
+    desc: "PAT - Enel Via Gris"
 
 2022-09-27 * "Gastos reñaca Visa BCI EAG Agosto 2022"
   id: "1758"
@@ -606,10 +676,15 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  1440229.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -254380.00 CLP
+    desc: "PAT - Esval Reñaca"
   Assets:EAG:ControlYLiquidacin-115099  -783429.00 CLP
+    desc: "PAT - Chilquinta Reñaca F#8219783"
   Assets:EAG:ControlYLiquidacin-115099  -76200.00 CLP
+    desc: "PAT - Galvalpo Reñaca B#4918544"
   Assets:EAG:ControlYLiquidacin-115099  -150260.00 CLP
+    desc: "PAT - Galvalpo Reñaca B#4918542"
   Assets:EAG:ControlYLiquidacin-115099  -175960.00 CLP
+    desc: "PAT - Esval Reñaca"
 
 2022-09-27 * "Inv. Some SpA - Psiquiatra Jael A."
   id: "1759"
@@ -624,11 +699,17 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  138978.00 CLP
   Income:EAG:DevolucinIsapre-310043  -12943.00 CLP
+    desc: "Devol Isapre B#6121 - Examenes EAG"
   Income:EAG:DevolucinIsapre-310043  -45220.00 CLP
+    desc: "Devol Isapre B#6122 - Examenes EAG"
   Income:EAG:DevolucinIsapre-310043  -20160.00 CLP
+    desc: "Devol Isapre B#6123 - Examenes EAG"
   Income:EAG:DevolucinIsapre-310043  -15400.00 CLP
+    desc: "Devol Isapre B#6124 - Examenes EAG"
   Income:EAG:DevolucinIsapre-310043  -19285.00 CLP
+    desc: "Devol Isapre B#6125 - Examenes EAG"
   Income:EAG:DevolucinIsapre-310043  -25970.00 CLP
+    desc: "Devol Isapre B#6126 - Examenes EAG"
 
 2022-09-28 * "Jeannette Avayu - Retiro Septiembre 2022"
   id: "1760"
@@ -637,7 +718,9 @@
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -2500000.00 CLP
   Expenses:Jeannette:RetirosDelMes-790001  2500000.00 CLP
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -300000.00 CLP
+    desc: "Jael Avayu - Retiro Septiembre 2022"
   Expenses:Jael:RetirosDelMes-990001  300000.00 CLP
+    desc: "Jael Avayu - Retiro Septiembre 2022"
 
 2022-09-28 * "1/2 Eduardo Figueroa - Locomocion"
   id: "1761"
@@ -645,7 +728,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -150000.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -40000.00 CLP
+    desc: "2/2 Eduardo Figueroa - Locomocion"
   Expenses:EAG:MovilizacinViajesChoferes-411037  190000.00 CLP
+    desc: "Eduardo Figueroa - Locomocion"
 
 2022-09-28 * "B#5537 Devol Isapre -Consulta medica EAG"
   id: "1775"
@@ -681,29 +766,53 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -362000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -734976.00 CLP
+    desc: "Mariela Mendez - Sueldo Septiembre 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -750000.00 CLP
+    desc: "Eduardo Figueroa - Sueldo Septiemb. 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -735960.00 CLP
+    desc: "Victoria Celia - Sueldo Septiembre 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -325000.00 CLP
+    desc: "Esteban Mendez - Sueldo Septiembre 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -528000.00 CLP
+    desc: "Andres Martinez - Sueldo Septiembre 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -550000.00 CLP
+    desc: "Fresia Gonzalez - Sueldo Septiembre 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -450000.00 CLP
+    desc: "Leontina Mendez - Sueldo Septiembre 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -86000.00 CLP
+    desc: "Luis Mendez - Sueldo Septiembre 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -671060.00 CLP
+    desc: "Daniel Cadenas - Sueldo Septiembre 2022"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -150000.00 CLP
+    desc: "CC1.261 Esteban Mendez - Dscto prestamo"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -50000.00 CLP
+    desc: "CC1.271 Andres Mendez - Dscto prestamo"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -100000.00 CLP
+    desc: "CC1.272 Leontina Mendez - Dscto prestamo"
   Expenses:EAG:SueldosRopaRegalas-411001  734976.00 CLP
+    desc: "Mariela Mendez - Sueldo Septiembre 2022"
   Expenses:EAG:SueldosRopaRegalas-411001  750000.00 CLP
+    desc: "Eduardo Figueroa - Sueldo Septiemb. 2022"
   Expenses:EAG:SueldosRopaRegalas-411001  735960.00 CLP
+    desc: "Victoria Celia - Sueldo Septiembre 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  475000.00 CLP
+    desc: "Esteban Mendez - Sueldo Septiembre 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  578000.00 CLP
+    desc: "Andres Martinez - Sueldo Septiembre 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  550000.00 CLP
+    desc: "Fresia Gonzalez - Sueldo Septiembre 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  550000.00 CLP
+    desc: "Leontina Mendez - Sueldo Septiembre 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  86000.00 CLP
+    desc: "Luis Mendez - Sueldo Septiembre 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  350000.00 CLP
+    desc: "Noelia Farfal  - Sueldo Septiembre 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  12000.00 CLP
+    desc: "Noelia Farfal  - Celular"
   Expenses:EAG:SueldosRopaRegalias-413001  700000.00 CLP
+    desc: "Daniel Cadenas - Sueldo Septiembre 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  -28940.00 CLP
+    desc: "Daniel Cadenas - Descto DIRECTV"
 
 2022-09-29 * "Inv Tecnion Ltda - EAG Septiembre 2022"
   id: "1768"
@@ -741,6 +850,7 @@
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -11556.00 CLP
   Expenses:Johanna:RetirosDelMes-890001  2500000.00 CLP
   Expenses:Johanna:GastosBancarios-890003  -518.00 CLP
+    desc: "Ajuste USD2.574,98 Johanna - Retiro Sept"
   Expenses:Johanna:GastosBancarios-890003  11556.00 CLP
 
 2022-09-30 * "Sra. Berta Galatzan - Septiembre 2022"
@@ -777,7 +887,12 @@
   source: "laudus-erp"
   Assets:EAG:ControlYLiquidacin-115099  -338064.00 CLP
   Expenses:EAG:Remedios-430051  31500.00 CLP
+    desc: "Eliot - Remedios Eduardo Avayu"
   Expenses:EAG:RegalosDeMatrimonioOtros-430091  26667.00 CLP
+    desc: "Flores Clara Moraga - Para FGK de EAG"
   Expenses:EAG:RegalosDeMatrimonioOtros-430091  22667.00 CLP
+    desc: "Flores Clara Moraga - Tia Judith de EAG"
   Expenses:EAG:RegalosDeMatrimonioOtros-430091  200000.00 CLP
+    desc: "Regalo cumpleaños Sra Irene de EAG"
   Expenses:EAG:OtrosGastosPersonales-430099  57230.00 CLP
+    desc: "Sobre al Julius - Documentos Tauro EAG"

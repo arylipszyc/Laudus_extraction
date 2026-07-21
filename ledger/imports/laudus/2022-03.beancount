@@ -55,12 +55,16 @@
   source: "laudus-erp"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  9697203.00 CLP
   Income:Jocelyn:Mbi-670023  -9697203.00 CLP
+    desc: "Retiro de MBI a BCI Jocelyn 28977581"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  11341438.00 CLP
   Income:Jeannette:Mbi-770023  -11341438.00 CLP
+    desc: "Retiro de MBI a BCI Jeannette 28981600"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  11802015.00 CLP
   Income:Johanna:Mbi-870023  -11802015.00 CLP
+    desc: "Retiro de MBI a BCI Jeannette 28981618"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  11743141.00 CLP
   Income:Jael:Mbi-970023  -11743141.00 CLP
+    desc: "Retiro de MBI a BCI Jeannette 28980981"
 
 2022-03-02 * "Traspaso de fondos entre cuentas propias"
   id: "1197"
@@ -124,14 +128,23 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1433577.00 CLP
   Expenses:EAG:SueldosRopaRegalas-411001  212850.00 CLP
+    desc: "Mariela Mendez - Leyes sociales Febrero"
   Expenses:EAG:SueldosRopaRegalas-411001  170901.00 CLP
+    desc: "Eduardo Figueroa -Leyes sociales Febrero"
   Expenses:EAG:SueldosRopaRegalas-411001  192653.00 CLP
+    desc: "Victoria Celia - Leyes sociales Febrero"
   Expenses:EAG:SueldosRopaRegalias-413001  229018.00 CLP
+    desc: "Leontina Mendez - Leyes sociales Febrero"
   Expenses:EAG:SueldosRopaRegalias-413001  37268.00 CLP
+    desc: "Luis Mendez - Leyes sociales Febrero"
   Expenses:EAG:SueldosRopaRegalias-413001  161529.00 CLP
+    desc: "Andres Martinez - Leyes sociales Febrero"
   Expenses:EAG:SueldosRopaRegalias-413001  102021.00 CLP
+    desc: "Fresia Gonzalez -Leyes sociales Febrero"
   Expenses:EAG:SueldosRopaRegalias-413001  133910.00 CLP
+    desc: "Esteban Mendez  - Leyes sociales Febrero"
   Expenses:EAG:SueldosRopaRegalias-413001  193427.00 CLP
+    desc: "Daniel Cadenas - Leyes sociales Febrero"
 
 2022-03-07 * "Traspaso a Cuenta Edwards EAG 162338082"
   id: "1171"
@@ -139,6 +152,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -20000000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  20000000.00 CLP
+    desc: "Traspaso de cuenta BCI EAG 10160175"
 
 2022-03-07 * "Daniel Cadenas - Comida perros sur EAG"
   id: "1172"
@@ -174,7 +188,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -602778.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -4249543.00 CLP
+    desc: "Master Santander pesos 2735 Febrero EAG"
   Expenses:EAG:TC:Tc8996MastercardLanpass-430007  4249543.00 CLP
+    desc: "Master Santander pesos 2735 Febrero EAG"
   Expenses:EAG:TC:Tc0858VisaLatanpass-430009  602778.00 CLP
 
 2022-03-08 * "Saesa F#7277996 - EAG del 18/12 al 18/02"
@@ -233,8 +249,11 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -468203.00 CLP
   Expenses:EAG:TC:TcRaquelVentura-430019  42465.00 CLP
+    desc: "Visa Santander 5966 Febrero Sra Raquel"
   Expenses:EAG:TC:TcRaquelVentura-430019  407078.00 CLP
+    desc: "Master Santander 2019 Febrero Sra Raquel"
   Expenses:EAG:TC:TcRaquelVentura-430019  18660.00 CLP
+    desc: "USD22,98 Master Sant 2019 Feb Sra Raquel"
 
 2022-03-09 * "2/4 Gloria Amollao 34 dias trab verano"
   id: "1183"
@@ -256,10 +275,14 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -90000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  45000.00 CLP
+    desc: "Devol AAG F#2484 Connect Chile Febrero"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  45000.00 CLP
+    desc: "Devol JAB F#2484 Connect Chile Febrero"
   Assets:EAG:ControlYLiquidacin-115099  90000.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -45000.00 CLP
+    desc: "Devol AAG F#2484 Connect Chile Febrero"
   Assets:EAG:ControlYLiquidacin-115099  -45000.00 CLP
+    desc: "Devol JAB F#2484 Connect Chile Febrero"
 
 2022-03-10 * "3/4 Gloria Amollao 34 dias trab verano"
   id: "1186"
@@ -295,7 +318,9 @@
   source: "laudus-erp"
   Expenses:EAG:MantencinVehculosSeguros-411043  12389.00 CLP
   Expenses:EAG:MantencinVehculosMotosTierraSeguros-413043  3753.00 CLP
+    desc: "Globalvia B#13.735.610 PSXJ10 EAG sur"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -16142.00 CLP
+    desc: "Tag autopistas Sra Raquel / Sur EAG"
 
 2022-03-11 * "Retiro de MBI"
   id: "1193"
@@ -303,16 +328,22 @@
   source: "laudus-erp"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  28261.00 CLP
   Income:Jocelyn:Mbi-670023  -28261.00 CLP
+    desc: "Retiro de MBI a BCI Jocelyn 28977581"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  28261.00 CLP
   Income:Jeannette:Mbi-770023  -28261.00 CLP
+    desc: "Retiro de MBI a BCI Jeannette 28981600"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  28261.00 CLP
   Income:Johanna:Mbi-870023  -28261.00 CLP
+    desc: "Retiro de MBI a BCI Johanna 28981618"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  500622.00 CLP
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  5000000.00 CLP
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  215564.00 CLP
   Income:Jael:Mbi-970023  -500622.00 CLP
+    desc: "Retiro de MBI a BCI Jael 28980981"
   Income:Jael:Mbi-970023  -5000000.00 CLP
+    desc: "Retiro de MBI a BCI Jael 28980981"
   Income:Jael:Mbi-970023  -215564.00 CLP
+    desc: "Retiro de MBI a BCI Jael 28980981"
 
 2022-03-11 * "Nuevo Ciclo: Devolución de préstamos"
   id: "1199"
@@ -369,10 +400,15 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  945649.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -293880.00 CLP
+    desc: "B#60409281 Esval"
   Assets:EAG:ControlYLiquidacin-115099  -499539.00 CLP
+    desc: "B#7907816 Chilquinta"
   Assets:EAG:ControlYLiquidacin-115099  -44870.00 CLP
+    desc: "B#4364300 Gasvalpo"
   Assets:EAG:ControlYLiquidacin-115099  -99830.00 CLP
+    desc: "B#4364299 Gasvalpo"
   Assets:EAG:ControlYLiquidacin-115099  -7530.00 CLP
+    desc: "B#4364298 Gasvalpo"
 
 2022-03-15 * "B#284 Amestica - Visita filtracion agua"
   id: "1202"
@@ -387,11 +423,17 @@
   source: "laudus-erp"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  905305.00 CLP
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -51542.00 CLP
+    desc: "Comision liquidacion USD840.019,44"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -378930.00 CLP
+    desc: "Previred Odontologia EIRL Diciembre 2021"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -90000.00 CLP
+    desc: "Traspaso de Fondos a Otro Banco en Linea"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -1858.00 CLP
+    desc: "F29 Odontologia Diciembre 2021"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -381140.00 CLP
+    desc: "Previred Odontologia EIRL Enero 2022"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -1835.00 CLP
+    desc: "F29 Odontologia EIRL Enero 2022"
 
 2022-03-15 * "Devol Isapre B#1383-1422 Psicologia Jael"
   id: "1211"
@@ -399,7 +441,9 @@
   source: "laudus-erp"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  34062.00 CLP
   Income:Jael:DevolucinIsapreJael-970051  -22708.00 CLP
+    desc: "Devol Isapre B#1383 Psicologia Jael"
   Income:Jael:DevolucinIsapreJael-970051  -11354.00 CLP
+    desc: "Devol Isapre B#1422 Psicologia Jael"
 
 2022-03-16 * "Visa BCI 1027 EAG Febrero 2022"
   id: "1200"
@@ -407,10 +451,15 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -9232701.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  293880.00 CLP
+    desc: "B#60409281 Esval"
   Assets:EAG:ControlYLiquidacin-115099  499539.00 CLP
+    desc: "B#7907816 Chilquinta"
   Assets:EAG:ControlYLiquidacin-115099  44870.00 CLP
+    desc: "B#4364300 Gasvalpo"
   Assets:EAG:ControlYLiquidacin-115099  99830.00 CLP
+    desc: "B#4364299 Gasvalpo"
   Assets:EAG:ControlYLiquidacin-115099  7530.00 CLP
+    desc: "B#4364298 Gasvalpo"
   Expenses:EAG:TC:Tc1027VisaInfinity-430005  8287052.00 CLP
 
 2022-03-16 * "Abono prestamo Jhonny - Auto"
@@ -433,6 +482,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -802500000.00 CLP
   Assets:EAG:Bancos:BancoBci18565743Us-111011  802500000.00 CLP
+    desc: "USD1.000.000 de Cta BCI 10160175 EAG"
 
 2022-03-17 * "Alberto Bitran - Abono prestamo mutuo"
   id: "1236"
@@ -498,14 +548,23 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1022699997.00 CLP
   Assets:EAG:Bancos:BancoBci18565743Us-111011  1022699997.00 CLP
+    desc: "USD1.286.415,08 de BCI 10160175 EAG"
   Assets:EAG:TauroLimitedPartnership-113021  170450003.00 CLP
+    desc: "USD214.402,52 Tauro - Aporte capital"
   Assets:EAG:TauroLimitedPartnership-113021  170450003.00 CLP
+    desc: "USD214.402,52 Tauro - Aporte capital"
   Assets:EAG:TauroLimitedPartnership-113021  170450003.00 CLP
+    desc: "USD214.402,52 Tauro - Aporte capital"
   Assets:EAG:TauroLimitedPartnership-113021  170450003.00 CLP
+    desc: "USD214.402,52 Tauro - Aporte capital"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  -170450003.00 CLP
+    desc: "USD214.402,52 Tauro - Aporte capital"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -170450003.00 CLP
+    desc: "USD214.402,52 Tauro - Aporte capital"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -170450003.00 CLP
+    desc: "USD214.402,52 Tauro - Aporte capital"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -170450003.00 CLP
+    desc: "USD214.402,52 Tauro - Aporte capital"
 
 2022-03-24 * "Aria 31 Gasto comun Febrero 2022"
   id: "1213"
@@ -520,10 +579,15 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -25450.00 CLP
   Expenses:EAG:MantencinVehculosSeguros-411043  5090.00 CLP
+    desc: "SOAP LJPD58 Bentley EAG"
   Expenses:EAG:MantencinVehculosSeguros-411043  5090.00 CLP
+    desc: "SOAP PSXH89 Sportage stgo EAG"
   Expenses:EAG:MantencinVehculosSeguros-411043  5090.00 CLP
+    desc: "SOAP PSXH79 Sportage Jael Avayu"
   Expenses:EAG:MantencinVehculosMotosTierraSeguros-413043  5090.00 CLP
+    desc: "SOAP PSXJ10 Sportage sur EAG"
   Expenses:EAG:SraRaquelVentura-430021  5090.00 CLP
+    desc: "SOAP LZDV19  Maserati Raquel Ventura"
 
 2022-03-24 * "Devol a JAB pago patentes EAG/Jael Avayu"
   id: "1216"
@@ -531,8 +595,11 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -800103.00 CLP
   Expenses:EAG:MantencinVehculosSeguros-411043  266701.00 CLP
+    desc: "Patente Sportage PSXH89 Stgo EAG"
   Expenses:EAG:MantencinVehculosSeguros-411043  266701.00 CLP
+    desc: "Patente Sportage PSXH79 Jael Avayu"
   Expenses:EAG:MantencinVehculosMotosTierraSeguros-413043  266701.00 CLP
+    desc: "Patente Sportage PSXJ10 sur EAG"
 
 2022-03-25 * "Valentina Tapia - PCR Johanna/Stephen"
   id: "1217"
@@ -554,9 +621,13 @@
   source: "laudus-erp"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  423968.00 CLP
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -1273.00 CLP
+    desc: "F29 Odontologia EIRL Febrero 2022"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -8388.00 CLP
+    desc: "Cargo Deuda Tarjeta Credito Visa"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -384407.00 CLP
+    desc: "Previred Odontologia EIRL Febrero 2022"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -29900.00 CLP
+    desc: "E-certchile - Firma electronica EIRL"
 
 2022-03-25 * "BH40 Indumotora - Dieta Marzo 2022"
   id: "1240"
@@ -571,8 +642,11 @@
   source: "laudus-erp"
   Expenses:EAG:MantencinVehculosSeguros-411043  2770.00 CLP
   Expenses:EAG:MantencinVehculosSeguros-411043  3603.00 CLP
+    desc: "Globalvia B#13634408 Jael Avayu"
   Expenses:EAG:MantencinVehculosSeguros-411043  12193.00 CLP
+    desc: "Autopase B#112013790 Jael Avayu"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -18566.00 CLP
+    desc: "Pago autopistas varias Jael Avayu"
 
 2022-03-28 * "PVC + SOAP KSPL89 Mahindra EAG"
   id: "1222"
@@ -580,7 +654,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -201001.00 CLP
   Expenses:EAG:MantencinVehculosMotosTierraSeguros-413043  192511.00 CLP
+    desc: "M. Panguipulli - Patente KSPL89 Mahindra"
   Expenses:EAG:MantencinVehculosMotosTierraSeguros-413043  8490.00 CLP
+    desc: "SOAP KSPL89 Mahindra EAG"
 
 2022-03-28 * "Devol a DAG regalo Rodrigo de EAG"
   id: "1223"
@@ -595,7 +671,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -32000.00 CLP
   Expenses:EAG:GastosLegalesNotara-430071  16000.00 CLP
+    desc: "Eluchans - Rendicion Tauro EAG"
   Expenses:EAG:GastosLegalesNotara-430071  16000.00 CLP
+    desc: "Eluchans - Mandatos Tauro EAG"
 
 2022-03-28 * "Luis Salazar Mantencion piscina"
   id: "1225"
@@ -617,23 +695,40 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -651502.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -539840.00 CLP
+    desc: "Andres Martinez - Sueldo Marzo 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -260002.00 CLP
+    desc: "Luis Mendez - Sueldo Marzo 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -550000.00 CLP
+    desc: "Leontina Mendez - Sueldo Marzo 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -400000.00 CLP
+    desc: "Fresia Gonzalez - Sueldo Marzo 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -351040.00 CLP
+    desc: "Esteban Mendez - Sueldo Marzo 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -700000.00 CLP
+    desc: "Victoria Celia - Sueldo Marzo 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -750000.00 CLP
+    desc: "Eduardo Figueroa - Sueldo Marzo 2022"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -500000.00 CLP
+    desc: "Mariela Mendez - Sueldo Marzo 2022"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -200000.00 CLP
+    desc: "CC1.065 Mariela Mendez - Dscto prestamo"
   Expenses:EAG:SueldosRopaRegalas-411001  700000.00 CLP
+    desc: "Victoria Celia - Sueldo Marzo 2022"
   Expenses:EAG:SueldosRopaRegalas-411001  750000.00 CLP
+    desc: "Eduardo Figueroa - Sueldo Marzo 2022"
   Expenses:EAG:SueldosRopaRegalas-411001  700000.00 CLP
+    desc: "Mariela Mendez - Sueldo Marzo 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  651502.00 CLP
   Expenses:EAG:SueldosRopaRegalias-413001  539840.00 CLP
+    desc: "Andres Martinez - Sueldo Marzo 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  260002.00 CLP
+    desc: "Luis Mendez - Sueldo Marzo 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  550000.00 CLP
+    desc: "Leontina Mendez - Sueldo Marzo 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  400000.00 CLP
+    desc: "Fresia Gonzalez - Sueldo Marzo 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  351040.00 CLP
+    desc: "Esteban Mendez - Sueldo Marzo 2022"
 
 2022-03-29 * "Jocelyn Avayu - Retiro Marzo 2022"
   id: "1227"
@@ -642,13 +737,21 @@
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  -1500000.00 CLP
   Expenses:Jocelyn:RetirosDelMes-690001  1500000.00 CLP
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -2230000.00 CLP
+    desc: "Jeannette Avayu -Sueldo/Enfemera Marzo"
   Expenses:Jeannette:RetirosDelMes-790001  1500000.00 CLP
+    desc: "Jeannette Avayu - Retiro Marzo 2022"
   Expenses:Jeannette:EnfermeraGastosMdicos-790051  730000.00 CLP
+    desc: "Jeannette Avayu - Enfemera Marzo 2022"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -1380000.00 CLP
+    desc: "Johanna Avayu - Retiro Marzo 2022"
   Expenses:Johanna:RetirosDelMes-890001  1500000.00 CLP
+    desc: "Johanna Avayu - Retiro Marzo 2022"
   Expenses:Johanna:OtrosGastosPersonalesJohanna-890099  -120000.00 CLP
+    desc: "CC1.214 Valentina - PCR Johanna/Stephen"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -300000.00 CLP
+    desc: "Jael Avayu - Retiro Marzo 2022"
   Expenses:Jael:RetirosDelMes-990001  300000.00 CLP
+    desc: "Jael Avayu - Retiro Marzo 2022"
 
 2022-03-29 * "WIZO - 1 Libro de cocina Sra Raquel"
   id: "1231"
@@ -663,14 +766,23 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -501785.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -157650.00 CLP
+    desc: "F314582 Acevedo Combustible Enero 2022"
   Assets:EAG:Bancos:BancoBci10160175-111005  -81845.00 CLP
+    desc: "F316253 Acevedo Combustible Febrero 2022"
   Expenses:EAG:CombustibleVehculos-413044  40626.00 CLP
+    desc: "F295804 Acevedo Combustible Mayo 2021"
   Expenses:EAG:CombustibleVehculos-413044  119102.00 CLP
+    desc: "F299265 Acevedo Combustible Junio 2021"
   Expenses:EAG:CombustibleVehculos-413044  72356.00 CLP
+    desc: "F303874 Acevedo Combustible Julio 2021"
   Expenses:EAG:CombustibleVehculos-413044  112765.00 CLP
+    desc: "F310834 Acevedo Combustible Nov 2021"
   Expenses:EAG:CombustibleVehculos-413044  156936.00 CLP
+    desc: "F312643 Acevedo Combustible Dic 2021"
   Expenses:EAG:CombustibleVehculos-413044  157650.00 CLP
+    desc: "F314582 Acevedo Combustible Enero 2022"
   Expenses:EAG:CombustibleVehculos-413044  81845.00 CLP
+    desc: "F316253 Acevedo Combustible Febrero 2022"
 
 2022-03-29 * "Sra Raquel - Retiro Marzo 2022"
   id: "1241"
@@ -713,6 +825,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1000000.00 CLP
   Expenses:EAG:GloriaJimenez-430033  1000000.00 CLP
+    desc: "Marzo 2022"
 
 2022-03-30 * "Sra. Berta Galatzan - Marzo 2022"
   id: "1233"
@@ -720,8 +833,11 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -859200.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -362000.00 CLP
+    desc: "Noelia Farfal -Sueldo/Celular Marzo 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  350000.00 CLP
+    desc: "Noelia Farfal - Sueldo Marzo 2022"
   Expenses:EAG:SueldosRopaRegalias-413001  12000.00 CLP
+    desc: "Noelia Farfal - Celular"
   Expenses:EAG:SraJacquelineDeutsch-430023  859200.00 CLP
 
 2022-03-30 * "WIZO 1 libro mama M. Ergas de Sra Coca"
@@ -737,16 +853,27 @@
   source: "laudus-erp"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  819957.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  -1991064.00 CLP
+    desc: "Gastos EAG Marzo 2022"
   Expenses:EAG:MovilizacinViajesChoferes-411037  2000.00 CLP
+    desc: "Eliot - Estacionamiento - Jocelyn"
   Expenses:EAG:MovilizacinViajesChoferes-411037  700.00 CLP
+    desc: "Eliot - Estacionamiento EAG"
   Expenses:EAG:SraRaquelVentura-430021  1090.00 CLP
+    desc: "Eliana - Copia padron Maserati Sra Coca"
   Expenses:EAG:GastosLegalesNotara-430071  1970.00 CLP
+    desc: "Acta nacimiento  - Jocelyn"
   Expenses:EAG:GastosLegalesNotara-430071  880340.00 CLP
+    desc: "F#1325 Guzmán y Asociados - Contribucion"
   Expenses:EAG:GastosLegalesNotara-430071  182259.00 CLP
+    desc: "F#4286 Kennedy - Cierre revision polizas"
   Expenses:EAG:OtrosGastosPersonales-430099  51768.00 CLP
+    desc: "DHL dcto de EAG al Julius"
   Expenses:EAG:OtrosGastosPersonales-430099  17000.00 CLP
+    desc: "Eliot - 2 libros de marvel 35-36"
   Expenses:EAG:OtrosGastosPersonales-430099  17000.00 CLP
+    desc: "Eliot - Libros marvel 33 y 34"
   Expenses:EAG:OtrosGastosPersonales-430099  16980.00 CLP
+    desc: "Eliot - Compra de libros marvel EAG"
 
 2022-03-30 * "EAG Gerencia Marzo 2022"
   id: "1259"

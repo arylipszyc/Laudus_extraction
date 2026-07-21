@@ -26,7 +26,9 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -203000.00 CLP
   Expenses:EAG:MovilizacinViajesChoferes-411037  203000.00 CLP
   Expenses:EAG:ComprasCasaEfectivo-411049  909000.00 CLP
+    desc: "Zita Miranda - Devol gastos casa EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -909000.00 CLP
+    desc: "Zita Miranda - Devol gastos casa EAG"
 
 2021-10-05 * "Martina Diez - Clases de yoga Jael Avayu"
   id: "731"
@@ -69,11 +71,17 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -269188.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -74010.00 CLP
+    desc: "Daniel Cadenas - Devol super/revision"
   Expenses:EAG:ComprasCasaEfectivo-413049  34010.00 CLP
+    desc: "Daniel Cadenas - Unimarc supermercado"
   Expenses:EAG:MantencinJardinTractor-413053  11300.00 CLP
+    desc: "F. Jaramillo F#128513 Engrasadora manual"
   Expenses:EAG:MantencinJardinTractor-413053  81292.00 CLP
+    desc: "F. Jaramillo F#128487 Materiales jardin"
   Expenses:EAG:MantencinJardinTractor-413053  176596.00 CLP
+    desc: "Cooprinsem F#3814423 - Yaramila pasto"
   Expenses:EAG:MantencinJardinTractor-413053  40000.00 CLP
+    desc: "Guillermo F. revision bombas agua riego"
 
 2021-10-05 * "F#12722 Eluchans - Devol honorario"
   id: "743"
@@ -95,8 +103,11 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -11048389.00 CLP
   Expenses:EAG:SegurosPropiedad-411071  4742097.00 CLP
+    desc: "UF366,9537 Aspor - Seguro incendio depto"
   Expenses:EAG:SegurosPropiedad-413071  4210892.00 CLP
+    desc: "UF139,8577 Aspor - Seguro incendio sur"
   Expenses:EAG:SegurosPropiedad-413071  2095400.00 CLP
+    desc: "UF69,5956 Aspor - Seguro incendio sur"
 
 2021-10-06 * "EAG - Isapre Cruz Blanca Septiembre 2021"
   id: "737"
@@ -112,9 +123,13 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -3131985.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  3131985.00 CLP
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1707033.00 CLP
+    desc: "Visa Santander 0790 EAG Septiembre 2021"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1424952.00 CLP
+    desc: "Mastercard Santander 0790 EAG Sept 2021"
   Expenses:EAG:TC:Tc8996MastercardLanpass-430007  1424952.00 CLP
+    desc: "Mastercard Santander 0790 EAG Sept 2021"
   Expenses:EAG:TC:Tc0858VisaLatanpass-430009  1707033.00 CLP
+    desc: "Visa Santander 0790 EAG Septiembre 2021"
 
 2021-10-06 * "1/2 Traspaso a Cta Edwards EAG 162338082"
   id: "739"
@@ -122,6 +137,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -3000000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  3000000.00 CLP
+    desc: "1/2 Traspaso de cuenta BCI EAG 10160175"
 
 2021-10-06 * "Leyes sociales empl sur/stgo EAG Sept-21"
   id: "740"
@@ -129,14 +145,23 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -1659264.00 CLP
   Expenses:EAG:SueldosRopaRegalas-411001  241085.00 CLP
+    desc: "Mariela Mendez - Leyes sociales Sept-21"
   Expenses:EAG:SueldosRopaRegalas-411001  198541.00 CLP
+    desc: "Eduardo Figueroa -Leyes sociales Sept-21"
   Expenses:EAG:SueldosRopaRegalas-411001  220601.00 CLP
+    desc: "Victoria Celia - Leyes sociales Sept-21"
   Expenses:EAG:SueldosRopaRegalias-413001  262330.00 CLP
+    desc: "Leontina Mendez - Leyes sociales Sept-21"
   Expenses:EAG:SueldosRopaRegalias-413001  44098.00 CLP
+    desc: "Luis Mendez - Leyes sociales Sept-21"
   Expenses:EAG:SueldosRopaRegalias-413001  189036.00 CLP
+    desc: "Andres Martinez - Leyes sociales Sept-21"
   Expenses:EAG:SueldosRopaRegalias-413001  120196.00 CLP
+    desc: "Fresia Gonzalez - Leyes sociales Sept-21"
   Expenses:EAG:SueldosRopaRegalias-413001  161261.00 CLP
+    desc: "Esteban Mendez - Leyes sociales Sept-21"
   Expenses:EAG:SueldosRopaRegalias-413001  222116.00 CLP
+    desc: "Daniel Cadenas - Leyes sociales Sept-21"
 
 2021-10-06 * "USD7.123,33 Master/Visa Santander Sept."
   id: "742"
@@ -188,7 +213,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -5834007.00 CLP
   Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  5827300.00 CLP
+    desc: "USD7.115,14 Master Santander Sept-21 EAG"
   Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  6707.00 CLP
+    desc: "USD8,19 Visa Santander Sept-21 EAG"
 
 2021-10-07 * "Potenza Inversiones - Flores de EAG"
   id: "747"
@@ -231,7 +258,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -7505.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  5326.00 CLP
+    desc: "Patricio Gallardo - Impto Unico Sept 21"
   Expenses:EAG:SueldosRopaRegalas-411001  2179.00 CLP
+    desc: "Mariela Mendez - Impto Unico Sept 21"
 
 2021-10-12 * "Sra Jacqueline de EAG"
   id: "757"
@@ -274,9 +303,13 @@
   source: "laudus-erp"
   Expenses:EAG:MantencinVehculosSeguros-411043  6169.00 CLP
   Expenses:EAG:MantencinVehculosMotosTierraSeguros-413043  5600.00 CLP
+    desc: "Ruta del Maipo B#9293630 PSXJ10 Sportage"
   Expenses:EAG:MantencinVehculosMotosTierraSeguros-413043  2594.00 CLP
+    desc: "Globalvia B#11991759 PSXJ10 Sportage"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -17363.00 CLP
+    desc: "Autopistas EAG/Sra Raquel/Jael Avayu"
   Expenses:Jael:OtrosGastosPersonalesJael-990099  3000.00 CLP
+    desc: "Vespucio norte Jael Avayu"
 
 2021-10-14 * "EAG sueldo FC Octubre 2021"
   id: "759"
@@ -305,11 +338,16 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -450000.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -120000.00 CLP
+    desc: "EAG/Sra Raquel PCR+2 Laborarios"
   Expenses:EAG:SraRaquelVentura-430021  40000.00 CLP
+    desc: "BH#308 Valentina Tapia - PCR Sra Raquel"
   Expenses:EAG:SraRaquelVentura-430021  20000.00 CLP
+    desc: "Valentina Tapia - Laboratorio Sra Raquel"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  450000.00 CLP
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  40000.00 CLP
+    desc: "BH#307 Valentina Tapia - PCR EAG"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  20000.00 CLP
+    desc: "Valentina Tapia - Laboratorio EAG"
 
 2021-10-15 * "Sra Raquel Ventura a su cuenta BICE"
   id: "765"
@@ -324,8 +362,10 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -150000.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -181050.00 CLP
+    desc: "Eliana Zuñiga - Remedios para EAG"
   Expenses:EAG:SueldosRopaRegalias-413001  150000.00 CLP
   Expenses:EAG:Remedios-430051  181050.00 CLP
+    desc: "Eliana Zuñiga - Remedios para EAG"
 
 2021-10-18 * "Daniel Cadenas - Alim perros/Repelente"
   id: "767"
@@ -333,7 +373,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -76500.00 CLP
   Expenses:EAG:ComprasCasaEfectivo-413049  50000.00 CLP
+    desc: "Daniel Cadenas - 2 sacos alimento perros"
   Expenses:EAG:ComprasCasaEfectivo-413049  26500.00 CLP
+    desc: "Daniel Cadenas - Repelente murcielagos"
 
 2021-10-18 * "2/2 Traspaso a Cta Edwards EAG 162338082"
   id: "768"
@@ -341,6 +383,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2000000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  2000000.00 CLP
+    desc: "2/2 Traspaso de cuenta BCI EAG 10160175"
 
 2021-10-18 * "Mariela Mendez - Devol gastos Sra Coca"
   id: "769"
@@ -412,10 +455,15 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -6944912.00 CLP
   Assets:EAG:ControlYLiquidacin-115099  147700.00 CLP
+    desc: "Esval B#57179572"
   Assets:EAG:ControlYLiquidacin-115099  776563.00 CLP
+    desc: "Chilquinta B#7649711"
   Assets:EAG:ControlYLiquidacin-115099  29430.00 CLP
+    desc: "Gasvalpo B#3919187"
   Assets:EAG:ControlYLiquidacin-115099  7340.00 CLP
+    desc: "Gasvalpo B#3919185"
   Assets:EAG:ControlYLiquidacin-115099  117730.00 CLP
+    desc: "Gasvalpo B#3919186"
   Expenses:EAG:TC:Tc1027VisaInfinity-430005  5866149.00 CLP
 
 2021-10-20 * "Retiro de Indumotora One"
@@ -431,8 +479,11 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -150000.00 CLP
   Expenses:EAG:MantencinJardinBonsai-411053  45000.00 CLP
+    desc: "Bonsai - Mant general Sept 2021"
   Expenses:EAG:MantencinJardinBonsai-411053  65000.00 CLP
+    desc: "Bonsai - 1 visita Mant jardin Sept 2021"
   Expenses:EAG:MantencinJardinBonsai-411053  40000.00 CLP
+    desc: "Bonsai - 5 arbol de Jade $8.000 c/u."
 
 2021-10-21 * "BH30 IP Chile Junta directiva Oct 2021"
   id: "797"
@@ -517,8 +568,11 @@
   source: "laudus-erp"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  403660.00 CLP
   Assets:Jocelyn:ControlYLiquidacin-610999  -30000.00 CLP
+    desc: "Traspaso de fondos a otro banco en linea"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -371334.00 CLP
+    desc: "Previred Odontologia EIRL Septiembre-21"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -2326.00 CLP
+    desc: "F29 Odontologia Septiembre 2021"
 
 2021-10-27 * "Traspaso a Cuenta Edwards EAG 162338082"
   id: "781"
@@ -526,6 +580,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -5000000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  5000000.00 CLP
+    desc: "Traspaso de cuenta BCI EAG 10160175"
 
 2021-10-27 * "Noelia Farfal - Sueldo/Celular Oct-21"
   id: "782"
@@ -533,27 +588,49 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -362000.00 CLP
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -56544.00 CLP
+    desc: "Fresia Gonzalez - Efectivo Octubre"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -651502.00 CLP
+    desc: "Daniel Cadenas - Sueldo Octubre 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -539840.00 CLP
+    desc: "Andres Martinez - Sueldo Octubre 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -240002.00 CLP
+    desc: "Luis Mendez - Sueldo Octubre 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -550000.00 CLP
+    desc: "Leontina Mendez - Sueldo Octubre 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -186819.00 CLP
+    desc: "Fresia Gonzalez - Sueldo Octubre 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -351040.00 CLP
+    desc: "Esteban Mendez - Sueldo Octubre 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -700000.00 CLP
+    desc: "Victoria Celia - Sueldo Octubre 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -700000.00 CLP
+    desc: "Mariela Mendez - Sueldo Octubre 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -600000.00 CLP
+    desc: "Eduardo Figueroa - Sueldo Octubre 2021"
   Expenses:EAG:SueldosRopaRegalas-411001  700000.00 CLP
+    desc: "Victoria Celia - Sueldo Octubre 2021"
   Expenses:EAG:SueldosRopaRegalas-411001  700000.00 CLP
+    desc: "Mariela Mendez - Sueldo Octubre 2021"
   Expenses:EAG:SueldosRopaRegalas-411001  600000.00 CLP
+    desc: "Eduardo Figueroa - Sueldo Octubre 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  350000.00 CLP
+    desc: "Noelia Farfal - Sueldo Octubre 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  12000.00 CLP
+    desc: "Noelia Farfal - Celular"
   Expenses:EAG:SueldosRopaRegalias-413001  56544.00 CLP
+    desc: "Fresia Gonzalez - Efectivo Octubre"
   Expenses:EAG:SueldosRopaRegalias-413001  651502.00 CLP
+    desc: "Daniel Cadenas - Sueldo Octubre 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  539840.00 CLP
+    desc: "Andres Martinez - Sueldo Octubre 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  240002.00 CLP
+    desc: "Luis Mendez - Sueldo Octubre 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  550000.00 CLP
+    desc: "Leontina Mendez - Sueldo Octubre 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  186819.00 CLP
+    desc: "Fresia Gonzalez - Sueldo Octubre 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  351040.00 CLP
+    desc: "Esteban Mendez - Sueldo Octubre 2021"
 
 2021-10-27 * "Com mant plan banco Santander"
   id: "802"
@@ -589,6 +666,7 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1000000.00 CLP
   Expenses:EAG:GloriaJimenez-430033  1000000.00 CLP
+    desc: "Octubre 2021"
 
 2021-10-28 * "Mariela Mendez - Devol gastos Sra Raquel"
   id: "786"
@@ -610,7 +688,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2230000.00 CLP
   Expenses:Jeannette:RetirosDelMes-790001  1500000.00 CLP
+    desc: "Jeannette Avayu Retiro Octubre 2021"
   Expenses:Jeannette:EnfermeraGastosMdicos-790051  730000.00 CLP
+    desc: "Jeannette Avayu - Enfemera Octubre 2021"
 
 2021-10-28 * "USD700 Enfermera Octubre 2021"
   id: "789"
@@ -671,7 +751,9 @@
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci10160175-111005  -300000.00 CLP
   Assets:EAG:Bancos:BancoBci10160175-111005  -1500000.00 CLP
+    desc: "Johanna Avayu - Retiro Octubre 2021"
   Expenses:Johanna:RetirosDelMes-890001  1500000.00 CLP
+    desc: "Johanna Avayu - Retiro Octubre 2021"
   Expenses:Jael:RetirosDelMes-990001  300000.00 CLP
 
 2021-10-29 * "E-Certchile - Firma digital avanzada EAG"
@@ -701,13 +783,21 @@
   source: "laudus-erp"
   Assets:EAG:ControlYLiquidacin-115099  -136845.00 CLP
   Expenses:EAG:OtrosGastosPersonales-430099  8490.00 CLP
+    desc: "Eliot - Libro coleccion Marvel EAG Molco"
   Expenses:EAG:OtrosGastosPersonales-430099  8500.00 CLP
+    desc: "Eliot - Libro coleccion Marvel EAG Molco"
   Expenses:EAG:OtrosGastosPersonales-430099  90875.00 CLP
+    desc: "Fobeju - Becas fallec Alberto Benadretti"
   Expenses:EAG:OtrosGastosPersonales-430099  7990.00 CLP
+    desc: "Eliot - Libro coleccion EAG"
   Expenses:EAG:OtrosGastosPersonales-430099  8490.00 CLP
+    desc: "Eliot - Libro coleccion marvel EAG"
   Expenses:EAG:OtrosGastosPersonales-430099  1000.00 CLP
+    desc: "Eliot - Plastificado pases movilidad"
   Expenses:EAG:OtrosGastosPersonales-430099  8500.00 CLP
+    desc: "Eliot - Libro coleccion marvel EAG"
   Expenses:EAG:OtrosGastosPersonales-430099  3000.00 CLP
+    desc: "Eliot - tarjeta regalo R. Zang EAG"
 
 2021-10-30 * "EAG Gastos Inv Tecnion Ltda Octubre 2021"
   id: "838"

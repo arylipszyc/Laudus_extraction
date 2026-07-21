@@ -149,6 +149,60 @@ def test_incremental_je_moved_to_new_month_leaves_no_stale_duplicate(tmp_path):
     assert all_content.count('id: "1"') == 1  # exactly once, no stale duplicate
 
 
+# ── Glosa por-línea (metadata `desc:` del posting) ───────────────────────────
+
+
+# JE multi-línea estilo planilla de sueldos: cada pata tiene su propia glosa; la
+# narration de la tx = la de la 1ª línea (banco). Balance: -150000 + 100000 + 50000 = 0.
+def _payroll_je(je_id=700, date="2026-06-26"):
+    return [
+        _row(je_id, 1, "111005", credit=150000, date=date, desc="Sueldos Junio 2026"),
+        _row(je_id, 2, "411005", debit=100000, date=date, desc="Empleado A - Sueldo"),
+        _row(je_id, 3, "411005", debit=50000, date=date, desc="Empleado B - Sueldo"),
+    ]
+
+
+def test_per_line_desc_emitted_when_differs_from_narration(tmp_path):
+    accounts_path, target_dir, pending_path = _setup(tmp_path)
+    write_jes(_payroll_je(), target_dir, accounts_path, pending_path)
+    content = (target_dir / "2026-06.beancount").read_text(encoding="utf-8")
+    assert '"Sueldos Junio 2026"' in content              # narration = 1ª línea
+    assert 'desc: "Empleado A - Sueldo"' in content       # glosa por-pata emitida
+    assert 'desc: "Empleado B - Sueldo"' in content
+    # La pata que comparte la narration NO repite su glosa como metadata.
+    assert 'desc: "Sueldos Junio 2026"' not in content
+
+
+def test_per_line_desc_loads_without_errors(tmp_path):
+    """La metadata `desc:` del posting es Beancount válido (bean-check sin errores)."""
+    accounts_path, target_dir, pending_path = _setup(tmp_path)
+    write_jes(_payroll_je(), target_dir, accounts_path, pending_path)
+    main = tmp_path / "main.beancount"
+    main.write_text(
+        'option "operating_currency" "CLP"\n'
+        '1900-01-01 commodity CLP\n'
+        'include "accounts.beancount"\n'
+        'include "imports/laudus/2026-06.beancount"\n'
+        'include "imports/_new-accounts-pending.beancount"\n',
+        encoding="utf-8",
+    )
+    _entries, errors, _options = loader.load_file(str(main))
+    assert errors == []
+
+
+def test_incremental_preserves_per_line_desc_of_untouched_je(tmp_path):
+    """AC2 + glosa: un JE NO re-fetcheado se re-emite desde `_parse_existing_jes`;
+    su glosa por-línea (recuperada de la metadata) debe sobrevivir intacta."""
+    accounts_path, target_dir, pending_path = _setup(tmp_path)
+    write_jes(_payroll_je(700, "2026-06-26"), target_dir, accounts_path, pending_path)
+    # Otro JE en el mismo mes; el 700 no viene en el fetch → se arrastra del archivo.
+    write_jes(_balanced_je(701, "2026-06-20"), target_dir, accounts_path, pending_path)
+    content = (target_dir / "2026-06.beancount").read_text(encoding="utf-8")
+    assert 'id: "700"' in content
+    assert 'desc: "Empleado A - Sueldo"' in content       # sobrevivió el re-parse
+    assert 'desc: "Empleado B - Sueldo"' in content
+
+
 def test_backfill_replace_regenerates_from_rows(tmp_path):
     accounts_path, target_dir, pending_path = _setup(tmp_path)
     write_jes(_balanced_je(1, "2024-03-15"), target_dir, accounts_path, pending_path)
