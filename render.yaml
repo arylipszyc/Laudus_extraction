@@ -11,26 +11,15 @@ services:
     plan: standard
     healthCheckPath: /api/v1/health
     envVars:
-      # Generated automatically by Render — never commit this value
-      - key: JWT_SECRET
-        generateValue: true
-
-      # URL of the deployed frontend (update if Render assigns a different slug)
+      # URL of the deployed frontend (CORS allow-origin)
       - key: FRONTEND_URL
         value: https://laudus-frontend.onrender.com
 
-      # ── Google OAuth ────────────────────────────────────────────────────────
-      # Set these manually in the Render dashboard after first deploy.
-      # Authorized redirect URI to add in Google Cloud Console:
-      #   https://laudus-backend.onrender.com/api/v1/auth/callback
-      - key: GOOGLE_CLIENT_ID
+      # ── Auth (HTTP Basic — reemplaza Google OAuth) ──────────────────────────
+      # Credencial unica compartida. Setear en el dashboard de Render.
+      - key: APP_BASIC_AUTH_USER
         sync: false
-      - key: GOOGLE_CLIENT_SECRET
-        sync: false
-
-      # Comma-separated list of allowed users, format: email:role
-      # Example: owner@example.com:owner,contador@example.com:contador
-      - key: ALLOWED_USERS
+      - key: APP_BASIC_AUTH_PASSWORD
         sync: false
 
       # ── Laudus ERP ───────────────────────────────────────────────────────────
