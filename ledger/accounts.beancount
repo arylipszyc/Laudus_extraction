@@ -2002,6 +2002,16 @@
 2020-12-31 open Equity:Reconciliation:Discrepancias CLP, USD
 2020-12-31 open Expenses:EAG:Suspense CLP, USD
 
+;; Cuenta SINTÉTICA (no viene de Laudus, sin código) para las compras de cartola-TC
+;; que no tienen una cuenta que las categorice. Reemplaza el mal-uso de 430017
+;; "T/C Varias EAG" (que vive bajo "Tarjetas de Crédito"). Se surface en Categorías
+;; Pendientes para reclasificar de a poco.
+2020-12-31 open Expenses:EAG:GastosVarios CLP, USD
+  laudus_account_name: "Gastos Varios"
+  laudus_categoria1: "GASTOS - EGRESOS"
+  laudus_categoria2: "GASTOS PERSONALES"
+  laudus_categoria3: "Gastos Varios"
+
 ;; ── Cuentas de corrección de TC vía cartolas (Story 6.2) ─────────────────────
 ;; Cuentas SINTÉTICAS (no vienen de Laudus) para el desglose de tarjetas de crédito.
 ;; La deuda real de cada tarjeta vive acá (pasivo), separada de la cuenta-gasto

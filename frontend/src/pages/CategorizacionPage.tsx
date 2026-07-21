@@ -8,9 +8,9 @@ import { CategoryAutocomplete } from '@/components/CategoryAutocomplete'
 // Las compras caen a Suspense hasta que el contador les pone cuenta. El batch confirma
 // justo las que ya salieron de Suspense (§tc_correction.SUSPENSE_ACCOUNT).
 const SUSPENSE = 'Expenses:EAG:Suspense'
-// Balde catch-all "T/C: Varias EAG": compras de cartola-TC que el matcher no categorizó.
+// Balde "Gastos Varios": compras de cartola-TC sin una cuenta que las categorice.
 // Se tratan como Suspense (picker en blanco) para que el contador les asigne cuenta real.
-const TC_FALLBACK = 'Expenses:EAG:TC:TcVariasEag-430017'
+const TC_FALLBACK = 'Expenses:EAG:GastosVarios'
 
 const fmt = (n: number | null) =>
   n == null ? '—' : new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(n)

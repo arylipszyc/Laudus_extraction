@@ -29,11 +29,11 @@ class CategoryEditError(Exception):
 
 from backend.app.services.ledger_service import compute_tx_id, tx_id_of as _tx_id_of
 
-# Balde catch-all "T/C: Varias EAG": el matcher de cartolas-TC deja acá las compras que no
-# pudo categorizar y las AUTO-confirma (category_status="confirmed") → nunca entran a la cola.
-# Se surfacean para que el contador pueda re-categorizarlas desde la misma UI (update/bulk ya
-# reescriben SOLO la pata de gasto, preservando la deuda Liabilities:TC:Real).
-_TC_FALLBACK_BUCKET = "Expenses:EAG:TC:TcVariasEag-430017"
+# Balde "Gastos Varios": compras de cartola-TC sin una cuenta que las categorice. Entran
+# auto-confirmadas (category_status="confirmed") → nunca entrarían a la cola. Se surfacean
+# para que el contador las reclasifique de a poco desde la misma UI (update/bulk ya reescriben
+# SOLO la pata de gasto, preservando la deuda Liabilities:TC:Real).
+_TC_FALLBACK_BUCKET = "Expenses:EAG:GastosVarios"
 
 
 def list_pending(entries: list) -> list[dict]:

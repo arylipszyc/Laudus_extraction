@@ -242,15 +242,15 @@ def test_update_category_commitea_la_history_jsonl(tmp_path, monkeypatch):
 
 
 def test_list_pending_surfaces_tc_fallback_bucket():
-    """Cartola-TC auto-confirmada en el balde 430017 se surfacea para re-categorizar;
-    una confirmada en categoría real NO, y una de Laudus en 430017 tampoco (no es cartola)."""
+    """Cartola-TC auto-confirmada en el balde Gastos Varios se surfacea para re-categorizar;
+    una confirmada en categoría real NO, y una de Laudus en el balde tampoco (no es cartola)."""
     from beancount.parser import parser
     src = '''
 2026-04-10 * "COMPRA VARIAS"
   source: "cartola-tc"
   category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -1000.00 CLP
-  Expenses:EAG:TC:TcVariasEag-430017           1000.00 CLP
+  Expenses:EAG:GastosVarios                     1000.00 CLP
 
 2026-04-11 * "COMPRA CATEGORIZADA"
   source: "cartola-tc"
@@ -261,7 +261,7 @@ def test_list_pending_surfaces_tc_fallback_bucket():
 2026-04-12 * "LUMP LAUDUS"
   source: "laudus-erp"
   Assets:EAG:Bancos:BancoBci-111005           -3000.00 CLP
-  Expenses:EAG:TC:TcVariasEag-430017           3000.00 CLP
+  Expenses:EAG:GastosVarios                     3000.00 CLP
 '''
     entries, _err, _opt = parser.parse_string(src)
     narr = {p["narration"] for p in list_pending(entries)}
