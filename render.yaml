@@ -59,3 +59,35 @@ services:
       # URL of the deployed backend (update if Render assigns a different slug)
       - key: VITE_API_URL
         value: https://laudus-backend.onrender.com
+      # Origin del servicio Fava (habilita el deep-link "ver asiento en Fava" del drill-down).
+      # Actualizar al valor real que Render asigne a `laudus-fava` tras el primer deploy.
+      - key: VITE_FAVA_URL
+        value: https://laudus-fava.onrender.com
+
+  # ── Fava (UI contable, nginx basic-auth) — Story 9.3 ───────────────────────
+  # Sirve el ledger Beancount de prod detrás de basic-auth; blanco del deep-link del reporte.
+  # Sin disco persistente: el entrypoint clona el repo (16MB) al bootear. Plan free (512MB +
+  # spin-down); subir a standard si hay OOM sobre el balance de ~18k asientos. NO seteamos
+  # healthCheckPath: `/` responde 401 (auth) y Render lo marcaría unhealthy — el check TCP por
+  # defecto (puerto abierto) alcanza.
+  - type: web
+    name: laudus-fava
+    runtime: docker
+    dockerfilePath: ./Dockerfile.fava
+    dockerContext: .
+    plan: free
+    envVars:
+      # Editor con red bean-check (Story 9.0). "false" → Fava read-only (solo ver).
+      - key: EDIT_HOOK_ENABLED
+        value: "true"
+      # Secretos — setear en el dashboard. BEANCOUNT_* son los MISMOS que usa el importer
+      # (`laudus-importer-laudus`): copiarlos de ahí. La deploy key necesita WRITE (el editor
+      # commitea+pushea los edits del contador).
+      - key: BEANCOUNT_REPO_URL
+        sync: false
+      - key: BEANCOUNT_DEPLOY_KEY
+        sync: false
+      - key: FAVA_BASIC_AUTH_USER
+        sync: false
+      - key: FAVA_BASIC_AUTH_PASSWORD
+        sync: false
