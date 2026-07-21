@@ -139,7 +139,7 @@
   match_source: "historical"
   confidence: "0.2"
   color: "yellow"
-  category_status: "suggested"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -16459.0 CLP
   Expenses:Jael:IsapreGastosMdicos-990051      16459.0 CLP
 2026-05-06 * "INMOBILIARIA CLC SANTIAGO"
@@ -203,7 +203,7 @@
   match_source: "historical"
   confidence: "0.2"
   color: "yellow"
-  category_status: "suggested"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -134316.0 CLP
   Expenses:Jael:IsapreGastosMdicos-990051      134316.0 CLP
 2026-05-11 * "MOVILIDAD URBANA S. SANTIAGO"
@@ -235,9 +235,9 @@
   match_source: "historical-30+"
   confidence: "1.0"
   color: "green"
-  category_status: "suggested"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -3900.0 CLP
-  Expenses:EAG:TC:TcVariasEag-430017           3900.0 CLP
+  Expenses:EAG:GastosVarios                    3900.0 CLP
 2026-05-14 * "PAGO PAC EN PESOS"
   source: "cartola-tc"
   bank_account_id: "e919b1db-be7d-430c-9f40-60fc58ae2bcb"
@@ -263,7 +263,7 @@
   match_source: "historical"
   confidence: "0.5666666666666667"
   color: "yellow"
-  category_status: "suggested"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -619544.0 CLP
   Expenses:EAG:Luz-411005                      619544.0 CLP
 2026-05-15 * "MERCADOPAGO*GLOBALD LAS CONDES"
@@ -295,7 +295,7 @@
   match_source: "historical"
   confidence: "0.2"
   color: "yellow"
-  category_status: "suggested"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -176400.0 CLP
   Expenses:EAG:TC:TcVariasEag-430017           176400.0 CLP
 2026-05-19 * "NEWREST SANTIAGO"
@@ -327,7 +327,7 @@
   match_source: "historical"
   confidence: "0.2"
   color: "yellow"
-  category_status: "suggested"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -70056.0 CLP
   Expenses:Jael:IsapreGastosMdicos-990051      70056.0 CLP
 2026-05-21 * "INMOBILIARIA CLC SANTIAGO"
@@ -359,7 +359,7 @@
   match_source: "historical"
   confidence: "0.2"
   color: "yellow"
-  category_status: "suggested"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -26146.0 CLP
   Expenses:Jael:IsapreGastosMdicos-990051      26146.0 CLP
 2026-05-22 * "MERPAGO*MELIMAS SANTIAGO"
@@ -375,7 +375,7 @@
   match_source: "historical"
   confidence: "0.5666666666666667"
   color: "yellow"
-  category_status: "suggested"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -12990.0 CLP
   Expenses:EAG:TC:TcVariasEag-430017           12990.0 CLP
 2026-05-23 * "MP *KITCHEN CEN TASA INT. 0,00% (cuota 01/03)"
@@ -407,7 +407,7 @@
   match_source: "historical"
   confidence: "0.6"
   color: "yellow"
-  category_status: "suggested"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -35606.0 CLP
   Expenses:EAG:TvCableInternet-411009          35606.0 CLP
 2026-05-25 * "DL RAPPI PRO CHIL LAS CONDES"
@@ -423,7 +423,7 @@
   match_source: "historical"
   confidence: "0.6"
   color: "yellow"
-  category_status: "suggested"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -3990.0 CLP
   Expenses:EAG:TC:TcVariasEag-430017           3990.0 CLP
 2026-05-25 * "CLINICA LAS CONDES SANTIAGO"
@@ -439,7 +439,7 @@
   match_source: "historical"
   confidence: "0.2"
   color: "yellow"
-  category_status: "suggested"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -195362.0 CLP
   Expenses:Jael:IsapreGastosMdicos-990051      195362.0 CLP
 2026-05-25 * "INMOBILIARIA CLC SANTIAGO"
@@ -471,7 +471,7 @@
   match_source: "historical"
   confidence: "0.2"
   color: "yellow"
-  category_status: "suggested"
+  category_status: "confirmed"
   Liabilities:EAG:TC:Real:Tc1027VisaInfinity  -16459.0 CLP
   Expenses:Jael:IsapreGastosMdicos-990051      16459.0 CLP
 2026-05-27 * "COBRO ADM MENSUAL"
