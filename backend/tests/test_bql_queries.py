@@ -54,6 +54,8 @@ LEDGER_KEYS = {
     "journalentryid", "journalentrynumber", "date", "accountnumber", "lineid",
     "description", "debit", "credit", "currencycode", "paritytomaincurrency",
     "periodo", "accountName", "Categoria1", "Categoria2", "Categoria3", "tx_id",
+    # Deep-link a Fava (story deep-link asiento): ubicación repo-relative + fuente del asiento.
+    "filename", "lineno", "source",
 }
 
 
@@ -140,6 +142,19 @@ def test_ledger_entries_shape(tmp_path):
     assert set(result.keys()) == {"data", "meta"}
     for record in result["data"]:
         assert set(record.keys()) == LEDGER_KEYS
+
+
+def test_ledger_entries_expose_fava_location(tmp_path):
+    """Deep-link a Fava: cada fila trae `filename` REPO-RELATIVE (no absoluto) + `lineno` int."""
+    result = ledger_entries_via_beancount(_ledger(tmp_path), "EAG")
+    assert result["data"], "fixture debe tener al menos un asiento"
+    for record in result["data"]:
+        fn = record["filename"]
+        assert fn is not None, "el asiento del fixture vive en un archivo → filename presente"
+        assert not fn.startswith(".."), "no debe escaparse del repo"
+        assert "\\" not in fn, "slashes POSIX (URL de Fava)"
+        assert ":" not in fn, "no es un path absoluto de Windows"
+        assert isinstance(record["lineno"], int) and record["lineno"] > 0
 
 
 def test_ledger_entries_entity_filter(tmp_path):

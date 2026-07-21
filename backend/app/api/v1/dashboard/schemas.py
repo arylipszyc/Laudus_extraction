@@ -48,6 +48,12 @@ class LedgerEntryRecord(BaseModel):
     # 7.1b AC1: tx_id de la transacción padre del posting (ancla de owner-comments). Sin alias —
     # el nombre del wire es el mismo. Declarado para que el response_model no lo descarte (PR #18).
     tx_id: str | None = None
+    # Deep-link a Fava (story deep-link asiento): ubicación repo-relative del asiento + fuente.
+    # `source: "laudus-erp"` ⇒ espejo (editar en Fava no es durable, el sync lo pisa). None cuando
+    # el asiento no tiene ubicación (sintético/cacheado viejo) → el frontend oculta el affordance.
+    filename: str | None = None
+    lineno: int | None = None
+    source: str | None = None
 
 
 class DashboardMeta(BaseModel):

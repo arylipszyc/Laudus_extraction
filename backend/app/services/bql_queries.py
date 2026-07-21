@@ -17,6 +17,7 @@ Account-name convention (from `accounts.beancount`):
 """
 from __future__ import annotations
 
+import os
 import re
 from collections import defaultdict
 from datetime import date
@@ -202,6 +203,11 @@ def ledger_entries_via_beancount(
     """
     entries = ledger.entries()
     meta = _account_meta(entries)
+    # Raíz del repo = padre del dir del ledger (`<repo>/ledger/main.beancount`). Sirve para
+    # devolver el `filename` de cada asiento como path REPO-RELATIVE (ej. `ledger/imports/
+    # laudus/2026-06.beancount`) en vez del absoluto del clon del backend, para el deep-link
+    # a Fava (story deep-link asiento; Fava reconstruye el absoluto de SU clon con ese relativo).
+    repo_root = os.path.dirname(os.path.dirname(ledger.main_path))
 
     pattern = _compiled_entity_pattern("Assets|Liabilities|Equity|Income|Expenses", entity)
     try:
@@ -220,6 +226,14 @@ def ledger_entries_via_beancount(
         if d_to is not None and entry.date > d_to:
             break
         tx_id: str | None = None  # una sola vez por tx, compartido entre sus patas
+        # Ubicación del asiento (deep-link a Fava) + fuente (guardrail de edición). Metadata
+        # por-asiento: misma para todas las patas. `filename` normalizado a repo-relative con
+        # slashes POSIX; None si cae fuera del repo (asiento sintético/generado) → sin affordance.
+        raw_fn = entry.meta.get("filename") if entry.meta else None
+        rel_fn = os.path.relpath(raw_fn, repo_root).replace(os.sep, "/") if raw_fn else None
+        entry_filename = rel_fn if rel_fn and not rel_fn.startswith("..") else None
+        entry_lineno = entry.meta.get("lineno") if entry.meta else None
+        entry_source = entry.meta.get("source") if entry.meta else None
         for posting in entry.postings:
             if not pattern.match(posting.account):
                 continue
@@ -256,6 +270,11 @@ def ledger_entries_via_beancount(
                 "Categoria2": str(m.get("laudus_categoria2", "")),
                 "Categoria3": str(m.get("laudus_categoria3", "")),
                 "tx_id": tx_id,
+                # Deep-link a Fava (story deep-link asiento): ubicación del asiento en el repo
+                # + fuente (para advertir que editar un espejo `laudus-erp` no es durable).
+                "filename": entry_filename,
+                "lineno": entry_lineno,
+                "source": entry_source,
             })
     # `ORDER BY date DESC` del BQL saliente; sort estable → orden de archivo intra-día.
     data.sort(key=lambda r: r["date"], reverse=True)

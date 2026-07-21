@@ -73,6 +73,12 @@ export interface LedgerEntryRecord {
   Categoria3: string    // 3rd-level category from PlanCuentas
   /** 7.1b: tx_id de la transacción padre (ancla de comentarios); ausente en datos cacheados viejos. */
   tx_id?: string | null
+  /** Deep-link a Fava: ubicación repo-relative del asiento (ej. `ledger/imports/laudus/2026-06.beancount`). */
+  filename?: string | null
+  /** Línea del asiento dentro de `filename` (1-based, de la metadata beancount). */
+  lineno?: number | null
+  /** Fuente del asiento: `laudus-erp` (espejo, editar no es durable), `cartola-tc`, `manual`, … */
+  source?: string | null
 }
 
 export interface LedgerEntriesResponse {

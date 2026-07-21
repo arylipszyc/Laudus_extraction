@@ -2,9 +2,11 @@ import { Fragment, useMemo, useState } from 'react'
 import { fmtNum } from '@/lib/format'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronDown, ChevronRight, MessageSquare, MessageSquarePlus } from 'lucide-react'
+import { ChevronDown, ChevronRight, ExternalLink, MessageSquare, MessageSquarePlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useHasRole } from '@/hooks/useHasRole'
+import { favaEditorUrl } from '@/lib/fava'
 import { useLedger } from '@/hooks/useLedger'
 import { listThreads, createComment } from '@/services/ownerComments'
 import { groupByCategoria1 } from '@/utils/ledgerAnalytics'
@@ -22,6 +24,10 @@ function formatDate(isoDate: string): string {
   if (!isoDate || isoDate.length < 10) return isoDate
   const [y, m, d] = isoDate.slice(0, 10).split('-')
   return `${d}/${m}/${y}`
+}
+
+function openFava(url: string) {
+  window.open(url, '_blank', 'noopener,noreferrer')
 }
 
 // ── Transaction detail (lazy-loaded per account) ──────────────────────────────
@@ -87,6 +93,8 @@ function CommentFormRow({ txId, onClose }: { txId: string; onClose: () => void }
 export function TransactionRows({ accountNumber, type, selectedPeriods }: { accountNumber: string; type: 'income' | 'expenses'; selectedPeriods: string[] }) {
   const { data, isLoading } = useLedger(accountNumber)
   const navigate = useNavigate()
+  // Deep-link a Fava = solo contador/admin (Fava es contador-only, basic-auth; la familia no entra).
+  const canUseFava = useHasRole(['contador', 'admin'])
   // 7.1b AC4: hilos cargados UNA vez para todo el drill-down — la queryKey compartida
   // dedupea entre todas las cuentas expandidas; para `family` el back ya acota a los suyos.
   const { data: threads, error: threadsError } = useQuery({
@@ -143,12 +151,31 @@ export function TransactionRows({ accountNumber, type, selectedPeriods }: { acco
           ? `${e.tx_id}-${unfilteredIndex}`
           : `${e.journalentryid}-${e.lineid}-${unfilteredIndex}`
         const threadId = e.tx_id ? threadByTx.get(e.tx_id) : undefined
+        // Fail-safe: sin ubicación (datos viejos/sintéticos) o sin config de Fava → sin affordance.
+        const favaUrl = canUseFava ? favaEditorUrl(e.filename, e.lineno) : null
+        const favaTitle = e.source === 'laudus-erp'
+          ? 'Ver en Fava (asiento de Laudus — no editar en el lugar; corregir con asiento de ajuste)'
+          : 'Ver asiento completo en Fava'
         return (
           <Fragment key={key}>
-            <tr className="bg-muted/10 text-xs border-t border-dashed">
+            <tr
+              className="bg-muted/10 text-xs border-t border-dashed"
+              onDoubleClick={favaUrl ? () => openFava(favaUrl) : undefined}
+            >
               <td className="px-10 py-1 font-mono text-muted-foreground whitespace-nowrap">{formatDate(e.date)}</td>
               <td className="px-3 py-1 text-muted-foreground" colSpan={2}>
                 {e.description || '—'}
+                {/* Deep-link al asiento completo en Fava (contador/admin; oculto sin ubicación/config) */}
+                {favaUrl && (
+                  <button
+                    title={favaTitle}
+                    aria-label={favaTitle}
+                    onClick={() => openFava(favaUrl)}
+                    className="ml-2 align-middle text-muted-foreground hover:text-primary"
+                  >
+                    <ExternalLink className="inline w-3.5 h-3.5" />
+                  </button>
+                )}
                 {/* 7.1b: sin tx_id (datos viejos cacheados) o si falló la carga → sin affordance (fail-safe AC3) */}
                 {!threadsError && e.tx_id && (threadId ? (
                   <button
