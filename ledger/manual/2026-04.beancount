@@ -1,8 +1,0 @@
-;; ledger/manual/2026-04.beancount — zona de edits manuales del contador
-;;
-;; Acá el contador agrega ajustes manuales vía el editor Fava (Story 9.0).
-;; SIN transacciones de ejemplo: el fixture de smoke-test de
-;; test_fava_edit_validator se inyecta en la copia temporal del test, NO en el
-;; ledger de producción — un asiento "(sample)" acá contaminaba el reporte
-;; (cuentas reales 413044/111005 que no existen en Laudus/Sheets). Ver Story 9.11
-;; paridad. Cuando el contador agregue su primer edit real, va debajo de esta línea.

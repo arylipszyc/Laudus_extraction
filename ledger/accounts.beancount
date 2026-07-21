@@ -1995,11 +1995,8 @@
   laudus_categoria3: "EGRESOS JAEL AVAYU DEUTSCH"
 
 ;; ── Cuentas de sistema (Story 9.6a) ──────────────────────────────────────
-;; Equity:Reconciliation:Discrepancias — destino del `pad` cuando el contador
-;; hace override de una Balance assertion fallida (AC6 / FR25).
 ;; Expenses:EAG:Suspense — categoría placeholder del NoopCategoryPredictor (v1);
 ;; Story 9.7 reemplaza con categorías reales.
-2020-12-31 open Equity:Reconciliation:Discrepancias CLP, USD
 2020-12-31 open Expenses:EAG:Suspense CLP, USD
 
 ;; Cuenta SINTÉTICA (no viene de Laudus, sin código) para las compras de cartola-TC
@@ -2012,85 +2009,6 @@
   laudus_categoria1: "GASTOS - EGRESOS"
   laudus_categoria2: "GASTOS PERSONALES"
   laudus_categoria3: "Gastos Varios"
-
-;; ── Cuentas de corrección de TC vía cartolas (Story 6.2) ─────────────────────
-;; Cuentas SINTÉTICAS (no vienen de Laudus) para el desglose de tarjetas de crédito.
-;; La deuda real de cada tarjeta vive acá (pasivo), separada de la cuenta-gasto
-;; Laudus original. El import de cartola itemiza las compras + el opening contra
-;; estas cuentas. Ver valentina-correccion-tc-cartolas-2026-06-20.md §6/§9.
-;; CLAVE (mecanismo de exclusión del reporte de gastos):
-;;   - laudus_categoria2/3 VACÍAS → el reporte agrupa el gasto por Categoria2, así
-;;     que cat2="" cae en un bucket que el resumen nunca lee → NO suma al gasto.
-;;   - laudus_categoria1 no-vacía → evita el guard "cuentas sin categorizar" (10.2).
-;;   - code sintético (2xxxxx pasivo / 3xxxxx patrimonio) → evita la línea fantasma
-;;     "Total prefijo desconocido" del reporte (los postings se agrupan por code).
-;; Nombre derivado por tc_correction.tc_real_account(): Expenses:EAG:TC:<stem>-<code>
-;;   → Liabilities:EAG:TC:Real:<stem> (string puro, sin el sufijo -code).
-;; NO llevan bank_account_id: el resolver mapea la cartola a la cuenta-gasto; la
-;; TC:Real se deriva por nombre. Amex 8083 (430011) se omite: cero actividad 2026.
-2020-12-31 open Liabilities:EAG:TC:Real:Tc1027VisaInfinity CLP
-  code: "230005"
-  laudus_account_name: "T/C: 1027 - Visa Infinity - $ (deuda real)"
-  laudus_categoria1: "PASIVO"
-  laudus_categoria2: ""
-  laudus_categoria3: ""
-
-2020-12-31 open Liabilities:EAG:TC:Real:Tc1027VisaInfinityUs CLP
-  code: "230006"
-  laudus_account_name: "T/C: 1027 - Visa Infinity - US$ (deuda real)"
-  laudus_categoria1: "PASIVO"
-  laudus_categoria2: ""
-  laudus_categoria3: ""
-
-2020-12-31 open Liabilities:EAG:TC:Real:Tc8996MastercardLanpass CLP
-  code: "230007"
-  laudus_account_name: "T/C: 8996 - Mastercard Lanpass - $ (deuda real)"
-  laudus_categoria1: "PASIVO"
-  laudus_categoria2: ""
-  laudus_categoria3: ""
-
-2020-12-31 open Liabilities:EAG:TC:Real:Tc8996MastercardLanpassUs CLP
-  code: "230008"
-  laudus_account_name: "T/C: 8996 - Mastercard Lanpass - US$ (deuda real)"
-  laudus_categoria1: "PASIVO"
-  laudus_categoria2: ""
-  laudus_categoria3: ""
-
-2020-12-31 open Liabilities:EAG:TC:Real:Tc0858VisaLatanpass CLP
-  code: "230009"
-  laudus_account_name: "T/C: 0858 - Visa Latanpass - $ (deuda real)"
-  laudus_categoria1: "PASIVO"
-  laudus_categoria2: ""
-  laudus_categoria3: ""
-
-2020-12-31 open Liabilities:EAG:TC:Real:Tc0858VisaLatanpassUs CLP
-  code: "230010"
-  laudus_account_name: "T/C: 0858 - Visa Latanpass - US$ (deuda real)"
-  laudus_categoria1: "PASIVO"
-  laudus_categoria2: ""
-  laudus_categoria3: ""
-
-2020-12-31 open Liabilities:EAG:TC:Real:TcVariasEag CLP
-  code: "230017"
-  laudus_account_name: "T/C: Varias EAG (deuda real)"
-  laudus_categoria1: "PASIVO"
-  laudus_categoria2: ""
-  laudus_categoria3: ""
-
-2020-12-31 open Liabilities:EAG:TC:Real:TcRaquelVentura CLP
-  code: "230019"
-  laudus_account_name: "T/C: Raquel Ventura (deuda real)"
-  laudus_categoria1: "PASIVO"
-  laudus_categoria2: ""
-  laudus_categoria3: ""
-
-2020-12-31 open Equity:Apertura:TarjetasSinDetalle CLP
-  code: "311005"
-  laudus_account_name: "Apertura — deuda TC sin detalle (arrastre pre-2026)"
-  laudus_categoria1: "PATRIMONIO"
-  laudus_categoria2: ""
-  laudus_categoria3: ""
-
 
 ;; ─── RUT2 (Fondo Común) — subárbol FFCC/JAB — Story 12.3 ───
 ;; Generado one-off por bootstrap/generate_rut2_accounts.py (2026-07-11) desde el
