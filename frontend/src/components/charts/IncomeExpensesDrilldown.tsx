@@ -1,4 +1,5 @@
 import { Fragment, useMemo, useState } from 'react'
+import { fmtNum } from '@/lib/format'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChevronDown, ChevronRight, MessageSquare, MessageSquarePlus } from 'lucide-react'
@@ -13,7 +14,7 @@ import type { AccountSummary, Categoria1Group, Categoria2Group, Categoria3Group 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function formatAmount(amount: number, currency = 'CLP'): string {
-  const formatted = amount.toLocaleString('es-CL')
+  const formatted = fmtNum(amount, currency)
   return currency !== 'CLP' ? `${formatted} ${currency}` : formatted
 }
 

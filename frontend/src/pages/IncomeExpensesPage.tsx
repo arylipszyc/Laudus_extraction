@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { fmtNum } from '@/lib/format'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useLedger } from '@/hooks/useLedger'
 import { ApiTimeoutError, ApiNetworkError } from '@/services/api'
@@ -11,7 +12,7 @@ import { IncomeExpensesDrilldown } from '@/components/charts/IncomeExpensesDrill
 import type { LedgerEntryRecord } from '@/types'
 
 function formatAmount(amount: number): string {
-  return amount.toLocaleString('es-CL')
+  return fmtNum(amount)
 }
 
 // Referencia estable para los memos mientras `data` aún no llega.

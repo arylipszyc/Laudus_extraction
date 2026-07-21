@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts'
+import { fmtNum } from '@/lib/format'
 
 export interface TimelinePeriodData {
   period: string
@@ -35,7 +36,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
       <p className="font-medium mb-1">{label}</p>
       {payload.map((p) => (
         <p key={p.name} style={{ color: p.color }}>
-          {p.name}: {p.value.toLocaleString('es-CL')}
+          {p.name}: {fmtNum(Number(p.value))}
         </p>
       ))}
     </div>
@@ -73,7 +74,7 @@ export function TimelineBarChart({ data, selectedPeriods, onBarClick }: Props) {
           style={{ cursor: 'pointer' }}
         >
           <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-          <YAxis tickFormatter={(v: number) => v.toLocaleString('es-CL')} tick={{ fontSize: 11 }} width={80} />
+          <YAxis tickFormatter={(v: number) => fmtNum(v)} tick={{ fontSize: 11 }} width={80} />
           <Tooltip content={<CustomTooltip />} />
           <Legend iconType="square" iconSize={10} formatter={(v) => <span className="text-xs">{v}</span>} />
           <Bar dataKey="income" name="Ingresos" fill="#22c55e" radius={[2, 2, 0, 0]}>

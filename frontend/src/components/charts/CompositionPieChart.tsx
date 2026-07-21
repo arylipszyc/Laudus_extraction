@@ -1,4 +1,5 @@
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, type PieLabelRenderProps } from 'recharts'
+import { fmtNum } from '@/lib/format'
 import { buildPieDataByCat2, buildPieDataByCat3 } from '@/utils/ledgerAnalytics'
 import type { LedgerEntryRecord } from '@/types'
 
@@ -18,7 +19,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
   return (
     <div className="rounded-md border bg-background px-3 py-2 text-sm shadow-md">
       <p className="font-medium">{name}</p>
-      <p className="text-muted-foreground">{value.toLocaleString('es-CL')}</p>
+      <p className="text-muted-foreground">{fmtNum(Number(value))}</p>
     </div>
   )
 }

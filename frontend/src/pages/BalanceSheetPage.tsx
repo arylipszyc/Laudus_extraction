@@ -1,4 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton'
+import { fmtNum } from '@/lib/format'
 import { useBalanceSheet } from '@/hooks/useBalanceSheet'
 import { ApiTimeoutError, ApiNetworkError } from '@/services/api'
 import type { BalanceSheetRecord } from '@/types'
@@ -19,7 +20,7 @@ function getCategory(record: BalanceSheetRecord): 'assets' | 'liabilities' | 'eq
 }
 
 function formatAmount(amount: number): string {
-  return amount.toLocaleString('es-CL')
+  return fmtNum(amount)
 }
 
 interface GroupedRecords {
