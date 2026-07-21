@@ -1,4 +1,6 @@
 """Global error handler and CORS middleware."""
+import base64
+import binascii
 import logging
 import os
 
@@ -7,7 +9,6 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from starlette.middleware.sessions import SessionMiddleware
 
 from backend.app.audit.service import log_write_operation
 from backend.app.services.ledger_service import LedgerUnavailableError
@@ -18,16 +19,15 @@ _WRITE_METHODS = frozenset({"POST", "PUT", "DELETE", "PATCH"})
 
 
 def _extract_email_from_request(request: Request) -> str | None:
-    """Extract user email from JWT cookie — best-effort, never raises."""
+    """Extract basic-auth username from the Authorization header — best-effort."""
+    header = request.headers.get("Authorization", "")
+    if not header.startswith("Basic "):
+        return None
     try:
-        from backend.app.auth.service import decode_jwt
-        token = request.cookies.get("access_token")
-        if token:
-            payload = decode_jwt(token)
-            return payload.get("sub")
-    except Exception:
-        pass
-    return None
+        decoded = base64.b64decode(header[len("Basic "):]).decode("utf-8")
+        return decoded.split(":", 1)[0] or None
+    except (binascii.Error, UnicodeDecodeError):
+        return None
 
 
 def add_middleware(app: FastAPI) -> None:
@@ -46,10 +46,6 @@ def add_middleware(app: FastAPI) -> None:
                 user_email=email,
             )
         return response
-
-    # ── Session (required by authlib for OAuth state) ─────────────────────────
-    session_secret = os.getenv("JWT_SECRET", "dev-secret-change-in-production")
-    app.add_middleware(SessionMiddleware, secret_key=session_secret)
 
     # ── CORS ──────────────────────────────────────────────────────────────────
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")

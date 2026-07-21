@@ -10,15 +10,14 @@ from backend.app.api.v1.sync.schemas import (
     TriggerResponse,
 )
 from backend.app.api.v1.sync.service import get_sync_status, trigger_sync
-from backend.app.auth.schemas import UserSession
-from backend.app.dependencies import get_current_user, require_role
+from backend.app.auth.basic import Principal, require_auth
 
 router = APIRouter(prefix="/sync", tags=["sync"])
 
 
 @router.get("/status", response_model=SyncStatusResponse)
 def sync_status(
-    user: UserSession = Depends(get_current_user),
+    user: Principal = Depends(require_auth),
 ) -> SyncStatusResponse:
     """Return last sync timestamp per data type and current job status."""
     state = get_sync_status()
@@ -36,7 +35,7 @@ def sync_status(
 @router.post("/trigger", response_model=TriggerResponse, status_code=202)
 def sync_trigger(
     request: TriggerRequest = Body(default=TriggerRequest()),
-    user: UserSession = Depends(require_role(["contador", "admin"])),
+    user: Principal = Depends(require_auth),
 ) -> TriggerResponse:
     """Trigger async sync (normal) or backfill. Returns job_id immediately."""
     if request.mode == "backfill":

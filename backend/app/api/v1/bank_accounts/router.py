@@ -14,7 +14,8 @@ from backend.app.api.v1.bank_accounts.service import (
     list_bank_accounts,
     update_bank_account,
 )
-from backend.app.dependencies import get_current_user, get_ledger_service, require_role
+from backend.app.auth.basic import require_auth
+from backend.app.dependencies import get_ledger_service
 from backend.app.services.ledger_service import LedgerService
 
 router = APIRouter(tags=["bank-accounts"])
@@ -22,7 +23,7 @@ router = APIRouter(tags=["bank-accounts"])
 
 @router.get("/", response_model=list[BankAccount])
 def get_bank_accounts(
-    _user=Depends(get_current_user),
+    _user=Depends(require_auth),
     ledger: LedgerService = Depends(get_ledger_service),
 ):
     """List all bank accounts (active and inactive) with linked account name."""
@@ -38,7 +39,7 @@ def get_bank_accounts(
 @router.post("/", response_model=BankAccount, status_code=status.HTTP_201_CREATED)
 def register_bank_account(
     data: BankAccountCreate,
-    _user=Depends(require_role(["contador", "admin"])),
+    _user=Depends(require_auth),
     ledger: LedgerService = Depends(get_ledger_service),
 ):
     """Register a new bank account. Requires: contador role.
@@ -52,7 +53,7 @@ def register_bank_account(
 def patch_bank_account(
     account_id: UUID,
     data: BankAccountUpdate,
-    _user=Depends(require_role(["contador", "admin"])),
+    _user=Depends(require_auth),
     ledger: LedgerService = Depends(get_ledger_service),
 ):
     """Update a bank account (e.g. deactivate). Requires: contador role."""

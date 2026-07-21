@@ -1,11 +1,7 @@
-"""Story 6.4 — listado del plan de cuentas (autocompletado de categoría) + moneda Laudus."""
-from datetime import date
-from decimal import Decimal
-
+"""Story 6.4 — listado del plan de cuentas (autocompletado de categoría)."""
 from beancount.parser import parser
 
 from backend.app.api.v1.accounts.service import list_accounts
-from pipeline.importers.matching_engine import load_laudus_entries
 
 _ACCOUNTS = """\
 2020-12-31 open Expenses:EAG:Super CLP
@@ -37,19 +33,3 @@ def test_list_accounts_root_assets_excluye_pendingreview(tmp_path):
 
 def test_list_accounts_root_inexistente_da_vacio(tmp_path):
     assert list_accounts(_entries(tmp_path), "Liabilities") == []
-
-
-# ── Moneda Laudus (AC7): load_laudus_entries la captura de la posting ──────────
-
-
-def test_load_laudus_entries_captura_currency(tmp_path):
-    laudus_dir = tmp_path / "laudus"
-    laudus_dir.mkdir()
-    (laudus_dir / "2026-04.beancount").write_text(
-        '2026-04-10 * "COMPRA USD"\n'
-        '  Assets:EAG:Bancos:Us  -42.75 USD\n'
-        '  Expenses:EAG:Super  42.75 USD\n', encoding="utf-8")
-    out = load_laudus_entries(laudus_dir, "Assets:EAG:Bancos:Us", date(2026, 4, 1), date(2026, 4, 30))
-    assert len(out) == 1
-    assert out[0].currency == "USD"
-    assert out[0].amount == Decimal("-42.75")

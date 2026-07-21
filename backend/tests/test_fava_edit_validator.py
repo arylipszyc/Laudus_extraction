@@ -63,9 +63,18 @@ def _copy_template_ledger(dst: Path) -> Path:
     # edit under test. Strip it so every load re-parses the temp copy.
     for cache in dst.glob(".*.picklecache"):
         cache.unlink(missing_ok=True)
-    # Inyecta el fixture en la copia temporal (el prod manual/2026-04.beancount no lo trae).
-    (dst / "manual" / "2026-04.beancount").write_text(_SMOKE_FIXTURE, encoding="utf-8")
-    return dst / "main.beancount"
+    # El mirror de prod ya no trae la zona manual/ (reset base-limpia). Este test
+    # necesita un archivo mutable INCLUIDO por el ledger para editar/romper: se crea
+    # SOLO en la copia temporal (nunca toca prod) y se agrega su include al main copiado.
+    manual_dir = dst / "manual"
+    manual_dir.mkdir(exist_ok=True)
+    (manual_dir / "2026-04.beancount").write_text(_SMOKE_FIXTURE, encoding="utf-8")
+    main = dst / "main.beancount"
+    main.write_text(
+        main.read_text(encoding="utf-8") + '\ninclude "manual/*.beancount"\n',
+        encoding="utf-8",
+    )
+    return main
 
 
 def _load_ledger(main_path: Path) -> FavaLedger:

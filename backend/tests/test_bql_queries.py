@@ -216,7 +216,7 @@ def test_ledger_entries_categoria_enrichment(tmp_path):
 def test_ledger_entries_tx_id_matches_parent_tx(tmp_path):
     """7.1b AC1: cada fila trae el tx_id de la TRANSACCIÓN padre (== _tx_id_of canónico)."""
     from beancount.core.data import Transaction as Txn
-    from backend.app.api.v1.transactions.service import _tx_id_of
+    from backend.app.services.ledger_service import tx_id_of as _tx_id_of
 
     ledger = _ledger(tmp_path)
     result = ledger_entries_via_beancount(ledger, "EAG", account_number="511005")
