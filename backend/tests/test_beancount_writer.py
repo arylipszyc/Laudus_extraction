@@ -162,15 +162,17 @@ def _payroll_je(je_id=700, date="2026-06-26"):
     ]
 
 
-def test_per_line_desc_emitted_when_differs_from_narration(tmp_path):
+def test_narration_neutra_y_desc_en_cada_pata(tmp_path):
+    """Formato nuevo: narration del asiento neutra (`JE <num>`) y la glosa por-línea de
+    Laudus emitida en CADA pata — incluida la 1ª, que antes quedaba solo en la narration
+    y se perdía al reportar por pata."""
     accounts_path, target_dir, pending_path = _setup(tmp_path)
     write_jes(_payroll_je(), target_dir, accounts_path, pending_path)
     content = (target_dir / "2026-06.beancount").read_text(encoding="utf-8")
-    assert '"Sueldos Junio 2026"' in content              # narration = 1ª línea
+    assert '* "JE 1001"' in content                       # narration neutra, no la 1ª línea
+    assert 'desc: "Sueldos Junio 2026"' in content        # 1ª pata: ahora SÍ lleva su glosa
     assert 'desc: "Empleado A - Sueldo"' in content       # glosa por-pata emitida
     assert 'desc: "Empleado B - Sueldo"' in content
-    # La pata que comparte la narration NO repite su glosa como metadata.
-    assert 'desc: "Sueldos Junio 2026"' not in content
 
 
 def test_per_line_desc_loads_without_errors(tmp_path):
@@ -328,10 +330,10 @@ def test_write_jes_rut2_cuarentena_por_entidad_del_libro(tmp_path):
     assert result.pending_accounts == 2
 
 
-def test_write_jes_libro_eag_byte_identico_al_legacy(tmp_path):
-    """AC4 (anti-regresión): una corrida EAG con book explícito produce archivos
-    BYTE-IDÉNTICOS a los del comportamiento pre-12.2 (book=None), incluida la
-    cuarentena EAG y el pending file."""
+def test_write_jes_libro_eag_solo_agrega_entity_vs_legacy(tmp_path):
+    """Anti-regresión: una corrida EAG con book explícito produce el MISMO output que
+    el comportamiento legacy (book=None) salvo la metadata `entity: "EAG"` que ahora se
+    estampa en cada asiento. Fuera de eso — cuarentena EAG y pending file — es idéntico."""
     eag, _ = _books()
     rows = _balanced_je() + [
         _row(60, 1, "111005", debit=5000, date="2024-05-10"),
@@ -356,4 +358,8 @@ def test_write_jes_libro_eag_byte_identico_al_legacy(tmp_path):
     book_files = sorted((book_dir / "imports").rglob("*.beancount"))
     assert [p.name for p in legacy_files] == [p.name for p in book_files]
     for lf, bf in zip(legacy_files, book_files):
-        assert lf.read_bytes() == bf.read_bytes(), f"{lf.name} difiere entre legacy y book=EAG"
+        legacy_lines = lf.read_text(encoding="utf-8").splitlines()
+        # Quitando la línea `entity: "EAG"`, el output debe ser idéntico al legacy.
+        book_lines = [ln for ln in bf.read_text(encoding="utf-8").splitlines()
+                      if ln.strip() != 'entity: "EAG"']
+        assert book_lines == legacy_lines, f"{lf.name} difiere (más allá de entity) entre legacy y book=EAG"

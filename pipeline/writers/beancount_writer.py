@@ -54,11 +54,12 @@ class JournalEntry:
     je_num: str                    # journalentrynumber
     narration: str
     # (account, amount, desc) — `desc` = glosa POR LÍNEA de Laudus (Laudus da una por
-    # lineId; la narration de la tx es solo la de la 1ª línea). Se emite como metadata
-    # `desc:` del posting cuando difiere de la narration, para que el reporte muestre el
-    # concepto real de cada pata y no el encabezado del asiento.
+    # lineId; NO hay glosa de cabecera). La narration del asiento es neutra `JE <num>`;
+    # cada pata lleva su propia glosa en metadata `desc:`, para que la reportería lea el
+    # concepto real de cada línea y no confunda con la de otra pata del mismo comprobante.
     postings: list[tuple[str, Decimal, str]] = field(default_factory=list)
     pending: bool = False          # alguna cuenta es de cuarentena → #pending-account
+    entity: str | None = None      # libro de origen (book_id: "EAG" | "RUT2") → metadata `entity:`
 
 
 @dataclass
@@ -136,11 +137,14 @@ def _format_je(je: JournalEntry) -> str:
     lines.append(f'  id: "{je.id}"')
     lines.append(f'  je_num: "{je.je_num}"')
     lines.append('  source: "laudus-erp"')
+    if je.entity:
+        lines.append(f'  entity: "{je.entity}"')
     for account, amount, desc in je.postings:
         lines.append(f"  {account}  {_fmt_amount(amount)}")
-        # Glosa por-línea: se emite solo si difiere de la narration (la 1ª línea la
-        # comparte → no se repite). El reporte cae a la narration cuando no hay `desc:`.
-        if desc and desc != je.narration:
+        # Glosa POR LÍNEA de Laudus en CADA pata que la tenga. La narration del asiento
+        # es neutra (`JE <num>`) y no describe ninguna pata: el concepto real de cada
+        # línea vive acá. Sin `desc:` = la línea no traía glosa en Laudus.
+        if desc:
             lines.append(f'    desc: "{_escape(desc)}"')
     return "\n".join(lines)
 
@@ -175,16 +179,18 @@ def _rows_to_jes(
             pending_codes.add(code)
         amount = Decimal(str(row.get("debit", 0))) - Decimal(str(row.get("credit", 0)))
         if je_id not in jes:
+            je_num = str(row.get("journalentrynumber", ""))
             jes[je_id] = JournalEntry(
                 date=str(row.get("date", ""))[:10],
                 id=je_id,
-                je_num=str(row.get("journalentrynumber", "")),
-                narration=str(row.get("description", "") or ""),
+                je_num=je_num,
+                # Narration neutra: Laudus no tiene glosa de cabecera; usar la de la 1ª
+                # línea (comportamiento previo) etiquetaba mal los comprobantes compuestos.
+                narration=f"JE {je_num}".strip(),
+                entity=book.book_id if book is not None else None,
                 postings=[],
             )
         je = jes[je_id]
-        if not je.narration and row.get("description"):
-            je.narration = str(row["description"])
         je.postings.append((account, amount, str(row.get("description", "") or "")))
         if is_pending:
             je.pending = True
@@ -207,11 +213,10 @@ def _parse_existing_jes(target_dir: Path) -> dict[str, JournalEntry]:
             if meta.get("source") != "laudus-erp":
                 continue
             je_id = str(meta.get("id", ""))
-            # Recupera la glosa por-línea de la metadata `desc:`; si no está (la pata
-            # compartía la narration → no se emitió), cae a la narration para que el
-            # re-emit sea idéntico (idempotencia intacta).
+            # Glosa por-línea desde la metadata `desc:` (el writer la emite en cada pata
+            # que la tenga; sin `desc:` = la línea no traía glosa en Laudus).
             postings = [
-                (p.account, p.units.number, str((p.meta or {}).get("desc") or e.narration or ""))
+                (p.account, p.units.number, str((p.meta or {}).get("desc") or ""))
                 for p in e.postings
                 if p.units is not None and p.units.number is not None
             ]
@@ -220,6 +225,7 @@ def _parse_existing_jes(target_dir: Path) -> dict[str, JournalEntry]:
                 id=je_id,
                 je_num=str(meta.get("je_num", "")),
                 narration=e.narration or "",
+                entity=meta.get("entity"),
                 postings=postings,
                 pending="pending-account" in (e.tags or frozenset()),
             )
