@@ -1,43 +1,60 @@
-2023-11-02 * "Devol EAG a FC Remedios/Pila reloj"
+2023-11-02 * "JE 2959"
   id: "2968"
   je_num: "2959"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -138163.00 CLP
+    desc: "Devol EAG a FC Remedios/Pila reloj"
   Assets:EAG:ControlYLiquidacin-115099  138163.00 CLP
+    desc: "Devol EAG a FC Remedios/Pila reloj"
 
-2023-11-02 * "Johanna Avayu - Retiro Octubre 2023"
+2023-11-02 * "JE 3124"
   id: "3133"
   je_num: "3124"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1000000.00 CLP
+    desc: "Johanna Avayu - Retiro Octubre 2023"
   Assets:EAG:ControlYLiquidacin-115099  1000000.00 CLP
+    desc: "Johanna Avayu - Retiro Octubre 2023"
 
-2023-11-03 * "Dr. Patricio Fischman - Atencion 06/11"
+2023-11-03 * "JE 2960"
   id: "2969"
   je_num: "2960"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -130000.00 CLP
+    desc: "Dr. Patricio Fischman - Atencion 06/11"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  130000.00 CLP
+    desc: "Dr. Patricio Fischman - Atencion 06/11"
 
-2023-11-03 * "USD8.828,61 The Tower House GGCC/FLP"
+2023-11-03 * "JE 3143"
   id: "3152"
   je_num: "3143"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  7855167.00 CLP
+    desc: "USD8.828,61 The Tower House GGCC/FLP"
   Income:EAG:OtrosIngresos-310099  -7855167.00 CLP
+    desc: "USD8.828,61 The Tower House GGCC/FLP"
 
-2023-11-06 * "Johanna Avayu - Retiro Octubre 2023"
+2023-11-06 * "JE 2962"
   id: "2971"
   je_num: "2962"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -500000.00 CLP
+    desc: "Johanna Avayu - Retiro Octubre 2023"
   Assets:EAG:ControlYLiquidacin-115099  500000.00 CLP
+    desc: "Johanna Avayu - Retiro Octubre 2023"
 
-2023-11-06 * "Devol FGK Reñaca / Via Gris"
+2023-11-06 * "JE 2965"
   id: "2974"
   je_num: "2965"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  2413104.00 CLP
+    desc: "Devol FGK Reñaca / Via Gris"
   Assets:EAG:ControlYLiquidacin-115099  -14990.00 CLP
     desc: "PAT - Claro Chile SA Lorenzo"
   Assets:EAG:ControlYLiquidacin-115099  -23229.00 CLP
@@ -49,38 +66,51 @@
   Assets:EAG:ControlYLiquidacin-115099  -430047.00 CLP
     desc: "PAT - Aguas Cordillera"
 
-2023-11-06 * "PAC Seguro fraude Santander"
+2023-11-06 * "JE 3157"
   id: "3168"
   je_num: "3157"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1421.00 CLP
+    desc: "PAC Seguro fraude Santander"
   Expenses:EAG:GastosBancarios-430003  1421.00 CLP
+    desc: "PAC Seguro fraude Santander"
 
-2023-11-07 * "EAG - Isapre Cruz Blanca Octubre 2023"
+2023-11-07 * "JE 2984"
   id: "2993"
   je_num: "2984"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -384913.00 CLP
+    desc: "EAG - Isapre Cruz Blanca Octubre 2023"
   Expenses:EAG:CotizacinIsapre-430055  384913.00 CLP
+    desc: "EAG - Isapre Cruz Blanca Octubre 2023"
 
-2023-11-07 * "Fresia Gonzalez - Ant. sueldo Noviembre"
+2023-11-07 * "JE 2987"
   id: "2996"
   je_num: "2987"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -200000.00 CLP
+    desc: "Fresia Gonzalez - Ant. sueldo Noviembre"
   Expenses:EAG:SueldosRopaRegalias-413001  200000.00 CLP
+    desc: "Fresia Gonzalez - Ant. sueldo Noviembre"
 
-2023-11-07 * "USD296,25 Levine - Revision seguro KK"
+2023-11-07 * "JE 2988"
   id: "2997"
   je_num: "2988"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  260635.00 CLP
+    desc: "USD296,25 Levine - Revision seguro KK"
   Assets:EAG:Bancos:BancoBci10160175-111005  -10487.00 CLP
     desc: "USD3.411,25 Levine - Gastos legales EAG"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -3001150.00 CLP
     desc: "USD3.411,25 Levine - Gastos legales EAG"
   Assets:EAG:ControlYLiquidacin-115099  260635.00 CLP
+    desc: "USD296,25 Levine - Revision seguro KK"
   Assets:EAG:ControlYLiquidacin-115099  -260635.00 CLP
+    desc: "USD296,25 Levine - Revision seguro KK"
   Expenses:EAG:GastosBancarios-430003  10487.00 CLP
     desc: "USD3.411,25 Levine - Gastos legales EAG"
   Expenses:EAG:GastosLegalesNotara-430071  947963.00 CLP
@@ -88,11 +118,13 @@
   Expenses:EAG:GastosLegalesNotara-430071  1792552.00 CLP
     desc: "USD2.037,5 Levine - Revision dctos Libra"
 
-2023-11-08 * "Mariela Mendez - Impos. Octubre 2023"
+2023-11-08 * "JE 2985"
   id: "2994"
   je_num: "2985"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -248791.00 CLP
+    desc: "Mariela Mendez - Impos. Octubre 2023"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -1437871.00 CLP
     desc: "Leyes soc empl sur/stgo EAG Octubre 2023"
   Expenses:EAG:SueldosRopaRegalas-411001  241672.00 CLP
@@ -100,6 +132,7 @@
   Expenses:EAG:SueldosRopaRegalas-411001  226469.00 CLP
     desc: "Victoria Celia - Impos. Octubre 2023"
   Expenses:EAG:SueldosRopaRegalas-411001  248791.00 CLP
+    desc: "Mariela Mendez - Impos. Octubre 2023"
   Expenses:EAG:SueldosRopaRegalias-413001  40475.00 CLP
     desc: "Esteban Mendez - Impos. Octubre 2023"
   Expenses:EAG:SueldosRopaRegalias-413001  69125.00 CLP
@@ -113,25 +146,33 @@
   Expenses:EAG:SueldosRopaRegalias-413001  192699.00 CLP
     desc: "Andres Martinez - Impos. Octubre 2023"
 
-2023-11-08 * "Jeannette Avayu - Bat Mitzva Maya"
+2023-11-08 * "JE 2986"
   id: "2995"
   je_num: "2986"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -13500000.00 CLP
+    desc: "Jeannette Avayu - Bat Mitzva Maya"
   Expenses:EAG:RegalosDeMatrimonioOtros-430091  13500000.00 CLP
+    desc: "Jeannette Avayu - Bat Mitzva Maya"
 
-2023-11-09 * "USD276,63 Master Santander EAG"
+2023-11-09 * "JE 2989"
   id: "2998"
   je_num: "2989"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -250724.00 CLP
+    desc: "USD276,63 Master Santander EAG"
   Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  250724.00 CLP
+    desc: "USD276,63 Master Santander EAG"
 
-2023-11-09 * "Visa Santander pesos 0790 Octubre EAG"
+2023-11-09 * "JE 2990"
   id: "2999"
   je_num: "2990"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -3012355.00 CLP
+    desc: "Visa Santander pesos 0790 Octubre EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -32567.00 CLP
     desc: "Master Sant. pesos 2735 Octubre EAG"
   Assets:EAG:ControlYLiquidacin-115099  14990.00 CLP
@@ -147,89 +188,121 @@
   Expenses:EAG:TC:Tc8996MastercardLanpass-430007  32567.00 CLP
     desc: "Master Sant. pesos 2735 Octubre EAG"
   Expenses:EAG:TC:Tc0858VisaLatanpass-430009  599251.00 CLP
+    desc: "Visa Santander pesos 0790 Octubre EAG"
 
-2023-11-09 * "Tarjetas Santander Raquel Ventura"
+2023-11-09 * "JE 2991"
   id: "3000"
   je_num: "2991"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4079456.00 CLP
+    desc: "Tarjetas Santander Raquel Ventura"
   Expenses:EAG:SraRaquelVentura-430021  3917303.00 CLP
     desc: "Visa Santander 1066 Raquel Ventura"
   Expenses:EAG:SraRaquelVentura-430021  162153.00 CLP
     desc: "USD180,17 Master Santander 4651 Raquel V"
 
-2023-11-09 * "Cotizaciones Octubre 2023"
+2023-11-09 * "JE 2992"
   id: "3001"
   je_num: "2992"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -342488.00 CLP
+    desc: "Cotizaciones Octubre 2023"
   Assets:EAG:Bancos:BancoBci10160175-111005  -866.00 CLP
     desc: "F29 Odontologia EIRL Octubre 2023"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  342488.00 CLP
+    desc: "Cotizaciones Octubre 2023"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  866.00 CLP
     desc: "F29 Odontologia EIRL Octubre 2023"
 
-2023-11-09 * "Devol Isapre B#4874 Psiquiatra EAG"
+2023-11-09 * "JE 3147"
   id: "3156"
   je_num: "3147"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  13290.00 CLP
+    desc: "Devol Isapre B#4874 Psiquiatra EAG"
   Income:EAG:DevolucinIsapre-310043  -13290.00 CLP
+    desc: "Devol Isapre B#4874 Psiquiatra EAG"
 
-2023-11-10 * "Rescate FM Competitito BCI a 10160175"
+2023-11-10 * "JE 2993"
   id: "3002"
   je_num: "2993"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  42531207.00 CLP
+    desc: "Rescate FM Competitito BCI a 10160175"
   Assets:EAG:Inversiones:FmBciCompetitivoSerieAp0-113002  -42531207.00 CLP
+    desc: "Rescate FM Competitito BCI a 10160175"
 
-2023-11-10 * "Traspaso de Fondos a Otro Banco en Linea"
+2023-11-10 * "JE 2994"
   id: "3003"
   je_num: "2994"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  -8000.00 CLP
+    desc: "Traspaso de Fondos a Otro Banco en Linea"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  8000.00 CLP
+    desc: "Traspaso de Fondos a Otro Banco en Linea"
 
-2023-11-10 * "Traspaso de Fondos a Otro Banco en Linea"
+2023-11-10 * "JE 2995"
   id: "3004"
   je_num: "2995"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  -534518.00 CLP
+    desc: "Traspaso de Fondos a Otro Banco en Linea"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  534518.00 CLP
+    desc: "Traspaso de Fondos a Otro Banco en Linea"
 
-2023-11-10 * "Eduardo Avayu - Personal FL"
+2023-11-10 * "JE 2996"
   id: "3005"
   je_num: "2996"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -45000000.00 CLP
+    desc: "Eduardo Avayu - Personal FL"
   Assets:EAG:DeudoresVarios-115019  45000000.00 CLP
+    desc: "Eduardo Avayu - Personal FL"
 
-2023-11-13 * "USD5.450,92 Visa BCI 1027 Octubre 2023"
+2023-11-13 * "JE 2997"
   id: "3006"
   je_num: "2997"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -4996204.00 CLP
+    desc: "USD5.450,92 Visa BCI 1027 Octubre 2023"
   Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  4996204.00 CLP
+    desc: "USD5.450,92 Visa BCI 1027 Octubre 2023"
 
-2023-11-13 * "Seguro proteccion bancaria Banco Chile"
+2023-11-13 * "JE 3145"
   id: "3154"
   je_num: "3145"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -5618.00 CLP
+    desc: "Seguro proteccion bancaria Banco Chile"
   Expenses:EAG:GastosBancarios-430003  5618.00 CLP
+    desc: "Seguro proteccion bancaria Banco Chile"
 
-2023-11-14 * "Rescate FM Security Plus C"
+2023-11-14 * "JE 2998"
   id: "3007"
   je_num: "2998"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  30000000.00 CLP
+    desc: "Rescate FM Security Plus C"
   Income:EAG:Mbi-310027  -30000000.00 CLP
+    desc: "Rescate FM Security Plus C"
 
-2023-11-14 * "Jocelyn devol Previred/F29 Odontologia"
+2023-11-14 * "JE 2999"
   id: "3008"
   je_num: "2999"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  885872.00 CLP
+    desc: "Jocelyn devol Previred/F29 Odontologia"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -342488.00 CLP
     desc: "Cotizaciones Octubre 2023"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -866.00 CLP
@@ -239,32 +312,43 @@
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -534518.00 CLP
     desc: "Traspaso de Fondos a Otro Banco en Linea"
 
-2023-11-14 * "USD120 William R. - Envio notebook EAG"
+2023-11-14 * "JE 3000"
   id: "3009"
   je_num: "3000"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -109990.00 CLP
+    desc: "USD120 William R. - Envio notebook EAG"
   Expenses:EAG:OtrosGastosPersonales-430099  109990.00 CLP
+    desc: "USD120 William R. - Envio notebook EAG"
 
-2023-11-14 * "Jocelyn Avayu devol cuidadora Sra Betty"
+2023-11-14 * "JE 3001"
   id: "3010"
   je_num: "3001"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2300000.00 CLP
+    desc: "Jocelyn Avayu devol cuidadora Sra Betty"
   Expenses:EAG:SraJacquelineDeutsch-430023  2300000.00 CLP
+    desc: "Jocelyn Avayu devol cuidadora Sra Betty"
 
-2023-11-14 * "Juan Jofre - Comisión venta RXJL83 EAG"
+2023-11-14 * "JE 3002"
   id: "3011"
   je_num: "3002"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -90000.00 CLP
+    desc: "Juan Jofre - Comisión venta RXJL83 EAG"
   Expenses:EAG:MantencinVehculosSeguros-411043  90000.00 CLP
+    desc: "Juan Jofre - Comisión venta RXJL83 EAG"
 
-2023-11-14 * "Visa BCI 1027 EAG Octubre 2023"
+2023-11-14 * "JE 3027"
   id: "3036"
   je_num: "3027"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -3380699.00 CLP
+    desc: "Visa BCI 1027 EAG Octubre 2023"
   Assets:EAG:ControlYLiquidacin-115099  59060.00 CLP
     desc: "B#73541117 Esval"
   Assets:EAG:ControlYLiquidacin-115099  631059.00 CLP
@@ -276,62 +360,87 @@
   Assets:EAG:ControlYLiquidacin-115099  58690.00 CLP
     desc: "B#6241065 Gasvalpo SPA"
   Expenses:EAG:TC:Tc1027VisaInfinity-430005  2455699.00 CLP
+    desc: "Visa BCI 1027 EAG Octubre 2023"
 
-2023-11-14 * "Visa Banco de Chile 1168 Eduardo Avayu"
+2023-11-14 * "JE 3146"
   id: "3155"
   je_num: "3146"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -70163.00 CLP
+    desc: "Visa Banco de Chile 1168 Eduardo Avayu"
   Expenses:EAG:TC:TcVariasEag-430017  70163.00 CLP
+    desc: "Visa Banco de Chile 1168 Eduardo Avayu"
 
-2023-11-14 * "Devol Isapre B#535 Kinesiologia EAG"
+2023-11-14 * "JE 3148"
   id: "3157"
   je_num: "3148"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  92716.00 CLP
+    desc: "Devol Isapre B#535 Kinesiologia EAG"
   Income:EAG:DevolucinIsapre-310043  -92716.00 CLP
+    desc: "Devol Isapre B#535 Kinesiologia EAG"
 
-2023-11-15 * "Saesa F#8375735 EAG del 24/08 al 19/10"
+2023-11-15 * "JE 3003"
   id: "3012"
   je_num: "3003"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2411400.00 CLP
+    desc: "Saesa F#8375735 EAG del 24/08 al 19/10"
   Expenses:EAG:Luz-413005  2411400.00 CLP
+    desc: "Saesa F#8375735 EAG del 24/08 al 19/10"
 
-2023-11-15 * "Victoria Svilgilsky - Previred Octubre"
+2023-11-15 * "JE 3004"
   id: "3013"
   je_num: "3004"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -124484.00 CLP
+    desc: "Victoria Svilgilsky - Previred Octubre"
   Assets:EAG:ControlYLiquidacin-115099  124484.00 CLP
+    desc: "Victoria Svilgilsky - Previred Octubre"
 
-2023-11-15 * "F#392867 Acevedo Ltda Comb. Octubre 2023"
+2023-11-15 * "JE 3005"
   id: "3014"
   je_num: "3005"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -114199.00 CLP
+    desc: "F#392867 Acevedo Ltda Comb. Octubre 2023"
   Expenses:EAG:CombustibleVehculos-413044  114199.00 CLP
+    desc: "F#392867 Acevedo Ltda Comb. Octubre 2023"
 
-2023-11-15 * "1/2 Victoria Svigilizky seguro/Previred"
+2023-11-15 * "JE 3006"
   id: "3015"
   je_num: "3006"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  200000.00 CLP
+    desc: "1/2 Victoria Svigilizky seguro/Previred"
   Assets:EAG:ControlYLiquidacin-115099  -124484.00 CLP
+    desc: "1/2 Victoria Svigilizky seguro/Previred"
   Income:EAG:OtrosIngresos-310099  -75516.00 CLP
+    desc: "1/2 Victoria Svigilizky seguro/Previred"
 
-2023-11-15 * "Johanna Avayu - Antic. retiro Nov 2023"
+2023-11-15 * "JE 3007"
   id: "3016"
   je_num: "3007"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -500000.00 CLP
+    desc: "Johanna Avayu - Antic. retiro Nov 2023"
   Expenses:Johanna:RetirosDelMes-890001  500000.00 CLP
+    desc: "Johanna Avayu - Antic. retiro Nov 2023"
 
-2023-11-16 * "Contribuciones Jose A. Delano 4/4 EAG"
+2023-11-16 * "JE 3008"
   id: "3017"
   je_num: "3008"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4799064.00 CLP
+    desc: "Contribuciones Jose A. Delano 4/4 EAG"
   Expenses:EAG:Contribuciones-411069  4342880.00 CLP
     desc: "Rol 3783-191 Depto Jose A. Delano 4/4"
   Expenses:EAG:Contribuciones-411069  189473.00 CLP
@@ -341,79 +450,109 @@
   Expenses:EAG:Contribuciones-411069  77238.00 CLP
     desc: "Rol 3783-197 Bodega 1  4/4"
 
-2023-11-17 * "2/2 Victoria Svigilizky seguro/Previred"
+2023-11-17 * "JE 3009"
   id: "3018"
   je_num: "3009"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  34687.00 CLP
+    desc: "2/2 Victoria Svigilizky seguro/Previred"
   Income:EAG:OtrosIngresos-310099  -34687.00 CLP
+    desc: "2/2 Victoria Svigilizky seguro/Previred"
 
-2023-11-17 * "Traspaso de Raquel Deborah Ventura"
+2023-11-17 * "JE 3010"
   id: "3019"
   je_num: "3010"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  1179990.00 CLP
+    desc: "Traspaso de Raquel Deborah Ventura"
   Income:EAG:OtrosIngresos-310099  -1179990.00 CLP
+    desc: "Traspaso de Raquel Deborah Ventura"
 
-2023-11-17 * "UF450 Tektonica - Inversion Puerto Fui"
+2023-11-17 * "JE 3011"
   id: "3020"
   je_num: "3011"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -16425306.00 CLP
+    desc: "UF450 Tektonica - Inversion Puerto Fui"
   Assets:EAG:TektonicaDiseoLimitada-113014  16425306.00 CLP
+    desc: "UF450 Tektonica - Inversion Puerto Fui"
 
-2023-11-17 * "Traspaso Raquel Deborah Ventura"
+2023-11-17 * "JE 3014"
   id: "3023"
   je_num: "3014"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  1156947.00 CLP
+    desc: "Traspaso Raquel Deborah Ventura"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -1156947.00 CLP
+    desc: "Traspaso Raquel Deborah Ventura"
   Assets:EAG:ControlYLiquidacin-115099  -1156947.00 CLP
+    desc: "Traspaso Raquel Deborah Ventura"
   Assets:EAG:ControlYLiquidacin-115099  1156947.00 CLP
+    desc: "Traspaso Raquel Deborah Ventura"
 
-2023-11-20 * "Dr. Patricio Fischman - Atencion 16/11"
+2023-11-20 * "JE 3012"
   id: "3021"
   je_num: "3012"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -130000.00 CLP
+    desc: "Dr. Patricio Fischman - Atencion 16/11"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  130000.00 CLP
+    desc: "Dr. Patricio Fischman - Atencion 16/11"
 
-2023-11-20 * "UF83,46 MAPFRE Seguro lancha Cobalt EAG"
+2023-11-20 * "JE 3013"
   id: "3022"
   je_num: "3013"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -3046347.00 CLP
+    desc: "UF83,46 MAPFRE Seguro lancha Cobalt EAG"
   Expenses:EAG:MantencinLanchasMotosDeAguaSeguros-413045  3046347.00 CLP
+    desc: "UF83,46 MAPFRE Seguro lancha Cobalt EAG"
 
-2023-11-20 * "Servipag - TAG  Sra. Raquel / EAG"
+2023-11-20 * "JE 3016"
   id: "3025"
   je_num: "3016"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -10472.00 CLP
+    desc: "Servipag - TAG  Sra. Raquel / EAG"
   Expenses:EAG:MantencinVehculosSeguros-411043  9046.00 CLP
     desc: "Servipag - TAG Autopistas Raquel Ventura"
   Expenses:EAG:CombustibleVehculos-413044  1426.00 CLP
     desc: "B#4065692 Vesp. Oriente SWHH43 EAG"
 
-2023-11-20 * "Costanera Norte SWHH43 - SSZZ84"
+2023-11-20 * "JE 3017"
   id: "3026"
   je_num: "3017"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -249567.00 CLP
+    desc: "Costanera Norte SWHH43 - SSZZ84"
   Expenses:EAG:MantencinVehculosSeguros-411043  249567.00 CLP
+    desc: "Costanera Norte SWHH43 - SSZZ84"
 
-2023-11-20 * "USD2.500 Matrimonio Camila Avayu"
+2023-11-20 * "JE 3018"
   id: "3027"
   je_num: "3018"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -2202925.00 CLP
+    desc: "USD2.500 Matrimonio Camila Avayu"
   Expenses:EAG:RegalosDeMatrimonioOtros-430091  2202925.00 CLP
+    desc: "USD2.500 Matrimonio Camila Avayu"
 
-2023-11-21 * "Noelia Farfal Devol. gastos casa sur EAG"
+2023-11-21 * "JE 3019"
   id: "3028"
   je_num: "3019"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2557008.00 CLP
+    desc: "Noelia Farfal Devol. gastos casa sur EAG"
   Expenses:EAG:ComprasCasaEfectivo-411049  85420.00 CLP
     desc: "Noelia Farfal - Compra utiles de aseo"
   Expenses:EAG:Gas-413015  1376340.00 CLP
@@ -421,78 +560,111 @@
   Expenses:EAG:Gas-413015  1095248.00 CLP
     desc: "Noelia Farfal - GD°3254478 Abastible SA"
 
-2023-11-21 * "1/2 Life Fitness Mant maquinas Gimnasio"
+2023-11-21 * "JE 3020"
   id: "3029"
   je_num: "3020"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -600000.00 CLP
+    desc: "1/2 Life Fitness Mant maquinas Gimnasio"
   Expenses:EAG:MantencinGeneralInstalaciones-413065  600000.00 CLP
+    desc: "1/2 Life Fitness Mant maquinas Gimnasio"
 
-2023-11-21 * "Devol Marcelo Ventura Tag Sorento SSZZ84"
+2023-11-21 * "JE 3021"
   id: "3030"
   je_num: "3021"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  371549.00 CLP
+    desc: "Devol Marcelo Ventura Tag Sorento SSZZ84"
   Income:EAG:OtrosIngresos-310099  -371549.00 CLP
+    desc: "Devol Marcelo Ventura Tag Sorento SSZZ84"
 
-2023-11-21 * "UF0,14 Southbridge - Escultura Marmol"
+2023-11-21 * "JE 3022"
   id: "3031"
   je_num: "3022"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -5112.00 CLP
+    desc: "UF0,14 Southbridge - Escultura Marmol"
   Expenses:EAG:SegurosPropiedad-411071  5112.00 CLP
+    desc: "UF0,14 Southbridge - Escultura Marmol"
 
-2023-11-21 * "Club deportivo y social la Dehesa - EAG"
+2023-11-21 * "JE 3023"
   id: "3032"
   je_num: "3023"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -370588.00 CLP
+    desc: "Club deportivo y social la Dehesa - EAG"
   Expenses:EAG:OtrosGastosPersonales-430099  370588.00 CLP
+    desc: "Club deportivo y social la Dehesa - EAG"
 
-2023-11-21 * "Lathrop y cia abogados Ltda - Varios EAG"
+2023-11-21 * "JE 3024"
   id: "3033"
   je_num: "3024"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -22378.00 CLP
+    desc: "Lathrop y cia abogados Ltda - Varios EAG"
   Assets:EAG:ControlYLiquidacin-115099  12600.00 CLP
     desc: "Lathrop Ltda Rev. escritura Sra Victoria"
   Expenses:EAG:GastosLegalesNotara-430071  9778.00 CLP
     desc: "Lathrop y cia abogados Ltda. - Uber EAG"
 
-2023-11-21 * "Emily Pacheco - Atenciones Eduardo Avayu"
+2023-11-21 * "JE 3025"
   id: "3034"
   je_num: "3025"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -160000.00 CLP
+    desc: "Emily Pacheco - Atenciones Eduardo Avayu"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  160000.00 CLP
+    desc: "Emily Pacheco - Atenciones Eduardo Avayu"
 
-2023-11-21 * "Lathrop Ltda Rev. escritura Sra Victoria"
+2023-11-21 * "JE 3026"
   id: "3035"
   je_num: "3026"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  12600.00 CLP
+    desc: "Lathrop Ltda Rev. escritura Sra Victoria"
   Assets:EAG:ControlYLiquidacin-115099  -12600.00 CLP
+    desc: "Lathrop Ltda Rev. escritura Sra Victoria"
 
-2023-11-21 * "PAC BCI Seguros generales Nov 2023"
+2023-11-21 * "JE 3072"
   id: "3081"
   je_num: "3072"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1095.00 CLP
+    desc: "PAC BCI Seguros generales Nov 2023"
   Expenses:EAG:GastosBancarios-430003  1095.00 CLP
+    desc: "PAC BCI Seguros generales Nov 2023"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  -1095.00 CLP
+    desc: "PAC BCI Seguros generales Nov 2023"
   Expenses:Jocelyn:GastosBancarios-690003  1095.00 CLP
+    desc: "PAC BCI Seguros generales Nov 2023"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -1095.00 CLP
+    desc: "PAC BCI Seguros generales Nov 2023"
   Expenses:Jeannette:GastosBancarios-790003  1095.00 CLP
+    desc: "PAC BCI Seguros generales Nov 2023"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -1095.00 CLP
+    desc: "PAC BCI Seguros generales Nov 2023"
   Expenses:Johanna:GastosBancarios-890003  1095.00 CLP
+    desc: "PAC BCI Seguros generales Nov 2023"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -1095.00 CLP
+    desc: "PAC BCI Seguros generales Nov 2023"
   Expenses:Jael:GastosBancarios-990003  1095.00 CLP
+    desc: "PAC BCI Seguros generales Nov 2023"
 
-2023-11-22 * "Gastos Reñaca Visa 1027 BCI EAG"
+2023-11-22 * "JE 3028"
   id: "3037"
   je_num: "3028"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  925000.00 CLP
+    desc: "Gastos Reñaca Visa 1027 BCI EAG"
   Assets:EAG:ControlYLiquidacin-115099  -59060.00 CLP
     desc: "B#73541117 Esval"
   Assets:EAG:ControlYLiquidacin-115099  -631059.00 CLP
@@ -504,145 +676,201 @@
   Assets:EAG:ControlYLiquidacin-115099  -58690.00 CLP
     desc: "B#6241065 Gasvalpo SPA"
 
-2023-11-22 * "2/2 Life Fitness Mant maquinas Gimnasio"
+2023-11-22 * "JE 3029"
   id: "3038"
   je_num: "3029"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -382338.00 CLP
+    desc: "2/2 Life Fitness Mant maquinas Gimnasio"
   Expenses:EAG:MantencinGeneralInstalaciones-413065  382338.00 CLP
+    desc: "2/2 Life Fitness Mant maquinas Gimnasio"
 
-2023-11-22 * "Moises Moncada - Compras casa EAG"
+2023-11-22 * "JE 3030"
   id: "3039"
   je_num: "3030"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -9869.00 CLP
+    desc: "Moises Moncada - Compras casa EAG"
   Expenses:EAG:ComprasCasaEfectivo-413049  9869.00 CLP
+    desc: "Moises Moncada - Compras casa EAG"
 
-2023-11-22 * "Emily Pacheco - Masaje Javiera Ventura"
+2023-11-22 * "JE 3031"
   id: "3040"
   je_num: "3031"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -60000.00 CLP
+    desc: "Emily Pacheco - Masaje Javiera Ventura"
   Expenses:EAG:SraRaquelVentura-430021  60000.00 CLP
+    desc: "Emily Pacheco - Masaje Javiera Ventura"
 
-2023-11-22 * "Cristian Moreno de Eduardo Avayu"
+2023-11-22 * "JE 3125"
   id: "3134"
   je_num: "3125"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -9565000.00 CLP
+    desc: "Cristian Moreno de Eduardo Avayu"
   Expenses:EAG:OtrosGastosPersonales-430099  9565000.00 CLP
+    desc: "Cristian Moreno de Eduardo Avayu"
 
-2023-11-23 * "B#8340 Agua Choshuenco EAG Octubre 2023"
+2023-11-23 * "JE 3035"
   id: "3044"
   je_num: "3035"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -5240.00 CLP
+    desc: "B#8340 Agua Choshuenco EAG Octubre 2023"
   Expenses:EAG:Agua-413013  5240.00 CLP
+    desc: "B#8340 Agua Choshuenco EAG Octubre 2023"
 
-2023-11-23 * "USD80.000 Rescate FM MBI"
+2023-11-23 * "JE 3043"
   id: "3052"
   je_num: "3043"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  70048000.00 CLP
+    desc: "USD80.000 Rescate FM MBI"
   Income:EAG:Mbi-310027  -70048000.00 CLP
     desc: "USD80.000 MBI a BCI USD 18565743 EAG"
 
-2023-11-24 * "Nuevo Ciclo: Devolución de préstamos"
+2023-11-24 * "JE 3032"
   id: "3041"
   je_num: "3032"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  100000000.00 CLP
+    desc: "Nuevo Ciclo: Devolución de préstamos"
   Income:EAG:RetirosInvNuevoCiclo-310016  -100000000.00 CLP
+    desc: "Nuevo Ciclo: Devolución de préstamos"
 
-2023-11-24 * "BH.97 Kia Chile Directiva Noviembre 2023"
+2023-11-24 * "JE 3054"
   id: "3063"
   je_num: "3054"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  15840000.00 CLP
+    desc: "BH.97 Kia Chile Directiva Noviembre 2023"
   Assets:EAG:Bancos:BancoBci10160175-111005  3960000.00 CLP
     desc: "BH.98 Hyundai - Directiva Noviembre 2023"
   Income:EAG:KiaChileSpa-310023  -15840000.00 CLP
+    desc: "BH.97 Kia Chile Directiva Noviembre 2023"
   Income:EAG:HyundaiChileSpa-310024  -3960000.00 CLP
     desc: "BH.98 Hyundai - Directiva Noviembre 2023"
 
-2023-11-24 * "BH.96 IP Chile Directiva Noviembre 2023"
+2023-11-24 * "JE 3055"
   id: "3064"
   je_num: "3055"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  1426517.00 CLP
+    desc: "BH.96 IP Chile Directiva Noviembre 2023"
   Income:EAG:DirectorioIpChile-310021  -1426517.00 CLP
+    desc: "BH.96 IP Chile Directiva Noviembre 2023"
 
-2023-11-24 * "Sra Raquel Ventura - Noviembre 2023"
+2023-11-24 * "JE 3126"
   id: "3135"
   je_num: "3126"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -5500000.00 CLP
+    desc: "Sra Raquel Ventura - Noviembre 2023"
   Expenses:EAG:SraRaquelVentura-430021  5500000.00 CLP
+    desc: "Sra Raquel Ventura - Noviembre 2023"
 
-2023-11-24 * "Traspaso de Andres Turski Gottlieb"
+2023-11-24 * "JE 3127"
   id: "3136"
   je_num: "3127"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  196500.00 CLP
+    desc: "Traspaso de Andres Turski Gottlieb"
   Income:EAG:OtrosIngresos-310099  -196500.00 CLP
+    desc: "Traspaso de Andres Turski Gottlieb"
 
-2023-11-27 * "Traspaso a Cuenta Edwards EAG 162338082"
+2023-11-27 * "JE 3033"
   id: "3042"
   je_num: "3033"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -10000000.00 CLP
+    desc: "Traspaso a Cuenta Edwards EAG 162338082"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  10000000.00 CLP
     desc: "Traspaso de cuenta BCI EAG 10160175"
 
-2023-11-27 * "Luis Salazar - Mantencion piscina"
+2023-11-27 * "JE 3034"
   id: "3043"
   je_num: "3034"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -100000.00 CLP
+    desc: "Luis Salazar - Mantencion piscina"
   Expenses:EAG:MantencinPiscina-411051  100000.00 CLP
+    desc: "Luis Salazar - Mantencion piscina"
 
-2023-11-27 * "Mirador Santa Anita - GGCC Octubre 2023"
+2023-11-27 * "JE 3037"
   id: "3046"
   je_num: "3037"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2423120.00 CLP
+    desc: "Mirador Santa Anita - GGCC Octubre 2023"
   Expenses:EAG:GastosComunes-411067  2423120.00 CLP
+    desc: "Mirador Santa Anita - GGCC Octubre 2023"
 
-2023-11-27 * "Eneval SPA - Visita tecnica revision EAG"
+2023-11-27 * "JE 3039"
   id: "3048"
   je_num: "3039"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -130481.00 CLP
+    desc: "Eneval SPA - Visita tecnica revision EAG"
   Expenses:EAG:MantencinAireCalefaccin-413055  130481.00 CLP
+    desc: "Eneval SPA - Visita tecnica revision EAG"
 
-2023-11-27 * "USD80.000 de Cta Cte BCI USD18565743 EAG"
+2023-11-27 * "JE 3044"
   id: "3053"
   je_num: "3044"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -10377.00 CLP
+    desc: "USD80.000 de Cta Cte BCI USD18565743 EAG"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -70048000.00 CLP
+    desc: "USD80.000 de Cta Cte BCI USD18565743 EAG"
   Assets:EAG:Bancos:BancoBci110014172UsMiami-111015  70048000.00 CLP
+    desc: "USD80.000 de Cta Cte BCI USD18565743 EAG"
   Expenses:EAG:GastosBancarios-430003  10377.00 CLP
+    desc: "USD80.000 de Cta Cte BCI USD18565743 EAG"
 
-2023-11-27 * "Traspaso de Andres Turski Gottlieb"
+2023-11-27 * "JE 3128"
   id: "3137"
   je_num: "3128"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  406000.00 CLP
+    desc: "Traspaso de Andres Turski Gottlieb"
   Income:EAG:OtrosIngresos-310099  -406000.00 CLP
+    desc: "Traspaso de Andres Turski Gottlieb"
 
-2023-11-28 * "Hugo S. - Reembolso notaria hijas EAG"
+2023-11-28 * "JE 3042"
   id: "3051"
   je_num: "3042"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -19500.00 CLP
+    desc: "Hugo S. - Reembolso notaria hijas EAG"
   Expenses:EAG:GastosLegalesNotara-430071  19500.00 CLP
+    desc: "Hugo S. - Reembolso notaria hijas EAG"
 
-2023-11-28 * "Jeannette Avayu - Noviembre 2023"
+2023-11-28 * "JE 3129"
   id: "3138"
   je_num: "3129"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2500000.00 CLP
+    desc: "Jeannette Avayu - Noviembre 2023"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2500000.00 CLP
     desc: "Jocelyn Avayu - Noviembre 2023"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4670000.00 CLP
@@ -652,19 +880,25 @@
   Expenses:Jocelyn:RetirosDelMes-690001  2500000.00 CLP
     desc: "Jocelyn Avayu - Noviembre 2023"
   Expenses:Jeannette:RetirosDelMes-790001  2500000.00 CLP
+    desc: "Jeannette Avayu - Noviembre 2023"
 
-2023-11-28 * "Com mant plan banco Santander"
+2023-11-28 * "JE 274"
   id: "3175"
   je_num: "274"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -9825.00 CLP
+    desc: "Com mant plan banco Santander"
   Expenses:EAG:GastosBancarios-430003  9825.00 CLP
+    desc: "Com mant plan banco Santander"
 
-2023-11-29 * "Claudio Jofre - Mant. Jardin Nov. 2023"
+2023-11-29 * "JE 3036"
   id: "3045"
   je_num: "3036"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -190000.00 CLP
+    desc: "Claudio Jofre - Mant. Jardin Nov. 2023"
   Expenses:EAG:MantencinJardinBonsai-411053  70000.00 CLP
     desc: "Bonsai - Mantencion general Nov. 2023"
   Expenses:EAG:MantencinJardinBonsai-411053  80000.00 CLP
@@ -672,18 +906,23 @@
   Expenses:EAG:MantencinJardinBonsai-411053  40000.00 CLP
     desc: "Retiro de plantas solicitadas 10 aprox."
 
-2023-11-29 * "Kia Chile - Inscripcion auto casa"
+2023-11-29 * "JE 3038"
   id: "3047"
   je_num: "3038"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -23470.00 CLP
+    desc: "Kia Chile - Inscripcion auto casa"
   Expenses:EAG:MantencinVehculosSeguros-411043  23470.00 CLP
+    desc: "Kia Chile - Inscripcion auto casa"
 
-2023-11-29 * "Sra. Berta Galatzan - Noviembre 2023"
+2023-11-29 * "JE 3040"
   id: "3049"
   je_num: "3040"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1500000.00 CLP
+    desc: "Sra. Berta Galatzan - Noviembre 2023"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -362000.00 CLP
     desc: "Noelia Farfal - Sueldo/Celular Nov. 2023"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -193500.00 CLP
@@ -731,74 +970,103 @@
   Expenses:EAG:SueldosRopaRegalias-413001  420400.00 CLP
     desc: "Fresia Gonzalez - Sueldo Noviembre 2023"
   Expenses:EAG:SraJacquelineDeutsch-430023  1500000.00 CLP
+    desc: "Sra. Berta Galatzan - Noviembre 2023"
 
-2023-11-29 * "Inv. Tecnion Ltda - Noviembre 2023"
+2023-11-29 * "JE 3052"
   id: "3061"
   je_num: "3052"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  5314488.00 CLP
+    desc: "Inv. Tecnion Ltda - Noviembre 2023"
   Income:EAG:SueldoTecnin-310003  -5314488.00 CLP
+    desc: "Inv. Tecnion Ltda - Noviembre 2023"
 
-2023-11-30 * "Noelia Farfal - Gtos funeral Don Oscar B"
+2023-11-30 * "JE 3041"
   id: "3050"
   je_num: "3041"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -516000.00 CLP
+    desc: "Noelia Farfal - Gtos funeral Don Oscar B"
   Expenses:EAG:OtrosGastosPersonales-430099  516000.00 CLP
+    desc: "Noelia Farfal - Gtos funeral Don Oscar B"
 
-2023-11-30 * "USD72.000 Rescate FM MBI"
+2023-11-30 * "JE 3045"
   id: "3054"
   je_num: "3045"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  62553600.00 CLP
+    desc: "USD72.000 Rescate FM MBI"
   Income:EAG:Mbi-310027  -62553600.00 CLP
     desc: "USD72.000 MBI a BCI USD 18565743 EAG"
 
-2023-11-30 * "USD72.000 a Yucatan CFB Homes, LLC"
+2023-11-30 * "JE 3046"
   id: "3055"
   je_num: "3046"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -25867.00 CLP
+    desc: "USD72.000 a Yucatan CFB Homes, LLC"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -62553600.00 CLP
+    desc: "USD72.000 a Yucatan CFB Homes, LLC"
   Assets:EAG:TecnionInternacional-113016  62553600.00 CLP
+    desc: "USD72.000 a Yucatan CFB Homes, LLC"
   Expenses:EAG:GastosBancarios-430003  25867.00 CLP
+    desc: "USD72.000 a Yucatan CFB Homes, LLC"
 
-2023-11-30 * "USD2.078,56 FPL-Seguro Toyota Miami FGK"
+2023-11-30 * "JE 3047"
   id: "3056"
   je_num: "3047"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  1803899.00 CLP
+    desc: "USD2.078,56 FPL-Seguro Toyota Miami FGK"
   Income:EAG:OtrosIngresos-310099  -1803899.00 CLP
+    desc: "USD2.078,56 FPL-Seguro Toyota Miami FGK"
 
-2023-11-30 * "Johanna Avayu - Retiro Noviembre 2023"
+2023-11-30 * "JE 3048"
   id: "3057"
   je_num: "3048"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -10347.00 CLP
+    desc: "Johanna Avayu - Retiro Noviembre 2023"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  -2000000.00 CLP
     desc: "USD2.437 Johanna A. - Retiro Nov 2023"
   Expenses:Johanna:RetirosDelMes-890001  2000000.00 CLP
+    desc: "Johanna Avayu - Retiro Noviembre 2023"
   Expenses:Johanna:GastosBancarios-890003  10347.00 CLP
+    desc: "Johanna Avayu - Retiro Noviembre 2023"
 
-2023-11-30 * "Jael Avayu - Noviembre 2023"
+2023-11-30 * "JE 3049"
   id: "3058"
   je_num: "3049"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:ControlYLiquidacin-115099  -2500000.00 CLP
+    desc: "Jael Avayu - Noviembre 2023"
   Expenses:Jael:RetirosDelMes-990001  2500000.00 CLP
+    desc: "Jael Avayu - Noviembre 2023"
 
-2023-11-30 * "Dr. Patricio Fischman - Atencion 30/11"
+2023-11-30 * "JE 3053"
   id: "3062"
   je_num: "3053"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -130000.00 CLP
+    desc: "Dr. Patricio Fischman - Atencion 30/11"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  130000.00 CLP
+    desc: "Dr. Patricio Fischman - Atencion 30/11"
 
-2023-11-30 * "Moises Moncada - Prestamo de EAG"
+2023-11-30 * "JE 3058"
   id: "3067"
   je_num: "3058"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  319990.00 CLP
+    desc: "Moises Moncada - Prestamo de EAG"
   Assets:EAG:ControlYLiquidacin-115099  -669990.00 CLP
     desc: "Devol EAG a FC - Gastos Noviembre 2023"
   Expenses:EAG:ComprasCasaEfectivo-411049  350000.00 CLP

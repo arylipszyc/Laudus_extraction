@@ -1,47 +1,62 @@
-2021-11-02 * "CC725 Rend. Edmundo Eluchans Abogados"
+2021-11-02 * "JE 797"
   id: "798"
   je_num: "797"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  177223.00 CLP
+    desc: "CC725 Rend. Edmundo Eluchans Abogados"
   Assets:EAG:ControlYLiquidacin-115099  -177223.00 CLP
+    desc: "CC725 Rend. Edmundo Eluchans Abogados"
 
-2021-11-02 * "Autopase sur EAG/Vesp Norte Sra Raquel"
+2021-11-02 * "JE 798"
   id: "799"
   je_num: "798"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -12051.00 CLP
+    desc: "Autopase sur EAG/Vesp Norte Sra Raquel"
   Expenses:EAG:MantencinVehculosSeguros-411043  1630.00 CLP
     desc: "Vesp Norte B#25356467 LZDV19 Maserati"
   Expenses:EAG:MantencinVehculosMotosTierraSeguros-413043  10421.00 CLP
     desc: "Autopase B#107988774 PSXJ10 Sportage sur"
 
-2021-11-02 * "Traspaso a Cuenta Edwards EAG 162338082"
+2021-11-02 * "JE 816"
   id: "817"
   je_num: "816"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -5000000.00 CLP
+    desc: "Traspaso a Cuenta Edwards EAG 162338082"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  5000000.00 CLP
     desc: "Traspaso de cuenta BCI EAG 10160175"
 
-2021-11-02 * "Luis Salazar Mantencion piscina"
+2021-11-02 * "JE 817"
   id: "818"
   je_num: "817"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:EAG:MantencinPiscina-411051  80000.00 CLP
+    desc: "Luis Salazar Mantencion piscina"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -80000.00 CLP
+    desc: "Luis Salazar Mantencion piscina"
 
-2021-11-03 * "UF34,18 Sura - LVJD42 Sorento 2020 SAG"
+2021-11-03 * "JE 807"
   id: "808"
   je_num: "807"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  1029009.00 CLP
+    desc: "UF34,18 Sura - LVJD42 Sorento 2020 SAG"
   Assets:EAG:ControlYLiquidacin-115099  -1029009.00 CLP
+    desc: "UF34,18 Sura - LVJD42 Sorento 2020 SAG"
 
-2021-11-03 * "Devol gastos reñaca Visa BCI EAG Septiem"
+2021-11-03 * "JE 811"
   id: "812"
   je_num: "811"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  1078763.00 CLP
+    desc: "Devol gastos reñaca Visa BCI EAG Septiem"
   Assets:EAG:ControlYLiquidacin-115099  -147700.00 CLP
     desc: "Esval B#57179572"
   Assets:EAG:ControlYLiquidacin-115099  -776563.00 CLP
@@ -53,22 +68,27 @@
   Assets:EAG:ControlYLiquidacin-115099  -117730.00 CLP
     desc: "Gasvalpo B#3919186"
 
-2021-11-03 * "Sabrina Wigodski - Nutricionista Jael"
+2021-11-03 * "JE 818"
   id: "819"
   je_num: "818"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -60000.00 CLP
+    desc: "Sabrina Wigodski - Nutricionista Jael"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -70000.00 CLP
     desc: "Yerbas Buenas SPA - Psicologa Jael Avayu"
   Expenses:Jael:IsapreGastosMdicos-990051  60000.00 CLP
+    desc: "Sabrina Wigodski - Nutricionista Jael"
   Expenses:Jael:IsapreGastosMdicos-990051  70000.00 CLP
     desc: "Yerbas Buenas SPA - Psicologa Jael Avayu"
 
-2021-11-03 * "Daniel Cadenas - Ferreteria/Jardin EAG"
+2021-11-03 * "JE 819"
   id: "820"
   je_num: "819"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -54021.00 CLP
+    desc: "Daniel Cadenas - Ferreteria/Jardin EAG"
   Expenses:EAG:ComprasCasaEfectivo-413049  45829.00 CLP
     desc: "Jaramillo F#129860 PVC/Cinta/Lija/Llave"
   Expenses:EAG:MantencinJardinTractor-413053  1922.00 CLP
@@ -76,91 +96,129 @@
   Expenses:EAG:MantencinJardinTractor-413053  6270.00 CLP
     desc: "P. Blancaire B#56781 - Semillas"
 
-2021-11-03 * "Alberto Bitran - Abono prestamo mutuo"
+2021-11-03 * "JE 841"
   id: "842"
   je_num: "841"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  250000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
   Assets:Jocelyn:DeudoresVarios-613019  -250000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
 
-2021-11-03 * "Alejandro Aliaga - Pintura depto AAG"
+2021-11-03 * "JE 906"
   id: "907"
   je_num: "906"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -85000.00 CLP
+    desc: "Alejandro Aliaga - Pintura depto AAG"
   Assets:EAG:ControlYLiquidacin-115099  85000.00 CLP
+    desc: "Alejandro Aliaga - Pintura depto AAG"
 
-2021-11-04 * "Metrogas B#34616603"
+2021-11-04 * "JE 820"
   id: "821"
   je_num: "820"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -40678.00 CLP
+    desc: "Metrogas B#34616603"
   Expenses:EAG:Gas-411015  40678.00 CLP
+    desc: "Metrogas B#34616603"
 
-2021-11-04 * "USD505.000 Tauro Limited - Comision"
+2021-11-04 * "JE 905"
   id: "906"
   je_num: "905"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -24252.00 CLP
+    desc: "USD505.000 Tauro Limited - Comision"
   Assets:EAG:Bancos:BancoBci10160175-111005  -9704.00 CLP
+    desc: "USD505.000 Tauro Limited - Comision"
   Expenses:EAG:GastosBancarios-430003  24252.00 CLP
+    desc: "USD505.000 Tauro Limited - Comision"
   Expenses:EAG:GastosBancarios-430003  9704.00 CLP
+    desc: "USD505.000 Tauro Limited - Comision"
 
-2021-11-05 * "Devol USD6.168,41 Com Sueldo Oct ABA"
+2021-11-05 * "JE 822"
   id: "823"
   je_num: "822"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  9571.00 CLP
+    desc: "Devol USD6.168,41 Com Sueldo Oct ABA"
   Assets:EAG:ControlYLiquidacin-115099  -9571.00 CLP
+    desc: "Devol USD6.168,41 Com Sueldo Oct ABA"
 
-2021-11-05 * "Abono prestamo Jhonny"
+2021-11-05 * "JE 823"
   id: "824"
   je_num: "823"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  150000.00 CLP
+    desc: "Abono prestamo Jhonny"
   Income:EAG:JhonnyGuerra-310045  -150000.00 CLP
+    desc: "Abono prestamo Jhonny"
 
-2021-11-05 * "Pago Carroza venta artículos person EAG"
+2021-11-05 * "JE 824"
   id: "825"
   je_num: "824"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  6834880.00 CLP
+    desc: "Pago Carroza venta artículos person EAG"
   Income:EAG:OtrosIngresos-310099  -6834880.00 CLP
+    desc: "Pago Carroza venta artículos person EAG"
 
-2021-11-05 * "F29 Mayo 2021 Boxc - EAG"
+2021-11-05 * "JE 825"
   id: "826"
   je_num: "825"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -16043.00 CLP
+    desc: "F29 Mayo 2021 Boxc - EAG"
   Expenses:EAG:OtrosGastosPersonales-430099  16043.00 CLP
+    desc: "F29 Mayo 2021 Boxc - EAG"
 
-2021-11-05 * "Eluchans  - Locomocion y Motoboy EAG"
+2021-11-05 * "JE 826"
   id: "827"
   je_num: "826"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -8440.00 CLP
+    desc: "Eluchans  - Locomocion y Motoboy EAG"
   Expenses:EAG:GastosLegalesNotara-430071  8440.00 CLP
+    desc: "Eluchans  - Locomocion y Motoboy EAG"
 
-2021-11-05 * "Alberto Bitran - Abono prestamo mutuo"
+2021-11-05 * "JE 842"
   id: "843"
   je_num: "842"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  2500000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
   Assets:Jocelyn:DeudoresVarios-613019  -2500000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
 
-2021-11-08 * "Eduardo Figueroa - Locomocion"
+2021-11-08 * "JE 827"
   id: "828"
   je_num: "827"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -210000.00 CLP
+    desc: "Eduardo Figueroa - Locomocion"
   Expenses:EAG:MovilizacinViajesChoferes-411037  210000.00 CLP
+    desc: "Eduardo Figueroa - Locomocion"
 
-2021-11-08 * "Canc Master/Visa Santander Octubre usd"
+2021-11-08 * "JE 832"
   id: "833"
   je_num: "832"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -550952.00 CLP
+    desc: "Canc Master/Visa Santander Octubre usd"
   Assets:EAG:Bancos:BancoSantander63188824-111009  550952.00 CLP
+    desc: "Canc Master/Visa Santander Octubre usd"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -555749.00 CLP
     desc: "USD681,91 Master/Visa Santander Octubre"
   Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  549354.00 CLP
@@ -168,75 +226,97 @@
   Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  6395.00 CLP
     desc: "USD7,84 Visa Santander EAG Octubre"
 
-2021-11-08 * "Canc Visa/Mastercard Santander EAG pesos"
+2021-11-08 * "JE 833"
   id: "834"
   je_num: "833"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4703094.00 CLP
+    desc: "Canc Visa/Mastercard Santander EAG pesos"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -4219864.00 CLP
     desc: "Mastercard Santander pesos EAG Octubre"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -483230.00 CLP
     desc: "Visa Santander pesos EAG Octubre"
   Assets:EAG:Bancos:BancoSantander63188824-111009  4703094.00 CLP
+    desc: "Canc Visa/Mastercard Santander EAG pesos"
   Expenses:EAG:TC:Tc8996MastercardLanpass-430007  4219864.00 CLP
     desc: "Mastercard Santander pesos EAG Octubre"
   Expenses:EAG:TC:Tc0858VisaLatanpass-430009  483230.00 CLP
     desc: "Visa Santander pesos EAG Octubre"
 
-2021-11-08 * "Devol de EAG gastos FC Octubre 2021"
+2021-11-08 * "JE 836"
   id: "837"
   je_num: "836"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -136845.00 CLP
+    desc: "Devol de EAG gastos FC Octubre 2021"
   Assets:EAG:ControlYLiquidacin-115099  136845.00 CLP
+    desc: "Devol de EAG gastos FC Octubre 2021"
 
-2021-11-08 * "PAC Seguro fraude Santander"
+2021-11-08 * "JE 898"
   id: "899"
   je_num: "898"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1188.00 CLP
+    desc: "PAC Seguro fraude Santander"
   Expenses:EAG:GastosBancarios-430003  1188.00 CLP
+    desc: "PAC Seguro fraude Santander"
 
-2021-11-09 * "Master/Visa Santander Octubre Sra Coca"
+2021-11-09 * "JE 831"
   id: "832"
   je_num: "831"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2535203.00 CLP
+    desc: "Master/Visa Santander Octubre Sra Coca"
   Expenses:EAG:TC:TcRaquelVentura-430019  312595.00 CLP
     desc: "Visa Santander 5966 Octubre Sra Raquel"
   Expenses:EAG:TC:TcRaquelVentura-430019  2222608.00 CLP
     desc: "Master Santander 2019 Octubre Sra Coca"
 
-2021-11-09 * "Jael Avayu - Isapre Colmena Octubre 2021"
+2021-11-09 * "JE 834"
   id: "835"
   je_num: "834"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -334793.00 CLP
+    desc: "Jael Avayu - Isapre Colmena Octubre 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -288007.00 CLP
     desc: "EAG - Isapre Cruz Blanca Octubre 2021"
   Expenses:EAG:CotizacinIsapre-430055  288007.00 CLP
     desc: "EAG - Isapre Cruz Blanca Octubre 2021"
   Expenses:Jael:IsapreGastosMdicos-990051  334793.00 CLP
+    desc: "Jael Avayu - Isapre Colmena Octubre 2021"
 
-2021-11-09 * "EAG Gastos Inv Tecnion Ltda Octubre 2021"
+2021-11-09 * "JE 838"
   id: "839"
   je_num: "838"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  11215701.00 CLP
+    desc: "EAG Gastos Inv Tecnion Ltda Octubre 2021"
   Assets:EAG:ControlYLiquidacin-115099  -11215701.00 CLP
+    desc: "EAG Gastos Inv Tecnion Ltda Octubre 2021"
 
-2021-11-09 * "American Express  8083 Octubre 2021 EAG"
+2021-11-09 * "JE 900"
   id: "901"
   je_num: "900"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -8.00 CLP
+    desc: "American Express  8083 Octubre 2021 EAG"
   Expenses:EAG:TC:Tc8083AmericanExpress-430011  8.00 CLP
+    desc: "American Express  8083 Octubre 2021 EAG"
 
-2021-11-10 * "Leyes sociales empl casa sur/stgo EAG"
+2021-11-10 * "JE 840"
   id: "841"
   je_num: "840"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -1462358.00 CLP
+    desc: "Leyes sociales empl casa sur/stgo EAG"
   Expenses:EAG:SueldosRopaRegalas-411001  212850.00 CLP
     desc: "Mariela Mendez - Leyes sociales 2021"
   Expenses:EAG:SueldosRopaRegalas-411001  170901.00 CLP
@@ -256,124 +336,175 @@
   Expenses:EAG:SueldosRopaRegalias-413001  193427.00 CLP
     desc: "Daniel Cadenas - Leyes sociales 2021"
 
-2021-11-10 * "Eluchans - Poder Inv const. soc RMJ"
+2021-11-10 * "JE 909"
   id: "910"
   je_num: "909"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -80000.00 CLP
+    desc: "Eluchans - Poder Inv const. soc RMJ"
   Assets:EAG:Bancos:BancoBci10160175-111005  -31000.00 CLP
     desc: "Eluchans -Contrato arrendamiento Jocelyn"
   Expenses:EAG:GastosLegalesNotara-430071  80000.00 CLP
+    desc: "Eluchans - Poder Inv const. soc RMJ"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  31000.00 CLP
     desc: "Eluchans - Contrato arriendo Jocelyn"
 
-2021-11-11 * "Psiquiatra Marcela Larraguibel B#1011"
+2021-11-11 * "JE 843"
   id: "844"
   je_num: "843"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -85000.00 CLP
+    desc: "Psiquiatra Marcela Larraguibel B#1011"
   Expenses:Jael:IsapreGastosMdicos-990051  85000.00 CLP
+    desc: "Psiquiatra Marcela Larraguibel B#1011"
 
-2021-11-11 * "Previred Odontologia EIRL Octubre 2021"
+2021-11-11 * "JE 844"
   id: "845"
   je_num: "844"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -372816.00 CLP
+    desc: "Previred Odontologia EIRL Octubre 2021"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  372816.00 CLP
+    desc: "Previred Odontologia EIRL Octubre 2021"
 
-2021-11-11 * "USD15.046,13 Visa BCI 1027 Oct EAG"
+2021-11-11 * "JE 845"
   id: "846"
   je_num: "845"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -11985747.00 CLP
+    desc: "USD15.046,13 Visa BCI 1027 Oct EAG"
   Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  11985747.00 CLP
+    desc: "USD15.046,13 Visa BCI 1027 Oct EAG"
 
-2021-11-11 * "USD425.000 Tauro Limited - Comision"
+2021-11-11 * "JE 871"
   id: "872"
   je_num: "871"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  -47107.00 CLP
+    desc: "USD425.000 Tauro Limited - Comision"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  -9421.00 CLP
+    desc: "USD425.000 Tauro Limited - Comision"
   Expenses:Jocelyn:GastosBancarios-690003  47107.00 CLP
+    desc: "USD425.000 Tauro Limited - Comision"
   Expenses:Jocelyn:GastosBancarios-690003  9421.00 CLP
+    desc: "USD425.000 Tauro Limited - Comision"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -9496.00 CLP
+    desc: "USD425.000 Tauro Limited - Comision"
   Expenses:Jeannette:GastosBancarios-790003  9496.00 CLP
+    desc: "USD425.000 Tauro Limited - Comision"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -47107.00 CLP
+    desc: "USD425.000 Tauro Limited - Comision"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -9496.00 CLP
+    desc: "USD425.000 Tauro Limited - Comision"
   Expenses:Johanna:GastosBancarios-890003  47107.00 CLP
+    desc: "USD425.000 Tauro Limited - Comision"
   Expenses:Johanna:GastosBancarios-890003  9496.00 CLP
+    desc: "USD425.000 Tauro Limited - Comision"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -47107.00 CLP
+    desc: "USD425.000 Tauro Limited - Comision"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -9421.00 CLP
+    desc: "USD425.000 Tauro Limited - Comision"
   Expenses:Jael:GastosBancarios-990003  47107.00 CLP
+    desc: "USD425.000 Tauro Limited - Comision"
   Expenses:Jael:GastosBancarios-990003  9421.00 CLP
+    desc: "USD425.000 Tauro Limited - Comision"
 
-2021-11-11 * "Seguro proteccion bancaria Banco Chile"
+2021-11-11 * "JE 904"
   id: "905"
   je_num: "904"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -4699.00 CLP
+    desc: "Seguro proteccion bancaria Banco Chile"
   Expenses:EAG:GastosBancarios-430003  4699.00 CLP
+    desc: "Seguro proteccion bancaria Banco Chile"
 
-2021-11-12 * "Bonsai - Mant general/jardin Octubre-21"
+2021-11-12 * "JE 846"
   id: "847"
   je_num: "846"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -110000.00 CLP
+    desc: "Bonsai - Mant general/jardin Octubre-21"
   Expenses:EAG:MantencinJardinBonsai-411053  45000.00 CLP
     desc: "Bonsai - Mant general Octubre 2021"
   Expenses:EAG:MantencinJardinBonsai-411053  65000.00 CLP
     desc: "Bonsai - 1 visita Mant jardin Octubre-21"
 
-2021-11-12 * "BH32 IP Chile Junta directiva Nov 2021"
+2021-11-12 * "JE 847"
   id: "848"
   je_num: "847"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  1883522.00 CLP
+    desc: "BH32 IP Chile Junta directiva Nov 2021"
   Income:EAG:DirectorioIpChile-310021  -1883522.00 CLP
+    desc: "BH32 IP Chile Junta directiva Nov 2021"
 
-2021-11-15 * "1/2 Faser SA F1363 Repar puerta gabinete"
+2021-11-15 * "JE 848"
   id: "849"
   je_num: "848"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -600000.00 CLP
+    desc: "1/2 Faser SA F1363 Repar puerta gabinete"
   Expenses:EAG:MantencinGeneralInstalaciones-411065  600000.00 CLP
+    desc: "1/2 Faser SA F1363 Repar puerta gabinete"
 
-2021-11-15 * "Kia Chile F#879347 Sportage PSXJ10 EAG"
+2021-11-15 * "JE 849"
   id: "850"
   je_num: "849"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -18620865.00 CLP
+    desc: "Kia Chile F#879347 Sportage PSXJ10 EAG"
   Expenses:EAG:CompraVehculos-413091  18620865.00 CLP
+    desc: "Kia Chile F#879347 Sportage PSXJ10 EAG"
 
-2021-11-15 * "Devol Isapre B#5070/1137 Jael Avayu"
+2021-11-15 * "JE 894"
   id: "895"
   je_num: "894"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  135496.00 CLP
+    desc: "Devol Isapre B#5070/1137 Jael Avayu"
   Income:Jael:DevolucinIsapreJael-970051  -48000.00 CLP
     desc: "Devol Isapre B#5070 Nutriologia - Jael"
   Income:Jael:DevolucinIsapreJael-970051  -87496.00 CLP
     desc: "Devol Isapre B#1137 Psicologia - Jael"
 
-2021-11-16 * "2/2 Faser SA F1363 Repar puerta gabinete"
+2021-11-16 * "JE 850"
   id: "851"
   je_num: "850"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -10541.00 CLP
+    desc: "2/2 Faser SA F1363 Repar puerta gabinete"
   Expenses:EAG:MantencinGeneralInstalaciones-411065  10541.00 CLP
+    desc: "2/2 Faser SA F1363 Repar puerta gabinete"
 
-2021-11-16 * "F308969 Acevedo Combustible Octubre 2021"
+2021-11-16 * "JE 851"
   id: "852"
   je_num: "851"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -99544.00 CLP
+    desc: "F308969 Acevedo Combustible Octubre 2021"
   Expenses:EAG:CombustibleVehculos-413044  99544.00 CLP
+    desc: "F308969 Acevedo Combustible Octubre 2021"
 
-2021-11-17 * "Rol 3783-191 Depto Jose A. Delano 4/4"
+2021-11-17 * "JE 852"
   id: "853"
   je_num: "852"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -3315054.00 CLP
+    desc: "Rol 3783-191 Depto Jose A. Delano 4/4"
   Assets:EAG:Bancos:BancoBci10160175-111005  -143661.00 CLP
     desc: "Rol 3783-203 Estacionamiento 1  4/4"
   Assets:EAG:Bancos:BancoBci10160175-111005  -143661.00 CLP
@@ -381,6 +512,7 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -58563.00 CLP
     desc: "Rol 3783-197 Bodega 1  4/4"
   Expenses:EAG:Contribuciones-411069  3315054.00 CLP
+    desc: "Rol 3783-191 Depto Jose A. Delano 4/4"
   Expenses:EAG:Contribuciones-411069  143661.00 CLP
     desc: "Rol 3783-203 Estacionamiento 1  4/4"
   Expenses:EAG:Contribuciones-411069  143661.00 CLP
@@ -388,58 +520,75 @@
   Expenses:EAG:Contribuciones-411069  58563.00 CLP
     desc: "Rol 3783-197 Bodega 1  4/4"
 
-2021-11-17 * "Devol Isapre B#1203 Psicologia Jael"
+2021-11-17 * "JE 895"
   id: "896"
   je_num: "895"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  10937.00 CLP
+    desc: "Devol Isapre B#1203 Psicologia Jael"
   Income:Jael:DevolucinIsapreJael-970051  -10937.00 CLP
+    desc: "Devol Isapre B#1203 Psicologia Jael"
 
-2021-11-18 * "Devol x compra TC EAG - Rodrigo Ubilla"
+2021-11-18 * "JE 853"
   id: "854"
   je_num: "853"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  222000.00 CLP
+    desc: "Devol x compra TC EAG - Rodrigo Ubilla"
   Income:EAG:OtrosIngresos-310099  -222000.00 CLP
+    desc: "Devol x compra TC EAG - Rodrigo Ubilla"
 
-2021-11-18 * "F#751 Connect Chile Internet Octubre-21"
+2021-11-18 * "JE 854"
   id: "855"
   je_num: "854"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -60000.00 CLP
+    desc: "F#751 Connect Chile Internet Octubre-21"
   Expenses:EAG:TvCableInternet-413009  60000.00 CLP
+    desc: "F#751 Connect Chile Internet Octubre-21"
 
-2021-11-18 * "F#758 Connect Chile Internet Oct AAG/JAB"
+2021-11-18 * "JE 855"
   id: "856"
   je_num: "855"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -60000.00 CLP
+    desc: "F#758 Connect Chile Internet Oct AAG/JAB"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  30000.00 CLP
     desc: "Devol AAG F#758 Connect Chile Octubre"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  30000.00 CLP
     desc: "Devol JAB F#758 Connect Chile Octubre"
   Assets:EAG:ControlYLiquidacin-115099  60000.00 CLP
+    desc: "F#758 Connect Chile Internet Oct AAG/JAB"
   Assets:EAG:ControlYLiquidacin-115099  -30000.00 CLP
     desc: "Devol AAG F#758 Connect Chile Octubre"
   Assets:EAG:ControlYLiquidacin-115099  -30000.00 CLP
     desc: "Devol JAB F#758 Connect Chile Octubre"
 
-2021-11-18 * "F#760 Connect Chile Internet Octubre DAG"
+2021-11-18 * "JE 856"
   id: "857"
   je_num: "856"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -60000.00 CLP
+    desc: "F#760 Connect Chile Internet Octubre DAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  60000.00 CLP
     desc: "Devol DAG F#760 Connect Chile Octubre"
   Assets:EAG:ControlYLiquidacin-115099  60000.00 CLP
+    desc: "F#760 Connect Chile Internet Octubre DAG"
   Assets:EAG:ControlYLiquidacin-115099  -60000.00 CLP
     desc: "Devol DAG F#760 Connect Chile Octubre"
 
-2021-11-18 * "Visa BCI 1027 EAG Ocubre 2021"
+2021-11-18 * "JE 857"
   id: "858"
   je_num: "857"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -6543903.00 CLP
+    desc: "Visa BCI 1027 EAG Ocubre 2021"
   Assets:EAG:ControlYLiquidacin-115099  104350.00 CLP
     desc: "Esval B#57823067"
   Assets:EAG:ControlYLiquidacin-115099  390601.00 CLP
@@ -451,12 +600,15 @@
   Assets:EAG:ControlYLiquidacin-115099  101680.00 CLP
     desc: "Gasvalpo B#4007885"
   Expenses:EAG:TC:Tc1027VisaInfinity-430005  5897762.00 CLP
+    desc: "Visa BCI 1027 EAG Ocubre 2021"
 
-2021-11-18 * "Gastos reñaca Visa BCI EAG Octubre 2021"
+2021-11-18 * "JE 858"
   id: "859"
   je_num: "858"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  646141.00 CLP
+    desc: "Gastos reñaca Visa BCI EAG Octubre 2021"
   Assets:EAG:ControlYLiquidacin-115099  -104350.00 CLP
     desc: "Esval B#57823067"
   Assets:EAG:ControlYLiquidacin-115099  -390601.00 CLP
@@ -468,98 +620,143 @@
   Assets:EAG:ControlYLiquidacin-115099  -101680.00 CLP
     desc: "Gasvalpo B#4007885"
 
-2021-11-18 * "Alberto Bitran - Abono prestamo mutuo"
+2021-11-18 * "JE 859"
   id: "860"
   je_num: "859"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  3000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
   Assets:Jocelyn:DeudoresVarios-613019  -3000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
 
-2021-11-18 * "Visa Banco de Chile 1168 Octubre 2021"
+2021-11-18 * "JE 903"
   id: "904"
   je_num: "903"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -49467.00 CLP
+    desc: "Visa Banco de Chile 1168 Octubre 2021"
   Expenses:EAG:TC:TcVariasEag-430017  49467.00 CLP
+    desc: "Visa Banco de Chile 1168 Octubre 2021"
 
-2021-11-19 * "F29 Odontologia Octubre 2021"
+2021-11-19 * "JE 860"
   id: "861"
   je_num: "860"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  2614.00 CLP
+    desc: "F29 Odontologia Octubre 2021"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -2614.00 CLP
+    desc: "F29 Odontologia Octubre 2021"
 
-2021-11-19 * "Alberto Bitran - Abono prestamo mutuo"
+2021-11-19 * "JE 861"
   id: "862"
   je_num: "861"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  3000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
   Assets:Jocelyn:DeudoresVarios-613019  -3000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
 
-2021-11-19 * "Helmuth B. transfer aeropuerto/casa EAG"
+2021-11-19 * "JE 862"
   id: "863"
   je_num: "862"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -35000.00 CLP
+    desc: "Helmuth B. transfer aeropuerto/casa EAG"
   Expenses:EAG:MovilizacinViajesChoferes-411037  35000.00 CLP
+    desc: "Helmuth B. transfer aeropuerto/casa EAG"
 
-2021-11-19 * "PAC BCI Seguros generales Noviembre 2021"
+2021-11-19 * "JE 893"
   id: "894"
   je_num: "893"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -918.00 CLP
+    desc: "PAC BCI Seguros generales Noviembre 2021"
   Expenses:EAG:GastosBancarios-430003  918.00 CLP
+    desc: "PAC BCI Seguros generales Noviembre 2021"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  -918.00 CLP
+    desc: "PAC BCI Seguros generales Noviembre 2021"
   Expenses:Jocelyn:GastosBancarios-690003  918.00 CLP
+    desc: "PAC BCI Seguros generales Noviembre 2021"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -918.00 CLP
+    desc: "PAC BCI Seguros generales Noviembre 2021"
   Expenses:Jeannette:GastosBancarios-790003  918.00 CLP
+    desc: "PAC BCI Seguros generales Noviembre 2021"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -918.00 CLP
+    desc: "PAC BCI Seguros generales Noviembre 2021"
   Expenses:Johanna:GastosBancarios-890003  918.00 CLP
+    desc: "PAC BCI Seguros generales Noviembre 2021"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -918.00 CLP
+    desc: "PAC BCI Seguros generales Noviembre 2021"
   Expenses:Jael:GastosBancarios-990003  918.00 CLP
+    desc: "PAC BCI Seguros generales Noviembre 2021"
 
-2021-11-19 * "American Express  8083 Octubre 2021 EAG"
+2021-11-19 * "JE 897"
   id: "898"
   je_num: "897"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -78969.00 CLP
+    desc: "American Express  8083 Octubre 2021 EAG"
   Expenses:EAG:TC:Tc8083AmericanExpress-430011  78969.00 CLP
+    desc: "American Express  8083 Octubre 2021 EAG"
 
-2021-11-21 * "Alberto Bitran - Abono prestamo mutuo"
+2021-11-21 * "JE 864"
   id: "865"
   je_num: "864"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  3000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  2000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
   Assets:Jocelyn:DeudoresVarios-613019  -3000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
   Assets:Jocelyn:DeudoresVarios-613019  -2000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
 
-2021-11-22 * "Alberto Bitran - Abono prestamo mutuo"
+2021-11-22 * "JE 863"
   id: "864"
   je_num: "863"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  3000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
   Assets:Jocelyn:DeudoresVarios-613019  -3000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
 
-2021-11-22 * "Cargo deuda tarjeta credito Mastercard"
+2021-11-22 * "JE 888"
   id: "889"
   je_num: "888"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  -8588.00 CLP
+    desc: "Cargo deuda tarjeta credito Mastercard"
   Assets:Jocelyn:ControlYLiquidacin-610999  8588.00 CLP
+    desc: "Cargo deuda tarjeta credito Mastercard"
 
-2021-11-23 * "Aria 31 Gasto comun Octubre 2021"
+2021-11-23 * "JE 865"
   id: "866"
   je_num: "865"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2108650.00 CLP
+    desc: "Aria 31 Gasto comun Octubre 2021"
   Expenses:EAG:GastosComunes-411067  2108650.00 CLP
+    desc: "Aria 31 Gasto comun Octubre 2021"
 
-2021-11-23 * "AT2016-2018-2019 Devol impto renta JAD"
+2021-11-23 * "JE 869"
   id: "870"
   je_num: "869"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  -5370119.00 CLP
+    desc: "AT2016-2018-2019 Devol impto renta JAD"
   Expenses:Jocelyn:ImpuestoRenta-690073  559831.00 CLP
     desc: "AT2016 Impto renta persona natural"
   Expenses:Jocelyn:ImpuestoRenta-690073  2180538.00 CLP
@@ -567,46 +764,63 @@
   Expenses:Jocelyn:ImpuestoRenta-690073  2629750.00 CLP
     desc: "AT2019 Impto renta persona natural"
 
-2021-11-23 * "Devol Isapre B#981 Catalina Alvarez"
+2021-11-23 * "JE 901"
   id: "902"
   je_num: "901"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  52686.00 CLP
+    desc: "Devol Isapre B#981 Catalina Alvarez"
   Income:EAG:DevolucinIsapre-310043  -52686.00 CLP
+    desc: "Devol Isapre B#981 Catalina Alvarez"
 
-2021-11-24 * "USD26.764,94 Levine & P. - Impuestos EAG"
+2021-11-24 * "JE 866"
   id: "867"
   je_num: "866"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -21719749.00 CLP
+    desc: "USD26.764,94 Levine & P. - Impuestos EAG"
   Expenses:EAG:MantencinGeneralInstalaciones-415065  21719749.00 CLP
+    desc: "USD26.764,94 Levine & P. - Impuestos EAG"
 
-2021-11-24 * "Sra Jacqueline retiro Noviembre 2021"
+2021-11-24 * "JE 867"
   id: "868"
   je_num: "867"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -3895119.00 CLP
+    desc: "Sra Jacqueline retiro Noviembre 2021"
   Expenses:EAG:SraJacquelineDeutsch-430023  3895119.00 CLP
+    desc: "Sra Jacqueline retiro Noviembre 2021"
 
-2021-11-24 * "Retiro Inmob Metropolitana a BCI10160175"
+2021-11-24 * "JE 868"
   id: "869"
   je_num: "868"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  50000000.00 CLP
+    desc: "Retiro Inmob Metropolitana a BCI10160175"
   Income:EAG:RetirosInmobiliariaMetropolitana-310019  -50000000.00 CLP
+    desc: "Retiro Inmob Metropolitana a BCI10160175"
 
-2021-11-24 * "Devol Isapre B#1019 Catalina Alvarez"
+2021-11-24 * "JE 902"
   id: "903"
   je_num: "902"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  52956.00 CLP
+    desc: "Devol Isapre B#1019 Catalina Alvarez"
   Income:EAG:DevolucinIsapre-310043  -52956.00 CLP
+    desc: "Devol Isapre B#1019 Catalina Alvarez"
 
-2021-11-25 * "Jocelyn devol Previred/F29 Odontologia"
+2021-11-25 * "JE 887"
   id: "888"
   je_num: "887"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  852535.00 CLP
+    desc: "Jocelyn devol Previred/F29 Odontologia"
   Assets:Jocelyn:ControlYLiquidacin-610999  -69711.00 CLP
     desc: "Traspaso de fondos a otro banco en linea"
   Assets:Jocelyn:ControlYLiquidacin-610999  -3644.00 CLP
@@ -622,67 +836,93 @@
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -2614.00 CLP
     desc: "F29 Odontologia Octubre 2021"
 
-2021-11-25 * "Alberto Bitran - Abono prestamo mutuo"
+2021-11-25 * "JE 890"
   id: "891"
   je_num: "890"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  3000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
   Assets:Jocelyn:DeudoresVarios-613019  -3000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
 
-2021-11-25 * "Devol Isapre B#1011 Psiquiatria - Jael"
+2021-11-25 * "JE 896"
   id: "897"
   je_num: "896"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  10937.00 CLP
+    desc: "Devol Isapre B#1011 Psiquiatria - Jael"
   Income:Jael:DevolucinIsapreJael-970051  -10937.00 CLP
+    desc: "Devol Isapre B#1011 Psiquiatria - Jael"
 
-2021-11-26 * "BH33 Indumotora - Dieta Noviembre 2021"
+2021-11-26 * "JE 870"
   id: "871"
   je_num: "870"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  18000000.00 CLP
+    desc: "BH33 Indumotora - Dieta Noviembre 2021"
   Income:EAG:DirectorioIndumotoraOne-310022  -18000000.00 CLP
+    desc: "BH33 Indumotora - Dieta Noviembre 2021"
 
-2021-11-26 * "Alberto Bitran - Abono prestamo mutuo"
+2021-11-26 * "JE 891"
   id: "892"
   je_num: "891"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  2000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
   Assets:Jocelyn:DeudoresVarios-613019  -2000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
 
-2021-11-26 * "Com mant plan banco Santander"
+2021-11-26 * "JE 899"
   id: "900"
   je_num: "899"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -8196.00 CLP
+    desc: "Com mant plan banco Santander"
   Expenses:EAG:GastosBancarios-430003  8196.00 CLP
+    desc: "Com mant plan banco Santander"
 
-2021-11-29 * "DTB Chile -Psicologia Nov-Dic Jael Avayu"
+2021-11-29 * "JE 872"
   id: "873"
   je_num: "872"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -200000.00 CLP
+    desc: "DTB Chile -Psicologia Nov-Dic Jael Avayu"
   Expenses:Jael:IsapreGastosMdicos-990051  200000.00 CLP
+    desc: "DTB Chile -Psicologia Nov-Dic Jael Avayu"
 
-2021-11-29 * "Sra Raquel - Retiro Noviembre 2021"
+2021-11-29 * "JE 873"
   id: "874"
   je_num: "873"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4000000.00 CLP
+    desc: "Sra Raquel - Retiro Noviembre 2021"
   Expenses:EAG:SraRaquelVentura-430021  4000000.00 CLP
+    desc: "Sra Raquel - Retiro Noviembre 2021"
 
-2021-11-29 * "EAG sueldo Inv Tecnion Ltda Noviem 2021"
+2021-11-29 * "JE 874"
   id: "875"
   je_num: "874"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  5127873.00 CLP
+    desc: "EAG sueldo Inv Tecnion Ltda Noviem 2021"
   Income:EAG:SueldoTecnin-310003  -5127873.00 CLP
+    desc: "EAG sueldo Inv Tecnion Ltda Noviem 2021"
 
-2021-11-29 * "Fresia Gonzalez - Efectivo Noviembre"
+2021-11-29 * "JE 875"
   id: "876"
   je_num: "875"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -56544.00 CLP
+    desc: "Fresia Gonzalez - Efectivo Noviembre"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -362000.00 CLP
     desc: "Noelia Farfal - Sueldo/Celular Nov 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -651502.00 CLP
@@ -710,6 +950,7 @@
   Expenses:EAG:SueldosRopaRegalas-411001  600000.00 CLP
     desc: "Eduardo Figueroa - Sueldo Noviembre 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  56544.00 CLP
+    desc: "Fresia Gonzalez - Efectivo Noviembre"
   Expenses:EAG:SueldosRopaRegalias-413001  350000.00 CLP
     desc: "Noelia Farfal - Sueldo Noviembre 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  12000.00 CLP
@@ -727,18 +968,23 @@
   Expenses:EAG:SueldosRopaRegalias-413001  351040.00 CLP
     desc: "Esteban Mendez - Sueldo Noviembre 2021"
 
-2021-11-29 * "EAG sueldo FC Noviembre 2021"
+2021-11-29 * "JE 876"
   id: "877"
   je_num: "876"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  15000000.00 CLP
+    desc: "EAG sueldo FC Noviembre 2021"
   Income:EAG:SueldoFcComplemento-310005  -15000000.00 CLP
+    desc: "EAG sueldo FC Noviembre 2021"
 
-2021-11-29 * "Jael Avayu - Retiro Noviembre 2021"
+2021-11-29 * "JE 877"
   id: "878"
   je_num: "877"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -300000.00 CLP
+    desc: "Jael Avayu - Retiro Noviembre 2021"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2230000.00 CLP
     desc: "Jeannette Avayu - Retiro/Enfemera Nov-21"
   Assets:EAG:Bancos:BancoBci10160175-111005  -585130.00 CLP
@@ -758,71 +1004,99 @@
   Expenses:Johanna:EnfermeraGastosMdicos-890051  585130.00 CLP
     desc: "USD700 Enfermera Noviembre 2021"
   Expenses:Jael:RetirosDelMes-990001  300000.00 CLP
+    desc: "Jael Avayu - Retiro Noviembre 2021"
 
-2021-11-29 * "Elias Gomez 50% Mant AC y Calefaccion"
+2021-11-29 * "JE 878"
   id: "879"
   je_num: "878"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1075000.00 CLP
+    desc: "Elias Gomez 50% Mant AC y Calefaccion"
   Expenses:EAG:MantencinAireCalefaccin-413055  1075000.00 CLP
+    desc: "Elias Gomez 50% Mant AC y Calefaccion"
 
-2021-11-29 * "Alejando Aliaga - Iluminacion lavadero"
+2021-11-29 * "JE 879"
   id: "880"
   je_num: "879"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -20000.00 CLP
+    desc: "Alejando Aliaga - Iluminacion lavadero"
   Expenses:EAG:MantencinGeneralInstalaciones-413065  20000.00 CLP
+    desc: "Alejando Aliaga - Iluminacion lavadero"
 
-2021-11-29 * "Cummins SA - Mant generador sur EAG"
+2021-11-29 * "JE 880"
   id: "881"
   je_num: "880"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -711771.00 CLP
+    desc: "Cummins SA - Mant generador sur EAG"
   Expenses:EAG:MantencinElctrica-413057  711771.00 CLP
+    desc: "Cummins SA - Mant generador sur EAG"
 
-2021-11-29 * "Alberto Bitran - Abono prestamo mutuo"
+2021-11-29 * "JE 892"
   id: "893"
   je_num: "892"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  3000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  2000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
   Assets:Jocelyn:DeudoresVarios-613019  -3000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
   Assets:Jocelyn:DeudoresVarios-613019  -2000000.00 CLP
+    desc: "Alberto Bitran - Abono prestamo mutuo"
 
-2021-11-29 * "Comision transferencia fondos alto valor"
+2021-11-29 * "JE 908"
   id: "909"
   je_num: "908"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -45201.00 CLP
+    desc: "Comision transferencia fondos alto valor"
   Assets:EAG:ControlYLiquidacin-115099  45201.00 CLP
+    desc: "Comision transferencia fondos alto valor"
 
-2021-11-30 * "Johanna Avayu - Retiro Noviembre 2021"
+2021-11-30 * "JE 881"
   id: "882"
   je_num: "881"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1500000.00 CLP
+    desc: "Johanna Avayu - Retiro Noviembre 2021"
   Expenses:Johanna:RetirosDelMes-890001  1500000.00 CLP
+    desc: "Johanna Avayu - Retiro Noviembre 2021"
 
-2021-11-30 * "Sra. Berta Galatzan - Noviembre 2021"
+2021-11-30 * "JE 882"
   id: "883"
   je_num: "882"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -800000.00 CLP
+    desc: "Sra. Berta Galatzan - Noviembre 2021"
   Expenses:EAG:SraJacquelineDeutsch-430023  800000.00 CLP
+    desc: "Sra. Berta Galatzan - Noviembre 2021"
 
-2021-11-30 * "Gloria Jimenez - Noviembre 2021"
+2021-11-30 * "JE 883"
   id: "884"
   je_num: "883"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1000000.00 CLP
+    desc: "Gloria Jimenez - Noviembre 2021"
   Expenses:EAG:GloriaJimenez-430033  1000000.00 CLP
     desc: "Noviembre 2021"
 
-2021-11-30 * "Daniel Cadenas-Corderos/Extintor/Jardin"
+2021-11-30 * "JE 884"
   id: "885"
   je_num: "884"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -285601.00 CLP
+    desc: "Daniel Cadenas-Corderos/Extintor/Jardin"
   Expenses:EAG:ComprasCasaEfectivo-413049  160000.00 CLP
     desc: "Daniel Cadenas - Compra 2 corderos"
   Expenses:EAG:MantencinJardinTractor-413053  44600.00 CLP
@@ -830,30 +1104,37 @@
   Expenses:EAG:MantencinGeneralInstalaciones-413065  81001.00 CLP
     desc: "F#491 Mario Vegas - Recarga extintores"
 
-2021-11-30 * "Catalina Alvarez B#1034 Atencion EAG"
+2021-11-30 * "JE 885"
   id: "886"
   je_num: "885"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -70000.00 CLP
+    desc: "Catalina Alvarez B#1034 Atencion EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -140000.00 CLP
     desc: "Catalina Alvarez B#1019 Atencion EAG"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  70000.00 CLP
+    desc: "Catalina Alvarez B#1034 Atencion EAG"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  140000.00 CLP
     desc: "Catalina Alvarez B#1019 Atencion EAG"
 
-2021-11-30 * "Traspaso a Cuenta Edwards EAG 162338082"
+2021-11-30 * "JE 886"
   id: "887"
   je_num: "886"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -20000000.00 CLP
+    desc: "Traspaso a Cuenta Edwards EAG 162338082"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  20000000.00 CLP
     desc: "Traspaso de cuenta BCI EAG 10160175"
 
-2021-11-30 * "Devol de EAG gastos FC Noviembre 2021"
+2021-11-30 * "JE 919"
   id: "920"
   je_num: "919"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:ControlYLiquidacin-115099  -42000.00 CLP
+    desc: "Devol de EAG gastos FC Noviembre 2021"
   Expenses:EAG:OtrosGastosPersonales-430099  12500.00 CLP
     desc: "Eluchans - EAG/SAG Declar escritura"
   Expenses:EAG:OtrosGastosPersonales-430099  12500.00 CLP
@@ -863,16 +1144,22 @@
   Expenses:EAG:OtrosGastosPersonales-430099  8500.00 CLP
     desc: "Eliot -Compra libro coleccion marvel EAG"
 
-2021-11-30 * "EAG Gastos Inv Tecnion Ltda Nov 2021"
+2021-11-30 * "JE 924"
   id: "925"
   je_num: "924"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:ControlYLiquidacin-115099  11443426.00 CLP
+    desc: "EAG Gastos Inv Tecnion Ltda Nov 2021"
   Income:EAG:DevolucinOficinaTecnin-310035  -11443426.00 CLP
+    desc: "EAG Gastos Inv Tecnion Ltda Nov 2021"
 
-2021-11-30 * "EAG Gerencia Noviembre 2021"
+2021-11-30 * "JE 970"
   id: "971"
   je_num: "970"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:ControlYLiquidacin-115099  932011.00 CLP
+    desc: "EAG Gerencia Noviembre 2021"
   Income:EAG:DevolucinGerencia50-310037  -932011.00 CLP
+    desc: "EAG Gerencia Noviembre 2021"

@@ -1,130 +1,178 @@
-2021-04-01 * "2/4 Victoria Celia Uscuvilca - EAG"
+2021-04-01 * "JE 207"
   id: "208"
   je_num: "207"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -200000.00 CLP
+    desc: "2/4 Victoria Celia Uscuvilca - EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -250000.00 CLP
     desc: "3/4 Victoria Celia Uscuvilca - EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -100000.00 CLP
     desc: "4/4 Victoria Celia Uscuvilca - EAG"
   Expenses:EAG:SueldosRopaRegalas-411001  200000.00 CLP
+    desc: "2/4 Victoria Celia Uscuvilca - EAG"
   Expenses:EAG:SueldosRopaRegalas-411001  250000.00 CLP
     desc: "3/4 Victoria Celia Uscuvilca - EAG"
   Expenses:EAG:SueldosRopaRegalas-411001  100000.00 CLP
     desc: "4/4 Victoria Celia Uscuvilca - EAG"
 
-2021-04-01 * "2/2 Esteban Mendez 14 dias hijo chabela"
+2021-04-01 * "JE 209"
   id: "210"
   je_num: "209"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:EAG:SueldosRopaRegalias-413001  240000.00 CLP
+    desc: "2/2 Esteban Mendez 14 dias hijo chabela"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -240000.00 CLP
+    desc: "2/2 Esteban Mendez 14 dias hijo chabela"
 
-2021-04-01 * "EAG sueldo Inv Tecnion Ltda Marzo 2021"
+2021-04-01 * "JE 211"
   id: "212"
   je_num: "211"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  5092504.00 CLP
+    desc: "EAG sueldo Inv Tecnion Ltda Marzo 2021"
   Income:EAG:SueldoTecnin-310003  -5092504.00 CLP
+    desc: "EAG sueldo Inv Tecnion Ltda Marzo 2021"
 
-2021-04-05 * "Margarita G. Psicologa Jael Avayu"
+2021-04-05 * "JE 212"
   id: "213"
   je_num: "212"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -60000.00 CLP
+    desc: "Margarita G. Psicologa Jael Avayu"
   Expenses:Jael:IsapreGastosMdicos-990051  60000.00 CLP
+    desc: "Margarita G. Psicologa Jael Avayu"
 
-2021-04-05 * "EAG Gastos Inv Tecnion Ltda Marzo 2021"
+2021-04-05 * "JE 214"
   id: "215"
   je_num: "214"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  11874290.00 CLP
+    desc: "EAG Gastos Inv Tecnion Ltda Marzo 2021"
   Assets:EAG:ControlYLiquidacin-115099  -11874290.00 CLP
+    desc: "EAG Gastos Inv Tecnion Ltda Marzo 2021"
 
-2021-04-05 * "USD1.575 Levine & Partners/Gtos legales"
+2021-04-05 * "JE 215"
   id: "216"
   je_num: "215"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1139355.00 CLP
+    desc: "USD1.575 Levine & Partners/Gtos legales"
   Assets:EAG:Bancos:BancoBci10160175-111005  -8533.00 CLP
+    desc: "USD1.575 Levine & Partners/Gtos legales"
   Expenses:EAG:MantencinGeneralInstalaciones-415065  1139355.00 CLP
+    desc: "USD1.575 Levine & Partners/Gtos legales"
   Expenses:EAG:GastosBancarios-430003  8533.00 CLP
+    desc: "USD1.575 Levine & Partners/Gtos legales"
 
-2021-04-05 * "Giro por rectificatoria Renta AT2018 EAG"
+2021-04-05 * "JE 216"
   id: "217"
   je_num: "216"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2827626.00 CLP
+    desc: "Giro por rectificatoria Renta AT2018 EAG"
   Expenses:EAG:ImpuestoRenta-430073  2827626.00 CLP
+    desc: "Giro por rectificatoria Renta AT2018 EAG"
 
-2021-04-05 * "Romina Alarcón - Limpieza casa EAG"
+2021-04-05 * "JE 218"
   id: "219"
   je_num: "218"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:EAG:SueldosRopaRegalias-413001  206000.00 CLP
+    desc: "Romina Alarcón - Limpieza casa EAG"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -206000.00 CLP
+    desc: "Romina Alarcón - Limpieza casa EAG"
 
-2021-04-05 * "B#5012 Full Plagas - Marzo 2021"
+2021-04-05 * "JE 219"
   id: "220"
   je_num: "219"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:EAG:FumigacionesDesratizacin-413059  98531.00 CLP
+    desc: "B#5012 Full Plagas - Marzo 2021"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -98531.00 CLP
+    desc: "B#5012 Full Plagas - Marzo 2021"
 
-2021-04-05 * "Pedro Leon Pozo - Examenes EAG/Sra Coca"
+2021-04-05 * "JE 220"
   id: "221"
   je_num: "220"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -600000.00 CLP
+    desc: "Pedro Leon Pozo - Examenes EAG/Sra Coca"
   Expenses:EAG:SraRaquelVentura-430021  88931.00 CLP
     desc: "Pedro Leon Pozo - Examenes Sra Raquel"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  511069.00 CLP
     desc: "1/2 Pedro Leon Pozo - Examenes EAG"
 
-2021-04-05 * "Devol Isapre B#172 Psicologo Jael"
+2021-04-05 * "JE 276"
   id: "277"
   je_num: "276"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  10500.00 CLP
+    desc: "Devol Isapre B#172 Psicologo Jael"
   Income:Jael:DevolucinIsapreJael-970051  -10500.00 CLP
+    desc: "Devol Isapre B#172 Psicologo Jael"
 
-2021-04-05 * "Abono prestamo Jhonny"
+2021-04-05 * "JE 312"
   id: "313"
   je_num: "312"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  150000.00 CLP
+    desc: "Abono prestamo Jhonny"
   Income:EAG:JhonnyGuerra-310045  -150000.00 CLP
+    desc: "Abono prestamo Jhonny"
 
-2021-04-06 * "2/2 Pedro Leon Pozo - Examenes EAG"
+2021-04-06 * "JE 221"
   id: "222"
   je_num: "221"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -693966.00 CLP
+    desc: "2/2 Pedro Leon Pozo - Examenes EAG"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  693966.00 CLP
+    desc: "2/2 Pedro Leon Pozo - Examenes EAG"
 
-2021-04-06 * "EAG - Isapre Cruz Blanca Marzo 2021"
+2021-04-06 * "JE 222"
   id: "223"
   je_num: "222"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -278662.00 CLP
+    desc: "EAG - Isapre Cruz Blanca Marzo 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -323930.00 CLP
     desc: "Jael - Isapre Colmena Marzo 2021"
   Expenses:EAG:CotizacinIsapre-430055  278662.00 CLP
+    desc: "EAG - Isapre Cruz Blanca Marzo 2021"
   Expenses:Jael:IsapreGastosMdicos-990051  323930.00 CLP
     desc: "Jael - Isapre Colmena Marzo 2021"
 
-2021-04-06 * "ASPOR Devol siniestro reñaca Pª145130-36"
+2021-04-06 * "JE 235"
   id: "236"
   je_num: "235"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -12568699.00 CLP
+    desc: "ASPOR Devol siniestro reñaca Pª145130-36"
   Assets:EAG:ControlYLiquidacin-115099  12568699.00 CLP
+    desc: "ASPOR Devol siniestro reñaca Pª145130-36"
 
-2021-04-06 * "Rendicion Oscar Bustamante casa sur EAG"
+2021-04-06 * "JE 261"
   id: "262"
   je_num: "261"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:ControlYLiquidacin-115099  -4557340.00 CLP
+    desc: "Rendicion Oscar Bustamante casa sur EAG"
   Expenses:EAG:Agua-413013  47900.00 CLP
     desc: "Oscar Bustamante - Agua potable"
   Expenses:EAG:Gas-413015  1146000.00 CLP
@@ -144,12 +192,15 @@
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -600000.00 CLP
     desc: "1/4 Rendicion Oscar Bustamante sur EAG"
 
-2021-04-07 * "Canc TC Mastercard/Visa Santander EAG"
+2021-04-07 * "JE 223"
   id: "224"
   je_num: "223"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2036517.00 CLP
+    desc: "Canc TC Mastercard/Visa Santander EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  2036517.00 CLP
+    desc: "Canc TC Mastercard/Visa Santander EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -502120.00 CLP
     desc: "Visa Santander 0790 EAG Marzo 2021"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1534397.00 CLP
@@ -159,56 +210,75 @@
   Expenses:EAG:TC:Tc0858VisaLatanpass-430009  502120.00 CLP
     desc: "Visa Santander 0790 EAG Marzo 2021"
 
-2021-04-07 * "USD46,31 Visa/Mastercard Santander EAG"
+2021-04-07 * "JE 224"
   id: "225"
   je_num: "224"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -33390.00 CLP
+    desc: "USD46,31 Visa/Mastercard Santander EAG"
   Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  27196.00 CLP
     desc: "USD37,72 Mastercard Santander Marzo EAG"
   Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  6194.00 CLP
     desc: "USD8,59 Visa Santander Marzo EAG"
 
-2021-04-07 * "Gabriela Navarro - Finiquito"
+2021-04-07 * "JE 225"
   id: "226"
   je_num: "225"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -686611.00 CLP
+    desc: "Gabriela Navarro - Finiquito"
   Expenses:EAG:SueldosRopaRegalas-411001  686611.00 CLP
+    desc: "Gabriela Navarro - Finiquito"
 
-2021-04-07 * "Lissette Sanchez de Sra Raquel Ventura"
+2021-04-07 * "JE 226"
   id: "227"
   je_num: "226"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:EAG:SraRaquelVentura-430021  480000.00 CLP
+    desc: "Lissette Sanchez de Sra Raquel Ventura"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -480000.00 CLP
+    desc: "Lissette Sanchez de Sra Raquel Ventura"
 
-2021-04-07 * "2/4 Rendicion Oscar Bustamante sur EAG"
+2021-04-07 * "JE 262"
   id: "263"
   je_num: "262"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:ControlYLiquidacin-115099  2000000.00 CLP
+    desc: "2/4 Rendicion Oscar Bustamante sur EAG"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -2000000.00 CLP
+    desc: "2/4 Rendicion Oscar Bustamante sur EAG"
 
-2021-04-07 * "3/4 Rendicion Oscar Bustamante sur EAG"
+2021-04-07 * "JE 263"
   id: "264"
   je_num: "263"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:ControlYLiquidacin-115099  2000000.00 CLP
+    desc: "3/4 Rendicion Oscar Bustamante sur EAG"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -2000000.00 CLP
+    desc: "3/4 Rendicion Oscar Bustamante sur EAG"
 
-2021-04-07 * "PAC Seguro fraude Santander"
+2021-04-07 * "JE 314"
   id: "315"
   je_num: "314"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1147.00 CLP
+    desc: "PAC Seguro fraude Santander"
   Expenses:EAG:GastosBancarios-430003  1147.00 CLP
+    desc: "PAC Seguro fraude Santander"
 
-2021-04-08 * "Devol Isapre toma de muestras EAG"
+2021-04-08 * "JE 227"
   id: "228"
   je_num: "227"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  702651.00 CLP
+    desc: "Devol Isapre toma de muestras EAG"
   Income:EAG:DevolucinIsapre-310043  -31374.00 CLP
     desc: "B#6339675 Toma de muestras EAG"
   Income:EAG:DevolucinIsapre-310043  -597842.00 CLP
@@ -216,49 +286,65 @@
   Income:EAG:DevolucinIsapre-310043  -73435.00 CLP
     desc: "B#6339676 Toma de muestras EAG"
 
-2021-04-08 * "Visa/Mastercard Santander Marzo Sra Coca"
+2021-04-08 * "JE 228"
   id: "229"
   je_num: "228"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1231964.00 CLP
+    desc: "Visa/Mastercard Santander Marzo Sra Coca"
   Expenses:EAG:TC:TcRaquelVentura-430019  178270.00 CLP
     desc: "Visa Santander 5966 Marzo Sra Raquel"
   Expenses:EAG:TC:TcRaquelVentura-430019  1053694.00 CLP
     desc: "Mastercard Santander 2019 Marzo Sra Coca"
 
-2021-04-09 * "Margarita G. Psicologa Jael Avayu"
+2021-04-09 * "JE 247"
   id: "248"
   je_num: "247"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -60000.00 CLP
+    desc: "Margarita G. Psicologa Jael Avayu"
   Expenses:Jael:IsapreGastosMdicos-990051  60000.00 CLP
+    desc: "Margarita G. Psicologa Jael Avayu"
 
-2021-04-09 * "Sra Raquel (Jocelyn/Jeannette y Chiloe)"
+2021-04-09 * "JE 248"
   id: "249"
   je_num: "248"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:EAG:SraRaquelVentura-430021  866060.00 CLP
+    desc: "Sra Raquel (Jocelyn/Jeannette y Chiloe)"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -866060.00 CLP
+    desc: "Sra Raquel (Jocelyn/Jeannette y Chiloe)"
 
-2021-04-09 * "BH18 IP Chile Junta directiva Marzo 2021"
+2021-04-09 * "JE 258"
   id: "259"
   je_num: "258"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  1814806.00 CLP
+    desc: "BH18 IP Chile Junta directiva Marzo 2021"
   Income:EAG:DirectorioIpChile-310021  -1814806.00 CLP
+    desc: "BH18 IP Chile Junta directiva Marzo 2021"
 
-2021-04-09 * "4/4 Rendicion Oscar Bustamante sur EAG"
+2021-04-09 * "JE 264"
   id: "265"
   je_num: "264"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:ControlYLiquidacin-115099  557340.00 CLP
+    desc: "4/4 Rendicion Oscar Bustamante sur EAG"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -557340.00 CLP
+    desc: "4/4 Rendicion Oscar Bustamante sur EAG"
 
-2021-04-12 * "Leyes sociales empl sur/stgo EAG Marzo"
+2021-04-12 * "JE 249"
   id: "250"
   je_num: "249"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -1429156.00 CLP
+    desc: "Leyes sociales empl sur/stgo EAG Marzo"
   Expenses:EAG:SueldosRopaRegalas-411001  185006.00 CLP
     desc: "Mariela Mendez leyes sociales Marzo-21"
   Expenses:EAG:SueldosRopaRegalas-411001  173936.00 CLP
@@ -278,95 +364,129 @@
   Expenses:EAG:SueldosRopaRegalias-413001  63218.00 CLP
     desc: "Luis Mendez leyes sociales Marzo 2021"
 
-2021-04-12 * "Dr Ricardo Espinosa - atencion EAG"
+2021-04-12 * "JE 250"
   id: "251"
   je_num: "250"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -150000.00 CLP
+    desc: "Dr Ricardo Espinosa - atencion EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -450000.00 CLP
     desc: "B#14 Lorena Ross10 sesiones Kine EAG"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  150000.00 CLP
+    desc: "Dr Ricardo Espinosa - atencion EAG"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  450000.00 CLP
     desc: "B#14 Lorena Ross10 sesiones Kine EAG"
 
-2021-04-12 * "Seguro proteccion bancaria Banco Chile"
+2021-04-12 * "JE 313"
   id: "314"
   je_num: "313"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -4531.00 CLP
+    desc: "Seguro proteccion bancaria Banco Chile"
   Expenses:EAG:GastosBancarios-430003  4531.00 CLP
+    desc: "Seguro proteccion bancaria Banco Chile"
 
-2021-04-13 * "Previred Odontologia EIRL Marzo 2021"
+2021-04-13 * "JE 256"
   id: "257"
   je_num: "256"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  364756.00 CLP
+    desc: "Previred Odontologia EIRL Marzo 2021"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -364756.00 CLP
+    desc: "Previred Odontologia EIRL Marzo 2021"
 
-2021-04-13 * "USD276,29 Visa BCI EAG Marzo 2021"
+2021-04-13 * "JE 257"
   id: "258"
   je_num: "257"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -197163.00 CLP
+    desc: "USD276,29 Visa BCI EAG Marzo 2021"
   Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  197163.00 CLP
+    desc: "USD276,29 Visa BCI EAG Marzo 2021"
 
-2021-04-13 * "V. Celia Uscuvilca Impto Unico Marzo-21"
+2021-04-13 * "JE 260"
   id: "261"
   je_num: "260"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1037.00 CLP
+    desc: "V. Celia Uscuvilca Impto Unico Marzo-21"
   Expenses:EAG:SueldosRopaRegalas-411001  1037.00 CLP
+    desc: "V. Celia Uscuvilca Impto Unico Marzo-21"
 
-2021-04-14 * "Vilma Vera tarjetas present EAG/Sra Coca"
+2021-04-14 * "JE 267"
   id: "268"
   je_num: "267"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:EAG:OtrosGastosPersonales-430099  60000.00 CLP
+    desc: "Vilma Vera tarjetas present EAG/Sra Coca"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -60000.00 CLP
+    desc: "Vilma Vera tarjetas present EAG/Sra Coca"
 
-2021-04-14 * "Jessica Echeverria-Limpieza casa sur EAG"
+2021-04-14 * "JE 268"
   id: "269"
   je_num: "268"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:EAG:MantencinGeneralInstalaciones-413065  84000.00 CLP
+    desc: "Jessica Echeverria-Limpieza casa sur EAG"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -84000.00 CLP
+    desc: "Jessica Echeverria-Limpieza casa sur EAG"
 
-2021-04-14 * "C. Norte B71491745 LZDV19 Sra Raquel"
+2021-04-14 * "JE 275"
   id: "276"
   je_num: "275"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:EAG:MantencinVehculosSeguros-411043  744.00 CLP
+    desc: "C. Norte B71491745 LZDV19 Sra Raquel"
   Expenses:EAG:MantencinVehculosMotosTierraSeguros-413043  2800.00 CLP
     desc: "Ruta Maipo B7499827 LVJC28 G.Balladares"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -3544.00 CLP
     desc: "Autopistas Ruta del maipo/C. norte"
 
-2021-04-15 * "Devol de EAG gastos FC Marzo 2021"
+2021-04-15 * "JE 270"
   id: "271"
   je_num: "270"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -303670.00 CLP
+    desc: "Devol de EAG gastos FC Marzo 2021"
   Assets:EAG:ControlYLiquidacin-115099  303670.00 CLP
+    desc: "Devol de EAG gastos FC Marzo 2021"
 
-2021-04-15 * "Ricardo Espinosa atencion EAG 11/04/21"
+2021-04-15 * "JE 271"
   id: "272"
   je_num: "271"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -150000.00 CLP
+    desc: "Ricardo Espinosa atencion EAG 11/04/21"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  150000.00 CLP
+    desc: "Ricardo Espinosa atencion EAG 11/04/21"
 
-2021-04-15 * "Devol Isapre B#155 Psicologo Jael"
+2021-04-15 * "JE 277"
   id: "278"
   je_num: "277"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  10500.00 CLP
+    desc: "Devol Isapre B#155 Psicologo Jael"
   Income:Jael:DevolucinIsapreJael-970051  -10500.00 CLP
+    desc: "Devol Isapre B#155 Psicologo Jael"
 
-2021-04-16 * "Devol JAB gastos reñaca visa BCI EAG"
+2021-04-16 * "JE 272"
   id: "273"
   je_num: "272"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  639665.00 CLP
+    desc: "Devol JAB gastos reñaca visa BCI EAG"
   Assets:EAG:ControlYLiquidacin-115099  -109620.00 CLP
     desc: "Esval SA B#5299804"
   Assets:EAG:ControlYLiquidacin-115099  -364065.00 CLP
@@ -378,11 +498,13 @@
   Assets:EAG:ControlYLiquidacin-115099  -7340.00 CLP
     desc: "Gasvalpo SA B#3328489"
 
-2021-04-16 * "Devol JAB gastos reñaca visa BCI EAG"
+2021-04-16 * "JE 273"
   id: "274"
   je_num: "273"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  619394.00 CLP
+    desc: "Devol JAB gastos reñaca visa BCI EAG"
   Assets:EAG:ControlYLiquidacin-115099  -99770.00 CLP
     desc: "Esval SA B#53337585"
   Assets:EAG:ControlYLiquidacin-115099  -374954.00 CLP
@@ -394,39 +516,53 @@
   Assets:EAG:ControlYLiquidacin-115099  -101650.00 CLP
     desc: "Gasvalpo SA B#3411438"
 
-2021-04-16 * "Eduardo Figueroa locomocion de Sra Coca"
+2021-04-16 * "JE 278"
   id: "279"
   je_num: "278"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:EAG:MovilizacinViajesChoferes-411037  60000.00 CLP
+    desc: "Eduardo Figueroa locomocion de Sra Coca"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -60000.00 CLP
+    desc: "Eduardo Figueroa locomocion de Sra Coca"
 
-2021-04-16 * "Sra Raquel casa EAG - Pedido"
+2021-04-16 * "JE 279"
   id: "280"
   je_num: "279"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:EAG:ComprasCasaEfectivo-411049  66800.00 CLP
+    desc: "Sra Raquel casa EAG - Pedido"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -66800.00 CLP
+    desc: "Sra Raquel casa EAG - Pedido"
 
-2021-04-16 * "Margarita G. Psicologa Jael Avayu"
+2021-04-16 * "JE 280"
   id: "281"
   je_num: "280"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -60000.00 CLP
+    desc: "Margarita G. Psicologa Jael Avayu"
   Expenses:Jael:IsapreGastosMdicos-990051  60000.00 CLP
+    desc: "Margarita G. Psicologa Jael Avayu"
 
-2021-04-16 * "Cargo por comision orden de pago"
+2021-04-16 * "JE 311"
   id: "312"
   je_num: "311"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -8417.00 CLP
+    desc: "Cargo por comision orden de pago"
   Expenses:EAG:GastosBancarios-430003  8417.00 CLP
+    desc: "Cargo por comision orden de pago"
 
-2021-04-19 * "Tarjeta Visa BCI 1027 EAG Marzo 2021"
+2021-04-19 * "JE 259"
   id: "260"
   je_num: "259"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -12346618.00 CLP
+    desc: "Tarjeta Visa BCI 1027 EAG Marzo 2021"
   Assets:EAG:ControlYLiquidacin-115099  99770.00 CLP
     desc: "Esval SA B#53337585"
   Assets:EAG:ControlYLiquidacin-115099  374954.00 CLP
@@ -438,87 +574,129 @@
   Assets:EAG:ControlYLiquidacin-115099  101650.00 CLP
     desc: "Gasvalpo SA B#3411438"
   Expenses:EAG:TC:Tc1027VisaInfinity-430005  11727224.00 CLP
+    desc: "Tarjeta Visa BCI 1027 EAG Marzo 2021"
 
-2021-04-19 * "American Express  8083 Marzo-21 EAG"
+2021-04-19 * "JE 265"
   id: "266"
   je_num: "265"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -75363.00 CLP
+    desc: "American Express  8083 Marzo-21 EAG"
   Expenses:EAG:TC:Tc8083AmericanExpress-430011  75363.00 CLP
+    desc: "American Express  8083 Marzo-21 EAG"
 
-2021-04-19 * "Visa Banco de Chile 1168 Marzo-21 EAG"
+2021-04-19 * "JE 266"
   id: "267"
   je_num: "266"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -52625.00 CLP
+    desc: "Visa Banco de Chile 1168 Marzo-21 EAG"
   Expenses:EAG:TC:TcVariasEag-430017  52625.00 CLP
+    desc: "Visa Banco de Chile 1168 Marzo-21 EAG"
 
-2021-04-20 * "F29 Odontologia - Marzo 2021"
+2021-04-20 * "JE 281"
   id: "282"
   je_num: "281"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  3491.00 CLP
+    desc: "F29 Odontologia - Marzo 2021"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -3491.00 CLP
+    desc: "F29 Odontologia - Marzo 2021"
 
-2021-04-20 * "Aria 31 Gasto comun Marzo 2021"
+2021-04-20 * "JE 282"
   id: "283"
   je_num: "282"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:EAG:GastosComunes-411067  1911870.00 CLP
+    desc: "Aria 31 Gasto comun Marzo 2021"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -1911870.00 CLP
+    desc: "Aria 31 Gasto comun Marzo 2021"
 
-2021-04-20 * "Devol Isapre B6339677 Examenes EAG"
+2021-04-20 * "JE 288"
   id: "289"
   je_num: "288"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  140875.00 CLP
+    desc: "Devol Isapre B6339677 Examenes EAG"
   Income:EAG:DevolucinIsapre-310043  -140875.00 CLP
+    desc: "Devol Isapre B6339677 Examenes EAG"
 
-2021-04-20 * "PAC BCI Seguros generales Abril 2021"
+2021-04-20 * "JE 310"
   id: "311"
   je_num: "310"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -883.00 CLP
+    desc: "PAC BCI Seguros generales Abril 2021"
   Expenses:EAG:GastosBancarios-430003  883.00 CLP
+    desc: "PAC BCI Seguros generales Abril 2021"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  -883.00 CLP
+    desc: "PAC BCI Seguros generales Abril 2021"
   Expenses:Jocelyn:GastosBancarios-690003  883.00 CLP
+    desc: "PAC BCI Seguros generales Abril 2021"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -883.00 CLP
+    desc: "PAC BCI Seguros generales Abril 2021"
   Expenses:Jeannette:GastosBancarios-790003  883.00 CLP
+    desc: "PAC BCI Seguros generales Abril 2021"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -883.00 CLP
+    desc: "PAC BCI Seguros generales Abril 2021"
   Expenses:Johanna:GastosBancarios-890003  883.00 CLP
+    desc: "PAC BCI Seguros generales Abril 2021"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -883.00 CLP
+    desc: "PAC BCI Seguros generales Abril 2021"
   Expenses:Jael:GastosBancarios-990003  883.00 CLP
+    desc: "PAC BCI Seguros generales Abril 2021"
 
-2021-04-21 * "UF116,03 Budhaus - Saldo 4 equipos AC"
+2021-04-21 * "JE 283"
   id: "284"
   je_num: "283"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -3418108.00 CLP
+    desc: "UF116,03 Budhaus - Saldo 4 equipos AC"
   Expenses:EAG:ObrasDeInfraestructuraMb-413900  3418108.00 CLP
+    desc: "UF116,03 Budhaus - Saldo 4 equipos AC"
 
-2021-04-21 * "USD1.500 Odis J. Olivero-Arreglos Depto"
+2021-04-21 * "JE 284"
   id: "285"
   je_num: "284"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1052550.00 CLP
+    desc: "USD1.500 Odis J. Olivero-Arreglos Depto"
   Assets:EAG:Bancos:BancoBci10160175-111005  -8342.00 CLP
+    desc: "USD1.500 Odis J. Olivero-Arreglos Depto"
   Expenses:EAG:MantencinGeneralInstalaciones-415065  1052550.00 CLP
+    desc: "USD1.500 Odis J. Olivero-Arreglos Depto"
   Expenses:EAG:GastosBancarios-430003  8342.00 CLP
+    desc: "USD1.500 Odis J. Olivero-Arreglos Depto"
 
-2021-04-21 * "USD1.300 Soraya Rodriguez - Empl. Miami"
+2021-04-21 * "JE 285"
   id: "286"
   je_num: "285"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -912990.00 CLP
+    desc: "USD1.300 Soraya Rodriguez - Empl. Miami"
   Assets:EAG:Bancos:BancoBci10160175-111005  -8342.00 CLP
+    desc: "USD1.300 Soraya Rodriguez - Empl. Miami"
   Expenses:EAG:MantencinGeneralInstalaciones-415065  912990.00 CLP
+    desc: "USD1.300 Soraya Rodriguez - Empl. Miami"
   Expenses:EAG:GastosBancarios-430003  8342.00 CLP
+    desc: "USD1.300 Soraya Rodriguez - Empl. Miami"
 
-2021-04-21 * "Rol 3783-191 Departamento EAG"
+2021-04-21 * "JE 286"
   id: "287"
   je_num: "286"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -3250206.00 CLP
+    desc: "Rol 3783-191 Departamento EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -140844.00 CLP
     desc: "Rol 3783-225 Estacionamiento 23"
   Assets:EAG:Bancos:BancoBci10160175-111005  -140844.00 CLP
@@ -526,6 +704,7 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -57415.00 CLP
     desc: "Rol 3783-197 Bodega 1"
   Expenses:EAG:Contribuciones-411069  3250206.00 CLP
+    desc: "Rol 3783-191 Departamento EAG"
   Expenses:EAG:Contribuciones-411069  140844.00 CLP
     desc: "Rol 3783-225 Estacionamiento 23"
   Expenses:EAG:Contribuciones-411069  140844.00 CLP
@@ -533,64 +712,87 @@
   Expenses:EAG:Contribuciones-411069  57415.00 CLP
     desc: "Rol 3783-197 Bodega 1"
 
-2021-04-21 * "Devol isapre B#190 Pisicologo Clinico"
+2021-04-21 * "JE 316"
   id: "317"
   je_num: "316"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  10500.00 CLP
+    desc: "Devol isapre B#190 Pisicologo Clinico"
   Income:Jael:DevolucinIsapreJael-970051  -10500.00 CLP
     desc: "Isapre B#190 Pisicologo Clinico Jael"
 
-2021-04-22 * "Zita Miranda de EAG"
+2021-04-22 * "JE 287"
   id: "288"
   je_num: "287"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:EAG:SueldosRopaRegalas-411001  550000.00 CLP
+    desc: "Zita Miranda de EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -550000.00 CLP
+    desc: "Zita Miranda de EAG"
 
-2021-04-23 * "Acevedo F293049 Combustible Marzo 2021"
+2021-04-23 * "JE 289"
   id: "290"
   je_num: "289"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -58728.00 CLP
+    desc: "Acevedo F293049 Combustible Marzo 2021"
   Expenses:EAG:CombustibleVehculos-413044  58728.00 CLP
+    desc: "Acevedo F293049 Combustible Marzo 2021"
 
-2021-04-23 * "Sra Jacqueline retiro Abril 2021"
+2021-04-23 * "JE 290"
   id: "291"
   je_num: "290"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:EAG:SraJacquelineDeutsch-430023  3895119.00 CLP
+    desc: "Sra Jacqueline retiro Abril 2021"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -3895119.00 CLP
+    desc: "Sra Jacqueline retiro Abril 2021"
 
-2021-04-23 * "Seguro cesantia EAG cuota 4/5"
+2021-04-23 * "JE 291"
   id: "292"
   je_num: "291"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  1904394.00 CLP
+    desc: "Seguro cesantia EAG cuota 4/5"
   Income:EAG:OtrosIngresos-310099  -1904394.00 CLP
+    desc: "Seguro cesantia EAG cuota 4/5"
 
-2021-04-23 * "Devol LATAM AIRLINES - Pasajes EAG"
+2021-04-23 * "JE 293"
   id: "294"
   je_num: "293"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  234099.00 CLP
+    desc: "Devol LATAM AIRLINES - Pasajes EAG"
   Income:EAG:OtrosIngresos-310099  -234099.00 CLP
+    desc: "Devol LATAM AIRLINES - Pasajes EAG"
 
-2021-04-26 * "Margarita G. Psicologa Jael Avayu"
+2021-04-26 * "JE 292"
   id: "293"
   je_num: "292"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -60000.00 CLP
+    desc: "Margarita G. Psicologa Jael Avayu"
   Expenses:Jael:IsapreGastosMdicos-990051  60000.00 CLP
+    desc: "Margarita G. Psicologa Jael Avayu"
 
-2021-04-26 * "Abril 2021"
+2021-04-26 * "JE 294"
   id: "295"
   je_num: "294"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:Jocelyn:RetirosDelMes-690001  1500000.00 CLP
+    desc: "Abril 2021"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -2230000.00 CLP
     desc: "Jeannette Avayu retiro/enfermera Abril"
   Expenses:Jeannette:RetirosDelMes-790001  1500000.00 CLP
+    desc: "Abril 2021"
   Expenses:Jeannette:EnfermeraGastosMdicos-790051  730000.00 CLP
     desc: "Enfermera Abril 2021"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -1500000.00 CLP
@@ -598,29 +800,39 @@
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -1500000.00 CLP
     desc: "Johanna Avayu Abril 2021"
   Expenses:Johanna:RetirosDelMes-890001  1500000.00 CLP
+    desc: "Abril 2021"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -300000.00 CLP
     desc: "Jael Avayu retiro Abril 2021"
   Expenses:Jael:RetirosDelMes-990001  300000.00 CLP
+    desc: "Abril 2021"
 
-2021-04-27 * "Kia Chile - 7 vacunas influenza EAG"
+2021-04-27 * "JE 295"
   id: "296"
   je_num: "295"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -72800.00 CLP
+    desc: "Kia Chile - 7 vacunas influenza EAG"
   Expenses:EAG:Remedios-430051  72800.00 CLP
+    desc: "Kia Chile - 7 vacunas influenza EAG"
 
-2021-04-28 * "EAG sueldo Inv Tecnion Ltda Abril 2021"
+2021-04-28 * "JE 296"
   id: "297"
   je_num: "296"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  5094338.00 CLP
+    desc: "EAG sueldo Inv Tecnion Ltda Abril 2021"
   Income:EAG:SueldoTecnin-310003  -5094338.00 CLP
+    desc: "EAG sueldo Inv Tecnion Ltda Abril 2021"
 
-2021-04-28 * "Sra. Berta Galatzan - Abril 2021"
+2021-04-28 * "JE 297"
   id: "298"
   je_num: "297"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -800000.00 CLP
+    desc: "Sra. Berta Galatzan - Abril 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -56544.00 CLP
     desc: "Fresia Gonzalez efectivo Abril 2021"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -439840.00 CLP
@@ -660,54 +872,73 @@
   Expenses:EAG:SueldosRopaRegalias-413001  350000.00 CLP
     desc: "Esteban Mendez - sueldo Abril 2021"
   Expenses:EAG:SraJacquelineDeutsch-430023  800000.00 CLP
+    desc: "Sra. Berta Galatzan - Abril 2021"
 
-2021-04-28 * "EAG sueldo FC Abril 2021"
+2021-04-28 * "JE 298"
   id: "299"
   je_num: "298"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  15000000.00 CLP
+    desc: "EAG sueldo FC Abril 2021"
   Assets:EAG:Bancos:BancoBci10160175-111005  16670361.00 CLP
     desc: "EAG Complemento Abril 2021"
   Income:EAG:SueldoFcComplemento-310005  -15000000.00 CLP
+    desc: "EAG sueldo FC Abril 2021"
   Income:EAG:SueldoFcComplemento-310005  -16670361.00 CLP
     desc: "EAG Complemento Abril 2021"
 
-2021-04-28 * "USD700 Enfermera Abril 2021"
+2021-04-28 * "JE 300"
   id: "301"
   je_num: "300"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -492345.00 CLP
+    desc: "USD700 Enfermera Abril 2021"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -8413.00 CLP
+    desc: "USD700 Enfermera Abril 2021"
   Expenses:Johanna:GastosBancarios-890003  8413.00 CLP
+    desc: "USD700 Enfermera Abril 2021"
   Expenses:Johanna:EnfermeraGastosMdicos-890051  492345.00 CLP
+    desc: "USD700 Enfermera Abril 2021"
 
-2021-04-28 * "Victoria Celia sueldlo Abril 2021"
+2021-04-28 * "JE 309"
   id: "310"
   je_num: "309"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -700000.00 CLP
+    desc: "Victoria Celia sueldlo Abril 2021"
   Expenses:EAG:SueldosRopaRegalas-411001  700000.00 CLP
+    desc: "Victoria Celia sueldlo Abril 2021"
 
-2021-04-28 * "Com mant plan banco Santander"
+2021-04-28 * "JE 315"
   id: "316"
   je_num: "315"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -7937.00 CLP
+    desc: "Com mant plan banco Santander"
   Expenses:EAG:GastosBancarios-430003  7937.00 CLP
+    desc: "Com mant plan banco Santander"
 
-2021-04-29 * "Sra Raquel - Retiro Abril 2021"
+2021-04-29 * "JE 299"
   id: "300"
   je_num: "299"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4000000.00 CLP
+    desc: "Sra Raquel - Retiro Abril 2021"
   Expenses:EAG:SraRaquelVentura-430021  4000000.00 CLP
     desc: "Retiro Abril 2021"
 
-2021-04-29 * "Jocelyn devol Previred/F29 Odontologia"
+2021-04-29 * "JE 301"
   id: "302"
   je_num: "301"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  364106.00 CLP
+    desc: "Jocelyn devol Previred/F29 Odontologia"
   Assets:Jocelyn:ControlYLiquidacin-610999  9141.00 CLP
     desc: "Dif. x cobrar devol Odontologia Marzo"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -364756.00 CLP
@@ -717,57 +948,80 @@
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -5000.00 CLP
     desc: "Transferencia de fondos a otro banco"
 
-2021-04-29 * "Esteban Mendez - saldo sueldo Abril 2021"
+2021-04-29 * "JE 302"
   id: "303"
   je_num: "302"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -25000.00 CLP
+    desc: "Esteban Mendez - saldo sueldo Abril 2021"
   Expenses:EAG:SueldosRopaRegalias-413001  25000.00 CLP
+    desc: "Esteban Mendez - saldo sueldo Abril 2021"
 
-2021-04-30 * "UF75 Marcelo Budnik Ampliacion cocina"
+2021-04-30 * "JE 303"
   id: "304"
   je_num: "303"
   source: "laudus-erp"
+  entity: "EAG"
   Expenses:EAG:ObrasDeInfraestructuraMb-413900  2212060.00 CLP
+    desc: "UF75 Marcelo Budnik Ampliacion cocina"
   Expenses:EAG:ObrasDeInfraestructuraMb-413900  1474707.00 CLP
     desc: "UF50 Marcelo Budnik Escalera, fogon."
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -1474707.00 CLP
     desc: "UF50 Marcelo Budnik Escalera, fogon."
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -2212060.00 CLP
+    desc: "UF75 Marcelo Budnik Ampliacion cocina"
 
-2021-04-30 * "BH19 IP Chile Junta directiva Abril 2021"
+2021-04-30 * "JE 304"
   id: "305"
   je_num: "304"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  1821593.00 CLP
+    desc: "BH19 IP Chile Junta directiva Abril 2021"
   Income:EAG:DirectorioIpChile-310021  -1821593.00 CLP
+    desc: "BH19 IP Chile Junta directiva Abril 2021"
 
-2021-04-30 * "USD94,95 Levine - Renov. patente Bentley"
+2021-04-30 * "JE 305"
   id: "306"
   je_num: "305"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -67851.00 CLP
+    desc: "USD94,95 Levine - Renov. patente Bentley"
   Assets:EAG:Bancos:BancoBci10160175-111005  -8391.00 CLP
+    desc: "USD94,95 Levine - Renov. patente Bentley"
   Expenses:EAG:MantencinGeneralInstalaciones-415065  67851.00 CLP
+    desc: "USD94,95 Levine - Renov. patente Bentley"
   Expenses:EAG:GastosBancarios-430003  8391.00 CLP
+    desc: "USD94,95 Levine - Renov. patente Bentley"
 
-2021-04-30 * "USD715 Devol a Jocelyn - Gastos tarjeta"
+2021-04-30 * "JE 306"
   id: "307"
   je_num: "306"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -514872.00 CLP
+    desc: "USD715 Devol a Jocelyn - Gastos tarjeta"
   Expenses:EAG:OtrosGastosPersonales-430099  514872.00 CLP
+    desc: "USD715 Devol a Jocelyn - Gastos tarjeta"
 
-2021-04-30 * "EAG Gastos Inv Tecnion Ltda Abril 2021"
+2021-04-30 * "JE 322"
   id: "323"
   je_num: "322"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:ControlYLiquidacin-115099  11892244.00 CLP
+    desc: "EAG Gastos Inv Tecnion Ltda Abril 2021"
   Income:EAG:DevolucinOficinaTecnin-310035  -11892244.00 CLP
+    desc: "EAG Gastos Inv Tecnion Ltda Abril 2021"
 
-2021-04-30 * "EAG Gerencia Abril 2021"
+2021-04-30 * "JE 333"
   id: "334"
   je_num: "333"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:ControlYLiquidacin-115099  902929.00 CLP
+    desc: "EAG Gerencia Abril 2021"
   Income:EAG:DevolucinGerencia50-310037  -902929.00 CLP
+    desc: "EAG Gerencia Abril 2021"

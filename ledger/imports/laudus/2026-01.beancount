@@ -1,96 +1,132 @@
-2026-01-02 * "Smartv TV 65° 4K UHD - Depto EAG"
+2026-01-02 * "JE 5474"
   id: "5513"
   je_num: "5474"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -303980.00 CLP
+    desc: "Smartv TV 65° 4K UHD - Depto EAG"
   Expenses:EAG:CompraDeActivosEquipamiento-411090  303980.00 CLP
+    desc: "Smartv TV 65° 4K UHD - Depto EAG"
 
-2026-01-02 * "Abono prestamo Jhonny"
+2026-01-02 * "JE 5475"
   id: "5514"
   je_num: "5475"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  150000.00 CLP
+    desc: "Abono prestamo Jhonny"
   Income:EAG:JhonnyGuerra-310045  -150000.00 CLP
+    desc: "Abono prestamo Jhonny"
 
-2026-01-02 * "Jocelyn Avayu - Devol compras sur de EAG"
+2026-01-02 * "JE 5476"
   id: "5515"
   je_num: "5476"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -576675.00 CLP
+    desc: "Jocelyn Avayu - Devol compras sur de EAG"
   Expenses:EAG:ComprasCasaEfectivo-413049  576675.00 CLP
+    desc: "Jocelyn Avayu - Devol compras sur de EAG"
 
-2026-01-02 * "Celia Uscuvilca de Sra Raquel Ventura"
+2026-01-02 * "JE 5477"
   id: "5516"
   je_num: "5477"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -245000.00 CLP
+    desc: "Celia Uscuvilca de Sra Raquel Ventura"
   Assets:EAG:Bancos:BancoBci10160175-111005  -700000.00 CLP
     desc: "Mariela Rubio de Sra Raquel Ventura"
   Expenses:EAG:SraRaquelVentura-430021  245000.00 CLP
+    desc: "Celia Uscuvilca de Sra Raquel Ventura"
   Expenses:EAG:SraRaquelVentura-430021  700000.00 CLP
     desc: "Mariela Rubio de Sra Raquel Ventura"
 
-2026-01-02 * "Comer. productos del mar - Sra Raquel"
+2026-01-02 * "JE 5478"
   id: "5517"
   je_num: "5478"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -383500.00 CLP
+    desc: "Comer. productos del mar - Sra Raquel"
   Expenses:EAG:ComprasCasaEfectivo-411049  383500.00 CLP
+    desc: "Comer. productos del mar - Sra Raquel"
 
-2026-01-02 * "Servipag - Tag vehiculos Eduardo Avayu"
+2026-01-02 * "JE 5480"
   id: "5519"
   je_num: "5480"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -40667.00 CLP
+    desc: "Servipag - Tag vehiculos Eduardo Avayu"
   Expenses:EAG:MantencinVehculosSeguros-411043  40667.00 CLP
+    desc: "Servipag - Tag vehiculos Eduardo Avayu"
 
-2026-01-02 * "USD3.182 Master Association Fee"
+2026-01-02 * "JE 5484"
   id: "5523"
   je_num: "5484"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci110014172UsMiami-111015  -2886488.00 CLP
+    desc: "USD3.182 Master Association Fee"
   Expenses:EAG:GastosComunesUsa-415067  2886488.00 CLP
+    desc: "USD3.182 Master Association Fee"
 
-2026-01-02 * "Traspaso a Fintual"
+2026-01-02 * "JE 5576"
   id: "5615"
   je_num: "5576"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -100000.00 CLP
+    desc: "Traspaso a Fintual"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -100000.00 CLP
     desc: "Traspaso de fondos a otra cuenta"
   Expenses:Jael:OtrosGastosPersonalesJael-990099  100000.00 CLP
+    desc: "Traspaso a Fintual"
   Expenses:Jael:OtrosGastosPersonalesJael-990099  100000.00 CLP
     desc: "Traspaso de fondos a otra cuenta"
 
-2026-01-05 * "Raquel Ventua traspaso banco santander"
+2026-01-05 * "JE 5479"
   id: "5518"
   je_num: "5479"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1500000.00 CLP
+    desc: "Raquel Ventua traspaso banco santander"
   Expenses:EAG:SraRaquelVentura-430021  1500000.00 CLP
+    desc: "Raquel Ventua traspaso banco santander"
 
-2026-01-05 * "Maximiliano Ventura de Eduardo Avayu"
+2026-01-05 * "JE 5481"
   id: "5520"
   je_num: "5481"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -45000.00 CLP
+    desc: "Maximiliano Ventura de Eduardo Avayu"
   Expenses:EAG:OtrosGastosPersonales-430099  45000.00 CLP
+    desc: "Maximiliano Ventura de Eduardo Avayu"
 
-2026-01-05 * "Devol Isapre B#8007 Psiquiatra EAG"
+2026-01-05 * "JE 5676"
   id: "5715"
   je_num: "5676"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  17200.00 CLP
+    desc: "Devol Isapre B#8007 Psiquiatra EAG"
   Income:EAG:DevolucinIsapre-310043  -17200.00 CLP
+    desc: "Devol Isapre B#8007 Psiquiatra EAG"
 
-2026-01-06 * "Mariela Mendez - Leyes soc Dic 2025"
+2026-01-06 * "JE 5482"
   id: "5521"
   je_num: "5482"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -314081.00 CLP
+    desc: "Mariela Mendez - Leyes soc Dic 2025"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -1662323.00 CLP
     desc: "Leyes soc empl sur/stgo EAG Dic. 2025"
   Expenses:EAG:SueldosRopaRegalas-411001  314081.00 CLP
+    desc: "Mariela Mendez - Leyes soc Dic 2025"
   Expenses:EAG:SueldosRopaRegalas-411001  296710.00 CLP
     desc: "Victoria Uscuvilca - Leyes soc Dic 2025"
   Expenses:EAG:SueldosRopaRegalias-413001  308300.00 CLP
@@ -106,67 +142,93 @@
   Expenses:EAG:SueldosRopaRegalias-413001  65503.00 CLP
     desc: "Rossy Diaz - Leyes soc Diciembre 2025"
 
-2026-01-06 * "EAG - Isapre Cruz Blanca Diciembre 2025"
+2026-01-06 * "JE 5483"
   id: "5522"
   je_num: "5483"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -461440.00 CLP
+    desc: "EAG - Isapre Cruz Blanca Diciembre 2025"
   Expenses:EAG:CotizacinIsapre-430055  461440.00 CLP
+    desc: "EAG - Isapre Cruz Blanca Diciembre 2025"
 
-2026-01-06 * "Victor Abarzua - Transfer familia Molco"
+2026-01-06 * "JE 5485"
   id: "5524"
   je_num: "5485"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -200000.00 CLP
+    desc: "Victor Abarzua - Transfer familia Molco"
   Expenses:EAG:MovilizacinViajesChoferes-413037  200000.00 CLP
+    desc: "Victor Abarzua - Transfer familia Molco"
 
-2026-01-06 * "Jose Alvo Ergas de Raquel Ventura"
+2026-01-06 * "JE 5487"
   id: "5526"
   je_num: "5487"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -320890.00 CLP
+    desc: "Jose Alvo Ergas de Raquel Ventura"
   Expenses:EAG:SraRaquelVentura-430021  320890.00 CLP
+    desc: "Jose Alvo Ergas de Raquel Ventura"
 
-2026-01-06 * "Marion Leal - Kinesiologia cuello EAG"
+2026-01-06 * "JE 5489"
   id: "5528"
   je_num: "5489"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -90000.00 CLP
+    desc: "Marion Leal - Kinesiologia cuello EAG"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  90000.00 CLP
+    desc: "Marion Leal - Kinesiologia cuello EAG"
 
-2026-01-06 * "UF5,294 Seguros Continental SA TROV EAG"
+2026-01-06 * "JE 5502"
   id: "5541"
   je_num: "5502"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -210442.00 CLP
+    desc: "UF5,294 Seguros Continental SA TROV EAG"
   Expenses:EAG:SegurosPropiedad-411071  210442.00 CLP
+    desc: "UF5,294 Seguros Continental SA TROV EAG"
 
-2026-01-06 * "Traspaso de fondos a terceros"
+2026-01-06 * "JE 5577"
   id: "5616"
   je_num: "5577"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -175000.00 CLP
+    desc: "Traspaso de fondos a terceros"
   Expenses:Jael:OtrosGastosPersonalesJael-990099  175000.00 CLP
+    desc: "Traspaso de fondos a terceros"
 
-2026-01-06 * "PAC Seguro fraude Santander"
+2026-01-06 * "JE 5649"
   id: "5688"
   je_num: "5649"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1550.00 CLP
+    desc: "PAC Seguro fraude Santander"
   Expenses:EAG:GastosBancarios-430003  1550.00 CLP
+    desc: "PAC Seguro fraude Santander"
 
-2026-01-07 * "USD838,48 Visa BCI 1027 Diciembre 2025"
+2026-01-07 * "JE 5490"
   id: "5529"
   je_num: "5490"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -759579.00 CLP
+    desc: "USD838,48 Visa BCI 1027 Diciembre 2025"
   Expenses:EAG:TC:Tc1027VisaInfinityUs-430006  759579.00 CLP
+    desc: "USD838,48 Visa BCI 1027 Diciembre 2025"
 
-2026-01-07 * "Tarjetas Santander Sra. Raquel Ventura"
+2026-01-07 * "JE 5494"
   id: "5533"
   je_num: "5494"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -9405000.00 CLP
+    desc: "Tarjetas Santander Sra. Raquel Ventura"
   Expenses:EAG:TC:TcRaquelVentura-430019  3082510.00 CLP
     desc: "Master Santander 9046 Raquel Ventura"
   Expenses:EAG:TC:TcRaquelVentura-430019  2909995.00 CLP
@@ -174,94 +236,125 @@
   Expenses:EAG:TC:TcRaquelVentura-430019  3412495.00 CLP
     desc: "USD3.769,97 Master 9046 Raquel Ventura"
 
-2026-01-07 * "Traspaso a Cuenta Santander EAG 63188824"
+2026-01-07 * "JE 5495"
   id: "5534"
   je_num: "5495"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -11400000.00 CLP
+    desc: "Traspaso a Cuenta Santander EAG 63188824"
   Assets:EAG:Bancos:BancoSantander63188824-111009  11400000.00 CLP
     desc: "Traspaso de cuenta BCI EAG 10160175"
 
-2026-01-07 * "F#470730 Acevedo combustible Dic 2025"
+2026-01-07 * "JE 5511"
   id: "5550"
   je_num: "5511"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -61003.00 CLP
+    desc: "F#470730 Acevedo combustible Dic 2025"
   Assets:EAG:Bancos:BancoBci10160175-111005  -70640.00 CLP
     desc: "F#471450 Acevedo combustible Dic 2025"
   Assets:EAG:Bancos:BancoBci10160175-111005  -71104.00 CLP
     desc: "F#472690 Acevedo combustible Ener 2026"
   Expenses:EAG:CombustibleVehculos-413044  61003.00 CLP
+    desc: "F#470730 Acevedo combustible Dic 2025"
   Expenses:EAG:CombustibleVehculos-413044  70640.00 CLP
     desc: "F#471450 Acevedo combustible Dic 2025"
   Expenses:EAG:CombustibleVehculos-413044  71104.00 CLP
     desc: "F#472690 Acevedo combustible Ener 2026"
 
-2026-01-07 * "F#37536 Kia Chile - Tassman VKKR50 EAG"
+2026-01-07 * "JE 5512"
   id: "5551"
   je_num: "5512"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1899917.00 CLP
+    desc: "F#37536 Kia Chile - Tassman VKKR50 EAG"
   Assets:EAG:ControlYLiquidacin-115099  1899917.00 CLP
+    desc: "F#37536 Kia Chile - Tassman VKKR50 EAG"
 
-2026-01-07 * "USD69,22 Visa Santander 0858 EAG"
+2026-01-07 * "JE 5650"
   id: "5689"
   je_num: "5650"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -62540.00 CLP
+    desc: "USD69,22 Visa Santander 0858 EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1305115.00 CLP
     desc: "USD1.444,43 Mastercard Santander EAG"
   Expenses:EAG:TC:Tc8996MastercardLanpassUs-430008  1305115.00 CLP
     desc: "USD1.444,43 Mastercard Santander EAG"
   Expenses:EAG:TC:Tc0858VisaLatanpassUs-430010  62540.00 CLP
+    desc: "USD69,22 Visa Santander 0858 EAG"
 
-2026-01-08 * "Dr. Patricio Fischman - Atenciones EAG"
+2026-01-08 * "JE 5501"
   id: "5540"
   je_num: "5501"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -150000.00 CLP
+    desc: "Dr. Patricio Fischman - Atenciones EAG"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  150000.00 CLP
+    desc: "Dr. Patricio Fischman - Atenciones EAG"
 
-2026-01-09 * "B#15951 Agua Choshuenco EAG Dic 2025"
+2026-01-09 * "JE 5504"
   id: "5543"
   je_num: "5504"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -133420.00 CLP
+    desc: "B#15951 Agua Choshuenco EAG Dic 2025"
   Expenses:EAG:Agua-413013  133420.00 CLP
+    desc: "B#15951 Agua Choshuenco EAG Dic 2025"
 
-2026-01-09 * "Juan Vilaza - Enmarcados Raquel Ventura"
+2026-01-09 * "JE 5505"
   id: "5544"
   je_num: "5505"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -150000.00 CLP
+    desc: "Juan Vilaza - Enmarcados Raquel Ventura"
   Expenses:EAG:SraRaquelVentura-430021  150000.00 CLP
+    desc: "Juan Vilaza - Enmarcados Raquel Ventura"
 
-2026-01-09 * "Abono Alberto Bitran - Prestamo de EAG"
+2026-01-09 * "JE 5634"
   id: "5673"
   je_num: "5634"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  2050000.00 CLP
+    desc: "Abono Alberto Bitran - Prestamo de EAG"
   Assets:EAG:DeudoresVarios-115019  -2050000.00 CLP
+    desc: "Abono Alberto Bitran - Prestamo de EAG"
 
-2026-01-09 * "Mariela Mendez - Impto unico Dic 2025"
+2026-01-09 * "JE 5639"
   id: "5678"
   je_num: "5639"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1883.00 CLP
+    desc: "Mariela Mendez - Impto unico Dic 2025"
   Expenses:EAG:SueldosRopaRegalas-411001  1883.00 CLP
+    desc: "Mariela Mendez - Impto unico Dic 2025"
 
-2026-01-09 * "Mastercard Santander 8996 Eduardo Avayu"
+2026-01-09 * "JE 5651"
   id: "5690"
   je_num: "5651"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -4988614.00 CLP
+    desc: "Mastercard Santander 8996 Eduardo Avayu"
   Expenses:EAG:TC:Tc8996MastercardLanpass-430007  4988614.00 CLP
+    desc: "Mastercard Santander 8996 Eduardo Avayu"
 
-2026-01-09 * "Visa Santander 0858 Eduardo Avayu"
+2026-01-09 * "JE 5652"
   id: "5691"
   je_num: "5652"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -4982028.00 CLP
+    desc: "Visa Santander 0858 Eduardo Avayu"
   Assets:EAG:ControlYLiquidacin-115099  37239.00 CLP
     desc: "PAT Santander - Aguas andinas"
   Assets:EAG:ControlYLiquidacin-115099  14990.00 CLP
@@ -279,54 +372,75 @@
   Assets:EAG:ControlYLiquidacin-115099  2479715.00 CLP
     desc: "PAT Santander - Enel SA"
   Expenses:EAG:TC:Tc0858VisaLatanpass-430009  595036.00 CLP
+    desc: "Visa Santander 0858 Eduardo Avayu"
 
-2026-01-12 * "UF806,28 Mandato mutuo Inv. Tecnion"
+2026-01-12 * "JE 5506"
   id: "5545"
   je_num: "5506"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  32053516.00 CLP
+    desc: "UF806,28 Mandato mutuo Inv. Tecnion"
   Assets:EAG:InvTecnionLimitada-113018  -32053516.00 CLP
+    desc: "UF806,28 Mandato mutuo Inv. Tecnion"
 
-2026-01-12 * "Victoria Svigilisky Previred Dic. 2025"
+2026-01-12 * "JE 5507"
   id: "5546"
   je_num: "5507"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -135900.00 CLP
+    desc: "Victoria Svigilisky Previred Dic. 2025"
   Assets:EAG:ControlYLiquidacin-115099  135900.00 CLP
+    desc: "Victoria Svigilisky Previred Dic. 2025"
 
-2026-01-12 * "USD10.000 Efectivo Eduardo Avayu"
+2026-01-12 * "JE 5508"
   id: "5547"
   je_num: "5508"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -8928000.00 CLP
+    desc: "USD10.000 Efectivo Eduardo Avayu"
   Expenses:EAG:Efectivo-430001  8928000.00 CLP
+    desc: "USD10.000 Efectivo Eduardo Avayu"
 
-2026-01-12 * "Cotizaciones Diciembre 2025"
+2026-01-12 * "JE 5509"
   id: "5548"
   je_num: "5509"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -399445.00 CLP
+    desc: "Cotizaciones Diciembre 2025"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  399445.00 CLP
+    desc: "Cotizaciones Diciembre 2025"
 
-2026-01-12 * "F#37536 Kia Chile - Tassman VKKR50 EAG"
+2026-01-12 * "JE 5513"
   id: "5552"
   je_num: "5513"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  1899917.00 CLP
+    desc: "F#37536 Kia Chile - Tassman VKKR50 EAG"
   Assets:EAG:ControlYLiquidacin-115099  -1899917.00 CLP
+    desc: "F#37536 Kia Chile - Tassman VKKR50 EAG"
 
-2026-01-12 * "Abono J.V Eduardo Avayu - Personal"
+2026-01-12 * "JE 5635"
   id: "5674"
   je_num: "5635"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  300000.00 CLP
+    desc: "Abono J.V Eduardo Avayu - Personal"
   Assets:EAG:DeudoresVarios-115019  -300000.00 CLP
+    desc: "Abono J.V Eduardo Avayu - Personal"
 
-2026-01-12 * "Jocelyn Avayu - Devol compras sur EAG"
+2026-01-12 * "JE 5653"
   id: "5692"
   je_num: "5653"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -450579.00 CLP
+    desc: "Jocelyn Avayu - Devol compras sur EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -80000.00 CLP
     desc: "Catalina Alvarez - 1 Sesion EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -80000.00 CLP
@@ -334,70 +448,97 @@
   Expenses:EAG:MovilizacinViajesChoferes-411037  80000.00 CLP
     desc: "Jhonny Guerra de Eduardo Avayu"
   Expenses:EAG:ComprasCasaEfectivo-413049  450579.00 CLP
+    desc: "Jocelyn Avayu - Devol compras sur EAG"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  80000.00 CLP
     desc: "Catalina Alvarez - 1 Sesion EAG"
 
-2026-01-12 * "Seguro proteccion bancaria Banco Chile"
+2026-01-12 * "JE 5674"
   id: "5713"
   je_num: "5674"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -6122.00 CLP
+    desc: "Seguro proteccion bancaria Banco Chile"
   Expenses:EAG:GastosBancarios-430003  6122.00 CLP
+    desc: "Seguro proteccion bancaria Banco Chile"
 
-2026-01-13 * "Victoria Svigilisky Previred Dic. 2025"
+2026-01-13 * "JE 5510"
   id: "5549"
   je_num: "5510"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  135900.00 CLP
+    desc: "Victoria Svigilisky Previred Dic. 2025"
   Assets:EAG:ControlYLiquidacin-115099  -135900.00 CLP
+    desc: "Victoria Svigilisky Previred Dic. 2025"
 
-2026-01-13 * "UF451,46 Mandato mutuo Inv. Tecnion"
+2026-01-13 * "JE 5514"
   id: "5553"
   je_num: "5514"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  17946551.00 CLP
+    desc: "UF451,46 Mandato mutuo Inv. Tecnion"
   Assets:EAG:InvTecnionLimitada-113018  -17946551.00 CLP
+    desc: "UF451,46 Mandato mutuo Inv. Tecnion"
 
-2026-01-13 * "Raquel Ventura - Traspaso banco BICE"
+2026-01-13 * "JE 5521"
   id: "5560"
   je_num: "5521"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -5000000.00 CLP
+    desc: "Raquel Ventura - Traspaso banco BICE"
   Expenses:EAG:SraRaquelVentura-430021  5000000.00 CLP
+    desc: "Raquel Ventura - Traspaso banco BICE"
 
-2026-01-13 * "Alejandra Kleinman de Raquel Ventura"
+2026-01-13 * "JE 5526"
   id: "5565"
   je_num: "5526"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1800000.00 CLP
+    desc: "Alejandra Kleinman de Raquel Ventura"
   Expenses:EAG:SraRaquelVentura-430021  1800000.00 CLP
+    desc: "Alejandra Kleinman de Raquel Ventura"
 
-2026-01-13 * "Marion Leal - Kinesiologia cuello EAG"
+2026-01-13 * "JE 5527"
   id: "5566"
   je_num: "5527"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -90000.00 CLP
+    desc: "Marion Leal - Kinesiologia cuello EAG"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  90000.00 CLP
+    desc: "Marion Leal - Kinesiologia cuello EAG"
 
-2026-01-13 * "Cruz Verde - Remedios EAG"
+2026-01-13 * "JE 5528"
   id: "5567"
   je_num: "5528"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -55323.00 CLP
+    desc: "Cruz Verde - Remedios EAG"
   Expenses:EAG:Remedios-430051  55323.00 CLP
+    desc: "Cruz Verde - Remedios EAG"
 
-2026-01-13 * "Devol Isapre B#8083 Psiquiatra EAG"
+2026-01-13 * "JE 5677"
   id: "5716"
   je_num: "5677"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  14340.00 CLP
+    desc: "Devol Isapre B#8083 Psiquiatra EAG"
   Income:EAG:DevolucinIsapre-310043  -14340.00 CLP
+    desc: "Devol Isapre B#8083 Psiquiatra EAG"
 
-2026-01-14 * "Visa BCI 1027 EAG Diciembre 2025"
+2026-01-14 * "JE 5550"
   id: "5589"
   je_num: "5550"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4041328.00 CLP
+    desc: "Visa BCI 1027 EAG Diciembre 2025"
   Assets:EAG:ControlYLiquidacin-115099  283080.00 CLP
     desc: "PAT BCI - Esval SA"
   Assets:EAG:ControlYLiquidacin-115099  61266.00 CLP
@@ -409,82 +550,115 @@
   Assets:EAG:ControlYLiquidacin-115099  131410.00 CLP
     desc: "PAT BCI - Gasvalpo SA"
   Expenses:EAG:TC:Tc1027VisaInfinity-430005  2956314.00 CLP
+    desc: "Visa BCI 1027 EAG Diciembre 2025"
 
-2026-01-14 * "Jocelyn Avayu - Abono gastos Odontologia"
+2026-01-14 * "JE 5573"
   id: "5612"
   je_num: "5573"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  400000.00 CLP
+    desc: "Jocelyn Avayu - Abono gastos Odontologia"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -400000.00 CLP
+    desc: "Jocelyn Avayu - Abono gastos Odontologia"
 
-2026-01-14 * "Marion Leal - Kinesiologia cuello EAG"
+2026-01-14 * "JE 5654"
   id: "5693"
   je_num: "5654"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -90000.00 CLP
+    desc: "Marion Leal - Kinesiologia cuello EAG"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  90000.00 CLP
+    desc: "Marion Leal - Kinesiologia cuello EAG"
 
-2026-01-14 * "Visa Banco de Chile 1168 Eduardo Avayu"
+2026-01-14 * "JE 5675"
   id: "5714"
   je_num: "5675"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -73362.00 CLP
+    desc: "Visa Banco de Chile 1168 Eduardo Avayu"
   Expenses:EAG:TC:TcVariasEag-430017  73362.00 CLP
+    desc: "Visa Banco de Chile 1168 Eduardo Avayu"
 
-2026-01-15 * "Eliot Avendaño - Remedios EAG"
+2026-01-15 * "JE 5546"
   id: "5585"
   je_num: "5546"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -49000.00 CLP
+    desc: "Eliot Avendaño - Remedios EAG"
   Expenses:EAG:Remedios-430051  49000.00 CLP
+    desc: "Eliot Avendaño - Remedios EAG"
 
-2026-01-15 * "Paola Estrada - Saldo escritorio/otros"
+2026-01-15 * "JE 5555"
   id: "5594"
   je_num: "5555"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1400000.00 CLP
+    desc: "Paola Estrada - Saldo escritorio/otros"
   Expenses:EAG:MantencinGeneralInstalaciones-411065  1400000.00 CLP
+    desc: "Paola Estrada - Saldo escritorio/otros"
 
-2026-01-15 * "Jeannette Avayu - Devol compras"
+2026-01-15 * "JE 5587"
   id: "5626"
   je_num: "5587"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -447000.00 CLP
+    desc: "Jeannette Avayu - Devol compras"
   Expenses:EAG:ComprasCasaEfectivo-413049  447000.00 CLP
+    desc: "Jeannette Avayu - Devol compras"
 
-2026-01-15 * "Victoria Svigilisky - FID Seguros TKFG30"
+2026-01-15 * "JE 5588"
   id: "5627"
   je_num: "5588"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -72340.00 CLP
+    desc: "Victoria Svigilisky - FID Seguros TKFG30"
   Assets:EAG:ControlYLiquidacin-115099  72340.00 CLP
+    desc: "Victoria Svigilisky - FID Seguros TKFG30"
 
-2026-01-15 * "Richard Simons - Servicios Wifi"
+2026-01-15 * "JE 5655"
   id: "5694"
   je_num: "5655"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -40000.00 CLP
+    desc: "Richard Simons - Servicios Wifi"
   Expenses:EAG:MantencinGeneralInstalaciones-413065  40000.00 CLP
+    desc: "Richard Simons - Servicios Wifi"
 
-2026-01-15 * "Devol Isapre B#7649 Psiquiatra EAG"
+2026-01-15 * "JE 5678"
   id: "5717"
   je_num: "5678"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  14340.00 CLP
+    desc: "Devol Isapre B#7649 Psiquiatra EAG"
   Income:EAG:DevolucinIsapre-310043  -14340.00 CLP
+    desc: "Devol Isapre B#7649 Psiquiatra EAG"
 
-2026-01-15 * "Indumotora hotel en Melbourne/Australia"
+2026-01-15 * "JE 5683"
   id: "5722"
   je_num: "5683"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci18565743Us-111011  5364270.00 CLP
+    desc: "Indumotora hotel en Melbourne/Australia"
   Income:EAG:OtrosIngresos-310099  -5364270.00 CLP
+    desc: "Indumotora hotel en Melbourne/Australia"
 
-2026-01-16 * "Devol FGK Reñaca / Via Gris"
+2026-01-16 * "JE 5544"
   id: "5583"
   je_num: "5544"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  4386992.00 CLP
+    desc: "Devol FGK Reñaca / Via Gris"
   Assets:EAG:ControlYLiquidacin-115099  -37239.00 CLP
     desc: "PAT Santander - Aguas andinas"
   Assets:EAG:ControlYLiquidacin-115099  -14990.00 CLP
@@ -502,28 +676,35 @@
   Assets:EAG:ControlYLiquidacin-115099  -2479715.00 CLP
     desc: "PAT Santander - Enel SA"
 
-2026-01-16 * "Moises FxR - Vuelto viaje Temuco JMC EAG"
+2026-01-16 * "JE 5545"
   id: "5584"
   je_num: "5545"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  13479.00 CLP
+    desc: "Moises FxR - Vuelto viaje Temuco JMC EAG"
   Assets:EAG:FondosPorRendir-115005  -50000.00 CLP
     desc: "CC5.534 Moises FxR Viaje Temuco JMC EAG"
   Expenses:EAG:MovilizacinViajesChoferes-413037  36521.00 CLP
     desc: "Moises FxR - Viaje Temuco JMC EAG"
 
-2026-01-16 * "Esteban Mendez - Prestamo de EAG"
+2026-01-16 * "JE 5547"
   id: "5586"
   je_num: "5547"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -500000.00 CLP
+    desc: "Esteban Mendez - Prestamo de EAG"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  500000.00 CLP
+    desc: "Esteban Mendez - Prestamo de EAG"
 
-2026-01-16 * "Victoria Celia - Compras sur"
+2026-01-16 * "JE 5548"
   id: "5587"
   je_num: "5548"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -200000.00 CLP
+    desc: "Victoria Celia - Compras sur"
   Assets:EAG:Bancos:BancoBci10160175-111005  -405000.00 CLP
     desc: "Mariela Mendez - Compras sur"
   Assets:EAG:Bancos:BancoBci10160175-111005  -177000.00 CLP
@@ -531,6 +712,7 @@
   Assets:EAG:Bancos:BancoBci10160175-111005  -238880.00 CLP
     desc: "Magaly Vergara - Compras sur"
   Expenses:EAG:ComprasCasaEfectivo-413049  200000.00 CLP
+    desc: "Victoria Celia - Compras sur"
   Expenses:EAG:ComprasCasaEfectivo-413049  405000.00 CLP
     desc: "Mariela Mendez - Compras sur"
   Expenses:EAG:ComprasCasaEfectivo-413049  177000.00 CLP
@@ -538,69 +720,97 @@
   Expenses:EAG:ComprasCasaEfectivo-413049  238880.00 CLP
     desc: "Magaly Vergara - Compras sur"
 
-2026-01-16 * "USD30.000 de Cta Cte BCI 10160175 EAG"
+2026-01-16 * "JE 5549"
   id: "5588"
   je_num: "5549"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -26776500.00 CLP
+    desc: "USD30.000 de Cta Cte BCI 10160175 EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -10526.00 CLP
+    desc: "USD30.000 de Cta Cte BCI 10160175 EAG"
   Assets:EAG:Bancos:BancoBci110014172UsMiami-111015  26776500.00 CLP
+    desc: "USD30.000 de Cta Cte BCI 10160175 EAG"
   Expenses:EAG:GastosBancarios-430003  10526.00 CLP
+    desc: "USD30.000 de Cta Cte BCI 10160175 EAG"
 
-2026-01-16 * "Marion Leal - Kinesiologia cuello EAG"
+2026-01-16 * "JE 5552"
   id: "5591"
   je_num: "5552"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -90000.00 CLP
+    desc: "Marion Leal - Kinesiologia cuello EAG"
   Expenses:EAG:ClnicasBonosMdicosExmenes-430053  90000.00 CLP
+    desc: "Marion Leal - Kinesiologia cuello EAG"
 
-2026-01-18 * "Jhonny Guerra - Aeropuerto EAG"
+2026-01-18 * "JE 5553"
   id: "5592"
   je_num: "5553"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -80000.00 CLP
+    desc: "Jhonny Guerra - Aeropuerto EAG"
   Expenses:EAG:MovilizacinViajesChoferes-411037  80000.00 CLP
+    desc: "Jhonny Guerra - Aeropuerto EAG"
 
-2026-01-19 * "Miguel Vidal - Sastre Eduardo Avayu"
+2026-01-19 * "JE 5551"
   id: "5590"
   je_num: "5551"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -250000.00 CLP
+    desc: "Miguel Vidal - Sastre Eduardo Avayu"
   Expenses:EAG:OtrosGastosPersonales-430099  250000.00 CLP
+    desc: "Miguel Vidal - Sastre Eduardo Avayu"
 
-2026-01-19 * "Patente Comercial Odontologia JAD EIRL"
+2026-01-19 * "JE 5570"
   id: "5609"
   je_num: "5570"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -34736.00 CLP
+    desc: "Patente Comercial Odontologia JAD EIRL"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  34736.00 CLP
+    desc: "Patente Comercial Odontologia JAD EIRL"
 
-2026-01-19 * "Jocelyn Avayu - Abono gastos Odontologia"
+2026-01-19 * "JE 5574"
   id: "5613"
   je_num: "5574"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  35000.00 CLP
+    desc: "Jocelyn Avayu - Abono gastos Odontologia"
   Expenses:Jocelyn:OtrosGastosPersonalesJocelyn-690099  -35000.00 CLP
+    desc: "Jocelyn Avayu - Abono gastos Odontologia"
 
-2026-01-19 * "Transferencia Eliana Vald."
+2026-01-19 * "JE 5578"
   id: "5617"
   je_num: "5578"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -25000.00 CLP
+    desc: "Transferencia Eliana Vald."
   Expenses:Jael:OtrosGastosPersonalesJael-990099  25000.00 CLP
+    desc: "Transferencia Eliana Vald."
 
-2026-01-19 * "Transferencia a T. Fischman"
+2026-01-19 * "JE 5579"
   id: "5618"
   je_num: "5579"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -30000.00 CLP
+    desc: "Transferencia a T. Fischman"
   Expenses:Jael:OtrosGastosPersonalesJael-990099  30000.00 CLP
+    desc: "Transferencia a T. Fischman"
 
-2026-01-19 * "Devol Visa BCI 1027 EAG Dic 25 FGK"
+2026-01-19 * "JE 5637"
   id: "5676"
   je_num: "5637"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  1085014.00 CLP
+    desc: "Devol Visa BCI 1027 EAG Dic 25 FGK"
   Assets:EAG:ControlYLiquidacin-115099  -283080.00 CLP
     desc: "PAT BCI - Esval SA"
   Assets:EAG:ControlYLiquidacin-115099  -61266.00 CLP
@@ -612,215 +822,303 @@
   Assets:EAG:ControlYLiquidacin-115099  -131410.00 CLP
     desc: "PAT BCI - Gasvalpo SA"
 
-2026-01-19 * "Miguel Vidal - Sastre Eduardo Avayu"
+2026-01-19 * "JE 5656"
   id: "5695"
   je_num: "5656"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -510000.00 CLP
+    desc: "Miguel Vidal - Sastre Eduardo Avayu"
   Expenses:EAG:OtrosGastosPersonales-430099  510000.00 CLP
+    desc: "Miguel Vidal - Sastre Eduardo Avayu"
 
-2026-01-20 * "UF12,38 Everest Seguro depto Jael Avayu"
+2026-01-20 * "JE 5559"
   id: "5598"
   je_num: "5559"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  489273.00 CLP
+    desc: "UF12,38 Everest Seguro depto Jael Avayu"
   Assets:Jael:ControlYLiquidacin-910099  -489273.00 CLP
+    desc: "UF12,38 Everest Seguro depto Jael Avayu"
 
-2026-01-20 * "Saesa F#9878793 EAG del 15/10 al 15/12"
+2026-01-20 * "JE 5560"
   id: "5599"
   je_num: "5560"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2651600.00 CLP
+    desc: "Saesa F#9878793 EAG del 15/10 al 15/12"
   Expenses:EAG:Luz-413005  2651600.00 CLP
+    desc: "Saesa F#9878793 EAG del 15/10 al 15/12"
 
-2026-01-20 * "Alberto Bitran - Compras sur"
+2026-01-20 * "JE 5561"
   id: "5600"
   je_num: "5561"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -452493.00 CLP
+    desc: "Alberto Bitran - Compras sur"
   Expenses:EAG:ComprasCasaEfectivo-413049  452493.00 CLP
+    desc: "Alberto Bitran - Compras sur"
 
-2026-01-20 * "PAC BCI Seguros generales Enero 2026"
+2026-01-20 * "JE 5575"
   id: "5614"
   je_num: "5575"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1192.00 CLP
+    desc: "PAC BCI Seguros generales Enero 2026"
   Expenses:EAG:GastosBancarios-430003  1192.00 CLP
+    desc: "PAC BCI Seguros generales Enero 2026"
   Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  -1192.00 CLP
+    desc: "PAC BCI Seguros generales Enero 2026"
   Expenses:Jocelyn:GastosBancarios-690003  1192.00 CLP
+    desc: "PAC BCI Seguros generales Enero 2026"
   Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  -1192.00 CLP
+    desc: "PAC BCI Seguros generales Enero 2026"
   Expenses:Jeannette:GastosBancarios-790003  1192.00 CLP
+    desc: "PAC BCI Seguros generales Enero 2026"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -1192.00 CLP
+    desc: "PAC BCI Seguros generales Enero 2026"
   Expenses:Johanna:GastosBancarios-890003  1192.00 CLP
+    desc: "PAC BCI Seguros generales Enero 2026"
   Assets:Jael:Bancos:BancoBci28980981Jael-910005  -1192.00 CLP
+    desc: "PAC BCI Seguros generales Enero 2026"
   Expenses:Jael:GastosBancarios-990003  1192.00 CLP
+    desc: "PAC BCI Seguros generales Enero 2026"
 
-2026-01-21 * "Jocelyn Avayu - Devol compras sur EAG"
+2026-01-21 * "JE 5657"
   id: "5696"
   je_num: "5657"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -378840.00 CLP
+    desc: "Jocelyn Avayu - Devol compras sur EAG"
   Expenses:EAG:ComprasCasaEfectivo-413049  378840.00 CLP
+    desc: "Jocelyn Avayu - Devol compras sur EAG"
 
-2026-01-21 * "Maximiliano Ventura de Eduardo Avayu"
+2026-01-21 * "JE 5658"
   id: "5697"
   je_num: "5658"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -150000.00 CLP
+    desc: "Maximiliano Ventura de Eduardo Avayu"
   Expenses:EAG:OtrosGastosPersonales-430099  150000.00 CLP
+    desc: "Maximiliano Ventura de Eduardo Avayu"
 
-2026-01-22 * "Traspaso a Cuenta Edwards EAG 162338082"
+2026-01-22 * "JE 5562"
   id: "5601"
   je_num: "5562"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -7000000.00 CLP
+    desc: "Traspaso a Cuenta Edwards EAG 162338082"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  7000000.00 CLP
     desc: "Traspaso de cuenta BCI EAG 10160175"
 
-2026-01-22 * "Alejandro Aliaga - Trabajos baños EAG"
+2026-01-22 * "JE 5563"
   id: "5602"
   je_num: "5563"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -80000.00 CLP
+    desc: "Alejandro Aliaga - Trabajos baños EAG"
   Expenses:EAG:MantencinGeneralInstalaciones-413065  80000.00 CLP
+    desc: "Alejandro Aliaga - Trabajos baños EAG"
 
-2026-01-22 * "Gloria Amoyao - 10 dias trabajo"
+2026-01-22 * "JE 5564"
   id: "5603"
   je_num: "5564"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -250000.00 CLP
+    desc: "Gloria Amoyao - 10 dias trabajo"
   Assets:EAG:Bancos:BancoBci10160175-111005  -150000.00 CLP
+    desc: "Gloria Amoyao - 10 dias trabajo"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  -100000.00 CLP
     desc: "Gloria Amoyao - Prestamo de EAG"
   Expenses:EAG:SueldosRopaRegalias-413001  500000.00 CLP
+    desc: "Gloria Amoyao - 10 dias trabajo"
 
-2026-01-22 * "Inv. Tecnion Ltda abono mandato Johanna"
+2026-01-22 * "JE 5580"
   id: "5619"
   je_num: "5580"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  3000000.00 CLP
+    desc: "Inv. Tecnion Ltda abono mandato Johanna"
   Income:Johanna:RetirosTecnin-870011  -3000000.00 CLP
     desc: "Retiro Inv Tecnion - Remesa Enero 2026"
 
-2026-01-22 * "Jocelyn Avayu - Devol Jumbo sur"
+2026-01-22 * "JE 5584"
   id: "5623"
   je_num: "5584"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -1326662.00 CLP
+    desc: "Jocelyn Avayu - Devol Jumbo sur"
   Expenses:EAG:ComprasCasaEfectivo-413049  1326662.00 CLP
+    desc: "Jocelyn Avayu - Devol Jumbo sur"
 
-2026-01-22 * "Jocelyn Avayu - Devol compras casa EAG"
+2026-01-22 * "JE 5659"
   id: "5698"
   je_num: "5659"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -137450.00 CLP
+    desc: "Jocelyn Avayu - Devol compras casa EAG"
   Expenses:EAG:ComprasCasaEfectivo-413049  137450.00 CLP
+    desc: "Jocelyn Avayu - Devol compras casa EAG"
 
-2026-01-23 * "Josef Helmlinger Casanova - EAG"
+2026-01-23 * "JE 5565"
   id: "5604"
   je_num: "5565"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -6260000.00 CLP
+    desc: "Josef Helmlinger Casanova - EAG"
   Expenses:EAG:OtrosGastosPersonales-430099  6260000.00 CLP
+    desc: "Josef Helmlinger Casanova - EAG"
 
-2026-01-23 * "Johanna Avayu - Remesa Diciembre 2025"
+2026-01-23 * "JE 5581"
   id: "5620"
   je_num: "5581"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:ControlYLiquidacin-115099  -38147.00 CLP
+    desc: "Johanna Avayu - Remesa Diciembre 2025"
   Assets:EAG:ControlYLiquidacin-115099  -8211.00 CLP
     desc: "Johanna Avayu - Remesa Enero 2026"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -2943263.00 CLP
+    desc: "Johanna Avayu - Remesa Diciembre 2025"
   Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  -10379.00 CLP
+    desc: "Johanna Avayu - Remesa Diciembre 2025"
   Expenses:Johanna:RetirosDelMes-890001  3000000.00 CLP
     desc: "Johanna Avayu - Remesa Enero 2026"
 
-2026-01-23 * "UF1.258,61 Mandato mutuo Inv. Tecnion"
+2026-01-23 * "JE 5583"
   id: "5622"
   je_num: "5583"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  50000283.00 CLP
+    desc: "UF1.258,61 Mandato mutuo Inv. Tecnion"
   Assets:EAG:InvTecnionLimitada-113018  -50000283.00 CLP
+    desc: "UF1.258,61 Mandato mutuo Inv. Tecnion"
 
-2026-01-23 * "UF400 Budhaus anticipo trabajos sur"
+2026-01-23 * "JE 5585"
   id: "5624"
   je_num: "5585"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -15890636.00 CLP
+    desc: "UF400 Budhaus anticipo trabajos sur"
   Expenses:EAG:ObrasDeInfraestructuraMb-413900  15890636.00 CLP
+    desc: "UF400 Budhaus anticipo trabajos sur"
 
-2026-01-23 * "Opendark - Devol iluminarias EAG"
+2026-01-23 * "JE 5661"
   id: "5700"
   je_num: "5661"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  1521713.00 CLP
+    desc: "Opendark - Devol iluminarias EAG"
   Income:EAG:OtrosIngresos-310099  -1521713.00 CLP
+    desc: "Opendark - Devol iluminarias EAG"
 
-2026-01-23 * "BH.155 Directorio Indumotora One SA EAG"
+2026-01-23 * "JE 5662"
   id: "5701"
   je_num: "5662"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  8933866.00 CLP
+    desc: "BH.155 Directorio Indumotora One SA EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  1684286.00 CLP
     desc: "BH.154 IP Chile Directiva Enero 2026"
   Income:EAG:DirectorioIpChile-310021  -1684286.00 CLP
     desc: "BH.154 IP Chile Directiva Enero 2026"
   Income:EAG:DirectorioIndumotoraOne-310022  -8933866.00 CLP
+    desc: "BH.155 Directorio Indumotora One SA EAG"
 
-2026-01-26 * "Mirador Santa Anita GGCC Diciembre 2025"
+2026-01-26 * "JE 5586"
   id: "5625"
   je_num: "5586"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -2905187.00 CLP
+    desc: "Mirador Santa Anita GGCC Diciembre 2025"
   Expenses:EAG:GastosComunes-411067  2905187.00 CLP
+    desc: "Mirador Santa Anita GGCC Diciembre 2025"
 
-2026-01-26 * "Sra Raquel Ventura - Enero 2026"
+2026-01-26 * "JE 5636"
   id: "5675"
   je_num: "5636"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -5500000.00 CLP
+    desc: "Sra Raquel Ventura - Enero 2026"
   Expenses:EAG:SraRaquelVentura-430021  5500000.00 CLP
+    desc: "Sra Raquel Ventura - Enero 2026"
 
-2026-01-27 * "Mariela Mendez - Prestamo de EAG"
+2026-01-27 * "JE 5566"
   id: "5605"
   je_num: "5566"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -600000.00 CLP
+    desc: "Mariela Mendez - Prestamo de EAG"
   Assets:EAG:CuentasCorrientesDelPersonal-115001  600000.00 CLP
+    desc: "Mariela Mendez - Prestamo de EAG"
 
-2026-01-28 * "Sra Jacqueline Deutsch Enero 2026"
+2026-01-28 * "JE 5590"
   id: "5629"
   je_num: "5590"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -4670000.00 CLP
+    desc: "Sra Jacqueline Deutsch Enero 2026"
   Expenses:EAG:SraJacquelineDeutsch-430023  4670000.00 CLP
+    desc: "Sra Jacqueline Deutsch Enero 2026"
 
-2026-01-28 * "Moises Moncada - FxR Hidrolavadora"
+2026-01-28 * "JE 5629"
   id: "5668"
   je_num: "5629"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -130000.00 CLP
+    desc: "Moises Moncada - FxR Hidrolavadora"
   Assets:EAG:FondosPorRendir-115005  130000.00 CLP
+    desc: "Moises Moncada - FxR Hidrolavadora"
 
-2026-01-28 * "Comision mant plan banco Santander"
+2026-01-28 * "JE 5660"
   id: "5699"
   je_num: "5660"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -5363.00 CLP
+    desc: "Comision mant plan banco Santander"
   Expenses:EAG:GastosBancarios-430003  5363.00 CLP
+    desc: "Comision mant plan banco Santander"
 
-2026-01-29 * "Luis Salazar - Mantencion piscina"
+2026-01-29 * "JE 5567"
   id: "5606"
   je_num: "5567"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -88000.00 CLP
+    desc: "Luis Salazar - Mantencion piscina"
   Expenses:EAG:MantencinPiscina-411051  88000.00 CLP
+    desc: "Luis Salazar - Mantencion piscina"
 
-2026-01-29 * "Patricia Deutsch - Enero 2026"
+2026-01-29 * "JE 5591"
   id: "5630"
   je_num: "5591"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1000000.00 CLP
+    desc: "Patricia Deutsch - Enero 2026"
   Assets:EAG:Bancos:BancoBci10160175-111005  -1002697.00 CLP
     desc: "Mariela Mendez - Sueldo Enero 2026"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  -945115.00 CLP
@@ -868,45 +1166,64 @@
   Expenses:EAG:SueldosRopaRegalias-413001  597064.00 CLP
     desc: "Esteban Mendez - Sueldo Enero 2026"
   Expenses:EAG:SraPatriciaDeutsch-430024  1000000.00 CLP
+    desc: "Patricia Deutsch - Enero 2026"
 
-2026-01-29 * "Full Plagas B#5773 Desratizacion EAG"
+2026-01-29 * "JE 5592"
   id: "5631"
   je_num: "5592"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -98532.00 CLP
+    desc: "Full Plagas B#5773 Desratizacion EAG"
   Expenses:EAG:FumigacionesDesratizacin-413059  98532.00 CLP
+    desc: "Full Plagas B#5773 Desratizacion EAG"
 
-2026-01-29 * "Efectivo Eduardo Avayu"
+2026-01-29 * "JE 5593"
   id: "5632"
   je_num: "5593"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -600000.00 CLP
+    desc: "Efectivo Eduardo Avayu"
   Expenses:EAG:Efectivo-430001  600000.00 CLP
+    desc: "Efectivo Eduardo Avayu"
 
-2026-01-29 * "Paola Estrada Rosenberg de Eduardo Avayu"
+2026-01-29 * "JE 5594"
   id: "5633"
   je_num: "5594"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoSantander63188824-111009  -391862.00 CLP
+    desc: "Paola Estrada Rosenberg de Eduardo Avayu"
   Expenses:EAG:OtrosGastosPersonales-430099  391862.00 CLP
+    desc: "Paola Estrada Rosenberg de Eduardo Avayu"
 
-2026-01-29 * "Cargo por comision bancaria"
+2026-01-29 * "JE 5638"
   id: "5677"
   je_num: "5638"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -10210.00 CLP
+    desc: "Cargo por comision bancaria"
   Expenses:EAG:GastosBancarios-430003  10210.00 CLP
+    desc: "Cargo por comision bancaria"
 
-2026-01-29 * "Isapre Cruz Blanca - Ajuste reembolso"
+2026-01-29 * "JE 5679"
   id: "5718"
   je_num: "5679"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoEdwards0162338082-111007  136.00 CLP
+    desc: "Isapre Cruz Blanca - Ajuste reembolso"
   Income:EAG:DevolucinIsapre-310043  -136.00 CLP
+    desc: "Isapre Cruz Blanca - Ajuste reembolso"
 
-2026-01-30 * "F#15940 Serv. Neltume SA - Combustible"
+2026-01-30 * "JE 5595"
   id: "5634"
   je_num: "5595"
   source: "laudus-erp"
+  entity: "EAG"
   Assets:EAG:Bancos:BancoBci10160175-111005  -94700.00 CLP
+    desc: "F#15940 Serv. Neltume SA - Combustible"
   Expenses:EAG:CombustibleVehculos-413044  94700.00 CLP
+    desc: "F#15940 Serv. Neltume SA - Combustible"
