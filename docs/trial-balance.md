@@ -1,0 +1,104 @@
+- generic [active] [ref=f3e1]:
+  - banner [ref=f3e2]:
+    - navigation [ref=f3e3]:
+      - button "" [ref=f3e5] [cursor=pointer]
+      - menuitem "Facturación" [ref=f3e21] [cursor=pointer]
+      - menu [ref=f3e22]:
+        - button "Clientes" [ref=f3e23] [cursor=pointer]
+        - button "Proveedores" [ref=f3e25] [cursor=pointer]
+        - button "Reportes" [ref=f3e27] [cursor=pointer]
+        - button "Configuración" [ref=f3e29] [cursor=pointer]
+      - menu [ref=f3e7]:
+        - button "Mensajes 4" [ref=f3e31] [cursor=pointer]:
+          - img "Mensajes" [ref=f3e10]: 
+          - generic [ref=f3e11]: "4"
+        - button [ref=f3e12] [cursor=pointer]:
+          - img "Actividades" [ref=f3e13]: 
+        - button "EAG" [ref=f3e15] [cursor=pointer]: 
+        - button [ref=f3e18] [cursor=pointer]:
+          - img "Usuario" [ref=f3e19]
+          - text: 
+  - dialog [ref=f3e32]:
+    - generic [ref=f3e33]:
+      - banner [ref=f3e34]:
+        - heading "Balance de Sumas y Saldos" [level=4] [ref=f3e35]
+        - button "Cerrar" [ref=f3e36] [cursor=pointer]
+      - main [ref=f3e37]:
+        - generic [ref=f3e41]:
+          - generic [ref=f3e43]:
+            - generic [ref=f3e44]: Compañía
+            - generic [ref=f3e48]:
+              - combobox "Compañía" [ref=f3e51]: EAG
+              - button "Enlace interno" [ref=f3e52] [cursor=pointer]: 
+          - generic [ref=f3e53]:
+            - generic [ref=f3e54]:
+              - generic [ref=f3e55]:
+                - generic [ref=f3e56]:
+                  - generic [ref=f3e57]: Período
+                  - combobox "Período" [ref=f3e64]
+                - generic [ref=f3e65]:
+                  - generic [ref=f3e66]: Fecha de inicio
+                  - textbox "Fecha de inicio" [ref=f3e71] [cursor=pointer]
+                - generic [ref=f3e72]:
+                  - generic [ref=f3e73]: Fecha final
+                  - textbox "Fecha final" [ref=f3e78] [cursor=pointer]
+              - generic [ref=f3e79]:
+                - generic [ref=f3e80]:
+                  - generic [ref=f3e81]: Movimientos destino
+                  - radiogroup "Movimientos destino" [ref=f3e85]:
+                    - generic [ref=f3e86]:
+                      - radio "Todos los asientos publicados" [checked] [ref=f3e87] [cursor=pointer]
+                      - generic [ref=f3e88] [cursor=pointer]: Todos los asientos publicados
+                    - generic [ref=f3e89]:
+                      - radio "Todos los asientos" [ref=f3e90] [cursor=pointer]
+                      - generic [ref=f3e91] [cursor=pointer]: Todos los asientos
+                - generic [ref=f3e93]:
+                  - generic [ref=f3e95]:
+                    - text: Ocultar cuentas sin actividad
+                    - superscript [ref=f3e96]: "?"
+                  - checkbox "Ocultar cuentas sin actividad?" [checked] [ref=f3e100] [cursor=pointer]
+                - generic [ref=f3e102]:
+                  - generic [ref=f3e103]: Mostrar detalles de empresa
+                  - checkbox "Mostrar detalles de empresa" [ref=f3e108] [cursor=pointer]
+                - generic [ref=f3e110]:
+                  - generic [ref=f3e112]:
+                    - text: Mostrar con jerarquía
+                    - superscript [ref=f3e113]: "?"
+                  - checkbox "Mostrar con jerarquía?" [ref=f3e117] [cursor=pointer]
+                - generic [ref=f3e119]:
+                  - generic [ref=f3e121]:
+                    - text: Mostrar Moneda Extranjera
+                    - superscript [ref=f3e122]: "?"
+                  - checkbox "Mostrar Moneda Extranjera?" [ref=f3e126] [cursor=pointer]
+            - generic [ref=f3e127]:
+              - generic [ref=f3e128]: Filtrar empresa
+              - combobox "Filtrar empresa" [ref=f3e138]
+            - generic [ref=f3e139]: Diario
+            - combobox "Diario" [ref=f3e145]
+            - generic [ref=f3e146]:
+              - generic [ref=f3e147]: Filtro Cuentas
+              - generic [ref=f3e150]:
+                - generic [ref=f3e151]:
+                  - generic [ref=f3e152]: Sólo cuentas a cobrar
+                  - checkbox "Sólo cuentas a cobrar" [ref=f3e157] [cursor=pointer]
+                - generic [ref=f3e158]:
+                  - generic [ref=f3e159]: Sólo cuentas a pagar
+                  - checkbox "Sólo cuentas a pagar" [ref=f3e164] [cursor=pointer]
+              - generic [ref=f3e165]:
+                - generic [ref=f3e167]:
+                  - text: Desde Código
+                  - superscript [ref=f3e168]: "?"
+                - generic [ref=f3e171]:
+                  - combobox "Desde Código?" [ref=f3e176]
+                  - generic [ref=f3e177]: A
+                  - combobox [ref=f3e182]
+              - combobox "Filtro Cuentas" [ref=f3e190]
+      - contentinfo [ref=f3e191]:
+        - generic [ref=f3e192]:
+          - button "Ver" [ref=f3e193] [cursor=pointer]
+          - text: o
+          - button "Exportar a PDF" [ref=f3e194] [cursor=pointer]
+          - text: o
+          - button "Exportar a XLSX" [ref=f3e195] [cursor=pointer]
+          - text: o
+          - button "Cancelar" [ref=f3e196] [cursor=pointer]

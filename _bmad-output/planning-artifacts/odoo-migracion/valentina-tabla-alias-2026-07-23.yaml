@@ -1,0 +1,212 @@
+# Tabla de alias — glosas Laudus -> entidad canónica (E1 §6·B)
+# Autora: Valentina · Fecha: 2026-07-23
+# Alias ya normalizados (minúscula, sin tilde, espacios colapsados).
+# freq_glosa = ocurrencias REALES en el campo desc: del ledger (ledger/imports/laudus + laudus-rut2),
+#              salvo nota "(nombres)" = viene de nombres de cuenta, no de glosa.
+# PRIMER PASE (seed) del loop de convergencia (arquitectura §6·B.3). Correcto y auditable, no exhaustivo.
+#
+# PRINCIPIO (arquitectura §6·B.1): la glosa es load-bearing solo para la minoría sin estructura.
+# El grueso keyea en el CÓDIGO de cuenta (ej. Tecnión = 310013, socios = 115xxx), inmune a la grafía.
+# Esta tabla existe para las cuentas MIXTO (OtrosIngresos 310099) y los tags dispersos por-glosa.
+
+vehiculos:
+
+  Tecnion:
+    aliases: ["tecnion", "tecnin", "tecnin llc", "tecninllc"]
+    excluir_homonimos: ["tecnica", "tecnico", "tecnicas", "tecnic"]  # "servicio tecnico", NO es el vehiculo
+    freq_glosa: {tecnion: 468, tecnin: 104, tecninllc: 8}  # "tecnin"/"tecninllc" solo en nombres de cuenta, no en glosa
+    nota: "Vehiculo. Codigo primario 310013 (RetirosTecnin) + X70011 hijas. La glosa dice siempre 'tecnion'; el typo 'tecnin' vive congelado en el NOMBRE de cuenta."
+
+  Leo:
+    aliases: ["leo limited partnership", "leo limited", "leo partnership", "leo limited pictet"]
+    excluir_homonimos: ["leontina", "leon", "leonel", "leopold", "leo hernandez"]  # Leontina Mendez=empleada; Leo Hernandez=trabajador (encarpada/calefactores)
+    freq_glosa: {leo_limited_partnership: 72, leo_bare: 97}  # "leo" solo (word) ~97, dominado por vehiculo+iniciales socio
+    nota: "Vehiculo offshore (Julius Baer). Codigo primario Assets:FFCC:LeoPartnershipLimited-111012. CUIDADO con substring 'leo': matchea leontina/leon/leonel/leopold (personas). Usar 'leo' solo como token con boundary, o exigir 'leo limited/partnership'."
+
+  Tauro:
+    aliases: ["tauro", "tauro limited"]
+    excluir_homonimos: []
+    freq_glosa: {tauro: 114}
+    nota: "Vehiculo offshore (JB). Codigo primario Assets:EAG:Tauro-113021. Grafia limpia, sin homonimos."
+
+  MBI:
+    aliases: ["mbi"]
+    excluir_homonimos: []
+    freq_glosa: {mbi: 67}
+    nota: "Fondo MBI. Codigo primario Mbi-310027 + hijas. 'Inversion en MBI'. Token corto: exigir word-boundary."
+
+  NuevoCiclo:
+    aliases: ["nuevo ciclo"]
+    excluir_homonimos: []
+    freq_glosa: {nuevo_ciclo: 62}
+    nota: "Codigo primario RetirosInvNuevoCiclo-310016. 'Nuevo Ciclo: Devolucion de prestamos'."
+
+  InmobiliariaEspana:
+    aliases: ["espana", "inmobiliaria espana"]
+    excluir_homonimos: ["espacho", "espatula", "espacio", "espalda", "esparacitacion", "espanza"]  # palabras distintas; solo riesgo si se hace substring "espa"
+    freq_glosa: {espana: 17}  # con la ñ; el substring "espa" (26) incluye homonimos
+    nota: "Codigo primario RetirosInmobiliariaEspaa-310018. Matchear 'espana'/'espania' entera, NUNCA substring 'espa'."
+
+  InmobiliariaMetropolitana:
+    aliases: ["metropolitana", "inmobiliaria metropolitana"]
+    excluir_homonimos: []
+    freq_glosa: {metropolitana: 18}
+    nota: "Codigo primario RetirosInmobiliariaMetropolitana-310019."
+
+  Sade:
+    aliases: ["sade", "inv sade", "inversiones sade", "sade ltda", "sade spa"]
+    excluir_homonimos: []
+    freq_glosa: {sade: 73}
+    nota: "Aporte de capital (SpA chilena). Destino Assets:FFCC:InversionesSade. Contextos: 'cuenta SADE', 'Inv. Sade Ltda - Aporte capital'. Sin homonimos."
+
+  JuliusBaer:
+    aliases: ["julius", "julius baer", "baer", "jb", "bank jb", "bank julius baer"]
+    excluir_homonimos: []
+    freq_glosa: {jb: 107, julius: 77, baer: 19}
+    nota: "Codigo primario Jb-310029 + hijas. 'jb' = iniciales de Julius Baer; todos los contextos revisados son JB (incl. 'DHL JB dctos', 'Bank JB FC'). Token corto 'jb': exigir word-boundary."
+
+  Pleyades:
+    aliases: ["pleyades"]
+    excluir_homonimos: []
+    freq_glosa: {pleyades: 10}
+    nota: "Codigo primario RetirosPlyades-310015. Monto chico."
+
+  Hemanext:
+    aliases: ["hemanext", "hemanex"]
+    excluir_homonimos: []
+    freq_glosa: {hemanex: 4, hemanext: 3}  # "hemanex" = typo (falta la t)
+    nota: "'Hemanext Inc - Inversion' (USD500.000). Grafia con typo 'Hemanex'. Monto chico, baja frecuencia."
+
+  W&M:
+    aliases: ["w&m"]
+    excluir_homonimos: []
+    freq_glosa: {"w&m": 2}
+    nota: "'Deposito W&M - Acciones de Perla'. Muy baja evidencia (2). Ligado a venta de Acciones Perla."
+
+  FIP:
+    aliases: ["fip", "fip inmobiliario"]
+    excluir_homonimos: []
+    freq_glosa: {fip: 16}
+    nota: "'FIP Inmobiliario - Inversion'. Token corto: exigir word-boundary."
+
+  FM_BCI:
+    aliases: ["fm bci"]
+    excluir_homonimos: []
+    freq_glosa: {"fm bci": 2}
+    nota: "'Rescate USD... FM BCI EAG' = fondo mutuo BCI. Muy baja evidencia (2)."
+
+  Indumotora:
+    aliases: ["indumotora"]
+    excluir_homonimos: []
+    freq_glosa: {indumotora: 196}
+    nota: "Dividendo REAL (allowlist ingreso, SPEC §2.A / 310011). No sinceramiento. Grafia limpia."
+
+personas:
+
+  # --- SOCIOS (socio-dueño = PARTICION, keyed por cuenta 115xxx, NO por glosa; iniciales secundarias) ---
+  EAG:
+    tipo: socio
+    aliases: ["eag", "eduardo avayu"]
+    excluir_homonimos: []
+    freq_glosa: {eag: 6099, eduardo_avayu: 1058}
+    nota: "Socio-dueño primario por cuenta 115xxx. 'de Eduardo Avayu' aparece MUCHO como marcador de entidad/libro (no siempre retiro socio-dueño) -> keyear por codigo, no glosa."
+
+  AAG:
+    tipo: socio
+    aliases: ["aag"]
+    excluir_homonimos: []
+    freq_glosa: {aag: 1922}
+    nota: "Socio-dueño por 115xxx. Nombre completo no se expande de forma fiable en glosa (no aparece 'alfredo avayu'). Iniciales son el token confiable."
+
+  DAG:
+    tipo: socio
+    aliases: ["dag", "daniel avayu"]
+    excluir_homonimos: []
+    freq_glosa: {dag: 1175, daniel_avayu: 135}
+    nota: "Socio-dueño por 115xxx."
+
+  SAG:
+    tipo: socio
+    aliases: ["sag"]
+    excluir_homonimos: []
+    freq_glosa: {sag: 750}
+    nota: "Socio-dueño por 115xxx."
+
+  AZBA:
+    tipo: socio
+    aliases: ["azba"]
+    excluir_homonimos: []
+    freq_glosa: {azba: 179}
+    nota: "Rama AZBA. Cuenta RetirosAzba-115029. Ver tambien apellidos de la rama abajo."
+
+  FGK:
+    tipo: socio
+    aliases: ["fgk"]
+    excluir_homonimos: []
+    freq_glosa: {fgk: 2575}
+    nota: "JAB/FGK. Dimension entidad dentro de RUT2. 'FGK - Celular', 'Cumpleaños FGK'."
+
+  # --- BENEFICIARIOS (dispersos por glosa; SOLO P&L, sin posicion de balance, mapa §3.1) ---
+  RaquelVentura:
+    tipo: beneficiario
+    aliases: ["raquel", "raquel ventura", "raquel v", "raquel v.", "raquel vent", "raquel deborah ventura", "raquel ventura de eag", "raquel ventura de eduardo avayu"]
+    excluir_homonimos: []
+    freq_glosa: {raquel_ventura: 460, raquel_bare: 213, "raquel v.": 33, raquel_deborah_ventura: 28}
+    nota: "Esposa de EAG. Sin homonimos: todo 'raquel' es ella. Las transferencias a su cuenta = gasto discrecional (NO por cobrar), mapa §3.1."
+
+  JacquelineDeutsch:
+    tipo: beneficiario
+    aliases: ["jacqueline deutsch"]
+    excluir_homonimos: ["deutsch"]  # 'deutsch' SOLO es ambiguo: patricia/avayu/grinstein/betty deutsch. Exigir nombre completo.
+    freq_glosa: {jacqueline_deutsch: 38}
+    nota: "Exigir 'jacqueline deutsch' completo. NUNCA matchear 'deutsch' bare (varios Deutsch en la data)."
+
+  PatriciaDeutsch:
+    tipo: beneficiario
+    aliases: ["patricia deutsch"]
+    excluir_homonimos: ["deutsch"]  # ver Jacqueline
+    freq_glosa: {patricia_deutsch: 51}
+    nota: "Exigir nombre completo. Otros Deutsch en data (avayu deutsch 18, grinstein deutsch 6, betty deutsch 2) NO son estas beneficiarias."
+
+  GloriaJimenez:
+    tipo: beneficiario
+    aliases: ["gloria jimenez"]
+    excluir_homonimos: ["gloria", "gloria amoyao", "gloria amollao", "gloria oporto", "gloria palma"]  # varias Glorias = empleadas distintas
+    freq_glosa: {gloria_jimenez: 27}
+    nota: "CONFIRMADA en data ('Gloria Jimenez - Septiembre 2021'...pagos mensuales). PELIGRO: 'gloria' bare matchea Amoyao/Amollao (60, prestamo/aguinaldo), Oporto (de Sra Fanny), Palma (sueldo) = personas DISTINTAS. Exigir 'gloria jimenez' completo."
+
+  # --- APELLIDOS RAMA AZBA (dispersos por glosa; cuentas 115031-037) ---
+  Alazraki:
+    tipo: apellido_azba
+    aliases: ["alazraki"]
+    excluir_homonimos: []
+    freq_glosa: {alazraki: 255}
+    nota: "Rama AZBA. Cuenta JosAlazraki-115031. Grafia limpia (1 typo 'alazrak')."
+
+  Zeldis:
+    tipo: apellido_azba
+    aliases: ["zeldis"]
+    excluir_homonimos: []
+    freq_glosa: {zeldis: 318}
+    nota: "Rama AZBA. Cuentas DeniseZeldis-115033 + MichelleZeldis-115035. Grafia limpia."
+
+  Borzutzky:
+    tipo: apellido_azba
+    aliases: ["borzutzky"]
+    excluir_homonimos: []
+    freq_glosa: {borzutzky: 118}
+    nota: "Rama AZBA. Cuenta ArielBorzutzky-115037. Grafia limpia."
+
+  Israel:
+    tipo: apellido_azba
+    aliases: []  # NO usar 'israel' por glosa: demasiado ambiguo (ver homonimos). Keyear por CUENTA/partner.
+    excluir_homonimos: ["israel", "israelita"]  # pais ('giro a Israel'), nombre ('Israel David Yeuda', 'Salazar Israel'), 'Chofer SAG Israel', adjetivo 'israelita'
+    freq_glosa: {israel: 37, israelita: 12}
+    nota: "DUDOSO / NO RESOLVER POR GLOSA. 'israel' en la data es mayormente el PAIS ('giro a Israel de cuenta SADE'), un NOMBRE de pila (Israel David Yeuda, Salazar Israel) y adjetivo (israelita). No hay senal fiable del apellido AZBA en glosa. Identificar por cuenta 115xxx / partner, no por alias de glosa. Revisar con contadoras si existe cuenta corriente 'Israel' de la rama."
+
+  JhonnyGuerra:
+    tipo: deudor
+    aliases: ["jhonny", "jhonny guerra", "jhony guerra", "johny guerra", "jonny guerra", "guerra"]
+    excluir_homonimos: []
+    freq_glosa: {jhonny: 220, guerra: 115, jhony: 2, jonny: 2, johny: 1}
+    nota: "Deudor/handyman. 'Abono prestamo Jhonny' = codigo JhonnyGuerra-310045. Grafia dominante 'Jhonny' (NO 'Johnny'); variantes Jhony/Jonny/Johny. Todo 'guerra' en la data es el (no hay otro Guerra)."
