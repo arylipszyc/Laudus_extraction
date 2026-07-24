@@ -37,7 +37,7 @@ FR7: Resolver las glosas inconsistentes con tabla de alias + normalización (§6
 FR8: Verificar la **paridad de ORIGEN** al peso: `Σ(líneas Odoo por x_laudus_account_code, por moneda) == saldo cuenta Laudus`; 0 diffs en los 569 códigos × moneda, ambas compañías, toda la historia. **NECESARIA pero NO suficiente** (ver FR12).
 FR9: [MOVIDO A Epic E1B] Producir el reporte de patrimonio v1: activos (inversiones, yate, avión, casas) al balance a costo, con participación por socio.
 FR10: Emitir en cada corrida el reporte de cobertura de glosa (líneas no-matcheadas + histograma por-glosa de las cuentas MIXTO) como insumo del loop de convergencia. La glosa sin-match no basta con marcarla: **se cuenta, se revisa y se firma (sign-off)**.
-FR11: Idempotencia: re-correr el loader hace upsert vía external IDs determinísticos (`acc_<cía>_<code>`, `mv_<cía>_<je_id>`, `aml_<je_id>_<n>`), sin duplicar. **Probada**: correr 2× → estado idéntico; correr / borrar mitad / re-correr → converge.
+FR11: Idempotencia: re-correr el loader hace upsert vía external IDs determinísticos (`acc_<cía>_<code>`, `mv_<cía>_<je_id>`, `aml_<cía>_<je_id>_<n>`), sin duplicar. **Probada**: correr 2× → estado idéntico; correr / borrar mitad / re-correr → converge.
 FR12: Verificar la **paridad de DESTINO y la clasificación** (2º gate, de la mesa redonda — necesario porque FR8 es invariante a errores de clasificación): (a) Σ por cuenta Odoo destino == Σ de sus códigos origen mapeados; (b) conteo de líneas y asientos preservado (no fusiones/particiones silenciosas); (c) el sinceramiento aterrizó donde debía — el ingreso bajó ~46B, los activos de origen subieron ese monto, Molco recibió lo suyo como gasto; (d) muestreo dirigido (N mayores + N aleatorios) revisado a mano contra Laudus: cuenta + partner + dimensión; (e) washes excluidos por criterio semántico (no solo monto-opuesto) + log auditable con conteo esperado.
 
 ### NonFunctional Requirements
@@ -159,7 +159,7 @@ So that toda story posterior se construye y verifica sin re-armar infra y sin de
 
 **Given** el helper de external IDs,
 **When** se le pasa `(compañía, code)` / `(compañía, je_id)` / `(je_id, n)`,
-**Then** devuelve determinísticamente `acc_<cía>_<code>` / `mv_<cía>_<jeid>` / `aml_<jeid>_<n>`, cubierto por test unitario.
+**Then** devuelve determinísticamente `acc_<cía>_<code>` / `mv_<cía>_<jeid>` / `aml_<cía>_<jeid>_<n>`, cubierto por test unitario.
 
 **Given** el `docker-compose` del spike,
 **When** se levanta para los tests del loader,
@@ -233,7 +233,7 @@ So that el P&L queda sincerado (los ~46B salen del ingreso) y sé que cada peso 
 
 **Given** el gate de destino (FR12c),
 **When** termina el sinceramiento,
-**Then** el ingreso total bajó ~46B, los activos de origen subieron **exactamente ese monto por vehículo**, y Molco recibió su financiamiento como gasto — cada aserción contra la expectativa del inventario.
+**Then** el ingreso total bajó **exactamente la cifra esperada del inventario de naturalezas** (el monto exacto, NO el redondeo "~46B" — el test assertea el número que produce el inventario, no una aproximación), los activos de origen subieron **exactamente ese monto por vehículo**, y Molco recibió su financiamiento como gasto — cada aserción contra la expectativa del inventario.
 
 **Given** la paridad-origen,
 **When** corre el verificador Tier A tras el sinceramiento,
@@ -314,7 +314,7 @@ So that antes de dar E1 por cerrado tengo la prueba al peso Y la prueba de que l
 **Then** valida Σ por cuenta destino, conteo de líneas/asientos, y el resultado del sinceramiento (ingreso −46B, activos de origen +ese monto).
 
 **Given** el muestreo dirigido (FR12d),
-**When** se seleccionan N asientos de mayor monto + N aleatorios,
+**When** se seleccionan los **20 asientos de mayor monto + 20 aleatorios con seed fijo** (N pineado por determinismo, NFR1; misma selección en cada corrida),
 **Then** se revisan a mano contra Laudus (cuenta + partner + dimensión) y se firma el resultado.
 
 **Given** los dos tiers de verificación,

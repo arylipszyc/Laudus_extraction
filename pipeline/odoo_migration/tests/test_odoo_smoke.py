@@ -56,7 +56,9 @@ def _wait_for_odoo(timeout=240):
                 timeout=10,
             ) as resp:
                 return json.loads(resp.read())
-        except (urllib.error.URLError, ConnectionError, OSError) as exc:
+        except (urllib.error.URLError, ConnectionError, OSError, json.JSONDecodeError) as exc:
+            # JSONDecodeError: durante el boot Odoo puede responder 200 con HTML
+            # (login/redirect) en vez de JSON → seguir reintentando, no abortar.
             last = exc
             time.sleep(5)
     raise TimeoutError(f"Odoo no respondió en {timeout}s (último error: {last})")
@@ -66,10 +68,12 @@ def _wait_for_odoo(timeout=240):
 def odoo_stack():
     if shutil.which("docker") is None:
         pytest.skip("docker no está en el PATH")
-    up = _compose("up", "-d")
-    if up.returncode != 0:
-        pytest.skip(f"no se pudo levantar el stack (¿daemon Docker abajo?): {up.stderr}")
+    # `up` va DENTRO del try: si lanza (p.ej. TimeoutExpired) el `finally` igual
+    # baja el stack, sin dejar contenedores/volúmenes huérfanos.
     try:
+        up = _compose("up", "-d")
+        if up.returncode != 0:
+            pytest.skip(f"no se pudo levantar el stack (¿daemon Docker abajo?): {up.stderr}")
         yield
     finally:
         _compose("down", "-v")
@@ -79,7 +83,9 @@ def odoo_stack():
 def test_odoo18_responde_y_acepta_addon_custom(odoo_stack):
     # 1) Odoo 18 responde en :8069
     info = _wait_for_odoo()
-    serie = str(info.get("result", info).get("server_serie", ""))
+    # `or info`: si la key `result` está presente pero es null, `.get(default)`
+    # devolvería None (el default solo aplica a key AUSENTE) → None.get → crash.
+    serie = str((info.get("result") or info).get("server_serie", ""))
     assert serie.startswith("18"), f"esperaba Odoo 18, server_serie={serie!r}"
 
     # 2) Acepta un addon custom: scaffold en el addons_path + instalación limpia.

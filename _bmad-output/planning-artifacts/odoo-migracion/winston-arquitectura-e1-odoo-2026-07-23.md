@@ -1,6 +1,14 @@
 # Arquitectura — Epic E1: Carga de la historia Laudus en Odoo (espejo corregido y estructurado)
 
-**Autor:** Winston (Arquitecto) · **Fecha:** 2026-07-23 · **Estado:** DISEÑO para luz verde de Ary (resumen ejecutivo §0)
+**Autor:** Winston (Arquitecto) · **Fecha:** 2026-07-23 · **Estado:** ✅ **APROBADO por Ary (resumen ejecutivo §0), 2026-07-24.** El detalle técnico queda auto-aprobado según `project-context.md`.
+
+> **⚠️ Nota de estructura (2026-07-24) — leer antes de usar §8:** el desglose de stories vive en `epics.md`
+> y es la **autoridad**. Tras la mesa redonda 2026-07-23, la estructura se revisó respecto de la secuencia
+> §8 de este documento: (a) se **agregó E1.0** (scaffold + fixture golden con caso USD + helper de external
+> IDs) como story-0 bloqueante — no aparece en §8; (b) el **patrimonio salió de E1**: lo que §8 lista como
+> **E1.7 (activos de patrimonio a costo + reporte v1) es ahora Epic E1B**, hermano de E1 y fuera del gate de
+> paridad, para dejar el gate del espejo inmaculado. **No construir patrimonio dentro de E1.** El resto de §8
+> (E1.1→E1.6) sigue vigente.
 **Insumos:** los 6 artefactos de Valentina (brief, spec, mapa de normalización, tabla CSV, resumen, generador).
 **Precede a:** desglose de stories de E1. **No es construcción todavía.**
 
@@ -395,7 +403,7 @@ las cuentas genuinamente sin estructura.
 
 Todo el loader usa **external IDs determinísticos** derivados de los ids Laudus:
 
-- Cuenta: `acc_<company>_<laudus_code>` · Asiento: `mv_<company>_<je_id>` · Línea: `aml_<je_id>_<n>`.
+- Cuenta: `acc_<company>_<laudus_code>` · Asiento: `mv_<company>_<je_id>` · Línea: `aml_<company>_<je_id>_<n>`.
 
 Con eso, **re-correr el loader hace upsert, no duplica** — la base de la idempotencia. Esto habilita el caso
 del brief §5 sin decidirlo ahora:

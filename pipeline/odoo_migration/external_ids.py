@@ -8,9 +8,9 @@ y E1.6 (verificador de paridad) dependen de que esta convención sea **estable**
   → Este formato se CONGELA acá (story E1.0). No cambiarlo después.
 
 Convención (congelada):
-    account : acc_<company>_<code>     p.ej.  acc_eag_111005
-    move    : mv_<company>_<je_id>     p.ej.  mv_eag_5881
-    line    : aml_<je_id>_<n>          p.ej.  aml_5881_0
+    account : acc_<company>_<code>       p.ej.  acc_eag_111005
+    move    : mv_<company>_<je_id>       p.ej.  mv_eag_5881
+    line    : aml_<company>_<je_id>_<n>  p.ej.  aml_eag_5881_0
 
 Normalización de los componentes:
   - `company`  → minúsculas + strip. Las dos entidades legales del proyecto son
@@ -24,16 +24,26 @@ Normalización de los componentes:
   - `n`        → índice **0-based** de la pata dentro del asiento (0, 1, 2, …).
                  Estable y derivable del asiento; no es el número de línea Laudus.
 
+Por qué `company` va también en la LÍNEA (no solo en account/move): el `id` de
+Laudus **reinicia por entidad** — `id=1` existe en EAG y en RUT2. Sin `company`,
+la pata 0 de asientos homónimos de distinta entidad colisionaría en el mismo
+`aml_1_0`, y el upsert de E1.5 haría que una entidad pise a la otra en silencio
+(justo la idempotencia que este módulo protege). La línea lleva la entidad igual
+que la cuenta y el asiento.
+
 Cualquier componente vacío o con caracteres que romperían un XML ID de Odoo
-(espacios, `.`, etc.) levanta `ValueError`: es preferible fallar fuerte a emitir
-un id silenciosamente corrupto del que dependen upserts posteriores.
+(espacios, `.`, los separadores `_`/`-`, no-ASCII) levanta `ValueError`: es
+preferible fallar fuerte a emitir un id silenciosamente corrupto o colisionable
+del que dependen upserts posteriores.
 """
 
 import re
 
-# XML ID de Odoo: letras, dígitos, guion bajo y guion. Congelado como el conjunto
-# de caracteres permitido en cada componente ya normalizado.
-_ALLOWED = re.compile(r"^[a-z0-9_-]+$", re.IGNORECASE)
+# Cada componente YA normalizado: solo alfanumérico ASCII. Se excluye a propósito
+# el `_`/`-` (son el SEPARADOR del id: un componente con separador adentro haría
+# el id ambiguo/colisionable, p.ej. ("eag","1_2") vs ("eag_1","2")) y los no-ASCII
+# (bajo IGNORECASE, `re.ASCII` evita que el signo Kelvin U+212A "matchee" [a-z]).
+_ALLOWED = re.compile(r"^[a-z0-9]+$", re.IGNORECASE | re.ASCII)
 
 
 def _component(value, *, name: str) -> str:
@@ -44,9 +54,27 @@ def _component(value, *, name: str) -> str:
     if not _ALLOWED.match(s):
         raise ValueError(
             f"external_id: componente '{name}'={value!r} tiene caracteres no "
-            f"válidos para un XML ID de Odoo (permitido: [a-z0-9_-])"
+            f"válidos para un XML ID de Odoo (permitido: [a-z0-9] ASCII)"
         )
     return s
+
+
+def _line_index(n) -> int:
+    """Valida y normaliza el índice de pata `n` (fail-loud, no truncar en silencio).
+
+    Rechaza `bool` (`True` daría índice 1) y `float` (`2.9` truncaría a 2, un id
+    corrupto silencioso); acepta `int` y string entera (`"3"`). `None`/basura →
+    `ValueError`, coherente con el contrato fail-loud del módulo.
+    """
+    if isinstance(n, bool) or isinstance(n, float):
+        raise ValueError(f"external_id: índice de línea n={n!r} debe ser un entero")
+    try:
+        idx = int(n)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"external_id: índice de línea n={n!r} inválido") from exc
+    if idx < 0:
+        raise ValueError(f"external_id: índice de línea n={n!r} debe ser >= 0")
+    return idx
 
 
 def account_xmlid(company, code) -> str:
@@ -59,12 +87,15 @@ def move_xmlid(company, je_id) -> str:
     return f"mv_{_component(company, name='company').lower()}_{_component(je_id, name='je_id')}"
 
 
-def line_xmlid(je_id, n) -> str:
-    """`aml_<je_id>_<n>` — external ID de account.move.line.
+def line_xmlid(company, je_id, n) -> str:
+    """`aml_<company>_<je_id>_<n>` — external ID de account.move.line.
 
-    `n` es el índice 0-based de la pata dentro del asiento.
+    `n` es el índice 0-based de la pata dentro del asiento. Lleva `company`
+    porque el `id` de Laudus reinicia por entidad (sin ella, `aml_1_0` chocaría
+    entre EAG y RUT2).
     """
-    idx = int(n)
-    if idx < 0:
-        raise ValueError(f"external_id: índice de línea n={n!r} debe ser >= 0")
-    return f"aml_{_component(je_id, name='je_id')}_{idx}"
+    idx = _line_index(n)
+    return (
+        f"aml_{_component(company, name='company').lower()}"
+        f"_{_component(je_id, name='je_id')}_{idx}"
+    )

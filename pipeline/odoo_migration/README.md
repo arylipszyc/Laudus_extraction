@@ -22,7 +22,7 @@ depende de Docker.
 
 - **`external_ids.py`** — external IDs determinísticos de Odoo. La columna vertebral de
   la idempotencia del loader (E1.5): re-correr hace upsert, no duplica. **El formato está
-  congelado acá** (`acc_<company>_<code>`, `mv_<company>_<je_id>`, `aml_<je_id>_<n>`);
+  congelado acá** (`acc_<company>_<code>`, `mv_<company>_<je_id>`, `aml_<company>_<je_id>_<n>`);
   no cambiarlo. Ver el docstring del módulo.
 - **`tests/fixtures/golden_slice.beancount`** — slice **curado** (no un corte por fecha):
   cubre a propósito cada naturaleza de sinceramiento (retiro, aporte, traspaso, wash

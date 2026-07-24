@@ -1,6 +1,6 @@
 # Story E1.0: Scaffold del pipeline de migración + fixture golden
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -38,8 +38,8 @@ Copiadas del epic (`epics.md` → Story E1.0), en formato Given/When/Then:
 
 **AC3 — Helper de external IDs determinístico y testeado**
 **Given** el helper de external IDs,
-**When** se le pasa `(compañía, code)` / `(compañía, je_id)` / `(je_id, n)`,
-**Then** devuelve **determinísticamente** `acc_<cía>_<code>` / `mv_<cía>_<jeid>` / `aml_<jeid>_<n>`, cubierto por **test unitario**.
+**When** se le pasa `(compañía, code)` / `(compañía, je_id)` / `(compañía, je_id, n)`,
+**Then** devuelve **determinísticamente** `acc_<cía>_<code>` / `mv_<cía>_<jeid>` / `aml_<cía>_<jeid>_<n>`, cubierto por **test unitario**.
 
 **AC4 — Odoo en Docker levanta y el módulo instala**
 **Given** el `docker-compose` del spike,
@@ -73,7 +73,7 @@ Copiadas del epic (`epics.md` → Story E1.0), en formato Given/When/Then:
   - [x] Implementar `pipeline/odoo_migration/external_ids.py` con tres funciones puras:
     - `account_xmlid(company, code) -> "acc_<company>_<code>"`
     - `move_xmlid(company, je_id) -> "mv_<company>_<je_id>"`
-    - `line_xmlid(je_id, n) -> "aml_<je_id>_<n>"`
+    - `line_xmlid(company, je_id, n) -> "aml_<company>_<je_id>_<n>"`
   - [x] Definir la **normalización de los componentes** (mayúsculas/minúsculas, caracteres no válidos para un external ID de Odoo, colisiones EAG vs RUT2) y documentarla en el módulo. Un external ID de Odoo debe ser único y estable → decidir la convención exacta (p.ej. `company` en minúsculas, `code`/`je_id` tal cual, `n` como índice de la pata) y **congelarla acá** porque E1.5 depende de ella. **Congelado**: `company` a minúsculas (EAG/RUT2 no colapsan; misma entidad en cualquier caja → mismo id = feature); `code`/`je_id` `str().strip()` tal cual; `n` = índice 0-based de la pata; componentes vacíos o con chars no válidos para XML ID → `ValueError` (fail-loud).
   - [x] `test_external_ids.py`: casos de las 3 funciones, incluyendo determinismo (mismo input → mismo output), unicidad EAG vs RUT2 para el mismo `code`, y estabilidad del formato.
 - [x] **Task 3 — Fixture golden (AC2)**
@@ -96,7 +96,7 @@ El comando de verificación del proyecto es, textual de `project-context.md`:
 Poniendo el paquete nuevo **bajo `pipeline/`** (`pipeline/odoo_migration/`), pytest lo descubre **sin cambiar el comando** — que es justo lo que pide AC1 ("no un comando inventado"). El `pipeline/` existente es el sync Laudus→Beancount/Sheets; el sub-paquete `odoo_migration/` es lógicamente distinto pero convive limpio. **Alternativa descartada:** un top-level `migration/` obligaría a ampliar el comando en `project-context.md` + el hook pre-push — más superficie de error por menos beneficio. [Source: _bmad-output/project-context.md §Comandos de verificación]
 
 ### El helper de external IDs — la convención se congela acá
-De la arquitectura: external IDs determinísticos `acc_<company>_<laudus_code>`, `mv_<company>_<je_id>`, `aml_<je_id>_<n>`. Son "la columna vertebral de la idempotencia" del loader: re-correr hace **upsert, no duplica**. E1.5 (loader) y E1.6 (verificador) dependen de que esta convención sea estable. **Congelar el formato exacto acá** y no cambiarlo después. [Source: winston-arquitectura-e1-odoo-2026-07-23.md §2.3, §7.3]
+De la arquitectura: external IDs determinísticos `acc_<company>_<laudus_code>`, `mv_<company>_<je_id>`, `aml_<company>_<je_id>_<n>`. Son "la columna vertebral de la idempotencia" del loader: re-correr hace **upsert, no duplica**. E1.5 (loader) y E1.6 (verificador) dependen de que esta convención sea estable. **Congelar el formato exacto acá** y no cambiarlo después. [Source: winston-arquitectura-e1-odoo-2026-07-23.md §2.3, §7.3] **(Corregido en code-review 2026-07-24: la línea lleva `company` — el `id` de Laudus reinicia por entidad, `id=1` existe en EAG y RUT2, así que `aml_<je_id>_<n>` sin `company` colisionaba entre entidades y rompía la idempotencia.)**
 
 ### El fixture golden es CURADO, no un corte por fecha
 AC2 pide "1 entidad, pocos meses" **y** "≥1 caso-borde de cada naturaleza". Esos dos requisitos pueden tensionar: una sola entidad en pocos meses **no** contiene naturalmente todas las naturalezas (p.ej. el **aporte** Sade vive en FFCC/`Income:FFCC:Sade-310011`; los **retiros** grandes en EAG `RetirosTecnin-310013`; los **washes** apertura/cierre en `OtrosIngresos-310099`). → El fixture se **cura**: se copian asientos reales del mirror que cubren cada caso, aunque provengan de más de una cuenta/mes, manteniéndolo chico. Documentar en el fixture **de dónde salió cada caso** (comentario con el código/glosa origen) para trazabilidad. Casos de referencia útiles del generador de Valentina:
@@ -142,7 +142,7 @@ Odoo 18 Community + Postgres 16, Docker Compose, en el VPS Hetzner del runbook d
 
 ### Preguntas guardadas para el dev / Ary (no bloquean el arranque)
 1. **Ubicación de tests** (co-locados en `pipeline/odoo_migration/tests/` vs `backend/tests/`) — recomiendo co-locar; decisión técnica, el dev puede resolver.
-2. **Formato exacto del external ID de la línea:** `aml_<je_id>_<n>` — ¿`n` es el índice 0-based de la pata dentro del asiento, o el número de línea Laudus? La arquitectura dice `aml_<je_id>_<n>` sin definir `n`. Recomiendo el índice 0-based de la pata (estable y derivable del asiento); congelarlo en el helper.
+2. **Formato exacto del external ID de la línea:** `aml_<company>_<je_id>_<n>` — `n` es el índice 0-based de la pata dentro del asiento. **(Resuelto en code-review 2026-07-24: se agregó `company` porque el `id` de Laudus reinicia por entidad y `aml_<je_id>_<n>` colisionaba entre EAG y RUT2.)**
 3. **Compose promovido vs referenciado:** recomiendo referenciar el del spike hasta E1.1.
 
 ## Dev Agent Record
@@ -160,7 +160,7 @@ claude-opus-4-8[1m] (Amelia / dev-story)
 
 ### Completion Notes List
 
-- **Decisiones congeladas (E1.5 depende de ellas):** external ID = `acc_<company-minúsc>_<code>` / `mv_<company-minúsc>_<je_id>` / `aml_<je_id>_<n>`, con `n` = índice **0-based** de la pata. `company` a minúsculas (idempotencia case-insensitive); componentes inválidos → `ValueError`. `<je_id>` = metadato `id` del asiento en el mirror (mismo que usa el prototipo del spike `import_to_odoo.py`), NO el `je_num`.
+- **Decisiones congeladas (E1.5 depende de ellas):** external ID = `acc_<company-minúsc>_<code>` / `mv_<company-minúsc>_<je_id>` / `aml_<company-minúsc>_<je_id>_<n>`, con `n` = índice **0-based** de la pata. `company` a minúsculas (idempotencia case-insensitive) y **en las tres** llaves (incl. la línea — ver code-review 2026-07-24: el `id` de Laudus reinicia por entidad); componentes inválidos → `ValueError` (incl. separador `_`/`-` dentro del componente y `n` no-entero, endurecido en el mismo review). `<je_id>` = metadato `id` del asiento en el mirror (mismo que usa el prototipo del spike `import_to_odoo.py`), NO el `je_num`.
 - **USD sintético (decisión técnica, auto-aprobada):** el mirror **no tiene ningún posting en USD** — todo es CLP y el "USD" real vive solo como texto en `desc`. AC2 exige ≥1 asiento USD con `amount_currency`, así que el fixture **fuerza** un asiento sintético `100 USD @ 800 CLP` (documentado como `[SINTÉTICO]`), para que E1.5 ejerza `currency_id`/`amount_currency`.
 - **Wash sintético:** el asiento real de cierre (Latinoamericana ±423,6M) es un cierre anual de **184 patas** — incompatible con "fixture chico". Se redujo al par mínimo apertura/cierre Latinoamericana↔Apertura que netea a 0, conservando la señal que E1.3 detecta (glosa "Comprobante de apertura/cierre"). Documentado como `[SINTÉTICO]` con la procedencia real.
 - **Docker aislado:** el smoke referencia el compose del spike pero bajo project name `migration_smoke`, así `down -v` nunca borra los volúmenes del stack del spike de Ary.
