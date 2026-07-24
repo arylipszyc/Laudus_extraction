@@ -13,6 +13,11 @@
 ;; USD siguen presentes. Si alguien "simplifica" el fixture y borra un caso, el
 ;; test se pone rojo.
 ;;
+;; Ids sintéticos: los asientos [SINTÉTICO] usan `id` en el rango 9000000+ (los
+;; ids reales de Laudus llegan a ~10.5k) — numérico y sin separadores, para que
+;; el external ID del loader (E1.5) los acepte igual que a un id real y no
+;; colisionen. Ver `external_ids.py` (los componentes rechazan `-`/`_`/no-ASCII).
+;;
 ;; Fuente de los `open` (verbatim de ledger/accounts.beancount) y de los asientos
 ;; reales (verbatim de ledger/imports/…), salvo los DOS asientos marcados
 ;; [SINTÉTICO] abajo. Todo en CLP como el mirror; el único USD es sintético
@@ -193,7 +198,7 @@ option "operating_currency" "CLP"
 ;;  Income:FFCC:LatinoamericanaSa-310009 +423.600.000 en el cierre]
 ;; ---------------------------------------------------------------------------
 2021-12-31 * "Comprobante de cierre"
-  id: "fixture-wash-cierre"
+  id: "9000001"
   source: "laudus-erp"
   entity: "RUT2"
   nature: "wash"
@@ -203,7 +208,7 @@ option "operating_currency" "CLP"
     desc: "Comprobante de cierre"
 
 2022-01-01 * "Comprobante de apertura"
-  id: "fixture-wash-apertura"
+  id: "9000002"
   source: "laudus-erp"
   entity: "RUT2"
   nature: "wash"
@@ -218,8 +223,8 @@ option "operating_currency" "CLP"
 ;; `units.currency == "USD"` + precio, para que E1.5 lo cargue con
 ;; `amount_currency`/`currency_id`. 100 USD @ 800 CLP = 80.000 CLP.
 ;; ---------------------------------------------------------------------------
-2021-02-10 * "JE FIXTURE-USD" "Compra USD sintética (fuerza amount_currency para E1.5)"
-  id: "fixture-usd-1"
+2021-02-10 * "JE 9000003" "Compra USD sintética (fuerza amount_currency para E1.5)"
+  id: "9000003"
   source: "laudus-erp"
   entity: "EAG"
   nature: "usd"
