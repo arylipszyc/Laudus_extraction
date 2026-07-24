@@ -1,0 +1,229 @@
+;; ============================================================================
+;; golden_slice.beancount — fixture CURADO del pipeline de migración Odoo (E1.0)
+;; ============================================================================
+;;
+;; NO es un corte por fecha/entidad: es un slice PEQUEÑO y curado que cubre, a
+;; propósito, cada naturaleza de sinceramiento (E1.3) + el caso multi-moneda
+;; (E1.5). Un corte ingenuo de "1 entidad, pocos meses" NO contiene todas las
+;; naturalezas (el aporte vive en FFCC/Sade, los retiros grandes en EAG, etc.),
+;; así que se copian asientos REALES del mirror que cubren cada caso — con la
+;; procedencia anotada en cada asiento (id Laudus / glosa) para trazabilidad.
+;;
+;; Guardrail: `test_fixture_golden.py` verifica que cada `nature:` y ≥1 posting
+;; USD siguen presentes. Si alguien "simplifica" el fixture y borra un caso, el
+;; test se pone rojo.
+;;
+;; Fuente de los `open` (verbatim de ledger/accounts.beancount) y de los asientos
+;; reales (verbatim de ledger/imports/…), salvo los DOS asientos marcados
+;; [SINTÉTICO] abajo. Todo en CLP como el mirror; el único USD es sintético
+;; porque el mirror no tiene ni un posting en USD (el "USD" real vive solo como
+;; texto en `desc`) y E1.5 necesita ejercer `amount_currency`/`currency_id`.
+
+option "title" "golden slice — migración Odoo E1.0"
+option "operating_currency" "CLP"
+
+;; ---------------------------------------------------------------------------
+;; Opens (verbatim de accounts.beancount) — cada cuenta tocada abajo.
+;; ---------------------------------------------------------------------------
+
+2020-12-31 open Assets:EAG:Bancos:BancoBci10160175-111005 CLP
+  code: "111005"
+  laudus_account_name: "Banco BCI - 10160175"
+  laudus_categoria1: "ACTIVO EAG"
+  laudus_categoria2: "ACTIVOS CORRIENTES"
+  laudus_categoria3: "DISPONIBLE - EAG"
+  bank_account_id: "d844c24e-e5da-41c6-8734-039424f13613"
+
+2020-12-31 open Income:EAG:RetirosTecnin-310013 CLP
+  code: "310013"
+  laudus_account_name: "Retiros Tecnión"
+  laudus_categoria1: "INGRESOS"
+
+2020-12-31 open Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005 CLP
+  code: "610005"
+  laudus_account_name: "Banco BCI 28977581 Jocelyn"
+
+2020-12-31 open Income:Jocelyn:RetirosTecnin-670011 CLP
+  code: "670011"
+  laudus_account_name: "Retiros Tecnión"
+
+2020-12-31 open Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005 CLP
+  code: "710005"
+  laudus_account_name: "Banco BCI 28981600 - Jeannette"
+
+2020-12-31 open Income:Jeannette:RetirosTecnin-770011 CLP
+  code: "770011"
+  laudus_account_name: "Retiros Tecnión"
+
+2020-12-31 open Assets:Johanna:Bancos:BancoBci28981618Johanna-810005 CLP
+  code: "810005"
+  laudus_account_name: "Banco BCI 28981618 - Johanna"
+
+2020-12-31 open Income:Johanna:RetirosTecnin-870011 CLP
+  code: "870011"
+  laudus_account_name: "Retiros  Tecnión"
+
+2020-12-31 open Assets:Jael:Bancos:BancoBci28980981Jael-910005 CLP
+  code: "910005"
+  laudus_account_name: "Banco BCI 28980981 - Jael"
+
+2020-12-31 open Income:Jael:RetirosTecnin-970011 CLP
+  code: "970011"
+  laudus_account_name: "Retiros Tecnión"
+
+2020-12-31 open Assets:FFCC:BancoBci28981162-111005 CLP
+  code: "111005"
+  laudus_account_name: "Banco BCI - 28981162"
+  laudus_categoria1: "ACTIVO FFCC"
+
+2020-12-31 open Income:FFCC:Sade-310011 CLP
+  code: "310011"
+  laudus_account_name: "SADE"
+
+2020-12-31 open Assets:EAG:Bancos:BancoEdwards0162338082-111007 CLP
+  code: "111007"
+  laudus_account_name: "Banco Edwards - 01-62-338082"
+
+2020-12-31 open Income:EAG:OtrosIngresos-310099 CLP
+  code: "310099"
+  laudus_account_name: "Otros Ingresos"
+
+2020-12-31 open Income:EAG:RetirosInvNuevoCiclo-310016 CLP
+  code: "310016"
+  laudus_account_name: "Retiros Inv. Nuevo Ciclo"
+
+2020-12-31 open Income:FFCC:LatinoamericanaSa-310009 CLP
+  code: "310009"
+  laudus_account_name: "Latinoamericana S.A."
+
+2020-12-31 open Liabilities:FFCC:Apertura-211005 CLP
+  code: "211005"
+  laudus_account_name: "Apertura"
+
+;; [SINTÉTICO] Caja US$ EAG — el mirror la abre solo en CLP; acá permitimos USD
+;; para poder forzar el asiento multi-moneda. Cuenta real (code 111003).
+2020-12-31 open Assets:EAG:CajaUs-111003 CLP,USD
+  code: "111003"
+  laudus_account_name: "Caja US$"
+
+;; ---------------------------------------------------------------------------
+;; RETIRO — real, verbatim. Laudus id=1237 (JE 1234). Retiro de inversión
+;; repartido EAG + 4 hijas. [Source: ledger/imports/laudus/2022-03.beancount]
+;; ---------------------------------------------------------------------------
+2022-03-23 * "JE 1234"
+  id: "1237"
+  je_num: "1234"
+  source: "laudus-erp"
+  entity: "EAG"
+  nature: "retiro"
+  Assets:EAG:Bancos:BancoBci10160175-111005  1022700000.00 CLP
+    desc: "Retiro de Inversiones Tecnion Limitada"
+  Income:EAG:RetirosTecnin-310013  -1022700000.00 CLP
+    desc: "Retiro de Inversiones Tecnion Limitada"
+  Assets:Jocelyn:Bancos:BancoBci28977581Jocelyn-610005  170450000.00 CLP
+    desc: "Retiro de Inversiones Tecnion Limitada"
+  Income:Jocelyn:RetirosTecnin-670011  -170450000.00 CLP
+    desc: "Retiro de Inversiones Tecnion Limitada"
+  Assets:Jeannette:Bancos:BancoBci28981600Jeannette-710005  170450000.00 CLP
+    desc: "Retiro de Inversiones Tecnion Limitada"
+  Income:Jeannette:RetirosTecnin-770011  -170450000.00 CLP
+    desc: "Retiro de Inversiones Tecnion Limitada"
+  Assets:Johanna:Bancos:BancoBci28981618Johanna-810005  170450000.00 CLP
+    desc: "Retiro de Inversiones Tecnion Limitada"
+  Income:Johanna:RetirosTecnin-870011  -170450000.00 CLP
+    desc: "Retiro de Inversiones Tecnion Limitada"
+  Assets:Jael:Bancos:BancoBci28980981Jael-910005  170450000.00 CLP
+    desc: "Retiro de Inversiones Tecnion Limitada"
+  Income:Jael:RetirosTecnin-970011  -170450000.00 CLP
+    desc: "Retiro de Inversiones Tecnion Limitada"
+
+;; ---------------------------------------------------------------------------
+;; APORTE — real, verbatim. Laudus id=3994 (JE 3980). Aporte de capital a Sade
+;; (signo +, ingreso). [Source: ledger/imports/laudus-rut2/2022-10.beancount]
+;; ---------------------------------------------------------------------------
+2022-10-04 * "JE 3980"
+  id: "3994"
+  je_num: "3980"
+  source: "laudus-erp"
+  entity: "RUT2"
+  nature: "aporte"
+  Assets:FFCC:BancoBci28981162-111005  -3660000000.00 CLP
+    desc: "Inv. Sade Ltda - Aporte capital"
+  Income:FFCC:Sade-310011  3660000000.00 CLP
+    desc: "Inv. Sade Ltda - Aporte capital"
+
+;; ---------------------------------------------------------------------------
+;; TRASPASO — real, verbatim. Laudus id=29 (JE 29). Glosa "Traspaso de …" en
+;; OtrosIngresos-310099. [Source: ledger/imports/laudus/2021-01.beancount]
+;; ---------------------------------------------------------------------------
+2021-01-05 * "JE 29"
+  id: "29"
+  je_num: "29"
+  source: "laudus-erp"
+  entity: "EAG"
+  nature: "traspaso"
+  Assets:EAG:Bancos:BancoEdwards0162338082-111007  106000.00 CLP
+    desc: "Traspaso de Andres Turski G."
+  Income:EAG:OtrosIngresos-310099  -106000.00 CLP
+    desc: "Traspaso de Andres Turski G."
+
+;; ---------------------------------------------------------------------------
+;; AMBIGUO — real, verbatim. Laudus id=4158 (JE 4138). "Dividendo" dudoso de
+;; Nuevo Ciclo (+32,16M): ¿retorno de inversión o retiro? Caso límite del último
+;; AC de E1.3. [Source: ledger/imports/laudus/2024-11.beancount]
+;; ---------------------------------------------------------------------------
+2024-11-22 * "JE 4138"
+  id: "4158"
+  je_num: "4138"
+  source: "laudus-erp"
+  entity: "EAG"
+  nature: "ambiguo"
+  Assets:EAG:Bancos:BancoBci10160175-111005  32160000.00 CLP
+    desc: "Inversiones Nuevo Ciclo SPA - Dividendo"
+  Income:EAG:RetirosInvNuevoCiclo-310016  -32160000.00 CLP
+    desc: "Inversiones Nuevo Ciclo SPA - Dividendo"
+
+;; ---------------------------------------------------------------------------
+;; WASH apertura/cierre — [SINTÉTICO] par igual-y-opuesto que netea a 0,
+;; modelado en el caso canónico Latinoamericana ±423,6M (E1.3 debe lavarlo). El
+;; asiento real de cierre del mirror tiene 184 patas (cierre anual completo); acá
+;; se reduce al par mínimo Latinoamericana↔Apertura para mantener el slice chico
+;; conservando la señal que E1.3 detecta: glosa "Comprobante de apertura/cierre".
+;; [Source: ledger/imports/laudus-rut2/2021-12.beancount JE 4515 (id 4529) —
+;;  Income:FFCC:LatinoamericanaSa-310009 +423.600.000 en el cierre]
+;; ---------------------------------------------------------------------------
+2021-12-31 * "Comprobante de cierre"
+  id: "fixture-wash-cierre"
+  source: "laudus-erp"
+  entity: "RUT2"
+  nature: "wash"
+  Income:FFCC:LatinoamericanaSa-310009  423600000.00 CLP
+    desc: "Comprobante de cierre"
+  Liabilities:FFCC:Apertura-211005  -423600000.00 CLP
+    desc: "Comprobante de cierre"
+
+2022-01-01 * "Comprobante de apertura"
+  id: "fixture-wash-apertura"
+  source: "laudus-erp"
+  entity: "RUT2"
+  nature: "wash"
+  Income:FFCC:LatinoamericanaSa-310009  -423600000.00 CLP
+    desc: "Comprobante de apertura"
+  Liabilities:FFCC:Apertura-211005  423600000.00 CLP
+    desc: "Comprobante de apertura"
+
+;; ---------------------------------------------------------------------------
+;; USD multi-moneda — [SINTÉTICO]. El mirror no tiene NINGÚN posting en USD
+;; (todo CLP; el "USD" real vive como texto en `desc`). Se fuerza ≥1 asiento con
+;; `units.currency == "USD"` + precio, para que E1.5 lo cargue con
+;; `amount_currency`/`currency_id`. 100 USD @ 800 CLP = 80.000 CLP.
+;; ---------------------------------------------------------------------------
+2021-02-10 * "JE FIXTURE-USD" "Compra USD sintética (fuerza amount_currency para E1.5)"
+  id: "fixture-usd-1"
+  source: "laudus-erp"
+  entity: "EAG"
+  nature: "usd"
+  Assets:EAG:CajaUs-111003  100.00 USD @ 800.00 CLP
+    desc: "USD100 caso sintético multi-moneda"
+  Assets:EAG:Bancos:BancoBci10160175-111005  -80000.00 CLP
+    desc: "USD100 caso sintético multi-moneda"

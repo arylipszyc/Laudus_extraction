@@ -55,6 +55,11 @@ documento entienda el motivo sin tener que preguntar.
 - **Backend (Python, desde la raíz del repo):**
   `PYTHONUTF8=1 venv/Scripts/python.exe -m pytest backend/tests pipeline -q`
   (Windows: `PYTHONUTF8=1` es obligatorio. El venv del repo es `venv/`.)
+  Este comando ya descubre el harness de migración Odoo (`pipeline/odoo_migration/tests/`,
+  Tier A) sin cambios. El smoke Docker de esa migración es **Tier B (opt-in)**: está
+  marcado `@pytest.mark.odoo` y se salta por defecto — corre solo con
+  `-m odoo` (gate de release, NO por-commit; requiere Docker). Ver
+  `pipeline/odoo_migration/README.md`.
 - **bean-check del ledger:** `venv/Scripts/python.exe -m beancount.scripts.check ledger/main.beancount`
   (borrar `ledger/.main.beancount.picklecache` antes — el cache por mtime no ve archivos
   nuevos que entran por glob).
