@@ -59,7 +59,11 @@ def test_historico_importado_y_solo_bajo_entidades_del_libro():
 def test_apertura_es_je_real_via_211005():
     """FR53 per convención firmada §3 (supersede la letra del epic): la apertura
     es el JE real id=1 'Saldo Inicial' y rutea a Liabilities:FFCC:Apertura-211005
-    — el mecanismo primario espejo-Laudus, no las Equity."""
+    — el mecanismo primario espejo-Laudus, no las Equity.
+
+    Nota (re-import 'narración neutra', commits fd023df/a53b7de): Laudus no tiene
+    glosa de cabecera → la narration del asiento es neutra `JE <num>` y la glosa
+    'Saldo Inicial' vive ahora POR LÍNEA en `desc:`. El pin comprueba ambas."""
     entries, errors, _options = parser.parse_file(str(RUT2_IMPORTS / "2021-01.beancount"))
     assert not errors
     apertura = next(
@@ -67,7 +71,11 @@ def test_apertura_es_je_real_via_211005():
         if isinstance(e, Transaction) and (e.meta or {}).get("id") == "1"
     )
     assert apertura.date.isoformat() == "2021-01-01"
-    assert apertura.narration == "Saldo Inicial"
+    assert apertura.meta.get("je_num") == "1"
+    assert apertura.narration == "JE 1"  # narración neutra (Laudus no tiene glosa de cabecera)
+    assert all(
+        (p.meta or {}).get("desc") == "Saldo Inicial" for p in apertura.postings
+    )  # la glosa 'Saldo Inicial' se conserva por-línea
     accounts = {p.account for p in apertura.postings}
     assert "Liabilities:FFCC:Apertura-211005" in accounts
     assert not accounts & EQUITY_RESPALDO
