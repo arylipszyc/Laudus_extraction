@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Los 6 planes analíticos (SOLO los contenedores). Las cuentas analíticas
+         (valores: Vía Gris, Leo, AAG, …) las crea E1.4. Compartidos entre las 2
+         compañías (sin company_id) porque dimensiones como "Entidad" cruzan ambas.
+         noupdate="1": re-instalar/actualizar no pisa cambios manuales.
+         Ver winston-arquitectura §5.1. -->
+    <data noupdate="1">
+        <record id="plan_propiedad_objeto" model="account.analytic.plan">
+            <field name="name">Propiedad / objeto</field>
+        </record>
+        <record id="plan_area_centro" model="account.analytic.plan">
+            <field name="name">Área / centro</field>
+        </record>
+        <record id="plan_offshore_vehiculo" model="account.analytic.plan">
+            <field name="name">Offshore / vehículo</field>
+        </record>
+        <record id="plan_por_cuenta_de" model="account.analytic.plan">
+            <field name="name">Por cuenta de</field>
+        </record>
+        <record id="plan_socio_uso" model="account.analytic.plan">
+            <field name="name">Socio-uso</field>
+        </record>
+        <record id="plan_entidad" model="account.analytic.plan">
+            <field name="name">Entidad</field>
+        </record>
+    </data>
+</odoo>

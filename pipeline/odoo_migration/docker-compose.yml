@@ -1,0 +1,35 @@
+# Compose propio del pipeline de migración (E1.1+). Monta el addon custom
+# `x_laudus_migration` desde ./addons — resuelve el defer de E1.0 (el smoke de E1.0
+# escribía en el bind-mount compartido del spike). Puerto 8070 para no chocar con el
+# smoke de E1.0 / el stack del spike (8069). Usado por los tests Tier B (opt-in).
+#
+# El addons_path por defecto de la imagen odoo:18 ya incluye /mnt/extra-addons, así
+# que montar ./addons ahí hace descubrible al módulo sin odoo.conf.
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo_pg_e1
+    volumes:
+      - e1-db:/var/lib/postgresql/data
+
+  odoo:
+    image: odoo:18
+    depends_on: [db]
+    ports:
+      - "8070:8069"
+    environment:
+      HOST: db
+      USER: odoo
+      PASSWORD: odoo_pg_e1
+    volumes:
+      - e1-data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+      - ./odoo.conf:/etc/odoo/odoo.conf
+
+volumes:
+  e1-db:
+  e1-data:

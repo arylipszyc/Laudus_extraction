@@ -45,3 +45,32 @@ Levanta Odoo 18 + Postgres 16, confirma que Odoo responde en `:8069`, hace scaff
 `--stop-after-init -i` de un addon custom mínimo (prueba que el stack acepta instalar un
 addon), y **siempre baja el stack** (`down -v` sobre su project aislado) al terminar. Es
 lento (~2-3 min): por eso NO corre por-commit.
+
+## Piezas (E1.1) — el módulo Odoo `x_laudus_migration`
+
+- **`addons/x_laudus_migration/`** — módulo addon de verdad (versionado, NO Studio). La
+  **estructura receptora** de la migración dentro de Odoo:
+  - Campos custom (`_inherit`) de trazabilidad al origen Laudus: `x_laudus_account_code`
+    / `x_laudus_je_id` / `x_laudus_entity` en `account.move.line` (los 3 **indexados** —
+    la paridad de E1.6 agrupa por `x_laudus_account_code`); `x_laudus_group` en
+    `account.account`; `x_laudus_je_id` en `account.move`.
+  - `data/analytic_plans.xml` — los **6 planes analíticos** (solo contenedores; los
+    valores los crea E1.4).
+  - `hooks.py` (`post_init_hook`) — crea las 2 compañías (**EAG** / **RUT2**) sin
+    `l10n_cl` + un diario "Diario Laudus" por compañía. **Cancela** la auto-carga del CoA
+    genérico que `account` programa para la compañía principal (el diseño quiere plan
+    Laudus-puro; además ese load borraría el diario recién creado — ver comentario en el hook).
+- **`docker-compose.yml` + `odoo.conf`** (raíz del paquete) — compose **propio** de la
+  migración (puerto 8070, project aislado `migration_e1`), monta `./addons`. Resuelve el
+  defer de E1.0 (el smoke ya no escribe en el `_spike-odoo/addons` compartido). El
+  `odoo.conf` es necesario para que `docker compose exec odoo …` conozca el host de la db
+  (no pasa por el entrypoint).
+
+### Verificar E1.1 (Tier B, opt-in)
+
+```bash
+PYTHONUTF8=1 venv/Scripts/python.exe -m pytest pipeline/odoo_migration/tests/test_x_laudus_migration_install.py -m odoo -q
+```
+
+Instala `x_laudus_migration` en una db fresca y verifica por SQL: los 5 campos + sus
+índices, 6 planes analíticos, 2 diarios (LAU1/LAU2), 2 compañías sin `l10n_cl`. ~40s.
