@@ -1,0 +1,37 @@
+# Spike Odoo — stack minimo para el VPS (Odoo Community + Postgres).
+# Levantar:  docker compose up -d   ->  Odoo en http://<IP-del-VPS>:8069
+#
+# OCA (reportes financieros): clonar dentro de ./addons ANTES de levantar:
+#   git clone --depth 1 -b 18.0 https://github.com/OCA/account-financial-reporting addons/account-financial-reporting
+# El addons_path esta en odoo.conf y ya apunta a /mnt/extra-addons/*.
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: spike_pg_2026
+    volumes:
+      - odoo-db:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  odoo:
+    image: odoo:18
+    depends_on: [db]
+    ports:
+      - "8069:8069"
+    environment:
+      HOST: db
+      USER: odoo
+      PASSWORD: spike_pg_2026
+    volumes:
+      - odoo-data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+      - ./csv:/mnt/csv:ro
+      - ./odoo.conf:/etc/odoo/odoo.conf
+    restart: unless-stopped
+
+volumes:
+  odoo-db:
+  odoo-data:
