@@ -1,0 +1,16 @@
+# Overrides de equipo para bmad-dev-story (family-office-eag).
+# Política de Ary 2026-07-25: tour guiado en Odoo — pero DESPUÉS del code review.
+
+[workflow]
+
+on_complete = """
+Política de Ary (2026-07-25): las stories del pipeline de migración Odoo
+(pipeline/odoo_migration) tienen un TOUR GUIADO con Playwright en el Odoo de
+migración, pero recién DESPUÉS del code review (el review puede cambiar el
+código y el tour debe mostrar la versión final). La política completa vive en
+`_bmad/custom/bmad-code-review.toml` (on_complete del skill code-review).
+
+Acá, al cerrar la implementación, SOLO recordarle a Ary en una línea: "después
+del code review viene el tour guiado en Odoo". NO levantar Docker ni ofrecer
+el tour todavía.
+"""

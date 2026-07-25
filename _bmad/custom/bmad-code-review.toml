@@ -1,0 +1,28 @@
+# Overrides de equipo para bmad-code-review (family-office-eag).
+# Política de Ary 2026-07-25: tour guiado en Odoo DESPUÉS del code review.
+
+[workflow]
+
+on_complete = """
+Política de Ary (2026-07-25) — tour guiado post-review:
+
+Si la story revisada es del pipeline de migración Odoo (pipeline/odoo_migration),
+al CERRAR el review (fixes aplicados, story aprobada) ofrecer a Ary un TOUR
+GUIADO con Playwright sobre el Odoo de migración mostrando lo que la story
+construyó — sobre el código YA revisado/parchado, nunca antes (un review puede
+cambiar el código y el tour debe mostrar la versión final).
+
+Mecánica:
+- Odoo de migración: `docker compose -p migration_e1` en `pipeline/odoo_migration/`
+  (puerto 8070, addons propios) — ver README del paquete. Requiere Docker;
+  levantar contenedores SOLO con confirmación de Ary (es interactivo, no un gate).
+- Incluir las "Preguntas guardadas para Ary / Valentina" de la story, mostradas
+  sobre los DATOS REALES en Odoo cuando existan (el saldo/listado en pantalla,
+  no en un doc) para poder responderlas mirando.
+- Si la story NO cargó nada visible en Odoo (transformadores Tier A puros, como
+  E1.2–E1.4), decirlo explícitamente y mostrar lo demostrable: reportes de
+  cobertura, gates corriendo, y lo que YA exista en Odoo de stories previas.
+  El tour completo aplica desde que el loader (E1.5+) puebla Odoo con datos.
+- Narración en lenguaje simple (Ary no es técnico), pantalla por pantalla,
+  con screenshots.
+"""
