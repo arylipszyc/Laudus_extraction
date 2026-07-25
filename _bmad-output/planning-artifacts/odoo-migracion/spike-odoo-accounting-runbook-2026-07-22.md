@@ -52,30 +52,40 @@ FFCC/JAB = company **RUT2**. El plan de cuentas se parte por company con el mism
 
 ---
 
-## Parte 1 — Montar el VPS (tu acción, ~1–2 h)
+## Parte 1 — Levantar el stack LOCAL (Docker Desktop, ~10 min)
 
-Un VPS es una máquina Linux arrendada donde vos administrás todo (a diferencia de Render). Para
-el spike se endurece lo mínimo; la carga real de sysadmin (backups, SSL, upgrades) es tema de
-producción, NO de este spike.
+**Decisión 2026-07-24:** el spike se valida **local primero**. El riesgo de "no funciona en el
+VPS" es ~nulo y ortogonal al spike: es 100% Docker con imágenes pinneadas (`odoo:18` +
+`postgres:16`), o sea el mismo contenedor local y en el VPS. Los tres riesgos reales (import
+cuadra / reportería / dev) dan idéntico en cualquier lado → se validan donde hay menos fricción.
+El VPS aparece recién para **producción** (ver "Parte 1-bis" abajo).
 
-1. **Arrendar** un Hetzner **CPX21** (3 vCPU AMD / 4 GB / 80 GB, ~€7,6 mes) en **Ashburn, VA
-   (US-East)** — mejor latencia desde Chile. Ubuntu 24.04. (El CX22 es solo-EU; desde Chile
-   conviene US. Odoo pide 2 GB+ real; con 4 GB y 3 vCPU andás cómodo.)
-2. **Entrar** por SSH (la llave ed25519 de Ary ya existe en `~/.ssh/id_ed25519.pub`). Firewall
-   Hetzner con dos reglas inbound limitadas a tu IP: **22** (SSH) y **8069** (Odoo) — no expongas
-   Odoo abierto al mundo.
-3. **Instalar Docker**: `curl -fsSL https://get.docker.com | sh`
-4. **Copiar** la carpeta `_spike-odoo/` al VPS (scp o git).
-5. **OCA reportes** (antes de levantar):
-   ```
-   cd _spike-odoo
-   git clone --depth 1 -b 18.0 https://github.com/OCA/account-financial-reporting addons/account-financial-reporting
-   ```
-6. **Cambiar** las 3 passwords en `docker-compose.yml` y `odoo.conf`.
-7. **Levantar**: `docker compose up -d` → Odoo en `http://<IP>:8069`.
+Prerrequisito: **Docker Desktop** corriendo (WSL2). Ya verificado 2026-07-24: daemon activo,
+CSVs listos en `csv/`, addons OCA (`account-financial-reporting`, `reporting-engine`,
+`server-ux`) + módulo custom `spike_account_panel` **ya clonados/armados** en `addons/`, y las
+passwords ya puestas en `docker-compose.yml` + `odoo.conf` (`spike_pg_2026` / master
+`spike_master_2026` — local, no exponer).
+
+1. **Levantar**: `cd _spike-odoo && docker compose up -d` → Odoo en `http://localhost:8069`.
+   (Primera vez baja las imágenes; después es instantáneo.)
+2. **Nada de SSH/firewall/arriendo** — es tu máquina. Seguí directo a la Parte 2.
 
 > Nota versión: el compose usa **Odoo 18** (rama OCA madura). Si preferís 19, cambiá `image:
 > odoo:19` y la rama del clone a `19.0` — confirmá que el módulo OCA tenga esa rama antes.
+
+### Parte 1-bis — VPS (SOLO para producción, después de que el spike dé PASS)
+
+Cuando se decida ir a producción, el traspaso es limpio porque es el mismo Docker: copiar
+`_spike-odoo/` al VPS → `docker compose up -d` → re-importar (CSVs deterministas) o `pg_dump`
+del volumen. Pasos de infra:
+
+1. **Arrendar** un Hetzner **CPX21** (3 vCPU / 4 GB / 80 GB, ~€7,6 mes) en **Ashburn, VA
+   (US-East)** — mejor latencia desde Chile. Ubuntu 24.04.
+2. **SSH** (llave ed25519 en `~/.ssh/id_ed25519.pub`). Firewall Hetzner inbound limitado a tu
+   IP: **22** (SSH) y **8069** (Odoo) — no expongas Odoo abierto al mundo.
+3. **Docker**: `curl -fsSL https://get.docker.com | sh`.
+4. **Passwords de verdad** (no las del spike local) en `docker-compose.yml` + `odoo.conf`.
+5. `docker compose up -d` → Odoo en `http://<IP>:8069`.
 
 ---
 

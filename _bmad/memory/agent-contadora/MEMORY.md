@@ -13,6 +13,112 @@ exportaba de Laudus a Google Sheets; ese flujo se reemplazó). El importer Laudu
 Beancount = espejo fiel de Laudus. Ledger en `ledger/` (main.beancount + imports/laudus/ +
 imports/cartolas/). Pipeline de import en `pipeline/importers/` (Stories 9.x).
 
+## 🚩 Sinceramiento de ingresos + mecanismo activos compartidos (2026-07-23, dentro de spike Odoo)
+
+Ary evalúa pasar la contabilidad de Laudus a **Odoo Community** (spike con mes real cargado, reconciliado).
+Contexto y detalle completo en `valentina-analitica-familia-mecanismo-2026-07-23.md` + `sessions/2026-07-23.md`.
+
+- **P&L de Laudus es ficción:** de 78.253M "ingresos", **~46.000M son movimientos de capital/traspasos** mal
+  puestos como ingreso; **ingreso operativo real ≈ 7B (<10%)**. Espejo: aportes/pérdidas como ingreso NEGATIVO.
+- **Regla de sinceramiento (Fase 1, determinística en el import): distinguir por NATURALEZA, no por nombre.**
+  retiro/rescate/devolución/traspaso → sale de ingreso a **cuenta de balance origen** (crear si falta, marcar
+  provisional). **dividendo/interés/directorio/arriendo → se queda** (ingreso real). Pérdida operativa→gasto.
+  Aporte de capital→Activo. Lógica de Ary (correcta): la ganancia se genera en la cuenta de ORIGEN, no en la
+  que recibe → Fase 1 muestra puros traspasos (real, conservador); Fase 2 (módulo inversiones) reconoce la
+  ganancia al valuar el origen. MI excepción: dividendo ≠ retiro.
+- **Decisiones Ary:** Indumotora 25,3B **se deja como ingreso** (asunción marcada — no consolidar la empresa
+  solo para separar capital/ganancia). Orígenes (Leo/Tauro/etc.) **saldos como están**, Fase 2. Módulo de
+  inversiones = proyecto propio después (custodio JB ya conseguido: Leo neto ~USD7,4M, Tauro ~4,9M, al 30.6.25).
+- **Sade CERRADO:** NO es pérdida (me corregí) — es **aporte de capital a inversión chilena local (SpA), 4.876M,
+  FFCC, contra banco local**, mal puesto como ingreso negativo → Fix Fase 1 = `Assets:FFCC:InversionesSade`.
+- **Mecanismo activos compartidos (yate/avión) VERIFICADO en Laudus** (contra relato contadoras + Excel):
+  **Leo** (offshore JB) paga **Fraser** (yate) ~USD90-115k/mes; **fijo split 1/3 AAG/EAG/DAG** (AZBA salió 2025);
+  **adjudicable por hermano itemizado en retiros** ("Vuelo X Hrs → RetirosDag"); netting con inyección offshore.
+  **Tauro** = aportes de capital (EAG). **TODO está en Laudus itemizado** (me equivoqué diciendo que no — Ary
+  tenía razón; lección: no concluir de 1 cuenta vacía). El **Excel del family office es pivote MANUAL** por
+  socio (= ya hacen analítica a mano; Odoo lo automatiza). Dimensiones analíticas Odoo: socio-dueño / socio-usuario
+  / propiedad / offshore / por-cuenta-de. Pendiente: lista de ingresos clasificada (input regla Fase 1).
+
+## 📋 SPEC estructura Odoo — escrito para las contadoras (2026-07-23, 2ª sesión)
+
+Diseño (NO implementación) para migrar la contabilidad a Odoo. Doc firmado:
+`valentina-spec-estructura-odoo-2026-07-23.md`; session log `sessions/2026-07-23-spec-odoo.md`.
+Es el documento que Ary le muestra a las contadoras ANTES de construir.
+
+- **Lista de ingresos clasificada (grounded en el ledger real, 83 cuentas, −78.253M):** 7 grupos por
+  naturaleza — A ingreso real (−34,2B; Indumotora EAG 25,3B + FFCC 6,3B = allowlist), B retiro-inversión
+  (~−38B → activos de origen provisionales), C aporte-capital (Sade +4,9B → `Assets:FFCC:InversionesSade`),
+  D disposición-activo (Venta de Activos = venta de AUTOS ~−3,6B), E Molco (+1,7B neto, **P-1 ambiguo**),
+  F reembolso (−0,55B, se queda), G MIXTO (OtrosIngresos ~−1,8B, regla por-glosa transacción a transacción).
+- **Campo que lee la regla Fase 1 = `desc` (glosa por-pata).** La narración es sólo "JE ####" tras el refactor
+  glosa-por-pata. Cuenta MIXTA → regla corre línea por línea sobre `desc`.
+- **Regla Fase 1 (determinística):** paso 1 netear wash "comprobante apertura/cierre" (cierre anual Laudus,
+  netea a 0); paso 2 allowlist ingreso real; paso 3 cascada por naturaleza (dividendo/sueldo/directorio→queda;
+  reembolso→queda; retiro/rescate/traspaso→activo origen; aporte→activo; venta→baja activo; pérdida op→gasto);
+  paso 4 sin match→queda+marca "sin clasificar" (nunca descartar). Conservador: subestima ganancia, nunca infla.
+- **Me corregí vs artefacto de la mañana:** Molco NO es claramente "pérdida operativa" — glosa dice "traspaso"
+  (financiamiento de activo?) → P-1, no lo decidí sola. "Venta de Activos" = autos propios (P-2).
+- **3 placeholders (Fase 2):** VALOR (Leo neto ~USD7,4M / Tauro ~4,9M @30.6.25 custodio JB), RESULTADO-ACUMULADO
+  (valor−costo, a cuentas 5xxx vacías, método IAS 21), PARTICIPACIÓN (yate/avión 1/3 AAG·EAG·DAG; AZBA salió,
+  −2.490M sin liquidar).
+- **5 dimensiones analíticas + regla partición-vs-disperso:** sólo **socio-dueño es PARTICIÓN** (reconcilia al
+  peso, reemplaza el "Resúmen Retiros" del Excel); socio-usuario/propiedad/offshore/por-cuenta-de son DISPERSAS.
+- **7 preguntas para las contadoras (P-1..P-7):** Molco activo-vs-pérdida, Venta Activos propios-vs-reventa,
+  Kia/Hyundai qué es, nombres de orígenes, Misc JB (Lombard?), AZBA liquidación, rendiciones capitán.
+- **Plan de cuentas = Laudus puro, SIN `l10n_cl`** (se auto-metió en el spike; se archiva). Códigos Laudus = llave.
+
+**Product brief escrito (2026-07-23) + preguntas resueltas** → `valentina-product-brief-migracion-odoo-2026-07-23.md`.
+Ary eligió "product brief primero" (no PRD). **Scope = Odoo todo el stack, por fases:** F1 cargar+corregir+
+estructurar toda la historia Laudus en Odoo (paridad al peso, sinceramiento, analítica, patrimonio a costo) →
+F2 conciliación TC+dashboards+reportes → F3 módulo inversiones (valuación custodio, cierra el círculo).
+- **Insight clave:** la decisión de las contadoras (seguir en Laudus con nosotros de ETL→Odoo, vs trabajar
+  directo en Odoo) **NO bloquea F1** — cargar+corregir la historia es idéntico en ambas y es lo que les permite
+  evaluar. Solo cambia lo de arriba (pipeline repetible vs migración única) = diseño técnico.
+- **Reporte de patrimonio = zanahoria temprana** (F1): activos hoy invisibles (inversiones/yate/avión/casas)
+  al balance a costo + participación por socio. Unifica con inversiones (mismo placeholder de valor, F3).
+- **Preguntas RESUELTAS con Ary:** P-1 Molco=GASTO (fundo a pérdida, se financia; no capitalizar; entra como 3ª
+  entidad EAG·FFCC·Molco más adelante). P-2 Venta Activos=autos propios, disposición personal, NO capitalizar
+  c/u; trade-in c/Indumotora deja cuenta x pagar transitoria (verificar si Laudus la refleja). P-3 Kia/Hyundai=
+  sueldo director (real, se queda); dividendos vía RetirosIndumotora. P-4 nombres=heredan Laudus.
+- **P-6 AZBA aclarada con datos actuales:** −2.490M = 5 ctas cte de la rama AZBA (4 nietos hijos de SAG, apellidos
+  Alazraki/Zeldis×2/Borzutzky + RetirosAzba-115029), a favor de ellos=pasivo del fondo. Compensación por salir
+  del yate/avión + utilidades asignadas − aportes. ABIERTO: ¿se liquida en cash o queda reparto de patrimonio?
+- **Propiedad (yate/avión/casas):** crear cuenta activo + saldo inicial a COSTO, contra Equity, **participación
+  obligatoria** (EAG=⅓, sino patrimonio inflado 3×), SIN depreciación (revalúa a mercado con tasación), traspasos
+  ongoing=gasto. SPEC §1.3.
+- **ABIERTAS (contadoras/JB):** P-5 Misc JB (Lombard?), P-6b AZBA cash-vs-patrimonio, P-7 rendiciones capitán,
+  P-2 verificar cuenta x pagar Indumotora, barrido de más aportes-disfrazados tipo Sade.
+- **Tabla de mapeo COMPLETA generada (fin sesión 2026-07-23):** `valentina-tabla-mapeo-odoo-2026-07-23.csv`
+  (569→336 cuentas Odoo, −41%) + resumen + generador `.py` (seed importador E1, determinístico). Dims auto:
+  12 propiedades, 5 socios, 4 beneficiarios, 18 vehículos inversión. **Hallazgo clave: cat3 ya carga la dimensión
+  objeto/propiedad** (Laudus explotó el plan metiendo la analítica en el nombre de la cuenta). Destapó: cartera
+  inversión 32 cuentas = targets F3; **error B confirmado** en 3 ctas negativas (Inv Tecnion Limitada −4.784M).
+  Residual = 12 ingresos a revisar (Jhonny Guerra). **RAQUEL** (esposa EAG) = dim `beneficiario` + TODO gasto
+  (transferencias a su cuenta = discrecional, NO CxC — Ary corrigió); partner = el "quién".
+- **FASE DE DISEÑO COMPLETA** (6 artefactos: brief→spec→mapa normalización→tabla mapeo+resumen+generador).
+  **PRÓXIMO:** Winston (`/bmad-agent-architect`) para arquitectura del import E1 a Odoo; alt = Valentina para
+  estructurar epics (E1 import→E2 sinceramiento→E3 analítica→E4 patrimonio). Sanity-check contadoras pendiente.
+
+## ✅ Spike Odoo — las 3 pruebas PASS, prueba #2 paridad cerrada (2026-07-24)
+
+Artefacto `valentina-matriz-paridad-laudus-odoo-2026-07-24.md`; session log `sessions/2026-07-24.md`.
+Stack Odoo corre **LOCAL** (Docker Desktop, base `familyoffice`, import completo) — NO VPS (riesgo VPS
+nulo+ortogonal; VPS solo para producción).
+
+- **Vara de Ary para prueba #2:** "Odoo debe darle a las contadoras ≥ lo que tienen en Laudus". 4 respuestas
+  de Ary que la colapsaron a algo ganable: (1) **solo usan el workbook de gastos**, cero reportes formales
+  Laudus → el gap "balance clasificado/EERR jerárquico ausente en Community" es **IRRELEVANTE**; (2) **cero
+  contactos, todo por cuenta** → Odoo no necesita maestro de terceros; (3) **registro 100% manual** → el
+  ingreso de asientos es la superficie que decide; (4) **no hacen SII/tributario** para EAG/RUT2.
+- **PASS las 3 superficies:** registro manual ✅ (comprobante doble entrada, autocompleta por código Laudus,
+  cuadre forzado); plan de cuentas editable ✅; **workbook de gastos reproducido al peso** ✅ (Trial Balance
+  OCA filtrado a gasto). **Encabezado (Categoría 2) = prefijo de código = `account.group` nativo Odoo** →
+  subtotales = importar ~12 grupos (config, no dev). Cuadre revalidado: 66/66 cuentas al peso CSV↔Odoo.
+- **Prueba #3 (dev):** módulo custom `spike_account_panel` ya construido = dev abordable.
+- **Lección:** la honestidad epistémica (dije "no conozco las pantallas Laudus, consumimos su API") disparó
+  las 4 preguntas que colapsaron la vara. No inventar → mejor diseño. El gap que asustaba era un no-problema.
+- **430xxx (TC) entra como gasto lumpeado** — problema TC estructural conocido, no de paridad; preservar marca.
+
 ## Modelo de Datos — Estado Actual
 
 **Problema conocido — Tarjetas de crédito (diagnóstico verificado, corrige el entendimiento previo):**
@@ -50,6 +156,34 @@ CONFIRMADO). Detalle en `_bmad-output/planning-artifacts/valentina-auditoria-ing
 - **No corregir sin saldos del custodio confirmados.** Fix futuro = estilo TC (solo asientos estándar).
 - Hijas (Jocelyn/Jeannette/Johanna/Jael) FUERA de alcance: no se sabe si retiran de fondos propios.
 - Herramientas: `_forense_inversiones.py`, `_forense_recon_vehiculo.py` (planning-artifacts).
+
+## Método multi-moneda IAS 21 — para patrimonio histórico que cuadre con cartola (2026-07-18)
+
+Doctrina adoptada. Detalle completo + fuentes en `valentina-metodo-multimoneda-ias21-2026-07-18.md`;
+session log `sessions/2026-07-18.md`. Research verificado (24/25 claims vs IFRS.org IAS 21).
+
+- **Estándar = IAS 21 / NIC 21 (= ASC 830).** Partida monetaria en USD (caja, deuda TC) → se retraduce a
+  CLP al **tipo de cambio de CIERRE de cada fecha de balance** (nunca un dólar congelado). No-monetario a
+  costo → tasa histórica. Nuestro caso = **remedición** (entidad CLP con partidas USD), método temporal.
+- **Dif. de cambio → RESULTADO (P&L), NO patrimonio.** La ruta OCI/CTA-patrimonio es solo para traducir
+  operaciones extranjeras con moneda funcional propia; no aplica. Realizada (mueve cash) y no-realizada
+  (revalúa saldo abierto) ambas a P&L. [Me corregí: antes dije no-realizada→patrimonio, mal.]
+- **Beancount:** cuentas USD **a valor nominal** (no {}), `price` directives por fecha (fx-bcch-eom YA es
+  esto), `balance` assertion contra cartola (afirma UNIDADES). 2 capas: cantidad (ancla a cartola) +
+  valorización (CLP al dólar de cierre). Inversiones offshore = costo `{}` (separar capital/mercado/FX).
+  REFUTADO (0-3): NO guardar CLP por movimiento — unidades USD + tabla de precios, el CLP se deriva al leer.
+- **TC USD:** BCCh mientras abierta; **dólar real del banco (con spread) al pagar** → diferencia realizada
+  a ResultadoFX (el spread se ve como pérdida, correcto). Doctrina TC actual "fx del pago" = atajo válido
+  si se paga completa en el mismo período. Signo: pasivo → dólar sube = pérdida.
+- **Carga fuera de orden (pago antes que cartola):** NO complica cuadratura, el libro reconcilia por FECHA.
+  Único efecto = frescura (se auto-corrige al importar). Assertion entra atómico con sus movimientos.
+- **Arquitectura pendiente (Ary):** espejo Laudus (CLP puro, paridad) + OVERLAY (USD nativo + price +
+  ResultadoFX) que **REEMPLAZA** (no suma) la versión CLP-congelada. Riesgo central = doble-conteo. Es el
+  fork "espejo vs patrimonio real" que Ary venía rondando. Comparte ancla con la auditoría de inversiones
+  diferida (las dos necesitan la posición real del custodio, una vez).
+- **Contexto que lo disparó:** las 5 cuentas USD hoy tienen datos pero TODO en CLP (Laudus convierte al
+  dólar del día, USD solo en glosa). BCI 18565743 = −8,5M CLP (negativo imposible = Error B inversiones,
+  por no contabilizar dif. de cambio). El saldo actual no es ni USD real ni CLP de hoy. B6 era el síntoma.
 
 ## ✅ Revisado — Story 6.2 (desglose TC): 3 pendientes cerrados (2026-06-22)
 
@@ -263,6 +397,41 @@ gate BCCh ±5% aplica igual, tope 3 meses, sin cadena de pago real → sigue blo
 misposteo, revisión humana" era el pago LEGÍTIMO del cierre de abril (abril absorbió marzo y creció a
 ~57k USD). No era misposteo. Lección: un monto "muchísimo más grande que el closing de un mes" puede
 ser simplemente la cadena revolving mirada desde el mes equivocado.
+
+## ✅ Wash del 0858 = pago consolidado Santander parte el pago vía ControlYLiquidación (2026-07-21)
+
+Diseño completo + números en `valentina-fix-wash-0858-pago-consolidado-2026-07-21.md`; session log
+`sessions/2026-07-21.md`. Afina mi nota vieja "0858 pago consolidado, story fallback por monto pendiente".
+
+- **Síntoma:** cuentas-gasto pasarela de pago TC (430005-430010) deberían netear a 0; el 0858 CLP (430009)
+  muestra ~−7M (se ve como "gasto negativo" en Ingresos/Gastos).
+- **NO es revolving** (me corregí): el 0858 se paga COMPLETO cada mes. **Causa exacta, verificada al peso:**
+  el residuo en 430009 = peso por peso lo que Laudus mete en `Assets:EAG:ControlYLiquidacin-115099` (feb
+  4.252.472 / mar 8.701.593 / abr 7.671.204 exactos; may off por 26.967 → revisar). Laudus paga las Santander
+  (0858+8996) en UN asiento consolidado y **parte el pago del 0858** entre la cuenta-gasto (pizca) y la puente
+  ControlYLiquidación (grueso). La cartola revierte la apertura completa contra 430009 solito → residuo.
+- **Por qué 1027/8996 SÍ netean:** su pago Laudus va directo a la cuenta-gasto (sin partir a la puente).
+- **Fix (story dev, NO parchar a ciegas):** el asiento de pago de la cartola debe espejar el split de Laudus —
+  `430009 −(monto en 430009) / ControlYLiquidación −(monto en puente) / TC:Real +apertura`. Netea ambas a 0,
+  deuda reconcilia igual. Es la story "fallback por monto / pagos consolidados Santander" (andamiaje en
+  `tc_correction.py` ~L46). Consistente con §6.2 pt.1 (pago = pago REAL Laudus, no apertura contra 1 cuenta).
+- **La deuda del 0858 CLP está CORRECTA** (TC:Real = −closing, cadena encadena, compras reales itemizadas).
+  Solo el wash del pago está distorsionado.
+- **REENCUADRE (hipótesis de Ary, confirmada) — el hallazgo de FONDO:** los PAT de la 0858 (Enel/Metrogas/
+  Aguas/etc.) **son gastos de JAB/Fondo Común que EAG paga con su tarjeta por cuenta de ellos.** Los
+  contadores los rutean a ControlYLiquidación porque para EAG **no son gasto → son cuenta por cobrar**
+  (lo hacen BIEN). Evidencia: ControlYLiquidación se salda contra TraspasoAFondoComún-113031 (+86M),
+  RetirosDelMes-890001 JAB (+64M), bancos de las hijas (+108M); y los mismos recibos están como gasto JAB
+  (Luz-811005/Agua-811006/Gas-811010) en el libro RUT2, montos idénticos. **El que está mal es NUESTRA
+  cartola:** itemiza esos PAT como gasto de EAG → sobre-declara EAG y duplica el gasto en el consolidado
+  (EAG-cartola + JAB-Laudus). El residuo −8,7M en 430009 es la contracara. **Fix real:** la cartola debe
+  separar PAT-por-cuenta-de-JAB (→ por cobrar/ControlYLiquidación) de gasto propio EAG; qué recibo es de
+  qué propiedad lo saben los contadores (preguntas P1/P2/P3). NO es revolving ni mecánica de pago.
+- **Preguntas para los contadores guardadas** en `valentina-preguntas-contadores-2026-07-21.md` (Ary las
+  pedirá en la reunión). Cubren: PAT→ControlYLiquidación=por cobrar JAB, qué gastos 0858 son de JAB, cómo
+  se reembolsa vía Fondo Común, la 0858 USD, y el desfase 27K de mayo.
+- **0858 USD (430010): problema DISTINTO** — nunca se importó cartola (lump Laudus desde 2021). No hay
+  `Liabilities:...Tc0858VisaLatanpassUs` con datos. Necesita conseguir + importar la cartola USD.
 
 ## Reportes Aprobados
 _Reportes que el dueño ha aprobado desarrollar. Actualizar a medida que se aprueban._
