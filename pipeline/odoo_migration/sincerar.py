@@ -149,6 +149,7 @@ class AliasEntry:
     name: str
     aliases: tuple
     excluir: tuple
+    tipo: str = ""  # sección `personas`: socio | beneficiario | apellido_azba | deudor
 
 
 def load_alias_table(path: Path | str = DEFAULT_ALIAS_PATH) -> dict[str, list[AliasEntry]]:
@@ -161,16 +162,32 @@ def load_alias_table(path: Path | str = DEFAULT_ALIAS_PATH) -> dict[str, list[Al
             f"sincerar: la tabla de alias {path} no tiene sección `vehiculos` — "
             f"la regla G quedaría ciega (todo caería a `sin clasificar` sin alarma)"
         )
+    if "personas" not in raw:
+        raise ValueError(
+            f"sincerar: la tabla de alias {path} no tiene sección `personas` — "
+            f"las reglas por glosa de E1.4 (beneficiarios/socio-uso) quedarían "
+            f"ciegas sin alarma"
+        )
     table: dict[str, list[AliasEntry]] = {}
     for section, entries in raw.items():
-        table[section] = [
+        parsed = [
             AliasEntry(
                 name=name,
                 aliases=tuple(normalize(a) for a in (spec.get("aliases") or [])),
                 excluir=tuple(normalize(h) for h in (spec.get("excluir_homonimos") or [])),
+                tipo=str(spec.get("tipo") or ""),
             )
             for name, spec in entries.items()
         ]
+        for entry in parsed:
+            if any(not a for a in entry.aliases) or any(not h for h in entry.excluir):
+                raise ValueError(
+                    f"sincerar: la entrada {entry.name!r} de la sección "
+                    f"{section!r} en {path} tiene un alias/homónimo que "
+                    f"normaliza a vacío — matchearía cualquier glosa (incluida "
+                    f"la vacía)"
+                )
+        table[section] = parsed
     return table
 
 
@@ -178,6 +195,11 @@ def _phrase_matches(phrase: str, text: str) -> bool:
     """Match de frase completa con word-boundary (los tokens cortos jb/mbi/fip
     lo exigen — notas del YAML). NUNCA substring pelado."""
     return re.search(rf"(?<!\w){re.escape(phrase)}(?!\w)", text) is not None
+
+
+def _phrase_spans(phrase: str, text: str) -> list[tuple[int, int]]:
+    """Todas las posiciones (start, end) donde la frase matchea con boundary."""
+    return [m.span() for m in re.finditer(rf"(?<!\w){re.escape(phrase)}(?!\w)", text)]
 
 
 #: Vehículo de la tabla de alias → cuenta de activo de origen (por entidad de la
@@ -196,19 +218,55 @@ VEHICULO_DESTINO = {
 }
 
 
-def resolve_vehiculo(glosa_norm: str, alias_table: dict) -> str | None:
-    """Vehículo único e inequívoco mencionado en la glosa, o None.
+def resolve_alias(
+    glosa_norm: str, alias_table: dict, section: str, *, tipo: str | None = None
+) -> tuple[str | None, bool]:
+    """Match único e inequívoco de una sección de la tabla en la glosa.
 
-    Un homónimo presente en la glosa veta al vehículo (conservador); más de un
-    vehículo distinto matcheando → ambiguo → None.
+    Devuelve `(nombre, candidata)`: `nombre` es la entrada que matcheó (None si
+    ninguna o más de una — ambiguo → conservador); `candidata=True` si la glosa
+    MENCIONÓ algo de la sección sin resolver (alias ambiguo, u homónimo que
+    veta) — la distinción alimenta el reporte de cobertura de E1.4
+    (mencionado-pero-no-resuelto ≠ no-mencionado). OJO: `candidata` puede
+    venir True aunque `nombre` SÍ haya resuelto (otra entrada de la sección
+    quedó vetada en la misma glosa) — los callers deben mirarla solo cuando
+    `nombre` es None (no doble-contar). Un homónimo presente en la glosa veta
+    a su entrada (conservador). `tipo` filtra la sección `personas`
+    (socio / beneficiario / …).
     """
     hits = []
-    for entry in alias_table.get("vehiculos", []):
-        if any(_phrase_matches(h, glosa_norm) for h in entry.excluir):
+    candidata = False
+    for entry in alias_table.get(section, []):
+        if tipo is not None and entry.tipo != tipo:
             continue
-        if any(_phrase_matches(a, glosa_norm) for a in entry.aliases):
+        alias_spans = [
+            span for a in entry.aliases for span in _phrase_spans(a, glosa_norm)
+        ]
+        # El homónimo veta SOLO si aparece FUERA de un match de alias: el
+        # nombre completo ("jacqueline deutsch") gana sobre su propio substring
+        # excluido ("deutsch"); un homónimo suelto en la misma glosa sí veta
+        # (conservador — caso "leo hernandez por leo limited").
+        vetado = any(
+            not any(s <= h_start and h_end <= e for s, e in alias_spans)
+            for h in entry.excluir
+            for h_start, h_end in _phrase_spans(h, glosa_norm)
+        )
+        if vetado:
+            candidata = True  # menciona un término de la entrada, sin resolver
+            continue
+        if alias_spans:
             hits.append(entry.name)
-    return hits[0] if len(hits) == 1 else None
+    if len(hits) == 1:
+        return hits[0], candidata
+    if len(hits) > 1:
+        return None, True  # más de una entrada distinta → ambiguo
+    return None, candidata
+
+
+def resolve_vehiculo(glosa_norm: str, alias_table: dict) -> str | None:
+    """Vehículo único e inequívoco mencionado en la glosa, o None (regla G)."""
+    name, _ = resolve_alias(glosa_norm, alias_table, "vehiculos")
+    return name
 
 
 # --- Clasificación (compartida por transformador y verificador) -------------

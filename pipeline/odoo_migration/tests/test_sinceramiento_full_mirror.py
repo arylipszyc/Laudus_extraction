@@ -6,55 +6,24 @@ Corre en <2s (la carga del ledger domina, ~0.5s) → Tier A por-commit.
 
 Las cifras pinneadas son las del INVENTARIO de naturalezas (el cross-check
 INDEPENDIENTE del transformador — Valentina las derivó con bean-query, no con
-este código). El mirror es un archivo VIVO (sync de Laudus): el test corta las
-transacciones a la fecha del inventario (2026-07-23) para que la historia
-pinneada no se mueva con syncs futuros. El corte es INCLUSIVO del 2026-07-23:
-un asiento posteado más tarde ese mismo día también entra al universo y mueve
-los pins. Si este test se pone rojo sin haber tocado el transformador, un
+este código). El corte al 2026-07-23 y la carga compartida del mirror viven en
+`conftest.py` (`full_mirror_chain`, session-scoped — E1.4 reusa la misma
+carga). Si este test se pone rojo sin haber tocado el transformador, un
 asiento retro-posteado (o tardío del día del corte) cambió la historia
 pinneada — eso es un hallazgo a investigar, no un test flaky.
 """
 
-import datetime
-import os
 from decimal import Decimal
 
 import pytest
-from beancount import loader
-from beancount.core import data
 
-from pipeline.odoo_migration.mapping import load_mapping_table
 from pipeline.odoo_migration.parity import run_tier_a
-from pipeline.odoo_migration.sincerar import (
-    ORIGEN_ASSETS,
-    load_alias_table,
-    route_sincerado,
-    sincerar,
-)
-from pipeline.odoo_migration.transform import collapse
-
-LEDGER = os.path.join(
-    os.path.dirname(__file__), "..", "..", "..", "ledger", "main.beancount"
-)
-
-#: Fecha del inventario de naturalezas — la historia hasta acá está pinneada.
-CUTOFF = datetime.date(2026, 7, 23)
+from pipeline.odoo_migration.sincerar import ORIGEN_ASSETS, route_sincerado
 
 
 @pytest.fixture(scope="module")
-def chain():
-    entries, errors, _ = loader.load_file(LEDGER)
-    assert errors == []
-    cut = [
-        e
-        for e in entries
-        if not (isinstance(e, data.Transaction) and e.date > CUTOFF)
-    ]
-    table = load_mapping_table()
-    aliases = load_alias_table()
-    moves = collapse(cut, table)
-    result = sincerar(moves, table, alias_table=aliases)
-    return cut, table, aliases, moves, result
+def chain(full_mirror_chain):
+    return full_mirror_chain
 
 
 def _suma(mv, pred):

@@ -150,8 +150,9 @@ def test_bom_de_excel_se_tolera(tmp_path):
     (utf-8-sig) en vez de perder la columna `code`."""
     path = tmp_path / "tabla.csv"
     path.write_text(
-        "﻿" "code,entity,company,name,odoo,otype,sinc,flag\n"
-        "111001,EAG,EAG,Caja $,Caja CLP,asset,,\n",
+        "﻿"
+        "code,entity,company,name,cat2,cat3,bal,odoo,otype,ent,prop,socio,benef,area,offshore,partner,sinc,flag\n"
+        "111001,EAG,EAG,Caja $,,,0,Caja CLP,asset,EAG,,,,,,,,\n",
         encoding="utf-8",
     )
     table = load_mapping_table(path)

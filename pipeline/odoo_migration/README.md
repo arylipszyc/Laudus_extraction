@@ -120,6 +120,44 @@ Segundo transformador de la cadena: `collapse → sincerar`. Todo **Tier A**.
   un archivo vivo: el test corta a la fecha del inventario (2026-07-23) para
   que la historia pinneada no se mueva con syncs futuros.
 
+## Piezas (E1.4) — dimensiones analíticas + partners
+
+Tercer transformador de la cadena: `collapse → sincerar → dimensionar`. Todo
+**Tier A**. Agrega el "quién" (partner) y el "sobre qué" (dimensiones) como
+**METADATA por línea** — no cambia cuentas, ni montos, ni el set de moves: el
+**contrato de regresión no cambia de firma**, `run_tier_a` corre tras
+`dimensionar` con los MISMOS `route`/`excluded_je_ids` de E1.3 y da idéntico.
+
+- **`dimensionar.py`** — `dimensionar(moves, mapping, alias_table) ->
+  DimensionadoResult` (función pura, mismo patrón de `sincerar`). Dos
+  mecanismos (winston §5.2): **PARTICIÓN** (socio-dueño sobre 115xxx FFCC —
+  el partner ledger debe cuadrar al peso, es el "Resumen Retiros") y
+  **DISPERSO** (deudores/donaciones/clubes/beneficiarios/socio-disperso +
+  los planes analíticos — agrupa, NUNCA se le exige sumar 100%, AC3).
+  - Partner por CUENTA: tabla `PARTNER_CANONICO` (los 48 valores reales de la
+    columna `partner`, población cerrada + snapshot pinneado) + pins por
+    `(entity, code)` (Jhonny 310045/310047, Raquel T/C 430019) + columna
+    `socio` → socio-disperso (mismo canónico que la partición, sin duplicar).
+  - Dims por columna, verbatim: `prop`→propiedad_objeto, `area`→area_centro
+    (salvo el marcador `por-cuenta-de` → plan por_cuenta_de), `offshore`→
+    offshore_vehiculo. Entidad = `line.entity` (ya viaja; E1.5 la convierte).
+  - Reglas por glosa ACOTADAS (`resolve_alias`, sección `personas` del YAML,
+    nombre completo + word-boundary + homónimos vetan — el nombre completo
+    gana sobre su propio substring excluido): beneficiarios en gasto (caso
+    Raquel) y socio-USO en retiros (plan socio_uso). Duda → sin estampar +
+    reporte (`sin_match`: mencionado-pero-no-resuelto ≠ no-mencionado).
+  - Buckets dudosos (Deudores Varios por entidad, Donaciones varias, CIS×3,
+    Otros hijos, Israel) = placeholder + `revisar con contadoras` (AC4).
+- **`verify_particion(entries, moves)`** — el gate NUEVO: Σ(patas por partner
+  de partición, por moneda) == Σ del mirror crudo para sus códigos 115xxx.
+  Se verifica por PARTNER, no por cuenta destino (115028 mapea a `Cuentas por
+  cobrar` y cuadra igual por DAG). Al corte 2026-07-23 los 11 saldos dieron
+  EXACTOS contra la lista independiente de Valentina, al peso.
+- **Gate full-mirror** (`test_dimensionado_full_mirror.py`): partición verde +
+  anchors pinneados + cobertura pinneada (67 sin-match listados para sign-off,
+  264 a revisar) + invariante estructural + tests de mutación (el gate puede
+  fallar). La carga del mirror es compartida (`conftest.full_mirror_chain`).
+
 ## Piezas (E1.1) — el módulo Odoo `x_laudus_migration`
 
 - **`addons/x_laudus_migration/`** — módulo addon de verdad (versionado, NO Studio). La

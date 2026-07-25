@@ -58,6 +58,14 @@ class MappingRow:
     odoo_type: str
     sinc: str  # naturaleza de sinceramiento (la aplica E1.3, acá es contexto)
     flag: str
+    # Columnas de dimensiones/partner a nivel cuenta (las consume E1.4 —
+    # `dimensionar.py`; acá solo viajan verbatim desde la tabla).
+    prop: str = ""
+    socio: str = ""
+    benef: str = ""
+    area: str = ""
+    offshore: str = ""
+    partner: str = ""
 
 
 class MappingTable:
@@ -81,7 +89,11 @@ class MappingTable:
 
 #: Columnas sin las cuales la tabla no es la tabla (un header renombrado haría
 #: que `raw.get(...)` devuelva None en TODAS las filas — tabla vacía silenciosa).
-REQUIRED_COLUMNS = frozenset({"code", "entity", "company", "odoo"})
+#: Las de dimensiones/partner entran acá desde E1.4: sin ellas `dimensionar`
+#: estamparía todo vacío en silencio (mismo modo de falla, mismo guard).
+REQUIRED_COLUMNS = frozenset(
+    {"code", "entity", "company", "odoo", "prop", "socio", "benef", "area", "offshore", "partner"}
+)
 
 
 def load_mapping_table(path: Path | str = DEFAULT_TABLE_PATH) -> MappingTable:
@@ -130,6 +142,12 @@ def load_mapping_table(path: Path | str = DEFAULT_TABLE_PATH) -> MappingTable:
                     odoo_type=(raw.get("otype") or "").strip(),
                     sinc=(raw.get("sinc") or "").strip(),
                     flag=(raw.get("flag") or "").strip(),
+                    prop=(raw.get("prop") or "").strip(),
+                    socio=(raw.get("socio") or "").strip(),
+                    benef=(raw.get("benef") or "").strip(),
+                    area=(raw.get("area") or "").strip(),
+                    offshore=(raw.get("offshore") or "").strip(),
+                    partner=(raw.get("partner") or "").strip(),
                 )
             )
 

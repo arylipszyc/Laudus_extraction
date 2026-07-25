@@ -53,6 +53,18 @@ class OdooLineRecord:
     sinc_regla: str = ""  # qué decidió (codigo:… / glosa:… / cuenta-vs-glosa)
     sinc_flag: str = ""  # "" | "sin clasificar" | "revisar con contadoras"
     odoo_account_colapso: str = ""  # destino de colapso original (pre-sinceramiento)
+    # Metadata de partner + dimensiones analíticas (E1.4) — vacía hasta que la
+    # pata pasa por `dimensionar`. E1.5 la convierte en `partner_id` /
+    # `analytic_distribution`; acá es solo metadata (no cambia cuenta ni monto).
+    partner: str = ""  # partner canónico (lista Valentina 2026-07-23)
+    partner_categoria: str = ""  # socio-particion | socio-disperso | deudor | …
+    partner_regla: str = ""  # cuenta:partner / cuenta:pin-lista / cuenta:socio / glosa:…
+    partner_flag: str = ""  # "" | "revisar con contadoras"
+    dim_propiedad: str = ""  # plan propiedad_objeto (columna `prop`)
+    dim_area: str = ""  # plan area_centro (columna `area`, salvo por-cuenta-de)
+    dim_offshore: str = ""  # plan offshore_vehiculo (columna `offshore`)
+    dim_por_cuenta_de: str = ""  # plan por_cuenta_de (valor `por-cuenta-de` de `area`)
+    dim_socio_uso: str = ""  # plan socio_uso (SOLO por glosa en retiros, E1.4 Task 3c)
 
 
 @dataclass
