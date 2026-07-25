@@ -142,23 +142,55 @@ def test_run_tier_a_falla_con_output_corrupto(entries, moves, table):
 
 
 def test_exclusion_esperada_del_par_wash(entries, moves, table):
-    """Caso E1.3: excluir el par wash completo (2 moves, 4 líneas) mantiene la
-    paridad en 0 (netea) y los conteos cuadran declarando la exclusión."""
-    wash_ids = {"9000001", "9000002"}
-    filtered = [m for m in moves if m.je_id not in wash_ids]
+    """Caso E1.3: excluir el par wash completo (2 moves, 4 líneas) por IDENTIDAD
+    mantiene la paridad en 0 (netea) y los conteos cuadran declarándolo."""
+    wash_ids = {("RUT2", "9000001"), ("RUT2", "9000002")}
+    filtered = [m for m in moves if (m.company, m.je_id) not in wash_ids]
     assert len(filtered) == len(moves) - 2
 
     # sin declarar la exclusión: los conteos acusan
     assert verify_counts(entries, filtered) != []
-    # declarándola: conteos verdes y la paridad sigue en 0 (el par netea)
-    assert verify_counts(
-        entries, filtered, expected_excluded_moves=2, expected_excluded_lines=4
-    ) == []
+    # declarándola por identidad: conteos verdes y la paridad sigue en 0 (netea)
+    assert verify_counts(entries, filtered, excluded_je_ids=wash_ids) == []
     assert verify_origin_parity(entries, filtered) == []
-    run_tier_a(
-        entries, filtered, table,
-        expected_excluded_moves=2, expected_excluded_lines=4,
-    )
+    run_tier_a(entries, filtered, table, excluded_je_ids=wash_ids)
+
+
+def test_exclusion_del_par_equivocado_falla_por_identidad(entries, moves, table):
+    """EL caso que el conteo ciego dejaba pasar (review E1.2): declarar la
+    exclusión de un par que NO es el que falta debe fallar — la identidad de lo
+    declarado tiene que coincidir con lo ausente, no solo el número."""
+    wash_ids = {("RUT2", "9000001"), ("RUT2", "9000002")}
+    filtered = [m for m in moves if (m.company, m.je_id) not in wash_ids]
+    declarado_equivocado = {("EAG", "1237"), ("EAG", "9000003")}
+    problems = verify_counts(entries, filtered, excluded_je_ids=declarado_equivocado)
+    assert any("SIN declarar" in p for p in problems)
+    assert any("SIGUE en el output" in p for p in problems)
+
+
+def test_exclusion_fantasma_falla(entries, moves):
+    """Declarar la exclusión de una identidad que NO existe en el mirror →
+    alarma dedicada (el mensaje 'NO existen en el mirror')."""
+    fantasma = {("EAG", "id-inexistente")}
+    problems = verify_counts(entries, moves, excluded_je_ids=fantasma)
+    assert any("NO existen en el mirror" in p for p in problems)
+
+
+def test_exclusion_no_declarada_falla(entries, moves):
+    """Un move ausente sin declaración explícita → alarma (nada se excluye en
+    silencio, AC2 E1.3)."""
+    filtered = [m for m in moves if (m.company, m.je_id) != ("RUT2", "9000001")]
+    problems = verify_counts(entries, filtered)
+    assert any("SIN declarar" in p for p in problems)
+
+
+def test_exclusion_que_no_netea_falla(entries, moves):
+    """Declarar la exclusión de un move que NO netea a 0 por código → alarma
+    (solo pares completos iguales-y-opuestos pueden excluirse)."""
+    excluded = {("EAG", "1237")}
+    filtered = [m for m in moves if (m.company, m.je_id) not in excluded]
+    problems = verify_counts(entries, filtered, excluded_je_ids=excluded)
+    assert any("NO netea" in p for p in problems)
 
 
 def test_exclusion_de_una_sola_pata_descuadra(entries, moves):

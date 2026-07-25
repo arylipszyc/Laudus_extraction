@@ -65,8 +65,9 @@ puro, sin Odoo, por-commit).
 - **`parity.py`** — el verificador: paridad-**origen** (FR8: Σ por código origen ×
   moneda × compañía == mirror, 0 diffs), gate de **destino** (FR12a: Σ por cuenta
   destino == Σ de sus códigos origen según la tabla, cruzado contra el mirror) y
-  **conteos** (FR12b: N moves/líneas preservados, con exclusiones **declaradas**
-  vía `expected_excluded_*` — las usa E1.3 para los washes auditados).
+  **conteos** (FR12b: N moves/líneas preservados, con exclusiones **declaradas
+  por identidad** vía `excluded_je_ids={(company, je_id), …}` — las usa E1.3
+  para los washes auditados).
 
 ### El contrato de regresión (E1.3 / E1.4, leer esto)
 
@@ -77,8 +78,9 @@ transformador nuevo termina con esto en verde sobre el golden slice:**
 ```python
 from pipeline.odoo_migration.parity import run_tier_a
 run_tier_a(entries, moves, mapping)  # levanta ParityError con el detalle si descuadra
-# E1.3 (washes excluidos con log auditable):
-run_tier_a(entries, moves, mapping, expected_excluded_moves=…, expected_excluded_lines=…)
+# Tras un transformador que excluye washes (E1.3+) o re-rutea destinos, las
+# exclusiones se declaran por IDENTIDAD y el ruteo esperado se comparte:
+run_tier_a(entries, moves, mapping, route=..., excluded_je_ids={(company, je_id), ...})
 ```
 
 Los tests incluyen **mutaciones** (monto alterado, línea borrada, código/entidad
@@ -88,6 +90,35 @@ fallar es `tsc --noEmit`.
 ```bash
 PYTHONUTF8=1 venv/Scripts/python.exe -m pytest pipeline/odoo_migration -q
 ```
+
+## Piezas (E1.3) — sinceramiento por naturaleza (0/A–H)
+
+Segundo transformador de la cadena: `collapse → sincerar`. Todo **Tier A**.
+
+- **`sincerar.py`** — reclasifica cada pata de INGRESO según la tabla-madre 0/A–H
+  del inventario de Valentina (población cerrada; una cuenta de ingreso sin
+  naturaleza revienta fuerte). A nivel pata: **B** retiros → activo de ORIGEN
+  provisional (`ORIGEN_ASSETS`, cross-check de completitud vs la columna `sinc`
+  de la tabla); **H** Jhonny → por-cobrar; **G** MIXTO → cascada por glosa
+  (normalización + `valentina-tabla-alias-*.yaml`, word-boundary, homónimos
+  vetan — NUNCA fuzzy); **D** queda marcada sin re-ruteo (P-2 abierta);
+  **C/E** ya vienen ruteadas del colapso (solo se estampan). Los **washes**
+  (Comprobante apertura/cierre + reversos Latinoamericana) se excluyen por
+  **pares completos iguales-y-opuestos** con log auditable (`excluded_pairs`).
+  Sin match = queda en Income + `sin clasificar` + reporte de cobertura —
+  nunca descarte silencioso. Cada línea tocada lleva metadata reversible
+  (`sinc_naturaleza`/`sinc_regla`/`sinc_flag`/`odoo_account_colapso`).
+- **Exclusiones por IDENTIDAD** (upgrade de `parity.py`): `verify_counts`/
+  `run_tier_a` reciben `excluded_je_ids={(company, je_id), …}` y verifican que
+  exactamente esos moves faltan, ninguno más, y que el conjunto excluido
+  **netea a 0 por código** — excluir el par equivocado o una pata suelta falla
+  con alarma (un conteo ciego no puede pescarlo).
+- **Gate FR12c** (`test_sinceramiento_full_mirror.py`): la cadena completa
+  sobre TODO el mirror (16.633 asientos, <2s) con las cifras del inventario
+  pinneadas al peso — Sade **+4.876.249.792**, Molco FFCC **+2.895.757.384**,
+  ingreso −84.825.124.241 → −39.248.623.118 (Δ −45.576.501.123). El mirror es
+  un archivo vivo: el test corta a la fecha del inventario (2026-07-23) para
+  que la historia pinneada no se mueva con syncs futuros.
 
 ## Piezas (E1.1) — el módulo Odoo `x_laudus_migration`
 

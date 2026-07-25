@@ -47,6 +47,12 @@ class OdooLineRecord:
     currency: str
     amount: Decimal
     desc: str = ""
+    # Metadata de auditoría del sinceramiento (E1.3) — vacía hasta que la pata
+    # pasa por `sincerar` (NFR1: cada re-clasificación es listable y reversible).
+    sinc_naturaleza: str = ""  # 0/A..H
+    sinc_regla: str = ""  # qué decidió (codigo:… / glosa:… / cuenta-vs-glosa)
+    sinc_flag: str = ""  # "" | "sin clasificar" | "revisar con contadoras"
+    odoo_account_colapso: str = ""  # destino de colapso original (pre-sinceramiento)
 
 
 @dataclass

@@ -13,9 +13,11 @@ Tres verificaciones:
      origen que la tabla mapea a ese destino (pesca una línea con código
      correcto pero cuenta destino inconsistente con la tabla).
   3. CONTEOS (FR12b): N moves == N transacciones, N líneas == N postings —
-     ninguna fusión/partición silenciosa. Los parámetros `expected_excluded_*`
-     existen para E1.3: los washes se excluyen con conteo AUDITADO, declarado
-     explícitamente — nunca en silencio.
+     ninguna fusión/partición silenciosa. Las exclusiones (washes de E1.3) se
+     declaran por IDENTIDAD (`excluded_je_ids={(company, je_id), …}`):
+     `verify_counts` verifica que exactamente esas faltan — ni una más, ni una
+     menos — y que el conjunto excluido netea a 0 por código. Nunca en
+     silencio, nunca por conteo ciego.
 
 Convención de signo (winston §6): Beancount guarda el número firmado
 (activo/gasto +, ingreso/pasivo/equity −); la línea transformada lo conserva y
@@ -128,16 +130,41 @@ def verify_origin_parity(entries, moves) -> list[ParityDiff]:
     return diffs
 
 
-def verify_destination(entries, moves, mapping: MappingTable) -> list[DestinationDiff]:
+def _txn_identity(txn) -> tuple[str, str]:
+    """(company, je_id) de una transacción del mirror — la identidad que usan
+    las exclusiones declaradas (E1.3: washes)."""
+    je_id = str(txn.meta.get("id") or "").strip()
+    company = company_for_entity(entity_of_account(txn.postings[0].account))
+    return (company, je_id)
+
+
+def verify_destination(
+    entries,
+    moves,
+    mapping: MappingTable,
+    *,
+    route=None,
+    excluded_je_ids: frozenset | set = frozenset(),
+) -> list[DestinationDiff]:
     """FR12a: Σ por cuenta Odoo destino == Σ de sus códigos origen mapeados.
 
     El lado esperado se computa desde el MIRROR (no desde las líneas), ruteando
-    cada (entity, code) a su destino según la tabla — cruza el output contra la
-    fuente, no contra sí mismo.
+    cada (entity, code) a su destino — cruza el output contra la fuente, no
+    contra sí mismo. Por defecto rutea por la tabla (post-colapso, E1.2);
+    `route(entity, code, desc, amount, collapsed_account)` permite componer
+    transformadores posteriores (E1.3: el sinceramiento comparte el ruteo con
+    el transformador — el cross-check independiente son las cifras pinneadas
+    del inventario). Los moves excluidos por identidad se saltan en el esperado.
+
+    OJO standalone: esta función NO valida las exclusiones declaradas
+    (existencia en el mirror / ausencia del output / neteo a 0) — eso lo hace
+    `verify_counts`. Para el gate completo usar `run_tier_a`.
     """
     codes = account_codes(entries)
     expected: dict[tuple[str, str, str], Decimal] = defaultdict(Decimal)
     for txn in laudus_transactions(entries):
+        if txn.postings and _txn_identity(txn) in excluded_je_ids:
+            continue
         for posting in txn.postings:
             code = codes.get(posting.account)
             if not code:
@@ -151,7 +178,14 @@ def verify_destination(entries, moves, mapping: MappingTable) -> list[Destinatio
                 )
             entity = entity_of_account(posting.account)
             row = mapping.get(entity, code)
-            key = (row.company, row.odoo_account, posting.units.currency)
+            if route is None:
+                account = row.odoo_account
+            else:
+                desc = str((posting.meta or {}).get("desc", ""))
+                account = route(
+                    entity, code, desc, posting.units.number, row.odoo_account
+                )
+            key = (row.company, account, posting.units.currency)
             expected[key] += posting.units.number
 
     actual: dict[tuple[str, str, str], Decimal] = defaultdict(Decimal)
@@ -178,23 +212,85 @@ def verify_counts(
     entries,
     moves,
     *,
-    expected_excluded_moves: int = 0,
-    expected_excluded_lines: int = 0,
+    excluded_je_ids: frozenset | set = frozenset(),
 ) -> list[str]:
-    """FR12b: conteo de asientos y líneas preservado (o exclusión DECLARADA)."""
+    """FR12b: conteo de asientos y líneas preservado, con exclusiones declaradas
+    por IDENTIDAD `(company, je_id)` — nunca por conteo ciego (learning del
+    review E1.2: un int acepta la exclusión de *cualesquiera* N moves).
+
+    Verifica que (a) exactamente los moves declarados faltan del output — ni uno
+    más, ni uno menos —, (b) las líneas cuadran descontando las de los excluidos,
+    y (c) el conjunto excluido NETEA A 0 por (company, code, currency) — excluir
+    algo que no netea descuadraría el libro ("falla con alarma", AC2 E1.3).
+    """
     txns = laudus_transactions(entries)
+    problems = []
+    mirror: dict[tuple[str, str], object] = {}
+    for t in txns:
+        if not t.postings:
+            continue
+        ident = _txn_identity(t)
+        # La identidad tiene que ser única y no-vacía: un dict que sobrescribe
+        # en silencio dejaría razonar al gate sobre un mirror deduplicado.
+        if not ident[1]:
+            problems.append(
+                f"txn del mirror sin meta `id` ({t.date} {t.narration!r}) — "
+                f"identidad vacía, el gate no puede razonar por identidad"
+            )
+            continue
+        if ident in mirror:
+            problems.append(f"identidad DUPLICADA en el mirror: {ident}")
+        mirror[ident] = t
+    output_ids = {(m.company, m.je_id) for m in moves}
+    excluded = set(excluded_je_ids)
+    fantasmas = excluded - set(mirror)
+    if fantasmas:
+        problems.append(
+            f"exclusiones declaradas que NO existen en el mirror: {sorted(fantasmas)}"
+        )
+    presentes = excluded & output_ids
+    if presentes:
+        problems.append(
+            f"exclusiones declaradas pero el move SIGUE en el output: {sorted(presentes)}"
+        )
+    missing = set(mirror) - output_ids
+    no_declaradas = missing - excluded
+    if no_declaradas:
+        problems.append(
+            f"moves del mirror ausentes del output SIN declarar: {sorted(no_declaradas)}"
+        )
+
+    n_excluded_postings = sum(
+        len(mirror[k].postings) for k in excluded & set(mirror)
+    )
     n_postings = sum(len(t.postings) for t in txns)
     n_lines = sum(len(m.lines) for m in moves)
-    problems = []
-    if len(moves) + expected_excluded_moves != len(txns):
-        problems.append(
-            f"asientos: {len(txns)} en el mirror vs {len(moves)} transformados "
-            f"(+{expected_excluded_moves} exclusión declarada)"
-        )
-    if n_lines + expected_excluded_lines != n_postings:
+    if n_lines + n_excluded_postings != n_postings:
         problems.append(
             f"líneas: {n_postings} postings en el mirror vs {n_lines} "
-            f"transformadas (+{expected_excluded_lines} exclusión declarada)"
+            f"transformadas (+{n_excluded_postings} de los {len(excluded)} "
+            f"moves excluidos declarados)"
+        )
+
+    net: dict[tuple[str, str, str], Decimal] = defaultdict(Decimal)
+    codes = account_codes(entries)
+    for k in excluded & set(mirror):
+        txn = mirror[k]
+        for posting in txn.postings:
+            code = codes.get(posting.account)
+            if not code:
+                raise ValueError(
+                    f"parity: la cuenta {posting.account!r} no tiene meta `code`"
+                )
+            entity = entity_of_account(posting.account)
+            net[(company_for_entity(entity), code, posting.units.currency)] += (
+                posting.units.number
+            )
+    descuadres = {k: v for k, v in net.items() if v != 0}
+    if descuadres:
+        problems.append(
+            f"el conjunto excluido NO netea a 0 por código (se excluyó una pata "
+            f"suelta o un par incompleto): {descuadres}"
         )
     return problems
 
@@ -204,29 +300,27 @@ def run_tier_a(
     moves,
     mapping: MappingTable,
     *,
-    expected_excluded_moves: int = 0,
-    expected_excluded_lines: int = 0,
+    route=None,
+    excluded_je_ids: frozenset | set = frozenset(),
 ) -> None:
     """El gate Tier A completo (origen + destino + conteos). Levanta
     `ParityError` con el detalle si algo descuadra.
 
     Contrato de E1 en adelante: TODO transformador nuevo (E1.3, E1.4) termina
-    con esta función en verde sobre el golden slice.
+    con esta función en verde sobre el golden slice. Las exclusiones (washes de
+    E1.3) se declaran por IDENTIDAD (`excluded_je_ids={(company, je_id), …}`);
+    `route` compone el ruteo esperado del gate de destino (ver
+    `verify_destination` y `sincerar.route_sincerado`).
     """
     problems: list[str] = []
     origin = verify_origin_parity(entries, moves)
     if origin:
         problems.append(f"paridad-origen: {len(origin)} diffs — {origin[:5]}")
-    destination = verify_destination(entries, moves, mapping)
+    destination = verify_destination(
+        entries, moves, mapping, route=route, excluded_je_ids=excluded_je_ids
+    )
     if destination:
         problems.append(f"gate destino: {len(destination)} diffs — {destination[:5]}")
-    problems.extend(
-        verify_counts(
-            entries,
-            moves,
-            expected_excluded_moves=expected_excluded_moves,
-            expected_excluded_lines=expected_excluded_lines,
-        )
-    )
+    problems.extend(verify_counts(entries, moves, excluded_je_ids=excluded_je_ids))
     if problems:
         raise ParityError("Tier A FAIL:\n  " + "\n  ".join(problems))
