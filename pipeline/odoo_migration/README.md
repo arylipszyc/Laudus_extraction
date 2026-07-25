@@ -46,6 +46,49 @@ Levanta Odoo 18 + Postgres 16, confirma que Odoo responde en `:8069`, hace scaff
 addon), y **siempre baja el stack** (`down -v` sobre su project aislado) al terminar. Es
 lento (~2-3 min): por eso NO corre por-commit.
 
+## Piezas (E1.2) — colapso del plan + verificador de paridad Tier A
+
+Primer transformador real + el verificador que lo cuadra. Todo **Tier A** (Python
+puro, sin Odoo, por-commit).
+
+- **`mapping.py`** — acceso a la tabla de mapeo de Valentina
+  (`_bmad-output/planning-artifacts/odoo-migracion/valentina-tabla-mapeo-odoo-2026-07-23.csv`).
+  Key = `(entity, code)` — los códigos Laudus se repiten entre entidades. Valida al
+  cargar: keys únicas (incl. `(company, code)`, que protege `acc_<company>_<code>`),
+  todo código con destino. La única fila sin código (`Expenses:EAG:Suspense`, cuenta
+  interna del proyecto) queda excluida del universo y pinneada en test.
+- **`transform.py`** — el colapso 569→destino: mirror → `OdooMoveRecord`/`OdooLineRecord`
+  neutrales. Cada línea lleva su cuenta Odoo destino según la tabla **y** el código
+  Laudus origen (`laudus_code` → futuro `x_laudus_account_code`). Universo = solo
+  transacciones `source: "laudus-erp"`. Fail-loud ante cuenta sin código, mapeo
+  faltante o asiento sin `id`.
+- **`parity.py`** — el verificador: paridad-**origen** (FR8: Σ por código origen ×
+  moneda × compañía == mirror, 0 diffs), gate de **destino** (FR12a: Σ por cuenta
+  destino == Σ de sus códigos origen según la tabla, cruzado contra el mirror) y
+  **conteos** (FR12b: N moves/líneas preservados, con exclusiones **declaradas**
+  vía `expected_excluded_*` — las usa E1.3 para los washes auditados).
+
+### El contrato de regresión (E1.3 / E1.4, leer esto)
+
+El verificador **nace acá y es reusable**: la paridad-origen es invariante al
+colapso y al sinceramiento (el código origen viaja en la línea). **Todo
+transformador nuevo termina con esto en verde sobre el golden slice:**
+
+```python
+from pipeline.odoo_migration.parity import run_tier_a
+run_tier_a(entries, moves, mapping)  # levanta ParityError con el detalle si descuadra
+# E1.3 (washes excluidos con log auditable):
+run_tier_a(entries, moves, mapping, expected_excluded_moves=…, expected_excluded_lines=…)
+```
+
+Los tests incluyen **mutaciones** (monto alterado, línea borrada, código/entidad
+cambiados) que verifican que el gate SÍ se pone rojo — un verificador que no puede
+fallar es `tsc --noEmit`.
+
+```bash
+PYTHONUTF8=1 venv/Scripts/python.exe -m pytest pipeline/odoo_migration -q
+```
+
 ## Piezas (E1.1) — el módulo Odoo `x_laudus_migration`
 
 - **`addons/x_laudus_migration/`** — módulo addon de verdad (versionado, NO Studio). La
