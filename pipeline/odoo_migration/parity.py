@@ -43,7 +43,24 @@ from pipeline.odoo_migration.transform import (
 
 
 class ParityError(AssertionError):
-    """El gate de paridad falló. El mensaje trae los diffs."""
+    """El gate de paridad falló. El mensaje trae los diffs (primeros N); los
+    diffs COMPLETOS viajan como atributos programáticos (cierra defer E1.2):
+    `origin_diffs` / `destination_diffs` / `count_diffs`. En un descuadre real
+    de cientos de códigos el operador recupera la lista entera desde la
+    excepción, no desde un repr truncado."""
+
+    def __init__(
+        self,
+        message: str = "",
+        *,
+        origin_diffs=(),
+        destination_diffs=(),
+        count_diffs=(),
+    ):
+        super().__init__(message)
+        self.origin_diffs = list(origin_diffs)
+        self.destination_diffs = list(destination_diffs)
+        self.count_diffs = list(count_diffs)
 
 
 @dataclass(frozen=True)
@@ -321,6 +338,12 @@ def run_tier_a(
     )
     if destination:
         problems.append(f"gate destino: {len(destination)} diffs — {destination[:5]}")
-    problems.extend(verify_counts(entries, moves, excluded_je_ids=excluded_je_ids))
+    counts = verify_counts(entries, moves, excluded_je_ids=excluded_je_ids)
+    problems.extend(counts)
     if problems:
-        raise ParityError("Tier A FAIL:\n  " + "\n  ".join(problems))
+        raise ParityError(
+            "Tier A FAIL:\n  " + "\n  ".join(problems),
+            origin_diffs=origin,
+            destination_diffs=destination,
+            count_diffs=counts,
+        )

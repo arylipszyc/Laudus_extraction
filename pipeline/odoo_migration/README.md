@@ -208,6 +208,73 @@ PYTHONUTF8=1 venv/Scripts/python.exe -m pipeline.odoo_migration.loader_rpc --db 
 corrida operativa **post-E1.6**: gates pendientes D-1 Latinoamericana
 (veredicto Valentina) + VPS Hetzner + medir 1 año antes del full (winston §9).
 
+## Piezas (E1.6) — verificación lado-Odoo (el gate de release)
+
+El otro lado del espejo del loader: **`verify_odoo.py`** lee lo que quedó EN
+Odoo y lo compara contra el mirror/cadena. **Tres planos, no uno** — la
+lección P1 del review E1.5: el loader ruteaba 182 líneas a la cuenta
+equivocada y la paridad por código daba 0 diffs igual (el código viaja
+correcto aunque la cuenta esté mal). Por eso:
+
+1. **Paridad ORIGEN (FR8)** — Σ `amount_currency` por `x_laudus_account_code`
+   × moneda × compañía == mirror PURO (`parity.laudus_balances` tal cual, sin
+   pasar por la cadena — un bug compartido no puede auto-validarse acá).
+2. **Gate de DESTINO (FR12)** — Σ `balance` por cuenta Odoo REAL
+   (`account_id`) == Σ(debit−credit) de los `MovePayload` (la MISMA fuente que
+   el loader escribió, `accs_*` de origen sincerado incluidas). Este plano
+   pesca el ruteo podrido que el plano 1 no ve.
+3. **CONTEOS + invariantes (FR12b)** — identidades `(company, x_laudus_je_id)`
+   exactas sin duplicados, N líneas, todo posteado, 0 líneas con `x_laudus_*`
+   vacíos, y las líneas 211005 == exactamente las del payload (**derivado, no
+   pinneado a 0**: en el full history sobreviven 2 patas sin par).
+
+Columna por plano, explícito: origen agrega `amount_currency`; destino agrega
+`balance` — columnas **almacenadas independientes** en Odoo 18. Las mutaciones
+del Tier B tocan LA columna que su plano agrega (un `UPDATE … SET debit` no
+movería ninguna de las dos y ningún plano lo vería).
+
+- Lado esperado en Python puro (Tier A por-push); lado Odoo vía XML-RPC
+  (`read_group` agrega server-side: el full history vuelve como ~570 códigos ×
+  moneda, no 57k líneas). `ParityError` ahora lleva los diffs COMPLETOS como
+  atributos (`origin_diffs`/`destination_diffs`/`count_diffs` — cierra el
+  defer E1.2 de diffs programáticos).
+- **Muestreo dirigido (FR12d)**: 20 asientos de mayor monto + 20 aleatorios
+  con seed pinneada (`20260723` — misma selección en cada corrida, NFR1) →
+  reporte markdown con la cuenta/partner/dims **leídos de Odoo** + anexo de
+  cobertura de glosa (resúmenes de la cadena + histograma por-glosa de las
+  patas MIXTO sin clasificar + listado sin-match E1.4). La FIRMA es humana
+  (Ary/Valentina) — el CLI entrega el reporte.
+- Tier B (`test_verify_odoo_tier_b.py`, `-m odoo`, db `test_e16`): carga el
+  golden con el loader E1.5 → 0 diffs en los 3 planos → **mutaciones contra
+  Odoo real** que prueban que el gate PUEDE fallar: `amount_currency` alterado
+  (origen acusa), línea movida de cuenta (destino acusa y origen NO — el
+  plano 2 existe por eso), move borrado (conteos acusan) — y reconverge con el
+  loader.
+
+```bash
+# Tier B — gate de release (opt-in, Docker)
+PYTHONUTF8=1 venv/Scripts/python.exe -m pytest pipeline/odoo_migration/tests/test_verify_odoo_tier_b.py -m odoo -q
+
+# CLI del verificador (default: golden slice contra el compose migration_e1)
+PYTHONUTF8=1 venv/Scripts/python.exe -m pipeline.odoo_migration.verify_odoo --db test_e16
+# El full load usa el MISMO CLI, con --full (post-gates D-1 + VPS):
+#   --ledger ledger/main.beancount --full
+# --full declara que el ledger es el mirror COMPLETO al corte y convierte el
+# pin FR12c del sinceramiento (Δ ingreso pre−post = −45.576.501.123) en GATE
+# (exit 1 si no calza) — sin --full el Δ es solo informativo.
+```
+
+Además de los 3 planos Odoo, el CLI corre el gate **Tier A sobre el ledger
+vivo** (`run_tier_a`: exclusiones por identidad + neteo a 0 del conjunto
+excluido) — los planos 2/3 comparan payload↔Odoo (misma cadena en ambos
+lados), así que una exclusión equivocada que netea a 0 por código solo la
+pesca el gate del mirror.
+
+⚠️ **E1 NO se cierra con el código verde**: quedan los gates humanos — el
+sign-off AC5 de E1.4 (partición), la **firma del muestreo** (este reporte),
+D-1 Latinoamericana y las preguntas 5-6 a Valentina — y el cierre de epic
+requiere aprobación explícita de Ary.
+
 ## Piezas (E1.1) — el módulo Odoo `x_laudus_migration`
 
 - **`addons/x_laudus_migration/`** — módulo addon de verdad (versionado, NO Studio). La
