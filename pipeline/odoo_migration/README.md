@@ -158,6 +158,56 @@ Tercer transformador de la cadena: `collapse → sincerar → dimensionar`. Todo
   264 a revisar) + invariante estructural + tests de mutación (el gate puede
   fallar). La carga del mirror es compartida (`conftest.full_mirror_chain`).
 
+## Piezas (E1.5) — loader idempotente hacia Odoo
+
+La ÚNICA pieza que toca Odoo (winston §2.4). Dos capas a propósito (NFR3 —
+el 90% de la lógica se testea sin infra):
+
+- **`load.py`** (Tier A, Python puro) — el payload builder: convierte el
+  output de la cadena (`collapse → sincerar → dimensionar`) + la tabla en
+  payloads Odoo con su external ID cada uno. El **chart es el plan COLAPSADO**
+  (una cuenta por `(company, odoo_account)`, 361 al corte; `code` = menor
+  código Laudus origen en orden numérico) **+ las cuentas de ORIGEN SINCERADO**
+  (`build_origin_accounts`: los destinos que E1.3 escribe al re-rutear —
+  JuliusBaer, InvTecnion, … — 21 al corte, xmlid propio `accs_*`, marcadas
+  `ORIGEN-SINCERADO`). Los xmlids congelados `acc_<company>_<code>` se emiten
+  POR CÓDIGO: N alias → la misma cuenta (ir.model.data acepta N nombres al
+  mismo res_id). **Cada línea rutea a la cuenta de su DESTINO
+  (`line.odoo_account`, sinceramiento incluido), no al colapso de su código**
+  (review E1.5, P1). Convención de signo: monto firmado == `debit − credit`;
+  las patas no-CLP exigen `price` (contravalor = `amount × price` CUANTIZADO
+  a precisión CLP, igual que Odoo al escribir) y llevan `currency_id` +
+  `amount_currency`. Valida fail-loud: `otype` población cerrada (7 valores)
+  y consistente por destino (cierra defers E1.2/E1.4), destino sin cuenta en
+  el chart, move desbalanceado en CLP, je_id duplicado, colisión de slug.
+- **`loader_rpc.py`** (Tier B) — cliente XML-RPC (stdlib, cero deps) +
+  `load_all`: **upsert = skip-si-existe por xmlid** (namespace
+  `ir.model.data.module = "__laudus__"`), create batcheado, `action_post`
+  solo de lo recién creado, y **convergencia ante corridas interrumpidas**:
+  lo creado sin xmlid (crash en la ventana create→register) se ADOPTA por
+  clave natural (cuenta: code+cía; partner: nombre; analítica: nombre+plan;
+  move: `x_laudus_je_id`+cía, re-verificando el contenido línea a línea) y
+  los moves del payload que quedaron en draft se postean al final
+  (`moves_reposted`). Re-correr NO duplica (FR11); correr / borrar la mitad /
+  re-correr converge. **Prerequisitos que el loader se asegura a sí mismo (y
+  reporta en los conteos):** grupo Analytic Accounting para su usuario RPC
+  (`analytic_group_granted`, solo si falta) y activación de monedas del
+  payload (`currencies_activated`). **Disciplina de re-corrida:** el loader
+  es para cargas frescas o reanudación — si CAMBIAN los transformadores, lo
+  ya cargado con xmlid no se re-sincroniza (skip): db nueva + carga completa.
+
+```bash
+# Tier B (opt-in, Docker): idempotencia probada sobre el golden (AC1–AC4)
+PYTHONUTF8=1 venv/Scripts/python.exe -m pytest pipeline/odoo_migration/tests/test_loader_idempotente.py -m odoo -q
+
+# CLI (default: golden slice contra el compose migration_e1 en :8070)
+PYTHONUTF8=1 venv/Scripts/python.exe -m pipeline.odoo_migration.loader_rpc --db test_e15
+```
+
+⚠️ **El full load real** (`--ledger ledger/main.beancount`, al VPS) es una
+corrida operativa **post-E1.6**: gates pendientes D-1 Latinoamericana
+(veredicto Valentina) + VPS Hetzner + medir 1 año antes del full (winston §9).
+
 ## Piezas (E1.1) — el módulo Odoo `x_laudus_migration`
 
 - **`addons/x_laudus_migration/`** — módulo addon de verdad (versionado, NO Studio). La

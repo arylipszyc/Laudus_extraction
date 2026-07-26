@@ -47,6 +47,10 @@ class OdooLineRecord:
     currency: str
     amount: Decimal
     desc: str = ""
+    # Precio por unidad en moneda compañía (`posting.price`, E1.5 — defer E1.2):
+    # la pata `100 USD @ 800 CLP` guarda 800; el loader deriva el contravalor
+    # CLP (debit/credit) como amount × price. None = sin precio (todo CLP).
+    price: Decimal | None = None
     # Metadata de auditoría del sinceramiento (E1.3) — vacía hasta que la pata
     # pasa por `sincerar` (NFR1: cada re-clasificación es listable y reversible).
     sinc_naturaleza: str = ""  # 0/A..H
@@ -156,6 +160,7 @@ def collapse(entries, mapping: MappingTable) -> list[OdooMoveRecord]:
                     currency=posting.units.currency,
                     amount=posting.units.number,
                     desc=str((posting.meta or {}).get("desc", "")),
+                    price=(posting.price.number if posting.price else None),
                 )
             )
         if not move.lines:

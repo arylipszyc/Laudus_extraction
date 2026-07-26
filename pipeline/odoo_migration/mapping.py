@@ -66,6 +66,10 @@ class MappingRow:
     area: str = ""
     offshore: str = ""
     partner: str = ""
+    # Path de categorías Laudus (las consume E1.5 → `x_laudus_group` de la
+    # cuenta Odoo; contexto, no paridad — por eso no entran a REQUIRED_COLUMNS).
+    cat2: str = ""
+    cat3: str = ""
 
 
 class MappingTable:
@@ -148,6 +152,8 @@ def load_mapping_table(path: Path | str = DEFAULT_TABLE_PATH) -> MappingTable:
                     area=(raw.get("area") or "").strip(),
                     offshore=(raw.get("offshore") or "").strip(),
                     partner=(raw.get("partner") or "").strip(),
+                    cat2=(raw.get("cat2") or "").strip(),
+                    cat3=(raw.get("cat3") or "").strip(),
                 )
             )
 

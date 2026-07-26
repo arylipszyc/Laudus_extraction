@@ -38,6 +38,7 @@ del que dependen upserts posteriores.
 """
 
 import re
+import unicodedata
 
 # Cada componente YA normalizado: solo alfanumérico ASCII. Se excluye a propósito
 # el `_`/`-` (son el SEPARADOR del id: un componente con separador adentro haría
@@ -98,4 +99,62 @@ def line_xmlid(company, je_id, n) -> str:
     return (
         f"aml_{_component(company, name='company').lower()}"
         f"_{_component(je_id, name='je_id')}_{idx}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Helpers NUEVOS de E1.5 (partners + cuentas analíticas). Los 3 de arriba
+# están CONGELADOS (E1.0) y no se tocan; estos son adiciones con la misma
+# disciplina fail-loud. Los nombres canónicos (lista Valentina / valores de
+# planes) traen espacios/tildes/paréntesis → se slugifican a [a-z0-9]. La
+# unicidad slug↔canónico la valida el CONSUMIDOR (`load.py`) sobre su
+# población cerrada: dos canónicos distintos con el mismo slug es fail-loud
+# allá (acá no hay visibilidad de la población).
+# ---------------------------------------------------------------------------
+
+
+def slug(value, *, name: str = "value") -> str:
+    """Slug determinístico de un nombre canónico: minúsculas, sin tildes,
+    solo [a-z0-9]. `"José Alazraki"` → `"josealazraki"`. Vacío → ValueError
+    (un canónico 100% no-ASCII produciría un xmlid sin identidad)."""
+    text = unicodedata.normalize("NFD", str(value))
+    text = "".join(c for c in text if not unicodedata.combining(c))
+    s = re.sub(r"[^a-z0-9]", "", text.lower())
+    if not s:
+        raise ValueError(
+            f"external_id: slug de '{name}'={value!r} quedó vacío — el nombre "
+            f"no tiene caracteres [a-z0-9] rescatables"
+        )
+    return s
+
+
+def partner_xmlid(canonical_name) -> str:
+    """`prt_<slug>` — external ID de res.partner (partner canónico E1.4)."""
+    return f"prt_{slug(canonical_name, name='partner')}"
+
+
+def analytic_xmlid(plan, value) -> str:
+    """`aa_<plan>_<slug>` — external ID de account.analytic.account.
+
+    `plan` es la clave interna del plan (propiedad_objeto, area_centro,
+    offshore_vehiculo, por_cuenta_de, socio_uso, entidad — E1.1) y `value`
+    el valor canónico de la dimensión. El plan también se slugifica (trae
+    `_`, que es el separador del id): `aa_propiedadobjeto_viagris`.
+    """
+    return f"aa_{slug(plan, name='plan')}_{slug(value, name='analytic value')}"
+
+
+def origin_account_xmlid(company, path) -> str:
+    """`accs_<company>_<slug>` — external ID de una cuenta de ORIGEN SINCERADO.
+
+    Son los destinos que E1.3 escribe en `line.odoo_account` al re-rutear una
+    pata (naturalezas B/H: `Assets:EAG:JuliusBaer`, `Assets:EAG:InvTecnion`, …)
+    y que NO existen como destino de ninguna fila de la tabla de mapeo — no
+    tienen código Laudus, así que el formato congelado `acc_<company>_<code>`
+    no les aplica. Prefijo propio `accs_` (sincerado) para no invadir ese
+    namespace; el path completo se slugifica (review E1.5, P1).
+    """
+    return (
+        f"accs_{_component(company, name='company').lower()}"
+        f"_{slug(path, name='origin account path')}"
     )
